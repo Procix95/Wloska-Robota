@@ -1,140 +1,62 @@
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Włoska Robota - 30cm Raju </title>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --red: #CD212A;
-            --green: #009246;
-            --gold: #D4AF37;
-            --black: #1A1A1A;
-        }
-
-        body {
-            font-family: 'Playfair Display', serif;
-            margin: 0;
-            background: repeating-linear-gradient(
-                45deg,
-                var(--black),
-                var(--black) 2px,
-                #2A2A2A 2px,
-                #2A2A2A 4px
-            );
-            color: white;
-        }
-
-        .header {
-            background: linear-gradient(to right, var(--green), white 33%, var(--red));
-            padding: 2rem;
-            text-align: center;
-            border-bottom: 3px solid var(--gold);
-        }
-
-        h1 {
-            font-family: 'Bebas Neue', cursive;
-            font-size: 4rem;
-            margin: 0;
-            text-shadow: 2px 2px var(--black);
-        }
-
-        .address {
-            font-size: 1.5rem;
-            margin-top: 0.5rem;
-            color: var(--black);
-        }
-
-        .menu {
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background: rgba(0,0,0,0.8);
-            border-radius: 15px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 2rem 0;
-        }
-
-        th {
-            background: var(--red);
-            padding: 1rem;
-            font-family: 'Bebas Neue', cursive;
-            font-size: 1.2rem;
-        }
-
-        td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--gold);
-        }
-
-        tr:hover td {
-            background: rgba(255,255,255,0.1);
-        }
-
-        .contact {
-            text-align: center;
-            padding: 2rem;
-            background: var(--black);
-        }
-
-        .phone-btn {
-            display: inline-block;
-            background: var(--red);
-            color: white;
-            padding: 1rem 2rem;
-            text-decoration: none;
-            border-radius: 50px;
-            font-size: 1.5rem;
-            margin: 1rem;
-        }
-
-        .phone-btn:hover {
-            transform: scale(1.1);
-        }
-    </style>
-</head>
-<body>
-    <header class="header">
-        <h1>🍕PIZZERIA WŁOSKA ROBOTA🍕</h1>
-        <div class="address">Głuponie 103, 64-316</div>
-    </header>
-
-    <div class="menu">
-        <h2>🍕 Menu - Tylko 30 cm włoskiej roboty!</h2>
-        <table>
+Skip to content
+Files
+Commands
+Search
+Selection deleted
             <tr>
-                <th>Nazwa</th>
-                <th>Skład</th>
-                <th>Cena</th>
-            </tr>
-            <tr>
-                <td>1. Margherita</td>
-                <td>Sos pomidorowy, ser mozzarella, świeża bazylia, oliwa z oliwek</td>
-                <td>20-30 zł</td>
-            </tr>
-            <tr>
-                <td>2. Pepperoni</td>
-                <td>Sos pomidorowy, ser mozzarella, pepperoni </td>
+                <td>7. Vegetariana</td>
+                <td>Sos pomidorowy, ser mozzarella, warzywa sezonowe</td>
                 <td>25-35 zł</td>
-            </tr>
-            <tr>
-                <td>3. Capricciosa</td>
-                <td>Sos pomidorowy, ser mozzarella, szynka, pieczarki, oliwki</td>
-                <td>30-40 zł</td>
             </tr>
         </table>
     </div>
+
+    <div class="map">
+        <h2>Najlepsza Pizza tylko tutaj 📍</h2>
+        <iframe 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d361.98385395499076!2d16.322214611763872!3d52.38624073785761!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47042f00163a9e2b%3A0x5481347cccc66f3f!2sRadTom%20-%20mieszalnia%20farb%20samochodowych!5e0!3m2!1spl!2spl!4v1738759301299!5m2!1spl!2spl"
+            width="100%" 
+            height="400" 
+            style="border:0;" 
+            allowfullscreen="" 
+            loading="lazy">
+        </iframe>
+    </div>
+    <script>
+        const apiKey = 'TWÓJ_KLUCZ_API'; // Wstaw swój klucz API
+        const placeId = 'TWÓJ_PLACE_ID'; // Wstaw swoje Place ID
+        const maxReviews = 5; // Maksymalna liczba opinii do wyświetlenia
+
+        // Pobierz opinie z Google
+        fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=reviews&key=${apiKey}`)
+            .then(response => response.json())
+            .then(data => {
+                const reviews = data.result.reviews;
+                let html = '';
+
+                if (reviews && reviews.length > 0) {
+                    reviews.slice(0, maxReviews).forEach(review => {
+                        html += `
+                            <div class="review-item">
+
+                document.getElementById('google-reviews').innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Błąd:', error);
+                document.getElementById('google-reviews').innerHTML = '<p>Nie można załadować opinii.</p>';
+            });
+    </script>
 
     <div class="contact">
         <h2>📞 Dzwonić, nie pisać!</h2>
         <a href="tel:503066325" class="phone-btn">Zadzwoń: 503 066 325</a>
         <p>Otwarte codziennie 12:00-22:00</p>
     </div>
+
+    <div class="social-icons">
+        <a href="https://www.facebook.com/profile.php?id=61560325043839" target="_blank"><i class="fab fa-facebook"></i></a>
+        <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+    </div>
 </body>
 </html>
+/
