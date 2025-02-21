@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Włoska Robota - 30cm Raju </title>
+    <title>Włoska Robota - 30cm Raju</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -202,7 +202,7 @@
 </head>
 <body>
     <header class="header">
-        <h1>🍕PIZZERIA WŁOSKA ROBOTA🍕</h1>
+        <h1>🍕 WŁOSKA ROBOTA</h1>
         <div class="address">Głuponie 103, 64-316</div>
     </header>
 
@@ -221,12 +221,12 @@
             </tr>
             <tr>
                 <td>2. Pepperoni</td>
-                <td>Sos pomidorowy, ser mozzarella, pepperoni </td>
+                <td>Sos pomidorowy, ser mozzarella, pepperoni (ostra salami)</td>
                 <td>25-35 zł</td>
             </tr>
             <tr>
                 <td>3. Capricciosa</td>
-                <td>Sos pomidorowy, ser mozzarella, szynka, pieczarki, oliwki</td>
+                <td>Sos pomidorowy, ser mozzarella, szynka, pieczarki, karczochy, oliwki</td>
                 <td>30-40 zł</td>
             </tr>
             <tr>
@@ -254,7 +254,6 @@
 
     <div class="map">
         <h2>Najlepsza Pizza tylko tutaj 📍</h2>
-        <!-- Tutaj wstaw prawdziwy kod mapy Google -->
         <iframe 
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d361.98385395499076!2d16.322214611763872!3d52.38624073785761!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47042f00163a9e2b%3A0x5481347cccc66f3f!2sRadTom%20-%20mieszalnia%20farb%20samochodowych!5e0!3m2!1spl!2spl!4v1738759301299!5m2!1spl!2spl"
             width="100%" 
@@ -265,6 +264,44 @@
         </iframe>
     </div>
 
+    <div class="reviews">
+        <h2>🌟 Co mówią klienci?</h2>
+        <div id="google-reviews"></div>
+    </div>
+
+    <script>
+        const apiKey = 'TWÓJ_KLUCZ_API'; // Wstaw swój klucz API
+        const placeId = 'TWÓJ_PLACE_ID'; // Wstaw swoje Place ID
+        const maxReviews = 5; // Maksymalna liczba opinii do wyświetlenia
+
+        // Pobierz opinie z Google
+        fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=reviews&key=${apiKey}`)
+            .then(response => response.json())
+            .then(data => {
+                const reviews = data.result.reviews;
+                let html = '';
+
+                if (reviews && reviews.length > 0) {
+                    reviews.slice(0, maxReviews).forEach(review => {
+                        html += `
+                            <div class="review-item">
+                                <div class="rating">${'⭐'.repeat(review.rating)}</div>
+                                <p>"${review.text}"</p>
+                                <em>– ${review.author_name}</em>
+                            </div>
+                        `;
+                    });
+                } else {
+                    html = '<p>Brak opinii do wyświetlenia.</p>';
+                }
+
+                document.getElementById('google-reviews').innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Błąd:', error);
+                document.getElementById('google-reviews').innerHTML = '<p>Nie można załadować opinii.</p>';
+            });
+    </script>
 
     <div class="contact">
         <h2>📞 Dzwonić, nie pisać!</h2>
@@ -273,8 +310,8 @@
     </div>
 
     <div class="social-icons">
-        <a href="https://www.facebook.com/profile.php?id=61560325043839" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-        <a href="https://instagram.com" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://www.facebook.com/profile.php?id=61560325043839" target="_blank"><i class="fab fa-facebook"></i></a>
+        <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
     </div>
 </body>
 </html>
