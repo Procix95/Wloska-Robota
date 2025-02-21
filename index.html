@@ -27,37 +27,6 @@
             color: white;
         }
 
-        /* Animacje */
-        @keyframes floatPizza {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes shake {
-            0% { transform: rotate(0deg); }
-            25% { transform: rotate(5deg); }
-            75% { transform: rotate(-5deg); }
-            100% { transform: rotate(0deg); }
-        }
-
-        .header h1 {
-            animation: floatPizza 3s ease-in-out infinite;
-        }
-
-        .menu, .contact, .reviews, .map {
-            animation: fadeIn 1s ease-out;
-        }
-
-        .header h1:hover {
-            animation: shake 0.5s ease-in-out;
-        }
-
         .header {
             background: linear-gradient(to right, var(--green), white 33%, var(--red));
             padding: 2rem;
@@ -102,7 +71,6 @@
         td {
             padding: 1rem;
             border-bottom: 1px solid var(--gold);
-            transition: all 0.3s;
         }
 
         tr:hover td {
@@ -124,79 +92,10 @@
             border-radius: 50px;
             font-size: 1.5rem;
             margin: 1rem;
-            transition: transform 0.3s;
         }
 
         .phone-btn:hover {
-            transform: scale(1.1) rotate(5deg);
-        }
-
-        .map {
-            margin: 2rem auto;
-            padding: 2rem;
-            text-align: center;
-        }
-
-        .reviews {
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background: rgba(0,0,0,0.8);
-            border-radius: 15px;
-        }
-
-        .review-item {
-            padding: 1rem;
-            margin: 1rem 0;
-            border-left: 3px solid var(--gold);
-            transition: transform 0.3s;
-        }
-
-        .review-item:hover {
-            transform: scale(1.02);
-        }
-
-        .rating {
-            color: var(--gold);
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            50% { opacity: 0.7; }
-        }
-
-        .social-icons {
-            text-align: center;
-            padding: 2rem;
-            background: var(--black);
-        }
-
-        .social-icons a {
-            color: var(--gold);
-            font-size: 2.5rem;
-            margin: 0 1rem;
-            transition: all 0.3s;
-        }
-
-        .social-icons a:hover {
-            color: var(--red);
-            transform: rotate(360deg);
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2.5rem;
-            }
-            .phone-btn {
-                font-size: 1.2rem;
-            }
-            td {
-                padding: 0.8rem;
-                font-size: 0.9rem;
-            }
-            iframe {
-                height: 300px;
-            }
+            transform: scale(1.1);
         }
     </style>
 </head>
@@ -229,65 +128,13 @@
                 <td>Sos pomidorowy, ser mozzarella, szynka, pieczarki, oliwki</td>
                 <td>30-40 zł</td>
             </tr>
-            <tr>
-                <td>4. Hawajska</td>
-                <td>Sos pomidorowy, ser mozzarella, szynka, ananas</td>
-                <td>25-35 zł</td>
-            </tr>
-            <tr>
-                <td>5. Quattro Formaggi</td>
-                <td>Sos pomidorowy lub śmietana, mieszanka czterech serów</td>
-                <td>30-40 zł</td>
-            </tr>
-            <tr>
-                <td>6. Diavolo</td>
-                <td>Sos pomidorowy, ser mozzarella, salami picante, papryczki chili</td>
-                <td>30-40 zł</td>
-            </tr>
-            <tr>
-                <td>7. Vegetariana</td>
-                <td>Sos pomidorowy, ser mozzarella, warzywa sezonowe</td>
-                <td>25-35 zł</td>
-            </tr>
         </table>
-    </div>
-
-    <div class="map">
-        <h2>Najlepsza Pizza tylko tutaj 📍</h2>
-        <!-- Tutaj wstaw prawdziwy kod mapy Google -->
-        <iframe 
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d361.98385395499076!2d16.322214611763872!3d52.38624073785761!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47042f00163a9e2b%3A0x5481347cccc66f3f!2sRadTom%20-%20mieszalnia%20farb%20samochodowych!5e0!3m2!1spl!2spl!4v1738759301299!5m2!1spl!2spl"
-            width="100%" 
-            height="400" 
-            style="border:0;" 
-            allowfullscreen="" 
-            loading="lazy">
-        </iframe>
-    </div>
-
-    <div class="reviews">
-        <h2>🌟 Co mówią klienci?</h2>
-        <div class="review-item">
-            <div class="rating">⭐⭐⭐⭐⭐</div>
-            <p>"Najlepsza pizza w okolicy! Prawdziwy włoski smak i świetna obsługa."</p>
-            <em>- Jan Kowalski</em>
-        </div>
-        <div class="review-item">
-            <div class="rating">⭐⭐⭐⭐⭐</div>
-            <p>"Capricciosa przepyszna! Czekamy na więcej nowych smaków."</p>
-            <em>- Anna Nowak</em>
-        </div>
     </div>
 
     <div class="contact">
         <h2>📞 Dzwonić, nie pisać!</h2>
         <a href="tel:503066325" class="phone-btn">Zadzwoń: 503 066 325</a>
         <p>Otwarte codziennie 12:00-22:00</p>
-    </div>
-
-    <div class="social-icons">
-        <a href="https://www.facebook.com/profile.php?id=61560325043839" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-        <a href="https://instagram.com" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
     </div>
 </body>
 </html>
