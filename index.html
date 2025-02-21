@@ -1,317 +1,294 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Włoska Robota - 30cm Raju</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --red: #CD212A;
-            --green: #009246;
-            --gold: #D4AF37;
-            --black: #1A1A1A;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Włoska Robota - 30cm Raju</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --red: #CD212A;
+      --green: #009246;
+      --gold: #D4AF37;
+      --black: #1A1A1A;
+    }
 
-        body {
-            font-family: 'Playfair Display', serif;
-            margin: 0;
-            background: repeating-linear-gradient(
-                45deg,
-                var(--black),
-                var(--black) 2px,
-                #2A2A2A 2px,
-                #2A2A2A 4px
-            );
-            color: white;
-        }
+    body {
+      font-family: 'Playfair Display', serif;
+      margin: 0;
+      background: repeating-linear-gradient(
+          45deg,
+          var(--black),
+          var(--black) 2px,
+          #2A2A2A 2px,
+          #2A2A2A 4px
+      );
+      color: white;
+    }
 
-        /* Animacje */
-        @keyframes floatPizza {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
-        }
+    /* Animacje */
+    @keyframes floatPizza {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+      100% { transform: translateY(0px); }
+    }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+    @keyframes gradientAnimation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
 
-        @keyframes shake {
-            0% { transform: rotate(0deg); }
-            25% { transform: rotate(5deg); }
-            75% { transform: rotate(-5deg); }
-            100% { transform: rotate(0deg); }
-        }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Efekt pulsowania dla wyróżnienia adresu */
+    @keyframes glow {
+      from {
+        box-shadow: 0 0 5px var(--gold);
+      }
+      to {
+        box-shadow: 0 0 20px var(--gold);
+      }
+    }
 
-        .header h1 {
-            animation: floatPizza 3s ease-in-out infinite;
-        }
+    /* Nagłówek z animowanym tłem */
+    .header {
+      background: linear-gradient(45deg, var(--green), var(--red), var(--gold));
+      background-size: 400% 400%;
+      animation: gradientAnimation 15s ease infinite;
+      padding: 1.5rem 2.5rem;
+      border-bottom: 4px solid var(--gold);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease;
+    }
 
-        .menu, .contact, .reviews, .map {
-            animation: fadeIn 1s ease-out;
-        }
+    .header:hover {
+      transform: scale(1.02);
+    }
 
-        .header h1:hover {
-            animation: shake 0.5s ease-in-out;
-        }
+    .header-top {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
 
-        .header {
-            background: linear-gradient(to right, var(--green), white 33%, var(--red));
-            padding: 2rem;
-            text-align: center;
-            border-bottom: 3px solid var(--gold);
-        }
+    .pizzeria-info h1 {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 3rem;
+      margin: 0;
+      text-shadow: 2px 2px var(--black);
+      animation: floatPizza 3s ease-in-out infinite;
+    }
 
-        h1 {
-            font-family: 'Bebas Neue', cursive;
-            font-size: 4rem;
-            margin: 0;
-            text-shadow: 2px 2px var(--black);
-        }
+    /* Nowy, wyróżniający styl dla adresu */
+    .address {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--black);
+      padding: 0.5rem 1rem;
+      background: var(--gold);
+      border: 2px solid var(--gold);
+      border-radius: 8px;
+      box-shadow: 0 0 10px var(--gold);
+      animation: glow 2s ease-in-out infinite alternate;
+    }
 
-        .address {
-            font-size: 1.5rem;
-            margin-top: 0.5rem;
-            color: var(--black);
-        }
+    .contact-info {
+      text-align: right;
+    }
 
-        .menu {
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background: rgba(0,0,0,0.8);
-            border-radius: 15px;
-        }
+    .contact-info h2 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 2rem 0;
-        }
+    .phone-btn {
+      display: inline-block;
+      background: var(--red);
+      color: white;
+      padding: 1.2rem 2.4rem;
+      text-decoration: none;
+      border-radius: 50px;
+      font-size: 1.6rem;
+      font-weight: bold;
+      margin: 0.5rem 0;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
 
-        th {
-            background: var(--red);
-            padding: 1rem;
-            font-family: 'Bebas Neue', cursive;
-            font-size: 1.2rem;
-        }
+    .phone-btn:hover {
+      transform: scale(1.15) rotate(5deg);
+      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.7);
+    }
 
-        td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--gold);
-            transition: all 0.3s;
-        }
+    /* Pozostałe sekcje */
+    .menu, .map {
+      animation: fadeIn 1s ease-out;
+    }
 
-        tr:hover td {
-            background: rgba(255,255,255,0.1);
-        }
+    .menu {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 15px;
+    }
 
-        .contact {
-            text-align: center;
-            padding: 2rem;
-            background: var(--black);
-        }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2rem 0;
+    }
 
-        .phone-btn {
-            display: inline-block;
-            background: var(--red);
-            color: white;
-            padding: 1rem 2rem;
-            text-decoration: none;
-            border-radius: 50px;
-            font-size: 1.5rem;
-            margin: 1rem;
-            transition: transform 0.3s;
-        }
+    th {
+      background: var(--red);
+      padding: 1rem;
+      font-family: 'Bebas Neue', cursive;
+      font-size: 1.2rem;
+    }
 
-        .phone-btn:hover {
-            transform: scale(1.1) rotate(5deg);
-        }
+    td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--gold);
+      transition: all 0.3s;
+    }
 
-        .map {
-            margin: 2rem auto;
-            padding: 2rem;
-            text-align: center;
-        }
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.1);
+    }
 
-        .reviews {
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background: rgba(0,0,0,0.8);
-            border-radius: 15px;
-        }
+    .map {
+      margin: 2rem auto;
+      padding: 2rem;
+      text-align: center;
+    }
 
-        .review-item {
-            padding: 1rem;
-            margin: 1rem 0;
-            border-left: 3px solid var(--gold);
-            transition: transform 0.3s;
-        }
+    .social-icons {
+      text-align: center;
+      padding: 2rem;
+      background: var(--black);
+    }
 
-        .review-item:hover {
-            transform: scale(1.02);
-        }
+    .social-icons a {
+      color: var(--gold);
+      font-size: 2.5rem;
+      margin: 0 1rem;
+      transition: all 0.3s;
+    }
 
-        .rating {
-            color: var(--gold);
-            animation: blink 1s infinite;
-        }
+    .social-icons a:hover {
+      color: var(--red);
+      transform: rotate(360deg);
+    }
 
-        @keyframes blink {
-            50% { opacity: 0.7; }
-        }
-
-        .social-icons {
-            text-align: center;
-            padding: 2rem;
-            background: var(--black);
-        }
-
-        .social-icons a {
-            color: var(--gold);
-            font-size: 2.5rem;
-            margin: 0 1rem;
-            transition: all 0.3s;
-        }
-
-        .social-icons a:hover {
-            color: var(--red);
-            transform: rotate(360deg);
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2.5rem;
-            }
-            .phone-btn {
-                font-size: 1.2rem;
-            }
-            td {
-                padding: 0.8rem;
-                font-size: 0.9rem;
-            }
-            iframe {
-                height: 300px;
-            }
-        }
-    </style>
+    @media (max-width: 768px) {
+      .pizzeria-info h1 {
+        font-size: 2.5rem;
+      }
+      .phone-btn {
+        font-size: 1.2rem;
+        padding: 1rem 2rem;
+      }
+      td {
+        padding: 0.8rem;
+        font-size: 0.9rem;
+      }
+      iframe {
+        height: 300px;
+      }
+      .header-top {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      .contact-info {
+        margin-top: 1rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    <header class="header">
-        <h1>🍕 WŁOSKA ROBOTA</h1>
+  <header class="header">
+    <div class="header-top">
+      <div class="pizzeria-info">
+        <h1>🍕 PIZZERIA WŁOSKA ROBOTA</h1>
         <div class="address">Głuponie 103, 64-316</div>
-    </header>
-
-    <div class="menu">
-        <h2>🍕 Menu - Tylko 30 cm włoskiej roboty!</h2>
-        <table>
-            <tr>
-                <th>Nazwa</th>
-                <th>Skład</th>
-                <th>Cena</th>
-            </tr>
-            <tr>
-                <td>1. Margherita</td>
-                <td>Sos pomidorowy, ser mozzarella, świeża bazylia, oliwa z oliwek</td>
-                <td>20-30 zł</td>
-            </tr>
-            <tr>
-                <td>2. Pepperoni</td>
-                <td>Sos pomidorowy, ser mozzarella, pepperoni (ostra salami)</td>
-                <td>25-35 zł</td>
-            </tr>
-            <tr>
-                <td>3. Capricciosa</td>
-                <td>Sos pomidorowy, ser mozzarella, szynka, pieczarki, karczochy, oliwki</td>
-                <td>30-40 zł</td>
-            </tr>
-            <tr>
-                <td>4. Hawajska</td>
-                <td>Sos pomidorowy, ser mozzarella, szynka, ananas</td>
-                <td>25-35 zł</td>
-            </tr>
-            <tr>
-                <td>5. Quattro Formaggi</td>
-                <td>Sos pomidorowy lub śmietana, mieszanka czterech serów</td>
-                <td>30-40 zł</td>
-            </tr>
-            <tr>
-                <td>6. Diavolo</td>
-                <td>Sos pomidorowy, ser mozzarella, salami picante, papryczki chili</td>
-                <td>30-40 zł</td>
-            </tr>
-            <tr>
-                <td>7. Vegetariana</td>
-                <td>Sos pomidorowy, ser mozzarella, warzywa sezonowe</td>
-                <td>25-35 zł</td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="map">
-        <h2>Najlepsza Pizza tylko tutaj 📍</h2>
-        <iframe 
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d361.98385395499076!2d16.322214611763872!3d52.38624073785761!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47042f00163a9e2b%3A0x5481347cccc66f3f!2sRadTom%20-%20mieszalnia%20farb%20samochodowych!5e0!3m2!1spl!2spl!4v1738759301299!5m2!1spl!2spl"
-            width="100%" 
-            height="400" 
-            style="border:0;" 
-            allowfullscreen="" 
-            loading="lazy">
-        </iframe>
-    </div>
-
-    <div class="reviews">
-        <h2>🌟 Co mówią klienci?</h2>
-        <div id="google-reviews"></div>
-    </div>
-
-    <script>
-        const apiKey = 'TWÓJ_KLUCZ_API'; // Wstaw swój klucz API
-        const placeId = 'TWÓJ_PLACE_ID'; // Wstaw swoje Place ID
-        const maxReviews = 5; // Maksymalna liczba opinii do wyświetlenia
-
-        // Pobierz opinie z Google
-        fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=reviews&key=${apiKey}`)
-            .then(response => response.json())
-            .then(data => {
-                const reviews = data.result.reviews;
-                let html = '';
-
-                if (reviews && reviews.length > 0) {
-                    reviews.slice(0, maxReviews).forEach(review => {
-                        html += `
-                            <div class="review-item">
-                                <div class="rating">${'⭐'.repeat(review.rating)}</div>
-                                <p>"${review.text}"</p>
-                                <em>– ${review.author_name}</em>
-                            </div>
-                        `;
-                    });
-                } else {
-                    html = '<p>Brak opinii do wyświetlenia.</p>';
-                }
-
-                document.getElementById('google-reviews').innerHTML = html;
-            })
-            .catch(error => {
-                console.error('Błąd:', error);
-                document.getElementById('google-reviews').innerHTML = '<p>Nie można załadować opinii.</p>';
-            });
-    </script>
-
-    <div class="contact">
-        <h2>📞 Dzwonić, nie pisać!</h2>
+      </div>
+      <div class="contact-info">
+        <h2>📞 Telefon Kotaktowy</h2>
         <a href="tel:503066325" class="phone-btn">Zadzwoń: 503 066 325</a>
-        <p>Otwarte codziennie 12:00-22:00</p>
+        <p>Otwarte: 12.00-22.00 Pon-Sob</p>
+      </div>
     </div>
+  </header>
 
-    <div class="social-icons">
-        <a href="https://www.facebook.com/profile.php?id=61560325043839" target="_blank"><i class="fab fa-facebook"></i></a>
-        <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
-    </div>
+  <div class="menu">
+    <h2>🍕 Menu - Tylko 30 cm włoskiej roboty!</h2>
+    <table>
+      <tr>
+        <th>Nazwa</th>
+        <th>Skład</th>
+        <th>Cena</th>
+      </tr>
+      <tr>
+        <td>1. Margherita</td>
+        <td>Sos pomidorowy, ser mozzarella, świeża bazylia, oliwa z oliwek</td>
+        <td>20-30 zł</td>
+      </tr>
+      <tr>
+        <td>2. Pepperoni</td>
+        <td>Sos pomidorowy, ser mozzarella, pepperoni (ostra salami)</td>
+        <td>25-35 zł</td>
+      </tr>
+      <tr>
+        <td>3. Capricciosa</td>
+        <td>Sos pomidorowy, ser mozzarella, szynka, pieczarki, karczochy, oliwki</td>
+        <td>30-40 zł</td>
+      </tr>
+      <tr>
+        <td>4. Hawajska</td>
+        <td>Sos pomidorowy, ser mozzarella, szynka, ananas</td>
+        <td>25-35 zł</td>
+      </tr>
+      <tr>
+        <td>5. Quattro Formaggi</td>
+        <td>Sos pomidorowy lub śmietana, mieszanka czterech serów</td>
+        <td>30-40 zł</td>
+      </tr>
+      <tr>
+        <td>6. Diavolo</td>
+        <td>Sos pomidorowy, ser mozzarella, salami picante, papryczki chili</td>
+        <td>30-40 zł</td>
+      </tr>
+      <tr>
+        <td>7. Vegetariana</td>
+        <td>Sos pomidorowy, ser mozzarella, warzywa sezonowe</td>
+        <td>25-35 zł</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="map">
+    <h2>Najlepsza Pizza tylko tutaj 📍</h2>
+    <iframe 
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d361.98385395499076!2d16.322214611763872!3d52.38624073785761!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47042f00163a9e2b%3A0x5481347cccc66f3f!2sRadTom%20-%20mieszalnia%20farb%20samochodowych!5e0!3m2!1spl!2spl!4v1738759301299!5m2!1spl!2spl"
+      width="100%"
+      height="400"
+      style="border:0;"
+      allowfullscreen=""
+      loading="lazy">
+    </iframe>
+  </div>
+
+  <div class="social-icons">
+    <a href="https://www.facebook.com/profile.php?id=61560325043839" target="_blank"><i class="fab fa-facebook"></i></a>
+    <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+  </div>
 </body>
 </html>
