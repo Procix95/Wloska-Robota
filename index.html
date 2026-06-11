@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Włoska Robota - 30cm Raju</title>
+  <title>Włoska Robota - Pizza 30cm Głuponie | Tel: 503 066 325</title>
+  <meta name="description" content="Włoska Robota Głuponie - Pizza 30cm z pieca. Zamów telefonicznie 503 066 325. Dowóz Głuponie, Lwówek, Pniewy. Otwarte 12:00-22:00">
+  <meta name="keywords" content="pizza Głuponie, pizzeria Głuponie, pizza 30cm, dowóz pizzy Lwówek, Włoska Robota">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍕</text></svg>">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
@@ -24,6 +27,7 @@
           #2A2A2A 4px
       );
       color: white;
+      padding-bottom: 0;
     }
     /* Animacje */
     @keyframes floatPizza {
@@ -47,6 +51,11 @@
       to {
         box-shadow: 0 0 20px var(--gold);
       }
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 rgba(205, 33, 42, 0.7); }
+      70% { box-shadow: 0 0 0 15px rgba(205, 33, 42, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(205, 33, 42, 0); }
     }
     /* Nagłówek z animowanym tłem */
     .header {
@@ -83,15 +92,17 @@
     .address {
       font-size: 1.5rem;
       font-weight: bold;
-      color: var(--black);
+      color: white;
       padding: 0.5rem 1rem;
-      background: var(--gold);
+      background: var(--red);
       border: 2px solid var(--gold);
       border-radius: 8px;
       box-shadow: 0 0 10px var(--gold);
       animation: glow 2s ease-in-out infinite alternate;
       text-decoration: none;
       cursor: pointer;
+      display: inline-block;
+      margin-top: 0.5rem;
     }
     .contact-info {
       text-align: right;
@@ -117,6 +128,11 @@
       transform: scale(1.15) rotate(5deg);
       box-shadow: 0 6px 10px rgba(0, 0, 0, 0.7);
     }
+    #open-status {
+      font-weight: bold; 
+      font-size: 1.2rem;
+      margin: 0.5rem 0;
+    }
     /* Sekcja Menu z efektem Glassmorphism */
     .menu {
       max-width: 800px;
@@ -131,6 +147,13 @@
     .menu h2 {
       text-align: center;
       margin-bottom: 1rem;
+    }
+    .menu-subtitle {
+      text-align: center; 
+      margin-top: -0.5rem; 
+      margin-bottom: 2rem; 
+      color: var(--gold); 
+      font-weight: bold;
     }
     .menu-grid {
       display: grid;
@@ -158,9 +181,58 @@
     .menu-item p {
       margin: 0.3rem 0;
     }
+    .menu-item .ingredients {
+      min-height: 40px;
+      font-size: 1rem;
+    }
     .menu-item .price {
       font-weight: bold;
       color: var(--red);
+      font-size: 1.2rem;
+      margin-top: 0.8rem;
+    }
+    /* Sekcja dodatków */
+    .dodatki {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      animation: fadeIn 1s ease-out;
+    }
+    .dodatki h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: var(--gold);
+      font-family: 'Bebas Neue', cursive;
+      font-size: 2.5rem;
+    }
+    .dodatki-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+    }
+    .dodatki-col h3 {
+      color: var(--red);
+      font-size: 1.4rem;
+      margin-bottom: 0.8rem;
+      border-bottom: 2px solid var(--gold);
+      padding-bottom: 0.3rem;
+    }
+    .dodatki-col ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .dodatki-col li {
+      padding: 0.3rem 0;
+      font-size: 0.95rem;
+    }
+    .dodatki-col li::before {
+      content: "🍕 ";
+      margin-right: 0.3rem;
     }
     /* Sekcja mapy */
     .map {
@@ -168,6 +240,7 @@
       padding: 2rem;
       text-align: center;
       animation: fadeIn 1s ease-out;
+      max-width: 800px;
     }
     /* Social icons */
     .social-icons {
@@ -186,21 +259,39 @@
       transform: rotate(360deg);
     }
     @media (max-width: 768px) {
+      body { padding-bottom: 100px; }
       .pizzeria-info h1 {
         font-size: 2.5rem;
       }
       .phone-btn {
-        font-size: 1.2rem;
-        padding: 1rem 2rem;
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 999;
+        width: 90%;
+        text-align: center;
+        font-size: 1.4rem;
+        padding: 1rem;
+        animation: pulse 2s infinite;
       }
-      .menu-grid {
+      .phone-btn:hover {
+        transform: translateX(-50%) scale(1.05);
+      }
+      .menu-grid, .dodatki-grid {
         grid-template-columns: 1fr;
       }
       .contact-info {
         margin-top: 1rem;
+        text-align: left;
+        width: 100%;
       }
       iframe {
         height: 300px;
+      }
+      .header-top {
+        flex-direction: column;
+        align-items: flex-start;
       }
     }
   </style>
@@ -210,13 +301,13 @@
     <div class="header-top">
       <div class="pizzeria-info">
         <h1>🍕 WŁOSKA ROBOTA</h1>
-        <!-- Adres opakowany w link – otwiera Google Maps z trasą do pizzerii -->
         <a class="address" href="https://www.google.com/maps/dir/?api=1&destination=G%C5%82uponie+103,+64-316" target="_blank" rel="noopener noreferrer">Głuponie 103, 64-316</a>
       </div>
       <div class="contact-info">
         <h2>📞 Dzwonić, nie pisać!</h2>
         <a href="tel:503066325" class="phone-btn">Zadzwoń: 503 066 325</a>
         <p>Otwarte codziennie 12:00-22:00</p>
+        <p id="open-status"></p>
       </div>
     </div>
   </header>
@@ -224,66 +315,90 @@
   <!-- Sekcja Menu -->
   <div class="menu">
     <h2>🍕 Menu - Tylko 30 cm włoskiej roboty!</h2>
+    <p class="menu-subtitle">
+      Wszystkie pizze 30cm od 30,20 zł
+    </p>
     <div class="menu-grid">
       <div class="menu-item">
         <h3>1. MARGHERITA</h3>
-        <p class="ingredients">Sos, ser</p>
+        <p class="ingredients">Niekwestionowany lider. Klasyczne połączenie sosu pomidorowego, sera mozzarella oraz bazylii.</p>
         <p class="price">od 30,20 zł</p>
       </div>
       <div class="menu-item">
-        <h3>2. FUNGHI</h3>
-        <p class="ingredients">Sos, ser, pieczarki</p>
+        <h3>2. CAPRICCIOSA</h3>
+        <p class="ingredients">Jeden z największych hitów. Na serowej bazie królują pieczarki, szynka oraz czarne oliwki.</p>
+        <p class="price">od 32,20 zł</p>
+      </div>
+      <div class="menu-item">
+        <h3>3. SALAMI / DIAVOLA</h3>
+        <p class="ingredients">Ostra propozycja, w której podstawowy zestaw wzbogacono o pikantne plastry wędliny.</p>
+        <p class="price">od 32,20 zł</p>
+      </div>
+      <div class="menu-item">
+        <h3>4. PEPPERONI</h3>
+        <p class="ingredients">Ukochana przez miłośników bardziej wyrazistych smaków, często pieczona do chrupkości.</p>
+        <p class="price">od 32,20 zł</p>
+      </div>
+      <div class="menu-item">
+        <h3>5. FUNGHI</h3>
+        <p class="ingredients">Propozycja dla jaroszy i fanów grzybów, z dominującą nutą pieczarek.</p>
         <p class="price">od 30,20 zł</p>
       </div>
       <div class="menu-item">
-        <h3>3. VESUVIO</h3>
-        <p class="ingredients">Sos, ser, szynka</p>
-        <p class="price">od 32,20 zł</p>
+        <h3>6. QUATTRO FORMAGGI</h3>
+        <p class="ingredients">Cztery sery. Bogata kompozycja: mozzarella, gorgonzola, parmezan oraz camembert/emmentaler.</p>
+        <p class="price">od 35,20 zł</p>
       </div>
       <div class="menu-item">
-        <h3>4. SALAMI</h3>
-        <p class="ingredients">Sos, ser, salami</p>
-        <p class="price">od 32,20 zł</p>
-      </div>
-      <div class="menu-item">
-        <h3>5. CAPRICIOSA</h3>
-        <p class="ingredients">Sos, ser, szynka, pieczarki</p>
-        <p class="price">od 32,20 zł</p>
-      </div>
-      <div class="menu-item">
-        <h3>6. HAWAJSKA</h3>
-        <p class="ingredients">Sos, ser, szynka, ananas</p>
-        <p class="price">od 32,20 zł</p>
-      </div>
-      <div class="menu-item">
-        <h3>7. PEPPERONI</h3>
-        <p class="ingredients">Sos, ser, salami, papryka pepperoni, cebula</p>
-        <p class="price">od 32,20 zł</p>
-      </div>
-      <div class="menu-item">
-        <h3>8. ROMA</h3>
-        <p class="ingredients">Sos, ser, szynka</p>
-        <p class="price">od 32,20 zł</p>
-      </div>
-      <div class="menu-item">
-        <h3>9. JALAPENIO</h3>
-        <p class="ingredients">Sos, ser, salami, papryka jalapenio</p>
-        <p class="price">od 32,20 zł</p>
-      </div>
-      <div class="menu-item">
-        <h3>10. MEKSYKANA</h3>
-        <p class="ingredients">Sos, ser, szynka, kukurydza, cebula</p>
-        <p class="price">od 32,20 zł</p>
-      </div>
-      <div class="menu-item">
-        <h3>11. TOSKANA</h3>
-        <p class="ingredients">Sos, ser, boczek, pomidor, carne, oliwki</p>
+        <h3>7. WIEJSKA</h3>
+        <p class="ingredients">Uwielbiany w kraju lokalny akcent. Dodatkami bywają swojska kiełbasa czy ogórek kiszony.</p>
         <p class="price">od 33,20 zł</p>
       </div>
       <div class="menu-item">
-        <h3>12. SPECIALE</h3>
-        <p class="ingredients">Sos, ser, pieczarki, boczek, cebula</p>
-        <p class="price">od 33,20 zł</p>
+        <h3>8. PIZZA WŁASNA</h3>
+        <p class="ingredients">Stwórz własną kompozycję! Baza: sos + ser mozzarella. Dobierz dodatki z listy poniżej.</p>
+        <p class="price">od 30,20 zł + dodatki</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sekcja Dodatki -->
+  <div class="dodatki">
+    <h2>DODATKI DO PIZZY WŁASNEJ</h2>
+    <div class="dodatki-grid">
+      <div class="dodatki-col">
+        <h3>Dodatki 3 zł</h3>
+        <ul>
+          <li>Pieczarki</li>
+          <li>Cebula</li>
+          <li>Kukurydza</li>
+          <li>Papryka</li>
+          <li>Pomidor</li>
+          <li>Oliwki czarne</li>
+          <li>Ogórek kiszony</li>
+          <li>Ananas</li>
+          <li>Jalapeño</li>
+          <li>Papryka pepperoni</li>
+          <li>Czosnek</li>
+          <li>Rukola</li>
+          <li>Bazylia</li>
+        </ul>
+      </div>
+      <div class="dodatki-col">
+        <h3>Dodatki 5 zł</h3>
+        <ul>
+          <li>Szynka</li>
+          <li>Salami</li>
+          <li>Boczek</li>
+          <li>Kiełbasa swojska</li>
+          <li>Kurczak</li>
+          <li>Tuńczyk</li>
+          <li>Krewetki</li>
+          <li>Ser gorgonzola</li>
+          <li>Ser camembert</li>
+          <li>Ser parmezan</li>
+          <li>Dodatkowy ser mozzarella</li>
+        </ul>
       </div>
     </div>
   </div>
@@ -305,32 +420,46 @@
     <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
   </div>
 
-  <!-- Skrypty GSAP i ScrollTrigger dla płynnych animacji i sticky header -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/ScrollTrigger.min.js" defer></script>
   <script>
-    gsap.registerPlugin(ScrollTrigger);
-    // Animacja pojawiania się elementów menu przy przewijaniu
-    gsap.utils.toArray('.menu-item').forEach(item => {
-      gsap.from(item, {
-        opacity: 0,
-        y: 50,
-        duration: 1,
-        scrollTrigger: {
-          trigger: item,
-          start: 'top 80%',
-          toggleActions: 'play none none none'
+    document.addEventListener('DOMContentLoaded', function() {
+      gsap.registerPlugin(ScrollTrigger);
+      gsap.utils.toArray('.menu-item').forEach(item => {
+        gsap.from(item, {
+          opacity: 0,
+          y: 50,
+          duration: 1,
+          scrollTrigger: {
+            trigger: item,
+            start: 'top 80%',
+            toggleActions: 'play none none none'
+          }
+        });
+      });
+      window.addEventListener('scroll', function() {
+        const header = document.querySelector('.header');
+        if (window.scrollY > 50) {
+          header.classList.add('scrolled');
+        } else {
+          header.classList.remove('scrolled');
         }
       });
-    });
-    // Sticky header – dodawanie klasy 'scrolled' przy przewijaniu
-    window.addEventListener('scroll', function() {
-      const header = document.querySelector('.header');
-      if (window.scrollY > 50) {
-        header.classList.add('scrolled');
-      } else {
-        header.classList.remove('scrolled');
+      function checkOpenStatus() {
+        const now = new Date();
+        const hour = now.getHours();
+        const statusEl = document.getElementById('open-status');
+        
+        if (hour >= 12 && hour < 22) {
+          statusEl.innerHTML = '🟢 Otwarte teraz - dzwoń!';
+          statusEl.style.color = '#00FF00';
+        } else {
+          statusEl.innerHTML = '🔴 Zamknięte - otwieramy o 12:00';
+          statusEl.style.color = '#FF4444';
+        }
       }
+      checkOpenStatus();
+      setInterval(checkOpenStatus, 60000);
     });
   </script>
 </body>
