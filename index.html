@@ -29,7 +29,6 @@
       color: white;
       padding-bottom: 0;
     }
-    /* Animacje */
     @keyframes floatPizza {
       0% { transform: translateY(0px); }
       50% { transform: translateY(-20px); }
@@ -57,7 +56,6 @@
       70% { box-shadow: 0 0 0 15px rgba(205, 33, 42, 0); }
       100% { box-shadow: 0 0 0 0 rgba(205, 33, 42, 0); }
     }
-    /* Nagłówek z animowanym tłem */
     .header {
       background: linear-gradient(45deg, var(--green), var(--red), var(--gold));
       background-size: 400% 400%;
@@ -67,7 +65,6 @@
       box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    /* Efekt zmiany nagłówka przy przewijaniu */
     .header.scrolled {
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6);
     }
@@ -88,7 +85,6 @@
       text-shadow: 2px 2px var(--black);
       animation: floatPizza 3s ease-in-out infinite;
     }
-    /* Adres – klikalny element, który otwiera Google Maps z trasą do pizzerii */
     .address {
       font-size: 1.5rem;
       font-weight: bold;
@@ -133,7 +129,6 @@
       font-size: 1.2rem;
       margin: 0.5rem 0;
     }
-    /* Sekcja Menu z efektem Glassmorphism */
     .menu {
       max-width: 800px;
       margin: 2rem auto;
@@ -191,7 +186,6 @@
       font-size: 1.2rem;
       margin-top: 0.8rem;
     }
-    /* Sekcja dodatków */
     .dodatki {
       max-width: 800px;
       margin: 2rem auto;
@@ -234,7 +228,6 @@
       content: "🍕 ";
       margin-right: 0.3rem;
     }
-    /* Sekcja mapy */
     .map {
       margin: 2rem auto;
       padding: 2rem;
@@ -242,7 +235,6 @@
       animation: fadeIn 1s ease-out;
       max-width: 800px;
     }
-    /* Social icons */
     .social-icons {
       text-align: center;
       padding: 2rem;
@@ -316,48 +308,43 @@
   <div class="menu">
     <h2>🍕 Menu - Tylko 30 cm włoskiej roboty!</h2>
     <p class="menu-subtitle">
-      Wszystkie pizze 30cm od 30,20 zł
+      Wszystkie pizze 30cm od 28,00 zł
     </p>
     <div class="menu-grid">
       <div class="menu-item">
-        <h3>1. MARGHERITA</h3>
-        <p class="ingredients">Niekwestionowany lider. Klasyczne połączenie sosu pomidorowego, sera mozzarella oraz bazylii.</p>
-        <p class="price">od 30,20 zł</p>
+        <h3>1. PIZZA WŁASNA</h3>
+        <p class="ingredients">Sos pomidorowy, mozzarella</p>
+        <p class="price">28,00 zł + dodatki</p>
       </div>
       <div class="menu-item">
-        <h3>2. CAPRICCIOSA</h3>
-        <p class="ingredients">Jeden z największych hitów. Na serowej bazie królują pieczarki, szynka oraz czarne oliwki.</p>
-        <p class="price">od 32,20 zł</p>
+        <h3>2. MARGHERITA</h3>
+        <p class="ingredients">Sos pomidorowy, mozzarella, bazylia</p>
+        <p class="price">30,00 zł</p>
       </div>
       <div class="menu-item">
-        <h3>3. SALAMI / DIAVOLA</h3>
-        <p class="ingredients">Ostra propozycja, w której podstawowy zestaw wzbogacono o pikantne plastry wędliny.</p>
-        <p class="price">od 32,20 zł</p>
+        <h3>3. FUNGHI</h3>
+        <p class="ingredients">Sos pomidorowy, mozzarella, pieczarki</p>
+        <p class="price">30,00 zł</p>
       </div>
       <div class="menu-item">
         <h3>4. PEPPERONI</h3>
-        <p class="ingredients">Ukochana przez miłośników bardziej wyrazistych smaków, często pieczona do chrupkości.</p>
-        <p class="price">od 32,20 zł</p>
+        <p class="ingredients">Sos pomidorowy, mozzarella, kiełbasa pepperoni</p>
+        <p class="price">32,00 zł</p>
       </div>
       <div class="menu-item">
-        <h3>5. FUNGHI</h3>
-        <p class="ingredients">Propozycja dla jaroszy i fanów grzybów, z dominującą nutą pieczarek.</p>
-        <p class="price">od 30,20 zł</p>
+        <h3>5. CAPRICCIOSA</h3>
+        <p class="ingredients">Sos pomidorowy, mozzarella, szynka, pieczarki, czarne oliwki</p>
+        <p class="price">36,00 zł</p>
       </div>
       <div class="menu-item">
-        <h3>6. QUATTRO FORMAGGI</h3>
-        <p class="ingredients">Cztery sery. Bogata kompozycja: mozzarella, gorgonzola, parmezan oraz camembert/emmentaler.</p>
-        <p class="price">od 35,20 zł</p>
+        <h3>6. WIEJSKA</h3>
+        <p class="ingredients">Sos pomidorowy, mozzarella, kiełbasa swojska, ogórek kiszony, cebula</p>
+        <p class="price">36,00 zł</p>
       </div>
       <div class="menu-item">
-        <h3>7. WIEJSKA</h3>
-        <p class="ingredients">Uwielbiany w kraju lokalny akcent. Dodatkami bywają swojska kiełbasa czy ogórek kiszony.</p>
-        <p class="price">od 33,20 zł</p>
-      </div>
-      <div class="menu-item">
-        <h3>8. PIZZA WŁASNA</h3>
-        <p class="ingredients">Stwórz własną kompozycję! Baza: sos + ser mozzarella. Dobierz dodatki z listy poniżej.</p>
-        <p class="price">od 30,20 zł + dodatki</p>
+        <h3>7. QUATTRO FORMAGGI</h3>
+        <p class="ingredients">Mozzarella, gorgonzola, parmezan, camembert</p>
+        <p class="price">40,00 zł</p>
       </div>
     </div>
   </div>
@@ -393,7 +380,6 @@
           <li>Kiełbasa swojska</li>
           <li>Kurczak</li>
           <li>Tuńczyk</li>
-          <li>Krewetki</li>
           <li>Ser gorgonzola</li>
           <li>Ser camembert</li>
           <li>Ser parmezan</li>
