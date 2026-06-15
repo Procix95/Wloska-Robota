@@ -363,7 +363,6 @@ body.dark footer {background: #0a0a0a;}
           <a href="#"><i class="fab fa-facebook"></i></a>
           <a href="#"><i class="fab fa-instagram"></i></a>
         </div>
-      </div>
       <div class="footer-section">
         <h4>Menu</h4>
         <a href="#menu">Pizza Klasyczne</a>
@@ -377,7 +376,6 @@ body.dark footer {background: #0a0a0a;}
         <a href="#"><i class="fas fa-map-marker-alt"></i> Głuponie</a>
         <a href="#"><i class="fas fa-clock"></i> 12:00 - 20:00</a>
       </div>
-    </div>
     <div class="footer-bottom">
       <p>&copy; 2026 Włoska Robota. Wszystkie prawa zastrzeżone. | Pizza z pieca | Głuponie</p>
     </div>
@@ -469,4 +467,8 @@ function updateTimer() {
     timerText.textContent = 'Obecnie zamknięte';
     const openTime = new Date();
     if (hours >= 20) openTime.setDate(openTime.getDate() + 1);
-    openTime.setHours(
+    openTime.setHours(12, 0, 0);
+    const diff = openTime - now;
+    const h = Math.floor(diff / 1000 / 60 / 60);
+    const m = Math.floor((diff / 1000 / 60) % 60);
+    timerCountdown.textContent = `
