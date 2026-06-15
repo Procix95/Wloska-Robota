@@ -8,17 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-:root {
-  --red: #CD212A;
-  --green: #009246;
-  --gold: #D4AF37;
-  --dark: #1a1a1a;
-  --dark-bg: #121212;
-  --dark-card: #1e1e1e;
-  --light: #f8f8f8;
-  --gray: #666;
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+:root {--red: #CD212A; --green: #009246; --gold: #D4AF37; --dark: #1a1a1a; --dark-bg: #121212; --dark-card: #1e1e1e; --light: #f8f8f8; --gray: #666; --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
 * {margin: 0; padding: 0; box-sizing: border-box;}
 html {scroll-behavior: smooth;}
 body {font-family: 'Poppins', sans-serif; background: var(--light); color: var(--dark); line-height: 1.6; overflow-x: hidden;}
@@ -31,7 +21,6 @@ section {padding: 5rem 0; position: relative;}
 body.dark .section-subtitle {color: #aaa;}
 header {position: fixed; top: 0; width: 100%; z-index: 1000; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); box-shadow: 0 2px 20px rgba(0,0,0,0.1); transition: var(--transition);}
 body.dark header {background: rgba(18, 18, 18, 0.95); box-shadow: 0 2px 20px rgba(0,0,0,0.5);}
-header.scrolled {padding: 0.5rem 0;}
 nav {display: flex; justify-content: space-between; align-items: center; padding: 1rem 0;}
 .logo {display: flex; align-items: center; gap: 0.8rem; font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 800; color: var(--dark); text-decoration: none;}
 body.dark .logo {color: var(--light);}
@@ -43,7 +32,6 @@ body.dark .nav-links a {color: var(--light);}
 .nav-links a:hover::after {width: 100%;}
 .theme-toggle {background: var(--dark); color: var(--light); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition);}
 body.dark .theme-toggle {background: var(--light); color: var(--dark);}
-.theme-toggle:hover {transform: rotate(180deg);}
 .mobile-toggle {display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--dark);}
 body.dark .mobile-toggle {color: var(--light);}
 .hero {min-height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden; background: linear-gradient(135deg, rgba(0,146,70,0.9), rgba(205,33,42,0.9)); margin-top: 70px;}
@@ -82,7 +70,7 @@ body.dark .menu {background: var(--dark-card);}
 body.dark .category-btn {color: var(--light); border-color: #444;}
 .category-btn.active, .category-btn:hover {background: linear-gradient(135deg, var(--green), var(--red)); color: white; border-color: transparent;}
 .menu-grid {display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;}
-.menu-item {background: var(--light); border-radius: 20px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.08); transition: var(--transition); opacity: 0; animation: fadeIn 0.5s ease forwards;}
+.menu-item {background: var(--light); border-radius: 20px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.08); transition: var(--transition);}
 body.dark .menu-item {background: var(--dark-bg); box-shadow: 0 5px 20px rgba(0,0,0,0.3);}
 .menu-item:hover {transform: translateY(-10px); box-shadow: 0 15px 40px rgba(0,0,0,0.15);}
 .menu-item-content {padding: 1.5rem;}
@@ -93,15 +81,12 @@ body.dark .menu-item {background: var(--dark-bg); box-shadow: 0 5px 20px rgba(0,
 body.dark .menu-item-desc {color: #aaa;}
 .menu-item-sizes {display: flex; gap: 0.5rem;}
 .size-badge {padding: 0.3rem 0.8rem; background: var(--green); color: white; border-radius: 20px; font-size: 0.85rem; font-weight: 600;}
-@keyframes fadeIn {to {opacity: 1;}}
 .gallery {background: var(--light);}
 body.dark .gallery {background: var(--dark-bg);}
 .gallery-grid {display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;}
-.gallery-item {position: relative; border-radius: 15px; overflow: hidden; aspect-ratio: 1; cursor: pointer; box-shadow: 0 5px 20px rgba(0,0,0,0.1);}
+.gallery-item {position: relative; border-radius: 15px; overflow: hidden; aspect-ratio: 1; cursor: pointer; box-shadow: 0 5px 20px rgba(0,0,0,0.1); background: #333;}
 .gallery-item img {width: 100%; height: 100%; object-fit: cover; transition: var(--transition);}
 .gallery-item:hover img {transform: scale(1.1);}
-.gallery-item::after {content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent, rgba(0,0,0,0.7)); opacity: 0; transition: var(--transition);}
-.gallery-item:hover::after {opacity: 1;}
 .contact {background: white;}
 body.dark .contact {background: var(--dark-card);}
 .contact-grid {display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;}
@@ -216,7 +201,7 @@ body.dark footer {background: #0a0a0a;}
         </div>
       </div>
       <div class="about-image fade-in">
-        <img src="images/DSC01389.JPG" alt="Pizzaiolo Włoska Robota przy pracy">
+        <img src="images/DSC01389.JPG" alt="Pizzaiolo Włoska Robota przy pracy" onerror="this.src='images/DSC01389.jpg'">
       </div>
     </div>
   </div>
@@ -323,15 +308,15 @@ body.dark footer {background: #0a0a0a;}
     <h2 class="section-title fade-in">Nasza <span>Galeria</span></h2>
     <p class="section-subtitle fade-in">Zobacz jak powstaje magia w naszym piecu</p>
     <div class="gallery-grid">
-      <div class="gallery-item fade-in"><img src="images/DSC01389.JPG" alt="Pizzaiolo Włoska Robota"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01412.JPG" alt="Próba pizzy"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01437.JPG" alt="Pizza Quattro Formaggi"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01283.JPG" alt="Świeże pomidory"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01311.JPG" alt="Pomidory w dłoni"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01314.JPG" alt="Pomidory na desce"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01315.JPG" alt="Krojenie pomidorów"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01358.JPG" alt="Pizza w piecu"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01373.JPG" alt="Pizzaiolo przy pracy"></div>
+      <div class="gallery-item fade-in"><img src="images/DSC01389.JPG" alt="Pizzaiolo Włoska Robota" onerror="this.src='images/DSC01389.jpg'"></div>
+      <div class="gallery-item fade-in"><img src="images/DSC01412.JPG" alt="Próba pizzy" onerror="this.src='images/DSC01412.jpg'"></div>
+      <div class="gallery-item fade-in"><img src="images/DSC01437.JPG" alt="Pizza Quattro Formaggi" onerror="this.src='images/DSC01437.jpg'"></div>
+      <div class="gallery-item fade-in"><img src="images/DSC01283.JPG" alt="Świeże pomidory" onerror="this.src='images/DSC01283.jpg'"></div>
+      <div class="gallery-item fade-in"><img src="images/DSC01311.JPG" alt="Pomidory w dłoni" onerror="this.src='images/DSC01311.jpg'"></div>
+      <div class="gallery-item fade-in"><img src="images/DSC01314.JPG" alt="Pomidory na desce" onerror="this.src='images/DSC01314.jpg'"></div>
+      <div class="gallery-item fade-in"><img src="images/DSC01315.JPG" alt="Krojenie pomidorów" onerror="this.src='images/DSC01315.jpg'"></div>
+      <div class="gallery-item fade-in"><img src="images/DSC01358.JPG" alt="Pizza w piecu" onerror="this.src='images/DSC01358.jpg'"></div>
+      <div class="gallery-item fade-in"><img src="images/DSC01373.JPG" alt="Pizzaiolo przy pracy" onerror="this.src='images/DSC01373.jpg'"></div>
     </div>
   </div>
 </section>
@@ -408,12 +393,3 @@ const themeToggle = document.getElementById('themeToggle');
 const mobileToggle = document.getElementById('mobileToggle');
 const navLinks = document.getElementById('navLinks');
 const timerText = document.getElementById('timerText');
-const timerCountdown = document.getElementById('timerCountdown');
-
-window.addEventListener('scroll', () => {
-  if (window.scrollY > 50) header.classList.add('scrolled');
-  else header.classList.remove('scrolled');
-});
-
-themeToggle.addEventListener('click', () => {
-  document.body.classList.toggle('dark
