@@ -1,452 +1,411 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Włoska Robota - Pizza 30cm Głuponie | Tel: 668 862 396</title>
-  <meta name="description" content="Włoska Robota Głuponie - Pizza 30cm z pieca. Zamów telefonicznie 668 862 396. Dowóz Głuponie, Lwówek, Pniewy. Otwarte 12:00-22:00">
-  <meta name="keywords" content="pizza Głuponie, pizzeria Głuponie, pizza 30cm, dowóz pizzy Lwówek, Włoska Robota">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍕</text></svg>">
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <style>
-    :root {
-      --red: #CD212A;
-      --green: #009246;
-      --gold: #D4AF37;
-      --black: #1A1A1A;
-    }
-    body {
-      font-family: 'Playfair Display', serif;
-      margin: 0;
-      background: repeating-linear-gradient(
-          45deg,
-          var(--black),
-          var(--black) 2px,
-          #2A2A2A 2px,
-          #2A2A2A 4px
-      );
-      color: white;
-      padding-bottom: 0;
-    }
-    @keyframes floatPizza {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-20px); }
-      100% { transform: translateY(0px); }
-    }
-    @keyframes gradientAnimation {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes glow {
-      from {
-        box-shadow: 0 0 5px var(--gold);
-      }
-      to {
-        box-shadow: 0 0 20px var(--gold);
-      }
-    }
-    @keyframes pulse {
-      0% { box-shadow: 0 0 rgba(205, 33, 42, 0.7); }
-      70% { box-shadow: 0 0 0 15px rgba(205, 33, 42, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(205, 33, 42, 0); }
-    }
-    .header {
-      background: linear-gradient(45deg, var(--green), var(--red), var(--gold));
-      background-size: 400% 400%;
-      animation: gradientAnimation 15s ease infinite;
-      padding: 1.5rem 2.5rem;
-      border-bottom: 4px solid var(--gold);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .header.scrolled {
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6);
-    }
-    .header:hover {
-      transform: scale(1.02);
-    }
-    .header-top {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-    }
-    .pizzeria-info h1 {
-      font-family: 'Bebas Neue', cursive;
-      font-size: 3rem;
-      margin: 0;
-      text-shadow: 2px 2px var(--black);
-      animation: floatPizza 3s ease-in-out infinite;
-    }
-    .address {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: white;
-      padding: 0.5rem 1rem;
-      background: var(--red);
-      border: 2px solid var(--gold);
-      border-radius: 8px;
-      box-shadow: 0 0 10px var(--gold);
-      animation: glow 2s ease-in-out infinite alternate;
-      text-decoration: none;
-      cursor: pointer;
-      display: inline-block;
-      margin-top: 0.5rem;
-    }
-    .contact-info {
-      text-align: right;
-    }
-    .contact-info h2 {
-      margin: 0;
-      font-size: 1.5rem;
-    }
-    .phone-btn {
-      display: inline-block;
-      background: var(--red);
-      color: white;
-      padding: 1.2rem 2.4rem;
-      text-decoration: none;
-      border-radius: 50px;
-      font-size: 1.6rem;
-      font-weight: bold;
-      margin: 0.5rem 0;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-    .phone-btn:hover {
-      transform: scale(1.15) rotate(5deg);
-      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.7);
-    }
-    #open-status {
-      font-weight: bold; 
-      font-size: 1.2rem;
-      margin: 0.5rem 0;
-    }
-    .menu {
-      max-width: 800px;
-      margin: 2rem auto;
-      padding: 2rem;
-      background: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 15px;
-      animation: fadeIn 1s ease-out;
-    }
-    .menu h2 {
-      text-align: center;
-      margin-bottom: 1rem;
-    }
-    .menu-subtitle {
-      text-align: center; 
-      margin-top: -0.5rem; 
-      margin-bottom: 2rem; 
-      color: var(--gold); 
-      font-weight: bold;
-    }
-    .menu-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1rem;
-    }
-    .menu-item {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 1rem;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-    .menu-item:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 12px rgba(0, 0, 0, 0.5);
-    }
-    .menu-item h3 {
-      font-family: 'Bebas Neue', cursive;
-      font-size: 1.8rem;
-      margin: 0 0 0.5rem;
-      color: var(--gold);
-    }
-    .menu-item p {
-      margin: 0.3rem 0;
-    }
-    .menu-item .ingredients {
-      min-height: 40px;
-      font-size: 1rem;
-    }
-    .menu-item .price {
-      font-weight: bold;
-      color: var(--red);
-      font-size: 1.2rem;
-      margin-top: 0.8rem;
-    }
-    .dodatki {
-      max-width: 800px;
-      margin: 2rem auto;
-      padding: 2rem;
-      background: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 15px;
-      animation: fadeIn 1s ease-out;
-    }
-    .dodatki h2 {
-      text-align: center;
-      margin-bottom: 1.5rem;
-      color: var(--gold);
-      font-family: 'Bebas Neue', cursive;
-      font-size: 2.5rem;
-    }
-    .dodatki-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 2rem;
-    }
-    .dodatki-col h3 {
-      color: var(--red);
-      font-size: 1.4rem;
-      margin-bottom: 0.8rem;
-      border-bottom: 2px solid var(--gold);
-      padding-bottom: 0.3rem;
-    }
-    .dodatki-col ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .dodatki-col li {
-      padding: 0.3rem 0;
-      font-size: 0.95rem;
-    }
-    .dodatki-col li::before {
-      content: "🍕 ";
-      margin-right: 0.3rem;
-    }
-    .map {
-      margin: 2rem auto;
-      padding: 2rem;
-      text-align: center;
-      animation: fadeIn 1s ease-out;
-      max-width: 800px;
-    }
-    .social-icons {
-      text-align: center;
-      padding: 2rem;
-      background: var(--black);
-    }
-    .social-icons a {
-      color: var(--gold);
-      font-size: 2.5rem;
-      margin: 0 1rem;
-      transition: all 0.3s;
-    }
-    .social-icons a:hover {
-      color: var(--red);
-      transform: rotate(360deg);
-    }
-    @media (max-width: 768px) {
-      body { padding-bottom: 100px; }
-      .pizzeria-info h1 {
-        font-size: 2.5rem;
-      }
-      .phone-btn {
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 999;
-        width: 90%;
-        text-align: center;
-        font-size: 1.4rem;
-        padding: 1rem;
-        animation: pulse 2s infinite;
-      }
-      .phone-btn:hover {
-        transform: translateX(-50%) scale(1.05);
-      }
-      .menu-grid, .dodatki-grid {
-        grid-template-columns: 1fr;
-      }
-      .contact-info {
-        margin-top: 1rem;
-        text-align: left;
-        width: 100%;
-      }
-      iframe {
-        height: 300px;
-      }
-      .header-top {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Włoska Robota - Pizza z Pieca | Głuponie</title>
+<meta name="description" content="Pizzeria Włoska Robota w Głuponiu. Pizza 30cm prosto z pieca. Dowóz: Głuponie, Lwówek, Pniewy. Tel: 668 862 396. Otwarte 12:00-20:00">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root {
+  --red: #CD212A;
+  --green: #009246;
+  --gold: #D4AF37;
+  --dark: #1a1a1a;
+  --dark-bg: #121212;
+  --dark-card: #1e1e1e;
+  --light: #f8f8f8;
+  --gray: #666;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+* {margin: 0; padding: 0; box-sizing: border-box;}
+html {scroll-behavior: smooth;}
+body {font-family: 'Poppins', sans-serif; background: var(--light); color: var(--dark); line-height: 1.6; overflow-x: hidden;}
+body.dark {background: var(--dark-bg); color: var(--light);}
+.container {max-width: 1280px; margin: 0 auto; padding: 0 1.5rem;}
+section {padding: 5rem 0; position: relative;}
+.section-title {font-family: 'Playfair Display', serif; font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; text-align: center; margin-bottom: 1rem;}
+.section-title span {background: linear-gradient(90deg, var(--green), var(--gold), var(--red)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;}
+.section-subtitle {text-align: center; color: var(--gray); font-size: 1.1rem; margin-bottom: 3rem; max-width: 600px; margin-left: auto; margin-right: auto;}
+body.dark .section-subtitle {color: #aaa;}
+header {position: fixed; top: 0; width: 100%; z-index: 1000; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); box-shadow: 0 2px 20px rgba(0,0,0,0.1); transition: var(--transition);}
+body.dark header {background: rgba(18, 18, 18, 0.95); box-shadow: 0 2px 20px rgba(0,0,0,0.5);}
+header.scrolled {padding: 0.5rem 0;}
+nav {display: flex; justify-content: space-between; align-items: center; padding: 1rem 0;}
+.logo {display: flex; align-items: center; gap: 0.8rem; font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 800; color: var(--dark); text-decoration: none;}
+body.dark .logo {color: var(--light);}
+.logo-icon {width: 45px; height: 45px; background: linear-gradient(135deg, var(--green), var(--red)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;}
+.nav-links {display: flex; gap: 2rem; list-style: none; align-items: center;}
+.nav-links a {color: var(--dark); text-decoration: none; font-weight: 500; transition: var(--transition); position: relative;}
+body.dark .nav-links a {color: var(--light);}
+.nav-links a::after {content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px; background: linear-gradient(90deg, var(--green), var(--red)); transition: var(--transition);}
+.nav-links a:hover::after {width: 100%;}
+.theme-toggle {background: var(--dark); color: var(--light); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition);}
+body.dark .theme-toggle {background: var(--light); color: var(--dark);}
+.theme-toggle:hover {transform: rotate(180deg);}
+.mobile-toggle {display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--dark);}
+body.dark .mobile-toggle {color: var(--light);}
+.hero {min-height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden; background: linear-gradient(135deg, rgba(0,146,70,0.9), rgba(205,33,42,0.9)); margin-top: 70px;}
+.hero-bg {position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; opacity: 0.3;}
+.hero-content {position: relative; z-index: 2; text-align: center; color: white;}
+.hero h1 {font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 8vw, 5rem); font-weight: 800; margin-bottom: 1rem; animation: fadeInUp 1s ease;}
+.hero p {font-size: clamp(1.1rem, 3vw, 1.5rem); margin-bottom: 2rem; opacity: 0.95; animation: fadeInUp 1s ease 0.2s both;}
+.hero-buttons {display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; animation: fadeInUp 1s ease 0.4s both;}
+.btn {padding: 1rem 2.5rem; border-radius: 50px; text-decoration: none; font-weight: 600; transition: var(--transition); display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; border: none; font-size: 1rem;}
+.btn-primary {background: white; color: var(--red); box-shadow: 0 10px 30px rgba(0,0,0,0.2);}
+.btn-primary:hover {transform: translateY(-3px); box-shadow: 0 15px 40px rgba(0,0,0,0.3);}
+.btn-secondary {background: transparent; color: white; border: 2px solid white;}
+.btn-secondary:hover {background: white; color: var(--red);}
+.opening-timer {margin-top: 3rem; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 1.5rem 2rem; border-radius: 20px; display: inline-block; animation: fadeInUp 1s ease 0.6s both;}
+.timer-text {font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;}
+.timer-countdown {font-size: 2rem; font-weight: 800; font-family: 'Playfair Display', serif;}
+@keyframes fadeInUp {from {opacity: 0; transform: translateY(30px);} to {opacity: 1; transform: translateY(0);}}
+.about {background: var(--light);}
+body.dark .about {background: var(--dark-bg);}
+.about-content {display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;}
+.about-text h3 {font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 1rem; color: var(--red);}
+.about-text p {margin-bottom: 1rem; color: var(--gray);}
+body.dark .about-text p {color: #aaa;}
+.about-features {display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2rem;}
+.feature-card {background: white; padding: 1.5rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); transition: var(--transition);}
+body.dark .feature-card {background: var(--dark-card); box-shadow: 0 5px 20px rgba(0,0,0,0.3);}
+.feature-card:hover {transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.15);}
+.feature-icon {width: 50px; height: 50px; background: linear-gradient(135deg, var(--green), var(--red)); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; margin-bottom: 1rem;}
+.feature-card h4 {font-size: 1.1rem; margin-bottom: 0.5rem;}
+.about-image {position: relative; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.2);}
+.about-image img {width: 100%; height: 100%; object-fit: cover; display: block;}
+.menu {background: white;}
+body.dark .menu {background: var(--dark-card);}
+.menu-categories {display: flex; justify-content: center; gap: 1rem; margin-bottom: 3rem; flex-wrap: wrap;}
+.category-btn {padding: 0.8rem 2rem; border: 2px solid var(--gray); background: transparent; border-radius: 50px; cursor: pointer; font-weight: 600; transition: var(--transition); color: var(--dark);}
+body.dark .category-btn {color: var(--light); border-color: #444;}
+.category-btn.active, .category-btn:hover {background: linear-gradient(135deg, var(--green), var(--red)); color: white; border-color: transparent;}
+.menu-grid {display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;}
+.menu-item {background: var(--light); border-radius: 20px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.08); transition: var(--transition); opacity: 0; animation: fadeIn 0.5s ease forwards;}
+body.dark .menu-item {background: var(--dark-bg); box-shadow: 0 5px 20px rgba(0,0,0,0.3);}
+.menu-item:hover {transform: translateY(-10px); box-shadow: 0 15px 40px rgba(0,0,0,0.15);}
+.menu-item-image {width: 100%; height: 200px; object-fit: cover;}
+.menu-item-content {padding: 1.5rem;}
+.menu-item-header {display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;}
+.menu-item-title {font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700;}
+.menu-item-price {font-size: 1.5rem; font-weight: 800; color: var(--red);}
+.menu-item-desc {color: var(--gray); font-size: 0.95rem; margin-bottom: 1rem;}
+body.dark .menu-item-desc {color: #aaa;}
+.menu-item-sizes {display: flex; gap: 0.5rem;}
+.size-badge {padding: 0.3rem 0.8rem; background: var(--green); color: white; border-radius: 20px; font-size: 0.85rem; font-weight: 600;}
+@keyframes fadeIn {to {opacity: 1;}}
+.gallery {background: var(--light);}
+body.dark .gallery {background: var(--dark-bg);}
+.gallery-grid {display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;}
+.gallery-item {position: relative; border-radius: 15px; overflow: hidden; aspect-ratio: 1; cursor: pointer; box-shadow: 0 5px 20px rgba(0,0,0,0.1);}
+.gallery-item img {width: 100%; height: 100%; object-fit: cover; transition: var(--transition);}
+.gallery-item:hover img {transform: scale(1.1);}
+.gallery-item::after {content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent, rgba(0,0,0,0.7)); opacity: 0; transition: var(--transition);}
+.gallery-item:hover::after {opacity: 1;}
+.contact {background: white;}
+body.dark .contact {background: var(--dark-card);}
+.contact-grid {display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;}
+.contact-card {background: var(--light); padding: 2rem; border-radius: 20px; text-align: center; transition: var(--transition);}
+body.dark .contact-card {background: var(--dark-bg);}
+.contact-card:hover {transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.1);}
+.contact-icon {width: 60px; height: 60px; background: linear-gradient(135deg, var(--green), var(--red)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.8rem; margin: 0 auto 1rem;}
+.contact-card h3 {font-size: 1.3rem; margin-bottom: 0.5rem;}
+.contact-card p, .contact-card a {color: var(--gray); text-decoration: none; transition: var(--transition);}
+body.dark .contact-card p, body.dark .contact-card a {color: #aaa;}
+.contact-card a:hover {color: var(--red);}
+footer {background: var(--dark); color: white; padding: 3rem 0 1rem; text-align: center;}
+body.dark footer {background: #0a0a0a;}
+.footer-content {display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-bottom: 2rem; text-align: left;}
+.footer-section h4 {font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 1rem; color: var(--gold);}
+.footer-section p, .footer-section a {color: #aaa; text-decoration: none; display: block; margin-bottom: 0.5rem; transition: var(--transition);}
+.footer-section a:hover {color: white; padding-left: 5px;}
+.social-links {display: flex; gap: 1rem; justify-content: start; margin-top: 1rem;}
+.social-links a {width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: var(--transition);}
+.social-links a:hover {background: var(--red); transform: translateY(-3px);}
+.footer-bottom {border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem; color: #666;}
+.sticky-phone {position: fixed; bottom: 2rem; right: 2rem; z-index: 999; width: 60px; height: 60px; background: linear-gradient(135deg, var(--green), var(--red)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; box-shadow: 0 10px 30px rgba(205,33,42,0.4); animation: pulse 2s infinite; text-decoration: none;}
+@keyframes pulse {0%, 100% {transform: scale(1);} 50% {transform: scale(1.1);}}
+.sticky-phone:hover {animation: none; transform: scale(1.15);}
+.fade-in {opacity: 0; transform: translateY(30px); transition: all 0.6s ease;}
+.fade-in.visible {opacity: 1; transform: translateY(0);}
+@media (max-width: 768px) {
+  .nav-links {position: fixed; top: 70px; left: -100%; width: 100%; height: calc(100vh - 70px); background: white; flex-direction: column; padding: 2rem; transition: var(--transition); box-shadow: 0 10px 30px rgba(0,0,0,0.1);}
+  body.dark .nav-links {background: var(--dark-bg);}
+  .nav-links.active {left: 0;}
+  .mobile-toggle {display: block;}
+  .about-content {grid-template-columns: 1fr; gap: 2rem;}
+  .about-features {grid-template-columns: 1fr;}
+  .hero-buttons {flex-direction: column; align-items: center;}
+  .btn {width: 100%; max-width: 300px; justify-content: center;}
+  section {padding: 3rem 0;}
+  .sticky-phone {bottom: 1rem; right: 1rem; width: 50px; height: 50px; font-size: 1.2rem;}
+}
+</style>
 </head>
 <body>
-  <header class="header">
-    <div class="header-top">
-      <div class="pizzeria-info">
-        <h1>🍕 WŁOSKA ROBOTA</h1>
-        <a class="address" href="https://www.google.com/maps/dir/?api=1&destination=G%C5%82uponie+103,+64-316" target="_blank" rel="noopener noreferrer">Głuponie 103, 64-316</a>
-      </div>
-      <div class="contact-info">
-        <h2>📞 Dzwonić, nie pisać!</h2>
-        <a href="tel:668862396" class="phone-btn">Zadzwoń: 668 862 396</a>
-        <p>Otwarte codziennie 12:00-22:00</p>
-        <p id="open-status"></p>
-      </div>
-    </div>
-  </header>
+<header id="header">
+  <div class="container">
+    <nav>
+      <a href="#" class="logo">
+        <div class="logo-icon"><i class="fas fa-pizza-slice"></i></div>
+        <span>Włoska Robota</span>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#home">Start</a></li>
+        <li><a href="#about">O nas</a></li>
+        <li><a href="#menu">Menu</a></li>
+        <li><a href="#gallery">Galeria</a></li>
+        <li><a href="#contact">Kontakt</a></li>
+        <li><button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button></li>
+      </ul>
+      <button class="mobile-toggle" id="mobileToggle"><i class="fas fa-bars"></i></button>
+    </nav>
+  </div>
+</header>
 
-  <!-- Sekcja Menu -->
-  <div class="menu">
-    <h2>🍕 Menu - Tylko 30 cm włoskiej roboty!</h2>
-    <p class="menu-subtitle">
-      Wszystkie pizze 30cm od 28,00 zł
-    </p>
-    <div class="menu-grid">
-      <div class="menu-item">
-        <h3>1. PIZZA WŁASNA</h3>
-        <p class="ingredients">Sos pomidorowy, mozzarella</p>
-        <p class="price">28,00 zł + dodatki</p>
+<section class="hero" id="home">
+  <video class="hero-bg" autoplay muted loop playsinline>
+    <source src="video/C0024.mp4" type="video/mp4">
+  </video>
+  <div class="container">
+    <div class="hero-content">
+      <h1>Pizza z Sercem z Głuponia</h1>
+      <p>Autentyczna włoska pizza 30cm prosto z pieca. Ciasto na 24h i 48h fermentacji.</p>
+      <div class="hero-buttons">
+        <a href="tel:668862396" class="btn btn-primary"><i class="fas fa-phone"></i> Zamów: 668 862 396</a>
+        <a href="#menu" class="btn btn-secondary"><i class="fas fa-utensils"></i> Zobacz Menu</a>
       </div>
-      <div class="menu-item">
-        <h3>2. MARGHERITA</h3>
-        <p class="ingredients">Sos pomidorowy, mozzarella, bazylia</p>
-        <p class="price">30,00 zł</p>
-      </div>
-      <div class="menu-item">
-        <h3>3. FUNGHI</h3>
-        <p class="ingredients">Sos pomidorowy, mozzarella, pieczarki</p>
-        <p class="price">30,00 zł</p>
-      </div>
-      <div class="menu-item">
-        <h3>4. PEPPERONI</h3>
-        <p class="ingredients">Sos pomidorowy, mozzarella, kiełbasa pepperoni</p>
-        <p class="price">32,00 zł</p>
-      </div>
-      <div class="menu-item">
-        <h3>5. CAPRICCIOSA</h3>
-        <p class="ingredients">Sos pomidorowy, mozzarella, szynka, pieczarki, czarne oliwki</p>
-        <p class="price">36,00 zł</p>
-      </div>
-      <div class="menu-item">
-        <h3>6. WIEJSKA</h3>
-        <p class="ingredients">Sos pomidorowy, mozzarella, kiełbasa swojska, ogórek kiszony, cebula</p>
-        <p class="price">36,00 zł</p>
-      </div>
-      <div class="menu-item">
-        <h3>7. QUATTRO FORMAGGI</h3>
-        <p class="ingredients">Mozzarella, gorgonzola, parmezan, camembert</p>
-        <p class="price">40,00 zł</p>
+      <div class="opening-timer">
+        <div class="timer-text" id="timerText">Sprawdzam godziny otwarcia...</div>
+        <div class="timer-countdown" id="timerCountdown"></div>
       </div>
     </div>
   </div>
+</section>
 
-  <!-- Sekcja Dodatki -->
-  <div class="dodatki">
-    <h2>DODATKI DO PIZZY WŁASNEJ</h2>
-    <div class="dodatki-grid">
-      <div class="dodatki-col">
-        <h3>Dodatki 3 zł</h3>
-        <ul>
-          <li>Pieczarki</li>
-          <li>Cebula</li>
-          <li>Kukurydza</li>
-          <li>Papryka</li>
-          <li>Pomidor</li>
-          <li>Oliwki czarne</li>
-          <li>Ogórek kiszony</li>
-          <li>Ananas</li>
-          <li>Jalapeño</li>
-          <li>Papryka pepperoni</li>
-          <li>Czosnek</li>
-          <li>Rukola</li>
-          <li>Bazylia</li>
-        </ul>
+<section class="about" id="about">
+  <div class="container">
+    <h2 class="section-title fade-in">Dlaczego <span>Włoska Robota</span>?</h2>
+    <p class="section-subtitle fade-in">To nie jest zwykła pizzeria. To pasja, tradycja i szacunek do rzemiosła.</p>
+    <div class="about-content">
+      <div class="about-text fade-in">
+        <h3>Pizza z duszą</h3>
+        <p>W Włoska Robota każdy placek to małe dzieło sztuki. Ciasto wyrabiamy ręcznie i fermentujemy minimum 24 godziny, a wersje specjalne nawet 48h. Dzięki temu jest lekkie, chrupiące i pełne smaku.</p>
+        <p>Używamy tylko składników najwyższej jakości: włoska mąka, pomidory San Marzano, mozzarella fior di latte, świeże zioła. Zero kompromisów.</p>
+        <div class="about-features">
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-fire"></i></div>
+            <h4>Piec Opałowy</h4>
+            <p>Wypiek w 400°C daje idealne "lamparty"</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-clock"></i></div>
+            <h4>48h Fermentacji</h4>
+            <p>Ciasto lekkostrawne i aromatyczne</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-leaf"></i></div>
+            <h4>Świeże Składniki</h4>
+            <p>Codziennie od lokalnych dostawców</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-heart"></i></div>
+            <h4>Prosto z Serca</h4>
+            <p>Każda pizza robiona z pasją</p>
+          </div>
+        </div>
       </div>
-      <div class="dodatki-col">
-        <h3>Dodatki 5 zł</h3>
-        <ul>
-          <li>Szynka</li>
-          <li>Salami</li>
-          <li>Boczek</li>
-          <li>Kiełbasa swojska</li>
-          <li>Kurczak</li>
-          <li>Tuńczyk</li>
-          <li>Ser gorgonzola</li>
-          <li>Ser camembert</li>
-          <li>Ser parmezan</li>
-          <li>Dodatkowy ser mozzarella</li>
-        </ul>
+      <div class="about-image fade-in">
+        <img src="images/DSC01389.JPG" alt="Pizzaiolo Włoska Robota przy pracy">
       </div>
     </div>
   </div>
+</section>
 
-  <div class="map">
-    <h2>Najlepsza Pizza tylko tutaj 📍</h2>
-    <iframe 
-      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d361.98385395499076!2d16.322214611763872!3d52.38624073785761!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47042f00163a9e2b%3A0x5481347cccc66f3f!2sRadTom%20-%20mieszalnia%20farb%20samochodowych!5e0!3m2!1spl!2spl!4v1738759301299!5m2!1spl!2spl" 
-      width="100%" 
-      height="400" 
-      style="border:0;" 
-      allowfullscreen="" 
-      loading="lazy">
-    </iframe>
+<section class="menu" id="menu">
+  <div class="container">
+    <h2 class="section-title fade-in">Nasze <span>Menu</span></h2>
+    <p class="section-subtitle fade-in">Wszystkie pizze 30cm. Wybierz swoją ulubioną!</p>
+    <div class="menu-categories fade-in">
+      <button class="category-btn active" data-category="all">Wszystkie</button>
+      <button class="category-btn" data-category="klasyczne">Klasyczne</button>
+      <button class="category-btn" data-category="miesne">Mięsne</button>
+      <button class="category-btn" data-category="vege">Wege</button>
+      <button class="category-btn" data-category="specjalne">Specjalne 48h</button>
+    </div>
+    <div class="menu-grid" id="menuGrid">
+      <div class="menu-item" data-category="klasyczne">
+        <div class="menu-item-content">
+          <div class="menu-item-header">
+            <h3 class="menu-item-title">1. MARGHERITA</h3>
+            <span class="menu-item-price">28 zł</span>
+          </div>
+          <p class="menu-item-desc">Sos pomidorowy, mozzarella fior di latte, bazylia, oliwa extra vergine</p>
+          <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
+        </div>
+      </div>
+      <div class="menu-item" data-category="klasyczne miesne">
+        <div class="menu-item-content">
+          <div class="menu-item-header">
+            <h3 class="menu-item-title">2. PEPPERONI</h3>
+            <span class="menu-item-price">34 zł</span>
+          </div>
+          <p class="menu-item-desc">Sos pomidorowy, mozzarella, pepperoni, oregano</p>
+          <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
+        </div>
+      </div>
+      <div class="menu-item" data-category="miesne">
+        <div class="menu-item-content">
+          <div class="menu-item-header">
+            <h3 class="menu-item-title">3. PROSCIUTTO</h3>
+            <span class="menu-item-price">38 zł</span>
+          </div>
+          <p class="menu-item-desc">Sos pomidorowy, mozzarella, szynka prosciutto crudo, rukola, parmezan</p>
+          <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
+        </div>
+      </div>
+      <div class="menu-item" data-category="vege">
+        <div class="menu-item-content">
+          <div class="menu-item-header">
+            <h3 class="menu-item-title">4. VEGETARIANA</h3>
+            <span class="menu-item-price">32 zł</span>
+          </div>
+          <p class="menu-item-desc">Sos pomidorowy, mozzarella, grillowane warzywa, cukinia, bakłażan, papryka</p>
+          <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
+        </div>
+      </div>
+      <div class="menu-item" data-category="miesne">
+        <div class="menu-item-content">
+          <div class="menu-item-header">
+            <h3 class="menu-item-title">5. DIAVOLA</h3>
+            <span class="menu-item-price">35 zł</span>
+          </div>
+          <p class="menu-item-desc">Sos pomidorowy, mozzarella, salami pikantne, papryczka chili, oliwki</p>
+          <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
+        </div>
+      </div>
+      <div class="menu-item" data-category="specjalne">
+        <div class="menu-item-content">
+          <div class="menu-item-header">
+            <h3 class="menu-item-title">6. TARTUFO 48H</h3>
+            <span class="menu-item-price">45 zł</span>
+          </div>
+          <p class="menu-item-desc">Biała baza, mozzarella, pieczarki, pasta truflowa, rukola, parmezan</p>
+          <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">48h</span></div>
+        </div>
+      </div>
+      <div class="menu-item" data-category="klasyczne">
+        <div class="menu-item-content">
+          <div class="menu-item-header">
+            <h3 class="menu-item-title">7. QUATTRO FORMAGGI</h3>
+            <span class="menu-item-price">36 zł</span>
+          </div>
+          <p class="menu-item-desc">Biała baza, mozzarella, gorgonzola, parmezan, kozi ser</p>
+          <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
+        </div>
+      </div>
+      <div class="menu-item" data-category="specjalne miesne">
+        <div class="menu-item-content">
+          <div class="menu-item-header">
+            <h3 class="menu-item-title">8. WŁOSKA ROBOTA 48H</h3>
+            <span class="menu-item-price">42 zł</span>
+          </div>
+          <p class="menu-item-desc">Sos pomidorowy, mozzarella, nduja, salami, pepperoni, cebula czerwona, oliwki</p>
+          <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">48h</span></div>
+        </div>
+      </div>
+    </div>
   </div>
+</section>
 
-  <div class="social-icons">
-    <a href="https://www.facebook.com/profile.php?id=61560325043839" target="_blank"><i class="fab fa-facebook"></i></a>
-    <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+<section class="gallery" id="gallery">
+  <div class="container">
+    <h2 class="section-title fade-in">Nasza <span>Galeria</span></h2>
+    <p class="section-subtitle fade-in">Zobacz jak powstaje magia w naszym piecu</p>
+    <div class="gallery-grid">
+      <div class="gallery-item fade-in"><img src="images/DSC01389.JPG" alt="Pizzaiolo Włoska Robota"></div>
+      <div class="gallery-item fade-in"><img src="images/DSC01412.JPG" alt="Próba pizzy"></div>
+      <div class="gallery-item fade-in"><img src="images/DSC01437.JPG" alt="Pizza Quattro Formaggi"></div>
+      <div class="gallery-item fade-in"><img src="images/DSC01283.JPG" alt="Świeże pomidory"></div>
+      <div class="gallery-item fade-in"><img src="images/DSC01311.JPG" alt="Pomidory w dłoni"></div>
+      <div class="gallery-item fade-in"><img src="images/DSC01314.JPG" alt="Pomidory na desce"></div>
+      <div class="gallery-item fade-in"><img src="images/DSC01315.JPG" alt="Krojenie pomidorów"></div>
+      <div class="gallery-item fade-in"><img src="images/DSC01358.JPG" alt="Pizza w piecu"></div>
+      <div class="gallery-item fade-in"><img src="images/DSC01373.JPG" alt="Pizzaiolo przy pracy"></div>
+    </div>
   </div>
+</section>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/ScrollTrigger.min.js" defer></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      gsap.registerPlugin(ScrollTrigger);
-      gsap.utils.toArray('.menu-item').forEach(item => {
-        gsap.from(item, {
-          opacity: 0,
-          y: 50,
-          duration: 1,
-          scrollTrigger: {
-            trigger: item,
-            start: 'top 80%',
-            toggleActions: 'play none none none'
-          }
-        });
-      });
-      window.addEventListener('scroll', function() {
-        const header = document.querySelector('.header');
-        if (window.scrollY > 50) {
-          header.classList.add('scrolled');
-        } else {
-          header.classList.remove('scrolled');
-        }
-      });
-      function checkOpenStatus() {
-        const now = new Date();
-        const hour = now.getHours();
-        const statusEl = document.getElementById('open-status');
-        
-        if (hour >= 12 && hour < 22) {
-          statusEl.innerHTML = '🟢 Otwarte teraz - dzwoń!';
-          statusEl.style.color = '#00FF00';
-        } else {
-          statusEl.innerHTML = '🔴 Zamknięte - otwieramy o 12:00';
-          statusEl.style.color = '#FF4444';
-        }
-      }
-      checkOpenStatus();
-      setInterval(checkOpenStatus, 60000);
-    });
-  </script>
-</body>
-</html>
+<section class="contact" id="contact">
+  <div class="container">
+    <h2 class="section-title fade-in">Zamów <span>Teraz</span></h2>
+    <p class="section-subtitle fade-in">Dowóz: Głuponie, Lwówek, Pniewy i okolice</p>
+    <div class="contact-grid">
+      <div class="contact-card fade-in">
+        <div class="contact-icon"><i class="fas fa-phone"></i></div>
+        <h3>Zadzwoń</h3>
+        <p><a href="tel:668862396">668 862 396</a></p>
+        <p>Zamówienia telefoniczne</p>
+      </div>
+      <div class="contact-card fade-in">
+        <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+        <h3>Lokalizacja</h3>
+        <p>Głuponie</p>
+        <p>woj. Wielkopolskie</p>
+      </div>
+      <div class="contact-card fade-in">
+        <div class="contact-icon"><i class="fas fa-clock"></i></div>
+        <h3>Godziny</h3>
+        <p>Codziennie</p>
+        <p>12:00 - 20:00</p>
+      </div>
+      <div class="contact-card fade-in">
+        <div class="contact-icon"><i class="fas fa-truck"></i></div>
+        <h3>Dowóz</h3>
+        <p>Głuponie, Lwówek</p>
+        <p>Pniewy i okolice</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h4>Włoska Robota</h4>
+        <p>Autentyczna pizza z pieca opalanego drewnem. Prosto z serca Głuponia.</p>
+        <div class="social-links">
+          <a href="#"><i class="fab fa-facebook"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+        </div>
+      </div>
+      <div class="footer-section">
+        <h4>Menu</h4>
+        <a href="#menu">Pizza Klasyczne</a>
+        <a href="#menu">Pizza Mięsne</a>
+        <a href="#menu">Pizza Wege</a>
+        <a href="#menu">Specjalne 48h</a>
+      </div>
+      <div class="footer-section">
+        <h4>Kontakt</h4>
+        <a href="tel:668862396"><i class="fas fa-phone"></i> 668 862 396</a>
+        <a href="#"><i class="fas fa-map-marker-alt"></i> Głuponie</a>
+        <a href="#"><i class="fas fa-clock"></i> 12:00 - 20:00</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Włoska Robota. Wszystkie prawa zastrzeżone. | Pizza z pieca | Głuponie</p>
+    </div>
+  </div>
+</footer>
+
+<a href="tel:668862396" class="sticky-phone"><i class="fas fa-phone"></i></a>
+
+<script>
+const header = document.getElementById('header');
+const themeToggle = document.getElementById('themeToggle');
+const mobileToggle = document.getElementById('mobileToggle');
+const navLinks = document.getElementById('navLinks');
+const timerText = document.getElementById('timer
