@@ -149,13 +149,14 @@ body.dark footer {background: #0a0a0a;}
 </header>
 
 <section class="hero" id="home">
-  <video class="hero-bg" autoplay muted loop playsinline preload="metadata">
-    <source src="video/C0024.mp4" type="video/mp4">
+  <video class="hero-bg" autoplay muted loop playsinline preload="metadata" poster="./images/DSC01358.JPG">
+    <source src="./video/C0024.mp4" type="video/mp4">
+    Twoja przeglądarka nie obsługuje wideo.
   </video>
   <div class="container">
     <div class="hero-content">
       <h1>Pizza z Sercem z Głuponia</h1>
-      <p>Autentyczna włoska pizza 30cm prosto z pieca. Ciasto na 24h i 48h fermentacji.</p>
+      <p>Autentyczna włoska pizza 30cm prosto z pieca. Ciasto na 24h fermentacji.</p>
       <div class="hero-buttons">
         <a href="tel:668862396" class="btn btn-primary"><i class="fas fa-phone"></i> Zamów: 668 862 396</a>
         <a href="#menu" class="btn btn-secondary"><i class="fas fa-utensils"></i> Zobacz Menu</a>
@@ -199,9 +200,8 @@ body.dark footer {background: #0a0a0a;}
             <p>Każda pizza robiona z pasją</p>
           </div>
         </div>
-      </div>
       <div class="about-image fade-in">
-        <img src="images/DSC01389.JPG" alt="Pizzaiolo Włoska Robota przy pracy">
+        <img src="./images/DSC01389.JPG" alt="Pizzaiolo Włoska Robota przy pracy" loading="lazy">
       </div>
     </div>
   </div>
@@ -248,7 +248,6 @@ body.dark footer {background: #0a0a0a;}
           <p class="menu-item-desc">Sos pomidorowy, mozzarella, szynka prosciutto crudo, rukola, parmezan</p>
           <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
         </div>
-      </div>
       <div class="menu-item" data-category="vege">
         <div class="menu-item-content">
           <div class="menu-item-header">
@@ -307,15 +306,15 @@ body.dark footer {background: #0a0a0a;}
     <h2 class="section-title fade-in">Nasza <span>Galeria</span></h2>
     <p class="section-subtitle fade-in">Zobacz jak powstaje magia w naszym piecu</p>
     <div class="gallery-grid">
-      <div class="gallery-item fade-in"><img src="images/DSC01389.JPG" alt="Pizzaiolo Włoska Robota"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01412.JPG" alt="Próba pizzy"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01437.JPG" alt="Pizza Quattro Formaggi"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01283.JPG" alt="Świeże pomidory"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01311.JPG" alt="Pomidory w dłoni"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01314.JPG" alt="Pomidory na desce"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01315.JPG" alt="Krojenie pomidorów"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01358.JPG" alt="Pizza w piecu"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01373.JPG" alt="Pizzaiolo przy pracy"></div>
+      <div class="gallery-item fade-in"><img src="./images/DSC01389.JPG" alt="Pizzaiolo Włoska Robota" loading="lazy"></div>
+      <div class="gallery-item fade-in"><img src="./images/DSC01412.JPG" alt="Próba pizzy" loading="lazy"></div>
+      <div class="gallery-item fade-in"><img src="./images/DSC01437.JPG" alt="Pizza Quattro Formaggi" loading="lazy"></div>
+      <div class="gallery-item fade-in"><img src="./images/DSC01283.JPG" alt="Świeże pomidory" loading="lazy"></div>
+      <div class="gallery-item fade-in"><img src="./images/DSC01311.JPG" alt="Pomidory w dłoni" loading="lazy"></div>
+      <div class="gallery-item fade-in"><img src="./images/DSC01314.JPG" alt="Pomidory na desce" loading="lazy"></div>
+      <div class="gallery-item fade-in"><img src="./images/DSC01315.JPG" alt="Krojenie pomidorów" loading="lazy"></div>
+      <div class="gallery-item fade-in"><img src="./images/DSC01358.JPG" alt="Pizza w piecu" loading="lazy"></div>
+      <div class="gallery-item fade-in"><img src="./images/DSC01373.JPG" alt="Pizzaiolo przy pracy" loading="lazy"></div>
     </div>
   </div>
 </section>
@@ -376,6 +375,7 @@ body.dark footer {background: #0a0a0a;}
         <a href="#"><i class="fas fa-map-marker-alt"></i> Głuponie</a>
         <a href="#"><i class="fas fa-clock"></i> 12:00 - 20:00</a>
       </div>
+    </div>
     <div class="footer-bottom">
       <p>&copy; 2026 Włoska Robota. Wszystkie prawa zastrzeżone. | Pizza z pieca | Głuponie</p>
     </div>
@@ -458,17 +458,4 @@ function updateTimer() {
   if (hours >= 12 && hours < 20) {
     timerText.textContent = 'Jesteśmy otwarci!';
     const closeTime = new Date();
-    closeTime.setHours(20, 0, 0);
-    const diff = closeTime - now;
-    const h = Math.floor(diff / 1000 / 60 / 60);
-    const m = Math.floor((diff / 1000 / 60) % 60);
-    timerCountdown.textContent = `Zamykamy za ${h}h ${m}min`;
-  } else {
-    timerText.textContent = 'Obecnie zamknięte';
-    const openTime = new Date();
-    if (hours >= 20) openTime.setDate(openTime.getDate() + 1);
-    openTime.setHours(12, 0, 0);
-    const diff = openTime - now;
-    const h = Math.floor(diff / 1000 / 60 / 60);
-    const m = Math.floor((diff / 1000 / 60) % 60);
-    timerCountdown.textContent = `
+    close
