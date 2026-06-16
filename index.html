@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Włoska Robota - Pizza z Pieca | Głuponie</title>
-<meta name="description" content="Pizzeria Włoska Robota w Głuponiu. Pizza 30cm prosto z pieca. Dowóz: Głuponie, Lwówek, Pniewy. Tel: 668 862 396. Otwarte wt-sb 12:00-20:00">
+<meta name="description" content="Pizzeria Włoska Robota w Głuponiu. Pizza 30cm prosto z pieca. Dowóz: Głuponie, Lwówek, Pniewy. Tel: 668 862 396. Otwarte 12:00-20:00">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
@@ -36,7 +36,7 @@ body.dark .theme-toggle {background: var(--light); color: var(--dark);}
 body.dark .mobile-toggle {color: var(--light);}
 .hero {min-height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden; background: #000; margin-top: 70px;}
 .hero-bg {position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; opacity: 1;}
-.hero::after {content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1;}
+.hero::after {content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); z-index: 1;}
 .hero-content {position: relative; z-index: 2; text-align: center; color: white;}
 .hero h1 {font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 8vw, 5rem); font-weight: 800; margin-bottom: 1rem; animation: fadeInUp 1s ease; text-shadow: 0 2px 20px rgba(0,0,0,0.6);}
 .hero p {font-size: clamp(1.1rem, 3vw, 1.5rem); margin-bottom: 2rem; opacity: 0.95; animation: fadeInUp 1s ease 0.2s both; text-shadow: 0 2px 10px rgba(0,0,0,0.6);}
@@ -156,8 +156,8 @@ body.dark footer {background: #0a0a0a;}
   </video>
   <div class="container">
     <div class="hero-content">
-      <h1>Pizza z Sercem z Głuponioń</h1>
-      <p>Autentyczna włoska pizza 30cm prosto z pieca.</p>
+      <h1>Pizza z Sercem z Głuponia</h1>
+      <p>Autentyczna włoska pizza 30cm prosto z pieca. Ciasto na 24h i 48h fermentacji.</p>
       <div class="hero-buttons">
         <a href="tel:668862396" class="btn btn-primary"><i class="fas fa-phone"></i> Zamów: 668 862 396</a>
         <a href="#menu" class="btn btn-secondary"><i class="fas fa-utensils"></i> Zobacz Menu</a>
@@ -177,7 +177,7 @@ body.dark footer {background: #0a0a0a;}
     <div class="about-content">
       <div class="about-text fade-in">
         <h3>Pizza z duszą</h3>
-        <p>W Włoska Robota każdy placek to małe dzieło sztuki. Ciasto wyrabiamy ręcznie i fermentujemy 24h, Dzięki temu jest lekkie, chrupiące i pełne smaku.</p>
+        <p>W Włoska Robota każdy placek to małe dzieło sztuki. Ciasto wyrabiamy ręcznie i fermentujemy minimum 24 godziny, a wersje specjalne nawet 48h. Dzięki temu jest lekkie, chrupiące i pełne smaku.</p>
         <p>Używamy tylko składników najwyższej jakości: włoska mąka, pomidory San Marzano, mozzarella fior di latte, świeże zioła. Zero kompromisów.</p>
         <div class="about-features">
           <div class="feature-card">
@@ -187,7 +187,7 @@ body.dark footer {background: #0a0a0a;}
           </div>
           <div class="feature-card">
             <div class="feature-icon"><i class="fas fa-clock"></i></div>
-            <h4>24h Fermentacji</h4>
+            <h4>48h Fermentacji</h4>
             <p>Ciasto lekkostrawne i aromatyczne</p>
           </div>
           <div class="feature-card">
@@ -218,7 +218,7 @@ body.dark footer {background: #0a0a0a;}
       <button class="category-btn" data-category="klasyczne">Klasyczne</button>
       <button class="category-btn" data-category="miesne">Mięsne</button>
       <button class="category-btn" data-category="vege">Wege</button>
-      <button class="category-btn" data-category="specjalne">Specjalne 24h</button>
+      <button class="category-btn" data-category="specjalne">Specjalne 48h</button>
     </div>
     <div class="menu-grid" id="menuGrid">
       <div class="menu-item" data-category="klasyczne">
@@ -240,6 +240,7 @@ body.dark footer {background: #0a0a0a;}
           <p class="menu-item-desc">Sos pomidorowy, mozzarella, pepperoni, oregano</p>
           <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
         </div>
+      </div>
       <div class="menu-item" data-category="miesne">
         <div class="menu-item-content">
           <div class="menu-item-header">
@@ -269,14 +270,15 @@ body.dark footer {background: #0a0a0a;}
           <p class="menu-item-desc">Sos pomidorowy, mozzarella, salami pikantne, papryczka chili, oliwki</p>
           <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
         </div>
+      </div>
       <div class="menu-item" data-category="specjalne">
         <div class="menu-item-content">
           <div class="menu-item-header">
-            <h3 class="menu-item-title">6. TARTUFO 24h</h3>
+            <h3 class="menu-item-title">6. TARTUFO 48H</h3>
             <span class="menu-item-price">45 zł</span>
           </div>
           <p class="menu-item-desc">Biała baza, mozzarella, pieczarki, pasta truflowa, rukola, parmezan</p>
-          <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
+          <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">48h</span></div>
         </div>
       </div>
       <div class="menu-item" data-category="klasyczne">
@@ -292,11 +294,11 @@ body.dark footer {background: #0a0a0a;}
       <div class="menu-item" data-category="specjalne miesne">
         <div class="menu-item-content">
           <div class="menu-item-header">
-            <h3 class="menu-item-title">8. WŁOSKA ROBOTA 24h</h3>
+            <h3 class="menu-item-title">8. WŁOSKA ROBOTA 48H</h3>
             <span class="menu-item-price">42 zł</span>
           </div>
           <p class="menu-item-desc">Sos pomidorowy, mozzarella, nduja, salami, pepperoni, cebula czerwona, oliwki</p>
-          <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
+          <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">48h</span></div>
         </div>
       </div>
     </div>
@@ -336,14 +338,13 @@ body.dark footer {background: #0a0a0a;}
         <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
         <h3>Lokalizacja</h3>
         <p>Głuponie</p>
-        <p>woj. Wielkopolskie 64-316 Głuponie 103</p>
+        <p>woj. Wielkopolskie</p>
       </div>
       <div class="contact-card fade-in">
         <div class="contact-icon"><i class="fas fa-clock"></i></div>
         <h3>Godziny</h3>
-        <p>Wtorek - Sobota</p>
+        <p>Codziennie</p>
         <p>12:00 - 20:00</p>
-        <p style="margin-top:0.5rem; font-size:0.9rem;">Pn i Nd: zamknięte</p>
       </div>
       <div class="contact-card fade-in">
         <div class="contact-icon"><i class="fas fa-truck"></i></div>
@@ -365,18 +366,19 @@ body.dark footer {background: #0a0a0a;}
           <a href="#"><i class="fab fa-facebook"></i></a>
           <a href="#"><i class="fab fa-instagram"></i></a>
         </div>
+      </div>
       <div class="footer-section">
         <h4>Menu</h4>
         <a href="#menu">Pizza Klasyczne</a>
         <a href="#menu">Pizza Mięsne</a>
         <a href="#menu">Pizza Wege</a>
-        <a href="#menu">Specjalne 24h</a>
+        <a href="#menu">Specjalne 48h</a>
       </div>
       <div class="footer-section">
         <h4>Kontakt</h4>
         <a href="tel:668862396"><i class="fas fa-phone"></i> 668 862 396</a>
         <p><i class="fas fa-map-marker-alt"></i> Głuponie, woj. Wielkopolskie</p>
-        <p><i class="fas fa-clock"></i> Wt-Sb: 12:00 - 20:00</p>
+        <p><i class="fas fa-clock"></i> Pon-Nd: 12:00 - 20:00</p>
       </div>
     </div>
     <div class="footer-bottom">
@@ -399,34 +401,4 @@ mobileToggle.addEventListener('click', () => {
 });
 navLinks.querySelectorAll('a').forEach(link => {
   link.addEventListener('click', () => {
-    navLinks.classList.remove('active');
-    mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
-  });
-});
-
-// Dark mode
-const themeToggle = document.getElementById('themeToggle');
-themeToggle.addEventListener('click', () => {
-  document.body.classList.toggle('dark');
-  const icon = themeToggle.querySelector('i');
-  icon.classList.toggle('fa-moon');
-  icon.classList.toggle('fa-sun');
-  localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
-});
-
-if (localStorage.getItem('theme') === 'dark') {
-  document.body.classList.add('dark');
-  themeToggle.querySelector('i').className = 'fas fa-sun';
-}
-
-// Timer otwarcia - WT-SB 12:00-20:00, PN i ND zamknięte
-function updateTimer() {
-  const now = new Date();
-  const day = now.getDay(); // 0 = niedziela, 1 = poniedziałek, 2 = wtorek... 6 = sobota
-  const hour = now.getHours();
-  
-  const isOpenDay = day >= 2 && day <= 6; // wt-sb
-  const isOpenHour = hour >= 12 && hour < 20;
-  const isOpen = isOpenDay && isOpenHour;
-  
-  if (
+    navLinks.classList.remove('active
