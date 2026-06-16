@@ -46,7 +46,7 @@ body.dark .mobile-toggle {color: var(--light);}
 .btn-primary:hover {transform: translateY(-3px); box-shadow: 0 15px 40px rgba(0,0,0,0.3);}
 .btn-secondary {background: transparent; color: white; border: 2px solid white;}
 .btn-secondary:hover {background: white; color: var(--red);}
-.opening-timer {margin-top: 3rem; background: rgba(255,255,0.15); backdrop-filter: blur(10px); padding: 1.5rem 2rem; border-radius: 20px; display: inline-block; animation: fadeInUp 1s ease 0.6s both;}
+.opening-timer {margin-top: 3rem; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 1.5rem 2rem; border-radius: 20px; display: inline-block; animation: fadeInUp 1s ease 0.6s both;}
 .timer-text {font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;}
 .timer-countdown {font-size: 2rem; font-weight: 800; font-family: 'Playfair Display', serif;}
 @keyframes fadeInUp {from {opacity: 0; transform: translateY(30px);} to {opacity: 1; transform: translateY(0);}}
@@ -108,7 +108,7 @@ body.dark footer {background: #0a0a0a;}
 .social-links {display: flex; gap: 1rem; justify-content: start; margin-top: 1rem;}
 .social-links a {width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: var(--transition);}
 .social-links a:hover {background: var(--red); transform: translateY(-3px);}
-.footer-bottom {border-top: 1px solid rgba(255,255,0.1); padding-top: 1.5rem; color: #666;}
+.footer-bottom {border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem; color: #666;}
 .sticky-phone {position: fixed; bottom: 2rem; right: 2rem; z-index: 999; width: 60px; height: 60px; background: linear-gradient(135deg, var(--green), var(--red)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; box-shadow: 0 10px 30px rgba(205,33,42,0.4); animation: pulse 2s infinite; text-decoration: none;}
 @keyframes pulse {0%, 100% {transform: scale(1);} 50% {transform: scale(1.1);}}
 .sticky-phone:hover {animation: none; transform: scale(1.15);}
@@ -409,4 +409,79 @@ navLinks.querySelectorAll('a').forEach(link => {
 // Dark mode
 const themeToggle = document.getElementById('themeToggle');
 themeToggle.addEventListener('click', () => {
-  document.body
+  document.body.classList.toggle('dark');
+  const icon = themeToggle.querySelector('i');
+  icon.classList.toggle('fa-moon');
+  icon.classList.toggle('fa-sun');
+  localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+});
+
+// Przywracanie trybu z localStorage
+if (localStorage.getItem('theme') === 'dark') {
+  document.body.classList.add('dark');
+  themeToggle.querySelector('i').className = 'fas fa-sun';
+}
+
+// Timer otwarcia
+function updateTimer() {
+  const now = new Date();
+  const hour = now.getHours();
+  const minute = now.getMinutes();
+  const isOpen = hour >= 12 && hour < 20;
+  
+  document.getElementById('timerText').textContent = isOpen 
+    ? '🟢 Jesteśmy otwarci!' 
+    : '🔴 Już zamknięte. Zapraszamy jutro!';
+  
+  if (isOpen) {
+    const closeTime = new Date(now);
+    closeTime.setHours(20, 0, 0);
+    const diff = closeTime - now;
+    const hours = Math.floor(diff / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+    document.getElementById('timerCountdown').textContent = 
+      `Zamykamy za ${hours}h ${minutes}min`;
+  } else {
+    const openTime = new Date(now);
+    openTime.setHours(12, 0, 0);
+    if (now > openTime) openTime.setDate(openTime.getDate() + 1);
+    const diff = openTime - now;
+    const hours = Math.floor(diff / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+    document.getElementById('timerCountdown').textContent = 
+      `Otwieramy za ${hours}h ${minutes}min`;
+  }
+}
+updateTimer();
+setInterval(updateTimer, 60000);
+
+// Filtrowanie menu
+document.querySelectorAll('.category-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const category = btn.dataset.category;
+    document.querySelectorAll('.menu-item').forEach(item => {
+      if (category === 'all' || item.dataset.category.includes(category)) {
+        item.style.display = 'block';
+      } else {
+        item.style.display = 'none';
+      }
+    });
+  });
+});
+
+// Animacje fade-in
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
