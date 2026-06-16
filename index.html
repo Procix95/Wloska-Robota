@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Włoska Robota - Pizza z Pieca | Głuponie</title>
-<meta name="description" content="Pizzeria Włoska Robota w Głuponiu. Pizza 30cm prosto z pieca. Dowóz: Głuponie, Lwówek, Pniewy. Tel: 668 862 396. Otwarte 12:00-20:00">
+<meta name="description" content="Pizzeria Włoska Robota w Głuponiu. Pizza 30cm prosto z pieca. Dowóz: Głuponie, Lwówek, Pniewy. Tel: 668 862 396. Otwarte wt-sb 12:00-20:00">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
@@ -270,7 +270,6 @@ body.dark footer {background: #0a0a0a;}
           <p class="menu-item-desc">Sos pomidorowy, mozzarella, salami pikantne, papryczka chili, oliwki</p>
           <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
         </div>
-      </div>
       <div class="menu-item" data-category="specjalne">
         <div class="menu-item-content">
           <div class="menu-item-header">
@@ -343,8 +342,9 @@ body.dark footer {background: #0a0a0a;}
       <div class="contact-card fade-in">
         <div class="contact-icon"><i class="fas fa-clock"></i></div>
         <h3>Godziny</h3>
-        <p>Codziennie</p>
+        <p>Wtorek - Sobota</p>
         <p>12:00 - 20:00</p>
+        <p style="margin-top:0.5rem; font-size:0.9rem;">Pn i Nd: zamknięte</p>
       </div>
       <div class="contact-card fade-in">
         <div class="contact-icon"><i class="fas fa-truck"></i></div>
@@ -378,7 +378,7 @@ body.dark footer {background: #0a0a0a;}
         <h4>Kontakt</h4>
         <a href="tel:668862396"><i class="fas fa-phone"></i> 668 862 396</a>
         <p><i class="fas fa-map-marker-alt"></i> Głuponie, woj. Wielkopolskie</p>
-        <p><i class="fas fa-clock"></i> Pon-Nd: 12:00 - 20:00</p>
+        <p><i class="fas fa-clock"></i> Wt-Sb: 12:00 - 20:00</p>
       </div>
     </div>
     <div class="footer-bottom">
@@ -422,66 +422,22 @@ if (localStorage.getItem('theme') === 'dark') {
   themeToggle.querySelector('i').className = 'fas fa-sun';
 }
 
-// Timer otwarcia
+// Timer otwarcia - WT-SB 12:00-20:00, PN i ND zamknięte
 function updateTimer() {
   const now = new Date();
+  const day = now.getDay(); // 0 = niedziela, 1 = poniedziałek, 2 = wtorek... 6 = sobota
   const hour = now.getHours();
   const minute = now.getMinutes();
-  const isOpen = hour >= 12 && hour < 20;
   
-  document.getElementById('timerText').textContent = isOpen 
-    ? '🟢 Jesteśmy otwarci!' 
-    : '🔴 Już zamknięte. Zapraszamy jutro!';
+  const isOpenDay = day >= 2 && day <= 6; // wt-sb
+  const isOpenHour = hour >= 12 && hour < 20;
+  const isOpen = isOpenDay && isOpenHour;
   
   if (isOpen) {
+    document.getElementById('timerText').textContent = '🟢 Jesteśmy otwarci!';
     const closeTime = new Date(now);
     closeTime.setHours(20, 0, 0);
     const diff = closeTime - now;
     const hours = Math.floor(diff / 3600000);
     const minutes = Math.floor((diff % 3600000) / 60000);
-    document.getElementById('timerCountdown').textContent = 
-      `Zamykamy za ${hours}h ${minutes}min`;
-  } else {
-    const openTime = new Date(now);
-    openTime.setHours(12, 0, 0);
-    if (now > openTime) openTime.setDate(openTime.getDate() + 1);
-    const diff = openTime - now;
-    const hours = Math.floor(diff / 3600000);
-    const minutes = Math.floor((diff % 3600000) / 60000);
-    document.getElementById('timerCountdown').textContent = 
-      `Otwieramy za ${hours}h ${minutes}min`;
-  }
-}
-updateTimer();
-setInterval(updateTimer, 60000);
-
-// Filtrowanie menu
-document.querySelectorAll('.category-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const category = btn.dataset.category;
-    document.querySelectorAll('.menu-item').forEach(item => {
-      if (category === 'all' || item.dataset.category.includes(category)) {
-        item.style.display = 'block';
-      } else {
-        item.style.display = 'none';
-      }
-    });
-  });
-});
-
-// Animacje fade-in
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-    }
-  });
-}, { threshold: 0.1 });
-
-document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-</script>
-
-</body>
-</html>
+    document
