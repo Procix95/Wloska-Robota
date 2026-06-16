@@ -365,7 +365,6 @@ body.dark footer {background: #0a0a0a;}
           <a href="#"><i class="fab fa-facebook"></i></a>
           <a href="#"><i class="fab fa-instagram"></i></a>
         </div>
-      </div>
       <div class="footer-section">
         <h4>Menu</h4>
         <a href="#menu">Pizza Klasyczne</a>
@@ -379,6 +378,7 @@ body.dark footer {background: #0a0a0a;}
         <p><i class="fas fa-map-marker-alt"></i> Głuponie, woj. Wielkopolskie</p>
         <p><i class="fas fa-clock"></i> Wt-Sb: 12:00 - 20:00</p>
       </div>
+    </div>
     <div class="footer-bottom">
       <p>&copy; 2024 Włoska Robota. Wszelkie prawa zastrzeżone.</p>
     </div>
@@ -414,7 +414,6 @@ themeToggle.addEventListener('click', () => {
   localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
 });
 
-// Przywracanie trybu z localStorage
 if (localStorage.getItem('theme') === 'dark') {
   document.body.classList.add('dark');
   themeToggle.querySelector('i').className = 'fas fa-sun';
@@ -425,11 +424,9 @@ function updateTimer() {
   const now = new Date();
   const day = now.getDay(); // 0 = niedziela, 1 = poniedziałek, 2 = wtorek... 6 = sobota
   const hour = now.getHours();
-  const minute = now.getMinutes();
   
   const isOpenDay = day >= 2 && day <= 6; // wt-sb
   const isOpenHour = hour >= 12 && hour < 20;
   const isOpen = isOpenDay && isOpenHour;
   
-  if (isOpen) {
-    document.getElementById('timerText').textContent
+  if (
