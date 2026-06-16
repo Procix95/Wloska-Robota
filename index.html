@@ -240,7 +240,6 @@ body.dark footer {background: #0a0a0a;}
           <p class="menu-item-desc">Sos pomidorowy, mozzarella, pepperoni, oregano</p>
           <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
         </div>
-      </div>
       <div class="menu-item" data-category="miesne">
         <div class="menu-item-content">
           <div class="menu-item-header">
@@ -380,7 +379,6 @@ body.dark footer {background: #0a0a0a;}
         <p><i class="fas fa-map-marker-alt"></i> Głuponie, woj. Wielkopolskie</p>
         <p><i class="fas fa-clock"></i> Wt-Sb: 12:00 - 20:00</p>
       </div>
-    </div>
     <div class="footer-bottom">
       <p>&copy; 2024 Włoska Robota. Wszelkie prawa zastrzeżone.</p>
     </div>
@@ -434,10 +432,4 @@ function updateTimer() {
   const isOpen = isOpenDay && isOpenHour;
   
   if (isOpen) {
-    document.getElementById('timerText').textContent = '🟢 Jesteśmy otwarci!';
-    const closeTime = new Date(now);
-    closeTime.setHours(20, 0, 0);
-    const diff = closeTime - now;
-    const hours = Math.floor(diff / 3600000);
-    const minutes = Math.floor((diff % 3600000) / 60000);
-    document
+    document.getElementById('timerText').textContent
