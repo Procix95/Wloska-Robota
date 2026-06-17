@@ -417,7 +417,7 @@ themeToggle.addEventListener('click', () => {
 // Opening timer z obsługą dni zamkniętych
 function updateTimer() {
   const now = new Date();
-  const day = now.getDay(); // 0 = nd, 1 = pon, 2 = wt, 3 = śr, 4 = czw, 5 = pt, 6 = sob
+  const day = now.getDay();
   const hours = now.getHours();
   const minutes = now.getMinutes();
   const totalMinutes = hours * 60 + minutes;
@@ -426,12 +426,15 @@ function updateTimer() {
   const closeMinutes = 20 * 60; // 20:00
   
   // 0=nd, 1=pon, 2=wt, 3=śr, 4=czw, 5=pt, 6=sb
-  // Ustaw które dni jesteście otwarci. Tu: zamknięte w pon i nd
   const dniOtwarcia = [2, 3, 4, 5, 6]; // wt, śr, czw, pt, sb
   const nazwyDni = ['Niedzielę', 'Poniedziałek', 'Wtorek', 'Środę', 'Czwartek', 'Piątek', 'Sobota'];
   
   const timerText = document.getElementById('timerText');
   const timerCountdown = document.getElementById('timerCountdown');
+  const timerSubtext = document.getElementById('timerSubtext'); // nowy element
+
+  // Reset subtext przy każdym odświeżeniu
+  if (timerSubtext) timerSubtext.textContent = '';
 
   // Sprawdź czy teraz otwarte
   if (dniOtwarcia.includes(day) && totalMinutes >= openMinutes && totalMinutes < closeMinutes) {
@@ -447,27 +450,21 @@ function updateTimer() {
   let dniDoOtwarcia = 0;
   let nastepnyDzien = day;
   
-  // Jeśli dziś otwarte ale jeszcze przed 12:00
   if (dniOtwarcia.includes(day) && totalMinutes < openMinutes) {
     dniDoOtwarcia = 0;
   } else {
-    // Szukaj następnego otwartego dnia
     do {
       dniDoOtwarcia++;
       nastepnyDzien = (day + dniDoOtwarcia) % 7;
     } while (!dniOtwarcia.includes(nastepnyDzien));
   }
   
-  // Licz minuty do otwarcia
   const minutesToOpen = (dniDoOtwarcia * 24 * 60) + openMinutes - totalMinutes;
   
   const dni = Math.floor(minutesToOpen / (24 * 60));
   const h = Math.floor((minutesToOpen % (24 * 60)) / 60);
   const m = minutesToOpen % 60;
   
-  timerText.textContent = '🔴 Aktualnie zamknięte.';
-  
-  // Formatowanie timera
   let odliczanie = '';
   if (dni > 0) {
     odliczanie = `${dni}d ${h}h ${m}min`;
@@ -475,10 +472,13 @@ function updateTimer() {
     odliczanie = `${h}h ${m}min`;
   }
   
+  timerText.textContent = '🔴 Aktualnie zamknięte.';
+  
   if (dniDoOtwarcia === 0) {
     timerCountdown.textContent = `Otwieramy za: ${odliczanie}`;
   } else {
-    timerCountdown.textContent = `Zapraszamy w ${nazwyDni[nastepnyDzien]} od 12:00. Otwarcie za: ${odliczanie}`;
+    timerCountdown.textContent = `Zapraszamy w ${nazwyDni[nastepnyDzien]} od 12:00`;
+    if (timerSubtext) timerSubtext.textContent = `Otwarcie za: ${odliczanie}`;
   }
 }
 
