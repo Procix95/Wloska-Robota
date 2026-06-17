@@ -417,7 +417,7 @@ themeToggle.addEventListener('click', () => {
 // Opening timer z obsługą dni zamkniętych
 function updateTimer() {
   const now = new Date();
-  const day = now.getDay(); // 0 = niedziela, 1 = pon, 2 = wt, 3 = śr, 4 = czw, 5 = pt, 6 = sob
+  const day = now.getDay(); // 0 = nd, 1 = pon, 2 = wt, 3 = śr, 4 = czw, 5 = pt, 6 = sob
   const hours = now.getHours();
   const minutes = now.getMinutes();
   const totalMinutes = hours * 60 + minutes;
@@ -433,56 +433,57 @@ function updateTimer() {
   const timerText = document.getElementById('timerText');
   const timerCountdown = document.getElementById('timerCountdown');
 
-  // Sprawdź czy dziś jest dzień otwarcia i czy jesteśmy w godzinach
+  // Sprawdź czy teraz otwarte
   if (dniOtwarcia.includes(day) && totalMinutes >= openMinutes && totalMinutes < closeMinutes) {
     const remaining = closeMinutes - totalMinutes;
     const h = Math.floor(remaining / 60);
     const m = remaining % 60;
     timerText.textContent = '🟢 Teraz otwarte! Zamykamy za:';
     timerCountdown.textContent = `${h}h ${m}min`;
+    return;
+  }
+
+  // Liczymy kiedy następne otwarcie
+  let dniDoOtwarcia = 0;
+  let nastepnyDzien = day;
+  
+  // Jeśli dziś otwarte ale jeszcze przed 12:00
+  if (dniOtwarcia.includes(day) && totalMinutes < openMinutes) {
+    dniDoOtwarcia = 0;
   } else {
-    // Szukamy następnego dnia otwarcia
-    let dniDoOtwarcia = 0;
-    let nastepnyDzien = day;
-    
-    // Jeśli dziś otwarte ale już po godzinach, lub dziś zamknięte - szukaj następnego dnia
-    if (dniOtwarcia.includes(day) && totalMinutes < openMinutes) {
-      // Dziś jeszcze otwieramy
-      dniDoOtwarcia = 0;
-    } else {
-      // Szukaj następnego otwartego dnia
-      do {
-        dniDoOtwarcia++;
-        nastepnyDzien = (day + dniDoOtwarcia) % 7;
-      } while (!dniOtwarcia.includes(nastepnyDzien));
-    }
-    
-    // Licz minuty do otwarcia
-    let minutesToOpen;
-    if (dniDoOtwarcia === 0) {
-      // Otwieramy jeszcze dziś
-      minutesToOpen = openMinutes - totalMinutes;
-    } else {
-      // Otwieramy za kilka dni
-      minutesToOpen = (24 * 60 - totalMinutes) + (dniDoOtwarcia - 1) * 24 * 60 + openMinutes;
-    }
-    
-    const dni = Math.floor(minutesToOpen / (24 * 60));
-    const h = Math.floor((minutesToOpen % (24 * 60)) / 60);
-    const m = minutesToOpen % 60;
-    
-    timerText.textContent = '🔴 Aktualnie zamknięte.';
-    
-    if (dniDoOtwarcia === 0) {
-      timerCountdown.textContent = `Otwieramy za: ${h}h ${m}min`;
-    } else {
-      timerCountdown.textContent = `Zapraszamy w ${nazwyDni[nastepnyDzien]} od godziny 12:00`;
-    }
+    // Szukaj następnego otwartego dnia
+    do {
+      dniDoOtwarcia++;
+      nastepnyDzien = (day + dniDoOtwarcia) % 7;
+    } while (!dniOtwarcia.includes(nastepnyDzien));
+  }
+  
+  // Licz minuty do otwarcia
+  const minutesToOpen = (dniDoOtwarcia * 24 * 60) + openMinutes - totalMinutes;
+  
+  const dni = Math.floor(minutesToOpen / (24 * 60));
+  const h = Math.floor((minutesToOpen % (24 * 60)) / 60);
+  const m = minutesToOpen % 60;
+  
+  timerText.textContent = '🔴 Aktualnie zamknięte.';
+  
+  // Formatowanie timera
+  let odliczanie = '';
+  if (dni > 0) {
+    odliczanie = `${dni}d ${h}h ${m}min`;
+  } else {
+    odliczanie = `${h}h ${m}min`;
+  }
+  
+  if (dniDoOtwarcia === 0) {
+    timerCountdown.textContent = `Otwieramy za: ${odliczanie}`;
+  } else {
+    timerCountdown.textContent = `Zapraszamy w ${nazwyDni[nastepnyDzien]} od 12:00. Otwarcie za: ${odliczanie}`;
   }
 }
 
 updateTimer();
-setInterval(updateTimer, 60000); // odświeżaj co minutę
+setInterval(updateTimer, 60000);
 
 // Fade in on scroll
 const fadeEls = document.querySelectorAll('.fade-in');
