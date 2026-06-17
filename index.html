@@ -34,8 +34,8 @@ body.dark .nav-links a {color: var(--light);}
 body.dark .theme-toggle {background: var(--light); color: var(--dark);}
 .mobile-toggle {display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--dark);}
 body.dark .mobile-toggle {color: var(--light);}
-.hero {min-height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden; background: linear-gradient(135deg, rgba(0,146,70,0.9), rgba(205,33,42,0.9)); margin-top: 70px;}
-.hero-bg {position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; opacity: 0.3;}
+.hero {min-height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden; margin-top: 70px;}
+.hero-bg {position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;}
 .hero-content {position: relative; z-index: 2; text-align: center; color: white;}
 .hero h1 {font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 8vw, 5rem); font-weight: 800; margin-bottom: 1rem; animation: fadeInUp 1s ease;}
 .hero p {font-size: clamp(1.1rem, 3vw, 1.5rem); margin-bottom: 2rem; opacity: 0.95; animation: fadeInUp 1s ease 0.2s both;}
@@ -279,7 +279,6 @@ body.dark footer {background: #0a0a0a;}
           <p class="menu-item-desc">Biała baza, mozzarella, Por, Cebula</p>
           <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
         </div>
-      </div>
       <div class="menu-item" data-category="klasyczne">
         <div class="menu-item-content">
           <div class="menu-item-header">
@@ -455,30 +454,4 @@ const categoryBtns = document.querySelectorAll('.category-btn');
 const menuItems = document.querySelectorAll('.menu-item');
 categoryBtns.forEach(btn => {
   btn.addEventListener('click', () => {
-    categoryBtns.forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const category = btn.dataset.category;
-    menuItems.forEach(item => {
-      if (category === 'all' || item.dataset.category.includes(category)) {
-        item.style.display = 'block';
-      } else {
-        item.style.display = 'none';
-      }
-    });
-  });
-});
-
-// Fade in on scroll
-const fadeEls = document.querySelectorAll('.fade-in');
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-    }
-  });
-}, {threshold: 0.1});
-fadeEls.forEach(el => observer.observe(el));
-</script>
-
-</body>
-</html>
+    category
