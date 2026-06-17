@@ -414,57 +414,75 @@ themeToggle.addEventListener('click', () => {
     : '<i class="fas fa-moon"></i>';
 });
 
-// Opening timer
+// Opening timer z obsługą dni zamkniętych
 function updateTimer() {
   const now = new Date();
-  const day = now.getDay();
+  const day = now.getDay(); // 0 = niedziela, 1 = pon, 2 = wt, 3 = śr, 4 = czw, 5 = pt, 6 = sob
   const hours = now.getHours();
   const minutes = now.getMinutes();
   const totalMinutes = hours * 60 + minutes;
-  const openMinutes = 12 * 60;
-  const closeMinutes = 20 * 60;
+  
+  const openMinutes = 12 * 60; // 12:00
+  const closeMinutes = 20 * 60; // 20:00
+  
+  // 0=nd, 1=pon, 2=wt, 3=śr, 4=czw, 5=pt, 6=sb
+  // Ustaw które dni jesteście otwarci. Tu: zamknięte w pon i nd
+  const dniOtwarcia = [2, 3, 4, 5, 6]; // wt, śr, czw, pt, sb
+  const nazwyDni = ['Niedzielę', 'Poniedziałek', 'Wtorek', 'Środę', 'Czwartek', 'Piątek', 'Sobota'];
+  
   const timerText = document.getElementById('timerText');
   const timerCountdown = document.getElementById('timerCountdown');
 
-  if (totalMinutes >= openMinutes && totalMinutes < closeMinutes) {
+  // Sprawdź czy dziś jest dzień otwarcia i czy jesteśmy w godzinach
+  if (dniOtwarcia.includes(day) && totalMinutes >= openMinutes && totalMinutes < closeMinutes) {
     const remaining = closeMinutes - totalMinutes;
     const h = Math.floor(remaining / 60);
     const m = remaining % 60;
     timerText.textContent = '🟢 Teraz otwarte! Zamykamy za:';
     timerCountdown.textContent = `${h}h ${m}min`;
   } else {
+    // Szukamy następnego dnia otwarcia
+    let dniDoOtwarcia = 0;
+    let nastepnyDzien = day;
+    
+    // Jeśli dziś otwarte ale już po godzinach, lub dziś zamknięte - szukaj następnego dnia
+    if (dniOtwarcia.includes(day) && totalMinutes < openMinutes) {
+      // Dziś jeszcze otwieramy
+      dniDoOtwarcia = 0;
+    } else {
+      // Szukaj następnego otwartego dnia
+      do {
+        dniDoOtwarcia++;
+        nastepnyDzien = (day + dniDoOtwarcia) % 7;
+      } while (!dniOtwarcia.includes(nastepnyDzien));
+    }
+    
+    // Licz minuty do otwarcia
     let minutesToOpen;
-    if (totalMinutes < openMinutes) {
+    if (dniDoOtwarcia === 0) {
+      // Otwieramy jeszcze dziś
       minutesToOpen = openMinutes - totalMinutes;
     } else {
-      minutesToOpen = (24 * 60 - totalMinutes) + openMinutes;
+      // Otwieramy za kilka dni
+      minutesToOpen = (24 * 60 - totalMinutes) + (dniDoOtwarcia - 1) * 24 * 60 + openMinutes;
     }
-    const h = Math.floor(minutesToOpen / 60);
+    
+    const dni = Math.floor(minutesToOpen / (24 * 60));
+    const h = Math.floor((minutesToOpen % (24 * 60)) / 60);
     const m = minutesToOpen % 60;
-    timerText.textContent = '🔴 Aktualnie zamknięte. Otwieramy za:';
-    timerCountdown.textContent = `${h}h ${m}min`;
+    
+    timerText.textContent = '🔴 Aktualnie zamknięte.';
+    
+    if (dniDoOtwarcia === 0) {
+      timerCountdown.textContent = `Otwieramy za: ${h}h ${m}min`;
+    } else {
+      timerCountdown.textContent = `Zapraszamy w ${nazwyDni[nastepnyDzien]} od godziny 12:00`;
+    }
   }
 }
-updateTimer();
-setInterval(updateTimer, 60000);
 
-// Menu filtering
-const categoryBtns = document.querySelectorAll('.category-btn');
-const menuItems = document.querySelectorAll('.menu-item');
-categoryBtns.forEach(btn => {
-  btn.addEventListener('click', () => {
-    categoryBtns.forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const category = btn.dataset.category;
-    menuItems.forEach(item => {
-      if (category === 'all' || item.dataset.category.includes(category)) {
-        item.style.display = 'block';
-      } else {
-        item.style.display = 'none';
-      }
-    });
-  });
-});
+updateTimer();
+setInterval(updateTimer, 60000); // odświeżaj co minutę
 
 // Fade in on scroll
 const fadeEls = document.querySelectorAll('.fade-in');
