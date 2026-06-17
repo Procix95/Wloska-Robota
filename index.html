@@ -34,8 +34,9 @@ body.dark .nav-links a {color: var(--light);}
 body.dark .theme-toggle {background: var(--light); color: var(--dark);}
 .mobile-toggle {display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--dark);}
 body.dark .mobile-toggle {color: var(--light);}
-.hero {min-height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden; margin-top: 70px;}
-.hero-bg {position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;}
+.hero {min-height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden; background: #000; margin-top: 70px;}
+.hero::after {content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1;}
+.hero-bg {position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; opacity: 1;}
 .hero-content {position: relative; z-index: 2; text-align: center; color: white;}
 .hero h1 {font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 8vw, 5rem); font-weight: 800; margin-bottom: 1rem; animation: fadeInUp 1s ease;}
 .hero p {font-size: clamp(1.1rem, 3vw, 1.5rem); margin-bottom: 2rem; opacity: 0.95; animation: fadeInUp 1s ease 0.2s both;}
@@ -200,7 +201,6 @@ body.dark footer {background: #0a0a0a;}
             <p>Każda pizza robiona z pasją</p>
           </div>
         </div>
-      </div>
       <div class="about-image fade-in">
         <img src="images/DSC01389.JPG" alt="Pizzaiolo Włoska Robota przy pracy" loading="lazy">
       </div>
@@ -279,6 +279,7 @@ body.dark footer {background: #0a0a0a;}
           <p class="menu-item-desc">Biała baza, mozzarella, Por, Cebula</p>
           <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
         </div>
+      </div>
       <div class="menu-item" data-category="klasyczne">
         <div class="menu-item-content">
           <div class="menu-item-header">
@@ -288,170 +289,5 @@ body.dark footer {background: #0a0a0a;}
           <p class="menu-item-desc">Sos pomidorowy, mozzarella, gorgonzola, parmezan</p>
           <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
         </div>
-      </div>
       <div class="menu-item" data-category="specjalne miesne">
         <div class="menu-item-content">
-          <div class="menu-item-header">
-            <h3 class="menu-item-title">8. WŁOSKA ROBOTA</h3>
-            <span class="menu-item-price">42 zł</span>
-          </div>
-          <p class="menu-item-desc">Sos pomidorowy, mozzarella, +Własne dodatki</p>
-          <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="gallery" id="gallery">
-  <div class="container">
-    <h2 class="section-title fade-in">Nasza <span>Galeria</span></h2>
-    <p class="section-subtitle fade-in">Zobacz jak powstaje magia w naszym piecu</p>
-    <div class="gallery-grid">
-      <div class="gallery-item fade-in"><img src="images/DSC01389.JPG" alt="Pizzaiolo Włoska Robota" loading="lazy"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01412.JPG" alt="Próba pizzy" loading="lazy"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01437.JPG" alt="Pizza Quattro Formaggi" loading="lazy"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01283.JPG" alt="Świeże pomidory" loading="lazy"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01311.JPG" alt="Pomidory w dłoni" loading="lazy"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01314.JPG" alt="Pomidory na desce" loading="lazy"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01315.JPG" alt="Krojenie pomidorów" loading="lazy"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01358.JPG" alt="Pizza w piecu" loading="lazy"></div>
-      <div class="gallery-item fade-in"><img src="images/DSC01373.JPG" alt="Pizzaiolo przy pracy" loading="lazy"></div>
-    </div>
-  </div>
-</section>
-
-<section class="contact" id="contact">
-  <div class="container">
-    <h2 class="section-title fade-in">Zamów <span>Teraz</span></h2>
-    <p class="section-subtitle fade-in">Dowóz: Głuponie, Lwówek, Pniewy i okolice</p>
-    <div class="contact-grid">
-      <div class="contact-card fade-in">
-        <div class="contact-icon"><i class="fas fa-phone"></i></div>
-        <h3>Zadzwoń</h3>
-        <p><a href="tel:668862396">668 862 396</a></p>
-        <p>Zamówienia telefoniczne</p>
-      </div>
-      <div class="contact-card fade-in">
-        <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
-        <h3>Lokalizacja</h3>
-        <p>Głuponie</p>
-        <p>Głuponie 103, 64-316, Kuślin</p>
-      </div>
-      <div class="contact-card fade-in">
-        <div class="contact-icon"><i class="fas fa-clock"></i></div>
-        <h3>Godziny</h3>
-        <p>Wtorek-Sobota</p>
-        <p>12:00 - 20:00</p>
-        <p>Niedziela-Poniedziałek</p>
-        <p>Nieczynne.</p>
-      </div>
-      <div class="contact-card fade-in">
-        <div class="contact-icon"><i class="fas fa-truck"></i></div>
-        <h3>Dowóz</h3>
-        <p>Głuponie, Lwówek</p>
-        <p>Pniewy i okolice</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<footer>
-  <div class="container">
-    <div class="footer-content">
-      <div class="footer-section">
-        <h4>Włoska Robota</h4>
-        <p>Autentyczna pizza z pieca opalanego drewnem. Prosto z serca Głuponia.</p>
-        <div class="social-links">
-          <a href="#"><i class="fab fa-facebook"></i></a>
-          <a href="#"><i class="fab fa-instagram"></i></a>
-        </div>
-      </div>
-      <div class="footer-section">
-        <h4>Menu</h4>
-        <a href="#menu">Pizza Klasyczne</a>
-        <a href="#menu">Pizza Mięsne</a>
-        <a href="#menu">Pizza Wege</a>
-        <a href="#menu">Specjalne 24h</a>
-      </div>
-      <div class="footer-section">
-        <h4>Kontakt</h4>
-        <a href="tel:668862396"><i class="fas fa-phone"></i> 668 862 396</a>
-        <p><i class="fas fa-map-marker-alt"></i> Głuponie, woj. Wielkopolskie</p>
-        <p><i class="fas fa-clock"></i> Pon-Nd: 12:00 - 20:00</p>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>&copy; 2026 Włoska Robota. Wszelkie prawa zastrzeżone.</p>
-    </div>
-  </div>
-</footer>
-
-<a href="tel:668862396" class="sticky-phone"><i class="fas fa-phone"></i></a>
-
-<script>
-// Mobile menu
-const mobileToggle = document.getElementById('mobileToggle');
-const navLinks = document.getElementById('navLinks');
-mobileToggle.addEventListener('click', () => {
-  navLinks.classList.toggle('active');
-  mobileToggle.innerHTML = navLinks.classList.contains('active') 
-    ? '<i class="fas fa-times"></i>' 
-    : '<i class="fas fa-bars"></i>';
-});
-navLinks.querySelectorAll('a').forEach(link => {
-  link.addEventListener('click', () => {
-    navLinks.classList.remove('active');
-    mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
-  });
-});
-
-// Dark mode
-const themeToggle = document.getElementById('themeToggle');
-themeToggle.addEventListener('click', () => {
-  document.body.classList.toggle('dark');
-  themeToggle.innerHTML = document.body.classList.contains('dark') 
-    ? '<i class="fas fa-sun"></i>' 
-    : '<i class="fas fa-moon"></i>';
-});
-
-// Opening timer
-function updateTimer() {
-  const now = new Date();
-  const day = now.getDay();
-  const hours = now.getHours();
-  const minutes = now.getMinutes();
-  const totalMinutes = hours * 60 + minutes;
-  const openMinutes = 12 * 60;
-  const closeMinutes = 20 * 60;
-  const timerText = document.getElementById('timerText');
-  const timerCountdown = document.getElementById('timerCountdown');
-
-  if (totalMinutes >= openMinutes && totalMinutes < closeMinutes) {
-    const remaining = closeMinutes - totalMinutes;
-    const h = Math.floor(remaining / 60);
-    const m = remaining % 60;
-    timerText.textContent = '🟢 Teraz otwarte! Zamykamy za:';
-    timerCountdown.textContent = `${h}h ${m}min`;
-  } else {
-    let minutesToOpen;
-    if (totalMinutes < openMinutes) {
-      minutesToOpen = openMinutes - totalMinutes;
-    } else {
-      minutesToOpen = (24 * 60 - totalMinutes) + openMinutes;
-    }
-    const h = Math.floor(minutesToOpen / 60);
-    const m = minutesToOpen % 60;
-    timerText.textContent = '🔴 Aktualnie zamknięte. Otwieramy za:';
-    timerCountdown.textContent = `${h}h ${m}min`;
-  }
-}
-updateTimer();
-setInterval(updateTimer, 60000);
-
-// Menu filtering
-const categoryBtns = document.querySelectorAll('.category-btn');
-const menuItems = document.querySelectorAll('.menu-item');
-categoryBtns.forEach(btn => {
-  btn.addEventListener('click', () => {
-    category
