@@ -48,6 +48,7 @@ body.dark .mobile-toggle {color: var(--light);}
 .opening-timer {margin-top: 3rem; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 1.5rem 2rem; border-radius: 20px; display: inline-block; animation: fadeInUp 1s ease 0.6s both;}
 .timer-text {font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;}
 .timer-countdown {font-size: 2rem; font-weight: 800; font-family: 'Playfair Display', serif;}
+.timer-subtext { font-size: 0.9rem; opacity: 0.9; margin-top: 0.3rem; }
 @keyframes fadeInUp {from {opacity: 0; transform: translateY(30px);} to {opacity: 1; transform: translateY(0);}}
 .about {background: var(--light);}
 body.dark .about {background: var(--dark-bg);}
@@ -108,7 +109,7 @@ body.dark footer {background: #0a0a0a;}
 .social-links a {width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: var(--transition);}
 .social-links a:hover {background: var(--red); transform: translateY(-3px);}
 .footer-bottom {border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem; color: #666;}
-.sticky-phone {position: fixed; bottom: 2rem; right: 2rem; z-index: 999; width: 60px; height: 60px; background: linear-gradient(135deg, var(--green), var(--red)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; box-shadow: 0 10px 30px rgba(205,33,42,0.4); animation: pulse 2s infinite; text-decoration: none;}
+.sticky-phone {position: fixed; bottom: calc(1rem + env(safe-area-inset-bottom)); right: 1rem; z-index: 999; width: 60px; height: 60px; background: linear-gradient(135deg, var(--green), var(--red)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; box-shadow: 0 10px 30px rgba(205,33,42,0.4); animation: pulse 2s infinite; text-decoration: none;}
 @keyframes pulse {0%, 100% {transform: scale(1);} 50% {transform: scale(1.1);}}
 .sticky-phone:hover {animation: none; transform: scale(1.15);}
 .fade-in {opacity: 0; transform: translateY(30px); transition: all 0.6s ease;}
@@ -123,7 +124,9 @@ body.dark footer {background: #0a0a0a;}
   .hero-buttons {flex-direction: column; align-items: center;}
   .btn {width: 100%; max-width: 300px; justify-content: center;}
   section {padding: 3rem 0;}
-  .sticky-phone {bottom: 1rem; right: 1rem; width: 50px; height: 50px; font-size: 1.2rem;}
+  .sticky-phone {bottom: calc(1rem + env(safe-area-inset-bottom)); right: 1rem; width: 50px; height: 50px; font-size: 1.2rem;}
+  .hero-bg { display: none; }
+  .hero { background: url('images/DSC01358.JPG') center/cover no-repeat; }
 }
 </style>
 </head>
@@ -142,9 +145,9 @@ body.dark footer {background: #0a0a0a;}
         <li><a href="#menu">Menu</a></li>
         <li><a href="#gallery">Galeria</a></li>
         <li><a href="#contact">Kontakt</a></li>
-        <li><button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button></li>
+        <li><button class="theme-toggle" id="themeToggle" aria-label="Przełącz motyw"><i class="fas fa-moon"></i></button></li>
       </ul>
-      <button class="mobile-toggle" id="mobileToggle"><i class="fas fa-bars"></i></button>
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
     </nav>
   </div>
 </header>
@@ -164,6 +167,7 @@ body.dark footer {background: #0a0a0a;}
       <div class="opening-timer">
         <div class="timer-text" id="timerText">Sprawdzam godziny otwarcia...</div>
         <div class="timer-countdown" id="timerCountdown"></div>
+        <div class="timer-subtext" id="timerSubtext"></div>
       </div>
     </div>
   </div>
@@ -362,8 +366,8 @@ body.dark footer {background: #0a0a0a;}
         <h4>Włoska Robota</h4>
         <p>Autentyczna pizza z pieca opalanego drewnem. Prosto z serca Głuponia.</p>
         <div class="social-links">
-          <a href="#"><i class="fab fa-facebook"></i></a>
-          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
         </div>
       </div>
       <div class="footer-section">
@@ -381,28 +385,41 @@ body.dark footer {background: #0a0a0a;}
       </div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; 2024 Włoska Robota. Wszelkie prawa zastrzeżone.</p>
+      <p>&copy; 2026 Włoska Robota. Wszelkie prawa zastrzeżone.</p>
     </div>
   </div>
 </footer>
 
-<a href="tel:668862396" class="sticky-phone"><i class="fas fa-phone"></i></a>
+<a href="tel:668862396" class="sticky-phone" aria-label="Zadzwoń i zamów"><i class="fas fa-phone"></i></a>
 
 <script>
 // Mobile menu
 const mobileToggle = document.getElementById('mobileToggle');
 const navLinks = document.getElementById('navLinks');
+const nav = document.querySelector('nav');
+
 mobileToggle.addEventListener('click', () => {
   navLinks.classList.toggle('active');
   mobileToggle.innerHTML = navLinks.classList.contains('active') 
     ? '<i class="fas fa-times"></i>' 
     : '<i class="fas fa-bars"></i>';
 });
+
+// Zamknij menu po kliknięciu w link
 navLinks.querySelectorAll('a').forEach(link => {
   link.addEventListener('click', () => {
     navLinks.classList.remove('active');
     mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
   });
+});
+
+// Zamknij menu po kliknięciu poza nim
+document.addEventListener('click', (e) => {
+  const isClickInsideNav = e.target.closest('nav');
+  if (!isClickInsideNav && navLinks.classList.contains('active')) {
+    navLinks.classList.remove('active');
+    mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
+  }
 });
 
 // Dark mode
@@ -427,75 +444,14 @@ function updateTimer() {
   
   // 0=nd, 1=pon, 2=wt, 3=śr, 4=czw, 5=pt, 6=sb
   const dniOtwarcia = [2, 3, 4, 5, 6]; // wt, śr, czw, pt, sb
-  const nazwyDni = ['Niedzielę', 'Poniedziałek', 'Wtorek', 'Środę', 'Czwartek', 'Piątek', 'Sobota'];
+  const nazwyDni = ['Niedzielę', 'Poniedziałek', 'Wtorek', 'Środę', 'Czwartek', 'Piątek', 'Sobotę'];
   
   const timerText = document.getElementById('timerText');
   const timerCountdown = document.getElementById('timerCountdown');
-  const timerSubtext = document.getElementById('timerSubtext'); // nowy element
+  const timerSubtext = document.getElementById('timerSubtext');
 
-  // Reset subtext przy każdym odświeżeniu
   if (timerSubtext) timerSubtext.textContent = '';
 
   // Sprawdź czy teraz otwarte
   if (dniOtwarcia.includes(day) && totalMinutes >= openMinutes && totalMinutes < closeMinutes) {
-    const remaining = closeMinutes - totalMinutes;
-    const h = Math.floor(remaining / 60);
-    const m = remaining % 60;
-    timerText.textContent = '🟢 Teraz otwarte! Zamykamy za:';
-    timerCountdown.textContent = `${h}h ${m}min`;
-    return;
-  }
-
-  // Liczymy kiedy następne otwarcie
-  let dniDoOtwarcia = 0;
-  let nastepnyDzien = day;
-  
-  if (dniOtwarcia.includes(day) && totalMinutes < openMinutes) {
-    dniDoOtwarcia = 0;
-  } else {
-    do {
-      dniDoOtwarcia++;
-      nastepnyDzien = (day + dniDoOtwarcia) % 7;
-    } while (!dniOtwarcia.includes(nastepnyDzien));
-  }
-  
-  const minutesToOpen = (dniDoOtwarcia * 24 * 60) + openMinutes - totalMinutes;
-  
-  const dni = Math.floor(minutesToOpen / (24 * 60));
-  const h = Math.floor((minutesToOpen % (24 * 60)) / 60);
-  const m = minutesToOpen % 60;
-  
-  let odliczanie = '';
-  if (dni > 0) {
-    odliczanie = `${dni}d ${h}h ${m}min`;
-  } else {
-    odliczanie = `${h}h ${m}min`;
-  }
-  
-  timerText.textContent = '🔴 Aktualnie zamknięte.';
-  
-  if (dniDoOtwarcia === 0) {
-    timerCountdown.textContent = `Otwieramy za: ${odliczanie}`;
-  } else {
-    timerCountdown.textContent = `Zapraszamy w ${nazwyDni[nastepnyDzien]} od 12:00`;
-    if (timerSubtext) timerSubtext.textContent = `Otwarcie za: ${odliczanie}`;
-  }
-}
-
-updateTimer();
-setInterval(updateTimer, 60000);
-
-// Fade in on scroll
-const fadeEls = document.querySelectorAll('.fade-in');
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-    }
-  });
-}, {threshold: 0.1});
-fadeEls.forEach(el => observer.observe(el));
-</script>
-
-</body>
-</html>
+    const remaining = close
