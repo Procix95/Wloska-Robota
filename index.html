@@ -48,7 +48,7 @@ body.dark .mobile-toggle {color: var(--light);}
 .opening-timer {margin-top: 3rem; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 1.5rem 2rem; border-radius: 20px; display: inline-block; animation: fadeInUp 1s ease 0.6s both;}
 .timer-text {font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;}
 .timer-countdown {font-size: 2rem; font-weight: 800; font-family: 'Playfair Display', serif;}
-.timer-subtext { font-size: 0.9rem; opacity: 0.9; margin-top: 0.3rem; }
+.timer-subtext {font-size: 0.9rem; opacity: 0.9; margin-top: 0.3rem;}
 @keyframes fadeInUp {from {opacity: 0; transform: translateY(30px);} to {opacity: 1; transform: translateY(0);}}
 .about {background: var(--light);}
 body.dark .about {background: var(--dark-bg);}
@@ -405,7 +405,6 @@ mobileToggle.addEventListener('click', () => {
     : '<i class="fas fa-bars"></i>';
 });
 
-// Zamknij menu po kliknięciu w link
 navLinks.querySelectorAll('a').forEach(link => {
   link.addEventListener('click', () => {
     navLinks.classList.remove('active');
@@ -413,7 +412,6 @@ navLinks.querySelectorAll('a').forEach(link => {
   });
 });
 
-// Zamknij menu po kliknięciu poza nim
 document.addEventListener('click', (e) => {
   const isClickInsideNav = e.target.closest('nav');
   if (!isClickInsideNav && navLinks.classList.contains('active')) {
@@ -431,7 +429,7 @@ themeToggle.addEventListener('click', () => {
     : '<i class="fas fa-moon"></i>';
 });
 
-// Opening timer z obsługą dni zamkniętych
+// Opening timer
 function updateTimer() {
   const now = new Date();
   const day = now.getDay();
@@ -439,19 +437,18 @@ function updateTimer() {
   const minutes = now.getMinutes();
   const totalMinutes = hours * 60 + minutes;
   
-  const openMinutes = 12 * 60; // 12:00
-  const closeMinutes = 20 * 60; // 20:00
+  const openMinutes = 12 * 60;
+  const closeMinutes = 20 * 60;
   
-  // 0=nd, 1=pon, 2=wt, 3=śr, 4=czw, 5=pt, 6=sb
-  const dniOtwarcia = [2, 3, 4, 5, 6]; // wt, śr, czw, pt, sb
+  const dniOtwarcia = [2, 3, 4, 5, 6];
   const nazwyDni = ['Niedzielę', 'Poniedziałek', 'Wtorek', 'Środę', 'Czwartek', 'Piątek', 'Sobotę'];
   
   const timerText = document.getElementById('timerText');
   const timerCountdown = document.getElementById('timerCountdown');
   const timerSubtext = document.getElementById('timerSubtext');
 
-  if (timerSubtext) timerSubtext.textContent = '';
-
-  // Sprawdź czy teraz otwarte
   if (dniOtwarcia.includes(day) && totalMinutes >= openMinutes && totalMinutes < closeMinutes) {
-    const remaining = close
+    const remaining = closeMinutes - totalMinutes;
+    const h = Math.floor(remaining / 60);
+    const m = remaining % 60;
+    timerText.textContent = '🟢 Teraz
