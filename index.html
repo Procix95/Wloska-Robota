@@ -82,6 +82,17 @@ body.dark .menu-item-desc {color: #aaa;}
 .menu-item-sizes {display: flex; gap: 0.5rem;}
 .size-badge {padding: 0.3rem 0.8rem; background: var(--green); color: white; border-radius: 20px; font-size: 0.85rem; font-weight: 600;}
 .gallery {background: var(--light);}
+.addons {background: white;}
+body.dark .addons {background: var(--dark-card);}
+.addons-groups {display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;}
+.addons-group {background: var(--light); border-radius: 20px; padding: 2rem; box-shadow: 0 5px 20px rgba(0,0,0,0.08);}
+body.dark .addons-group {background: var(--dark-bg); box-shadow: 0 5px 20px rgba(0,0,0,0.3);}
+.addons-group h3 {font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--red); margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.6rem;}
+.addons-list {list-style: none;}
+.addons-list li {display: flex; justify-content: space-between; align-items: center; padding: 0.7rem 0; border-bottom: 1px solid rgba(0,0,0,0.08);}
+body.dark .addons-list li {border-bottom-color: rgba(255,255,255,0.08);}
+.addons-list li:last-child {border-bottom: none;}
+.addon-price {font-weight: 700; color: var(--green); background: rgba(0,146,70,0.1); padding: 0.3rem 0.9rem; border-radius: 20px; font-size: 0.95rem;}
 body.dark .gallery {background: var(--dark-bg);}
 .gallery-grid {display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;}
 .gallery-item {position: relative; border-radius: 15px; overflow: hidden; aspect-ratio: 1; cursor: pointer; box-shadow: 0 5px 20px rgba(0,0,0,0.1); background: #333;}
@@ -140,6 +151,7 @@ body.dark footer {background: #0a0a0a;}
         <li><a href="#home">Start</a></li>
         <li><a href="#about">O nas</a></li>
         <li><a href="#menu">Menu</a></li>
+        <li><a href="#addons">Dodatki</a></li>
         <li><a href="#gallery">Galeria</a></li>
         <li><a href="#contact">Kontakt</a></li>
         <li><button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button></li>
@@ -176,7 +188,7 @@ body.dark footer {background: #0a0a0a;}
     <div class="about-content">
       <div class="about-text fade-in">
         <h3>Pizza z duszą</h3>
-        <p>W Włoska Robota każdy placek to małe dzieło sztuki. Ciasto wyrabiamy ręcznie i fermentujemy minimum 24 godziny, a wersje specjalne nawet 24h. Dzięki temu jest lekkie, chrupiące i pełne smaku.</p>
+        <p>We Włoska Robota każdy placek to małe dzieło sztuki. Ciasto wyrabiamy ręcznie i fermentujemy minimum 24 godziny. Dzięki temu jest lekkie, chrupiące i pełne smaku.</p>
         <p>Używamy tylko składników najwyższej jakości: włoska mąka, pomidory San Marzano, mozzarella fior di latte, świeże zioła. Zero kompromisów.</p>
         <div class="about-features">
           <div class="feature-card">
@@ -217,7 +229,7 @@ body.dark footer {background: #0a0a0a;}
       <button class="category-btn" data-category="klasyczne">Klasyczne</button>
       <button class="category-btn" data-category="miesne">Mięsne</button>
       <button class="category-btn" data-category="vege">Wege</button>
-      <button class="category-btn" data-category="specjalne">Specjalne 24h</button>
+      <button class="category-btn" data-category="sosy">Sosy</button>
     </div>
     <div class="menu-grid" id="menuGrid">
       <div class="menu-item" data-category="klasyczne">
@@ -270,7 +282,7 @@ body.dark footer {background: #0a0a0a;}
           <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
         </div>
       </div>
-      <div class="menu-item" data-category="specjalne">
+      <div class="menu-item" data-category="miesne">
         <div class="menu-item-content">
           <div class="menu-item-header">
             <h3 class="menu-item-title">6. CARBONARA</h3>
@@ -290,7 +302,7 @@ body.dark footer {background: #0a0a0a;}
           <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
         </div>
       </div>
-      <div class="menu-item" data-category="specjalne miesne">
+      <div class="menu-item" data-category="">
         <div class="menu-item-content">
           <div class="menu-item-header">
             <h3 class="menu-item-title">8. PIZZA WŁASNA</h3>
@@ -299,6 +311,61 @@ body.dark footer {background: #0a0a0a;}
           <p class="menu-item-desc">Sos pomidorowy, mozzarella, własna kompozycja</p>
           <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
         </div>
+      </div>
+      <div class="menu-item" data-category="sosy">
+        <div class="menu-item-content">
+          <div class="menu-item-header">
+            <h3 class="menu-item-title">SOS CZOSNKOWY</h3>
+            <span class="menu-item-price">5 zł</span>
+          </div>
+          <p class="menu-item-desc">Aromatyczny sos czosnkowy do pizzy</p>
+        </div>
+      </div>
+      <div class="menu-item" data-category="sosy">
+        <div class="menu-item-content">
+          <div class="menu-item-header">
+            <h3 class="menu-item-title">SOS MARINARA</h3>
+            <span class="menu-item-price">5 zł</span>
+          </div>
+          <p class="menu-item-desc">Klasyczny sos pomidorowy ziołowy</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="addons" id="addons">
+  <div class="container">
+    <h2 class="section-title fade-in">Dodaj <span>Coś Extra</span></h2>
+    <p class="section-subtitle fade-in">Dopasuj swoją pizzę do własnego gustu</p>
+    <div class="addons-groups">
+      <div class="addons-group fade-in">
+        <h3><i class="fas fa-drumstick-bite"></i> Dodatki Mięsne i Sery</h3>
+        <ul class="addons-list">
+          <li>Pepperoni <span class="addon-price">5 zł</span></li>
+          <li>Szynka <span class="addon-price">5 zł</span></li>
+          <li>Salami <span class="addon-price">5 zł</span></li>
+          <li>Kiełbasa wiejska <span class="addon-price">5 zł</span></li>
+          <li>Boczek <span class="addon-price">5 zł</span></li>
+          <li>Prosciutto <span class="addon-price">5 zł</span></li>
+          <li>Salami pikantne <span class="addon-price">5 zł</span></li>
+          <li>Szynka parmeńska <span class="addon-price">5 zł</span></li>
+		  <li>Mozzarella <span class="addon-price">5 zł</span></li>
+        </ul>
+      </div>
+      <div class="addons-group fade-in">
+        <h3><i class="fas fa-leaf"></i> Dodatki Warzywne</h3>
+        <ul class="addons-list">
+          <li>Pieczarki <span class="addon-price">3 zł</span></li>
+          <li>Cebula <span class="addon-price">3 zł</span></li>
+          <li>Papryka <span class="addon-price">3 zł</span></li>
+          <li>Oliwki <span class="addon-price">3 zł</span></li>
+          <li>Pomidor <span class="addon-price">3 zł</span></li>
+          <li>Rukola <span class="addon-price">3 zł</span></li>
+          <li>Papryczka jalapeño <span class="addon-price">3 zł</span></li>
+          <li>Cebula czerwona <span class="addon-price">3 zł</span></li>
+		  <li>Por <span class="addon-price">3 zł</span></li>
+        </ul>
       </div>
     </div>
   </div>
@@ -325,7 +392,7 @@ body.dark footer {background: #0a0a0a;}
 <section class="contact" id="contact">
   <div class="container">
     <h2 class="section-title fade-in">Zamów <span>Teraz</span></h2>
-    <p class="section-subtitle fade-in">Dowóz: Głuponie, Lwówek, Pniewy i okolice</p>
+    <p class="section-subtitle fade-in">Dowóz: Głuponie, Lwówek, Pniewy, Kuślin, Michorzewo, Michorzewko i okolice</p>
     <div class="contact-grid">
       <div class="contact-card fade-in">
         <div class="contact-icon"><i class="fas fa-phone"></i></div>
@@ -336,7 +403,7 @@ body.dark footer {background: #0a0a0a;}
       <div class="contact-card fade-in">
         <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
         <h3>Lokalizacja</h3>
-        <p>Głuponie</p>
+        <p>Głuponie 103</p>
         <p>woj. Wielkopolskie</p>
       </div>
       <div class="contact-card fade-in">
@@ -360,9 +427,9 @@ body.dark footer {background: #0a0a0a;}
     <div class="footer-content">
       <div class="footer-section">
         <h4>Włoska Robota</h4>
-        <p>Autentyczna pizza z pieca opalanego drewnem. Prosto z serca Głuponia.</p>
+        <p>Autentyczna pizza prosto z Neapolu.</p>
         <div class="social-links">
-          <a href="#"><i class="fab fa-facebook"></i></a>
+          <a href="https://www.facebook.com/profile.php?id=61591198263542"><i class="fab fa-facebook"></i></a>
           <a href="#"><i class="fab fa-instagram"></i></a>
         </div>
       </div>
@@ -371,7 +438,6 @@ body.dark footer {background: #0a0a0a;}
         <a href="#menu">Pizza Klasyczne</a>
         <a href="#menu">Pizza Mięsne</a>
         <a href="#menu">Pizza Wege</a>
-        <a href="#menu">Specjalne 24h</a>
       </div>
       <div class="footer-section">
         <h4>Kontakt</h4>
@@ -381,7 +447,7 @@ body.dark footer {background: #0a0a0a;}
       </div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; 2024 Włoska Robota. Wszelkie prawa zastrzeżone.</p>
+      <p>&copy; <span id="currentYear">2026</span> Włoska Robota. Wszelkie prawa zastrzeżone.</p>
     </div>
   </div>
 </footer>
@@ -402,6 +468,28 @@ navLinks.querySelectorAll('a').forEach(link => {
   link.addEventListener('click', () => {
     navLinks.classList.remove('active');
     mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
+  });
+});
+
+// Aktualny rok w stopce
+document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+// Filtrowanie menu po kategoriach
+const categoryBtns = document.querySelectorAll('.category-btn');
+const menuItems = document.querySelectorAll('.menu-item');
+categoryBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    categoryBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const category = btn.dataset.category;
+    menuItems.forEach(item => {
+      const itemCategories = item.dataset.category.split(' ');
+      if (category === 'all' || itemCategories.includes(category)) {
+        item.style.display = '';
+      } else {
+        item.style.display = 'none';
+      }
+    });
   });
 });
 
