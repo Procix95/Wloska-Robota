@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Włoska Robota - Pizza z Pieca | Głuponie</title>
 <meta name="description" content="Pizzeria Włoska Robota w Głuponiu. Pizza 30cm prosto z pieca. Dowóz: Głuponie, Lwówek, Pniewy. Tel: 668 862 396. Otwarte 12:00-20:00">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍕</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
@@ -63,6 +64,23 @@ body.dark .feature-card {background: var(--dark-card); box-shadow: 0 5px 20px rg
 .feature-card h4 {font-size: 1.1rem; margin-bottom: 0.5rem;}
 .about-image {position: relative; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.2);}
 .about-image img {width: 100%; height: 100%; object-fit: cover; display: block;}
+.skladniki {background: #1a1a1a; padding: 5rem 0;}
+.sk-eyebrow {text-align: center; font-size: 11px; letter-spacing: 4px; color: var(--gold); text-transform: uppercase; margin-bottom: 1rem; font-family: 'Poppins', sans-serif; padding-top: 0;}
+.sk-grid {display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5px; background: #333; border: 1.5px solid #333; border-radius: 20px; overflow: hidden; max-width: 900px; margin: 0 auto 0;}
+.sk-card {background: #242424; padding: 2rem 1.5rem 1.8rem; display: flex; flex-direction: column; align-items: flex-start; transition: background 0.2s;}
+.sk-card:hover {background: #2c2c2c;}
+.sk-emoji {font-size: 2.6rem; margin-bottom: 1.2rem; line-height: 1;}
+.sk-line {width: 28px; height: 2px; background: var(--green); margin-bottom: 1rem; border-radius: 2px;}
+.sk-name {font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 0.4rem;}
+.sk-desc {font-size: 0.82rem; color: #888; line-height: 1.55; margin-bottom: 1rem; flex: 1;}
+.sk-origin {display: flex; align-items: center; gap: 6px; font-size: 0.75rem;}
+.sk-flag {font-size: 1rem;}
+.sk-country {color: #555;}
+.sk-divider {border: none; border-top: 1px solid #2a2a2a; max-width: 900px; margin: 2.5rem auto 0;}
+.sk-quote-wrap {max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 0; text-align: center;}
+.sk-quote {font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #555; font-style: italic; line-height: 1.7;}
+.sk-quote-author {font-size: 0.8rem; color: var(--gold); font-family: 'Poppins', sans-serif; letter-spacing: 2px; text-transform: uppercase; margin-top: 0.8rem;}
+@media (max-width: 768px) {.sk-grid {grid-template-columns: 1fr 1fr;} .sk-card {padding: 1.3rem 1rem;}}
 .menu {background: white;}
 body.dark .menu {background: var(--dark-card);}
 .menu-categories {display: flex; justify-content: center; gap: 1rem; margin-bottom: 3rem; flex-wrap: wrap;}
@@ -82,17 +100,6 @@ body.dark .menu-item-desc {color: #aaa;}
 .menu-item-sizes {display: flex; gap: 0.5rem;}
 .size-badge {padding: 0.3rem 0.8rem; background: var(--green); color: white; border-radius: 20px; font-size: 0.85rem; font-weight: 600;}
 .gallery {background: var(--light);}
-.addons {background: white;}
-body.dark .addons {background: var(--dark-card);}
-.addons-groups {display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;}
-.addons-group {background: var(--light); border-radius: 20px; padding: 2rem; box-shadow: 0 5px 20px rgba(0,0,0,0.08);}
-body.dark .addons-group {background: var(--dark-bg); box-shadow: 0 5px 20px rgba(0,0,0,0.3);}
-.addons-group h3 {font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--red); margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.6rem;}
-.addons-list {list-style: none;}
-.addons-list li {display: flex; justify-content: space-between; align-items: center; padding: 0.7rem 0; border-bottom: 1px solid rgba(0,0,0,0.08);}
-body.dark .addons-list li {border-bottom-color: rgba(255,255,255,0.08);}
-.addons-list li:last-child {border-bottom: none;}
-.addon-price {font-weight: 700; color: var(--green); background: rgba(0,146,70,0.1); padding: 0.3rem 0.9rem; border-radius: 20px; font-size: 0.95rem;}
 body.dark .gallery {background: var(--dark-bg);}
 .gallery-grid {display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;}
 .gallery-item {position: relative; border-radius: 15px; overflow: hidden; aspect-ratio: 1; cursor: pointer; box-shadow: 0 5px 20px rgba(0,0,0,0.1); background: #333;}
@@ -109,6 +116,10 @@ body.dark .contact-card {background: var(--dark-bg);}
 .contact-card p, .contact-card a {color: var(--gray); text-decoration: none; transition: var(--transition);}
 body.dark .contact-card p, body.dark .contact-card a {color: #aaa;}
 .contact-card a:hover {color: var(--red);}
+.map-wrapper {margin-top: 3rem; position: relative;}
+.map-wrapper iframe {width: 100%; height: 420px; border: 0; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.12); display: block;}
+.map-link {display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1rem; color: var(--red); font-weight: 600; text-decoration: none; transition: var(--transition);}
+.map-link:hover {color: var(--green); gap: 0.8rem;}
 footer {background: var(--dark); color: white; padding: 3rem 0 1rem; text-align: center;}
 body.dark footer {background: #0a0a0a;}
 .footer-content {display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-bottom: 2rem; text-align: left;}
@@ -135,6 +146,7 @@ body.dark footer {background: #0a0a0a;}
   .btn {width: 100%; max-width: 300px; justify-content: center;}
   section {padding: 3rem 0;}
   .sticky-phone {bottom: 1rem; right: 1rem; width: 50px; height: 50px; font-size: 1.2rem;}
+  .map-wrapper iframe {height: 300px;}
 }
 </style>
 </head>
@@ -151,7 +163,6 @@ body.dark footer {background: #0a0a0a;}
         <li><a href="#home">Start</a></li>
         <li><a href="#about">O nas</a></li>
         <li><a href="#menu">Menu</a></li>
-        <li><a href="#addons">Dodatki</a></li>
         <li><a href="#gallery">Galeria</a></li>
         <li><a href="#contact">Kontakt</a></li>
         <li><button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button></li>
@@ -220,6 +231,63 @@ body.dark footer {background: #0a0a0a;}
   </div>
 </section>
 
+<section class="skladniki" id="skladniki">
+  <div class="sk-eyebrow">Jakość bez kompromisów</div>
+  <div class="container">
+    <h2 class="section-title fade-in" style="color:white;">Nasze <span>Składniki</span></h2>
+    <p class="section-subtitle fade-in" style="color:#888; font-style:italic;">Od źródła do Twojego talerza — wybieramy tylko to, co najlepsze</p>
+    <div class="sk-grid fade-in">
+      <div class="sk-card">
+        <div class="sk-emoji">🌾</div>
+        <div class="sk-line"></div>
+        <div class="sk-name">Mąka Tipo 00</div>
+        <p class="sk-desc">Mąka z młynów Caputo — drobno mielona, idealna do ciasta neapolitańskiego o chrupiącym spodzie i miękkim wnętrzu</p>
+        <div class="sk-origin"><span class="sk-flag">🇮🇹</span><span class="sk-country">Włochy, Neapol</span></div>
+      </div>
+      <div class="sk-card">
+        <div class="sk-emoji">🍅</div>
+        <div class="sk-line"></div>
+        <div class="sk-name">Pomidory San Marzano</div>
+        <p class="sk-desc">DOP z Kampanii — słodkie i gęste, bez kwasowości. Baza sosów w Marghericie, Diavoli, Prosciutto i Vegetarianie</p>
+        <div class="sk-origin"><span class="sk-flag">🇮🇹</span><span class="sk-country">Włochy, Kampania</span></div>
+      </div>
+      <div class="sk-card">
+        <div class="sk-emoji">🧀</div>
+        <div class="sk-line"></div>
+        <div class="sk-name">Mozzarella fior di latte</div>
+        <p class="sk-desc">Świeża, kremowa — topi się w 400°C tworząc jedwabistą warstwę. Serce każdej naszej pizzy</p>
+        <div class="sk-origin"><span class="sk-flag">🇮🇹</span><span class="sk-country">Włochy</span></div>
+      </div>
+      <div class="sk-card">
+        <div class="sk-emoji">🌿</div>
+        <div class="sk-line"></div>
+        <div class="sk-name">Bazylia &amp; oregano</div>
+        <p class="sk-desc">Świeża bazylia na Marghericie, oregano na Pepperoni — dodawane tuż przed podaniem dla zachowania aromatu</p>
+        <div class="sk-origin"><span class="sk-flag">🇵🇱</span><span class="sk-country">Polska, Wielkopolska</span></div>
+      </div>
+      <div class="sk-card">
+        <div class="sk-emoji">🫒</div>
+        <div class="sk-line"></div>
+        <div class="sk-name">Oliwa extra vergine</div>
+        <p class="sk-desc">Tłoczona na zimno — wykończenie każdej pizzy delikatną nicią oliwy tuż przed wyjściem z pieca</p>
+        <div class="sk-origin"><span class="sk-flag">🇮🇹</span><span class="sk-country">Włochy, Sycylia</span></div>
+      </div>
+      <div class="sk-card">
+        <div class="sk-emoji">🧀</div>
+        <div class="sk-line"></div>
+        <div class="sk-name">Grana Padano &amp; Provola</div>
+        <p class="sk-desc">Grana Padano na Prosciutto i Quattro Formaggi — intensywny smak. Provola wędzona dopełnia kompozycję serów</p>
+        <div class="sk-origin"><span class="sk-flag">🇮🇹</span><span class="sk-country">Włochy</span></div>
+      </div>
+    </div>
+    <div class="sk-quote-wrap fade-in">
+      <hr class="sk-divider">
+      <p class="sk-quote">"Dobra pizza zaczyna się od dobrych składników.<br>Nie ma skrótów, nie ma kompromisów."</p>
+      <p class="sk-quote-author">— Włoska Robota, Głuponie</p>
+    </div>
+  </div>
+</section>
+
 <section class="menu" id="menu">
   <div class="container">
     <h2 class="section-title fade-in">Nasze <span>Menu</span></h2>
@@ -238,7 +306,7 @@ body.dark footer {background: #0a0a0a;}
             <h3 class="menu-item-title">1. MARGHERITA</h3>
             <span class="menu-item-price">28 zł</span>
           </div>
-          <p class="menu-item-desc">Sos pomidorowy, mozzarella fior di latte</p>
+          <p class="menu-item-desc">Sos pomidorowy San Marzano, mozzarella fior di latte, bazylia</p>
           <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
         </div>
       </div>
@@ -258,7 +326,7 @@ body.dark footer {background: #0a0a0a;}
             <h3 class="menu-item-title">3. PROSCIUTTO</h3>
             <span class="menu-item-price">38 zł</span>
           </div>
-          <p class="menu-item-desc">Sos pomidorowy, mozzarella, szynka prosciutto crudo, rukola, parmezan</p>
+          <p class="menu-item-desc">Sos pomidorowy San Marzano, mozzarella fior di latte, szynka prosciutto crudo, rukola, grana padano</p>
           <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
         </div>
       </div>
@@ -268,7 +336,7 @@ body.dark footer {background: #0a0a0a;}
             <h3 class="menu-item-title">4. VEGETARIANA</h3>
             <span class="menu-item-price">32 zł</span>
           </div>
-          <p class="menu-item-desc">Sos pomidorowy, mozzarella, cebula, pieczarki</p>
+          <p class="menu-item-desc">Sos pomidorowy San Marzano, mozzarella fior di latte, cebula, pieczarki, karczochy</p>
           <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
         </div>
       </div>
@@ -278,7 +346,7 @@ body.dark footer {background: #0a0a0a;}
             <h3 class="menu-item-title">5. DIAVOLA</h3>
             <span class="menu-item-price">35 zł</span>
           </div>
-          <p class="menu-item-desc">Sos pomidorowy, mozzarella, salami pikantne, papryczka jalapeño</p>
+          <p class="menu-item-desc">Sos pomidorowy San Marzano, mozzarella fior di latte, salami piccante, papryczka jalapeño</p>
           <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
         </div>
       </div>
@@ -288,7 +356,7 @@ body.dark footer {background: #0a0a0a;}
             <h3 class="menu-item-title">6. CARBONARA</h3>
             <span class="menu-item-price">36 zł</span>
           </div>
-          <p class="menu-item-desc">Biała baza, mozzarella, por, boczek</p>
+          <p class="menu-item-desc">Biała baza, mozzarella fior di latte, por, boczek</p>
           <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
         </div>
       </div>
@@ -298,20 +366,11 @@ body.dark footer {background: #0a0a0a;}
             <h3 class="menu-item-title">7. QUATTRO FORMAGGI</h3>
             <span class="menu-item-price">34 zł</span>
           </div>
-          <p class="menu-item-desc">Biała baza, mozzarella, gorgonzola, parmezan</p>
+          <p class="menu-item-desc">Biała baza, mozzarella, gorgonzola, grana padano, provola</p>
           <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
         </div>
       </div>
-      <div class="menu-item" data-category="">
-        <div class="menu-item-content">
-          <div class="menu-item-header">
-            <h3 class="menu-item-title">8. PIZZA WŁASNA</h3>
-            <span class="menu-item-price">42 zł</span>
-          </div>
-          <p class="menu-item-desc">Sos pomidorowy, mozzarella, własna kompozycja</p>
-          <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
-        </div>
-      </div>
+
       <div class="menu-item" data-category="sosy">
         <div class="menu-item-content">
           <div class="menu-item-header">
@@ -329,43 +388,6 @@ body.dark footer {background: #0a0a0a;}
           </div>
           <p class="menu-item-desc">Klasyczny sos pomidorowy ziołowy</p>
         </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="addons" id="addons">
-  <div class="container">
-    <h2 class="section-title fade-in">Dodaj <span>Coś Extra</span></h2>
-    <p class="section-subtitle fade-in">Dopasuj swoją pizzę do własnego gustu</p>
-    <div class="addons-groups">
-      <div class="addons-group fade-in">
-        <h3><i class="fas fa-drumstick-bite"></i> Dodatki Mięsne i Sery</h3>
-        <ul class="addons-list">
-          <li>Pepperoni <span class="addon-price">5 zł</span></li>
-          <li>Szynka <span class="addon-price">5 zł</span></li>
-          <li>Salami <span class="addon-price">5 zł</span></li>
-          <li>Kiełbasa wiejska <span class="addon-price">5 zł</span></li>
-          <li>Boczek <span class="addon-price">5 zł</span></li>
-          <li>Prosciutto <span class="addon-price">5 zł</span></li>
-          <li>Salami pikantne <span class="addon-price">5 zł</span></li>
-          <li>Szynka parmeńska <span class="addon-price">5 zł</span></li>
-		  <li>Mozzarella <span class="addon-price">5 zł</span></li>
-        </ul>
-      </div>
-      <div class="addons-group fade-in">
-        <h3><i class="fas fa-leaf"></i> Dodatki Warzywne</h3>
-        <ul class="addons-list">
-          <li>Pieczarki <span class="addon-price">3 zł</span></li>
-          <li>Cebula <span class="addon-price">3 zł</span></li>
-          <li>Papryka <span class="addon-price">3 zł</span></li>
-          <li>Oliwki <span class="addon-price">3 zł</span></li>
-          <li>Pomidor <span class="addon-price">3 zł</span></li>
-          <li>Rukola <span class="addon-price">3 zł</span></li>
-          <li>Papryczka jalapeño <span class="addon-price">3 zł</span></li>
-          <li>Cebula czerwona <span class="addon-price">3 zł</span></li>
-		  <li>Por <span class="addon-price">3 zł</span></li>
-        </ul>
       </div>
     </div>
   </div>
@@ -418,6 +440,18 @@ body.dark footer {background: #0a0a0a;}
         <p>Głuponie, Lwówek</p>
         <p>Pniewy i okolice</p>
       </div>
+    </div>
+    <div class="map-wrapper fade-in">
+      <iframe
+        src="https://maps.google.com/maps?q=G%C5%82uponie+103,+Ku%C5%9Blin,+Wielkopolska&t=&z=15&ie=UTF8&iwloc=&output=embed"
+        allowfullscreen=""
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title="Lokalizacja Włoska Robota - Głuponie 103">
+      </iframe>
+      <a href="https://www.google.com/maps/search/G%C5%82uponie+103,+Ku%C5%9Blin,+Wielkopolska" target="_blank" rel="noopener" class="map-link">
+        <i class="fas fa-external-link-alt"></i> Otwórz w Google Maps
+      </a>
     </div>
   </div>
 </section>
@@ -510,21 +544,17 @@ function updateTimer() {
   const minutes = now.getMinutes();
   const totalMinutes = hours * 60 + minutes;
   
-  const openMinutes = 12 * 60; // 12:00
-  const closeMinutes = 20 * 60; // 20:00
+  const openMinutes = 12 * 60;
+  const closeMinutes = 20 * 60;
   
-  // 0=nd, 1=pon, 2=wt, 3=śr, 4=czw, 5=pt, 6=sb
-  const dniOtwarcia = [2, 3, 4, 5, 6]; // wt, śr, czw, pt, sb
+  const dniOtwarcia = [2, 3, 4, 5, 6];
   const nazwyDni = ['Niedzielę', 'Poniedziałek', 'Wtorek', 'Środę', 'Czwartek', 'Piątek', 'Sobota'];
   
   const timerText = document.getElementById('timerText');
   const timerCountdown = document.getElementById('timerCountdown');
-  const timerSubtext = document.getElementById('timerSubtext'); // nowy element
-
-  // Reset subtext przy każdym odświeżeniu
+  const timerSubtext = document.getElementById('timerSubtext');
   if (timerSubtext) timerSubtext.textContent = '';
 
-  // Sprawdź czy teraz otwarte
   if (dniOtwarcia.includes(day) && totalMinutes >= openMinutes && totalMinutes < closeMinutes) {
     const remaining = closeMinutes - totalMinutes;
     const h = Math.floor(remaining / 60);
@@ -534,7 +564,6 @@ function updateTimer() {
     return;
   }
 
-  // Liczymy kiedy następne otwarcie
   let dniDoOtwarcia = 0;
   let nastepnyDzien = day;
   
@@ -548,17 +577,11 @@ function updateTimer() {
   }
   
   const minutesToOpen = (dniDoOtwarcia * 24 * 60) + openMinutes - totalMinutes;
-  
   const dni = Math.floor(minutesToOpen / (24 * 60));
   const h = Math.floor((minutesToOpen % (24 * 60)) / 60);
   const m = minutesToOpen % 60;
   
-  let odliczanie = '';
-  if (dni > 0) {
-    odliczanie = `${dni}d ${h}h ${m}min`;
-  } else {
-    odliczanie = `${h}h ${m}min`;
-  }
+  let odliczanie = dni > 0 ? `${dni}d ${h}h ${m}min` : `${h}h ${m}min`;
   
   timerText.textContent = '🔴 Aktualnie zamknięte.';
   
