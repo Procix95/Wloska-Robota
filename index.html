@@ -440,8 +440,8 @@ body.dark footer {background: #0a0a0a;}
       <div class="contact-card fade-in">
         <div class="contact-icon"><i class="fas fa-clock"></i></div>
         <h3>Godziny</h3>
-        <p>Wtorek-Sobota</p>
-        <p>12:00 - 20:00</p>
+        <p>Śr-Pt: 12:00 - 20:00</p>
+        <p>Sob-Nd: 14:00 - 22:00</p>
       </div>
       <div class="contact-card fade-in">
         <div class="contact-icon"><i class="fas fa-truck"></i></div>
@@ -486,7 +486,7 @@ body.dark footer {background: #0a0a0a;}
         <h4>Kontakt</h4>
         <a href="tel:668862396"><i class="fas fa-phone"></i> 668 862 396</a>
         <p><i class="fas fa-map-marker-alt"></i> Głuponie, woj. Wielkopolskie</p>
-        <p><i class="fas fa-clock"></i> Wt-Sob: 12:00 - 20:00</p>
+        <p><i class="fas fa-clock"></i> Śr-Pt: 12:00-20:00 | Sob-Nd: 14:00-22:00</p>
       </div>
     </div>
     <div class="footer-bottom">
@@ -545,27 +545,32 @@ themeToggle.addEventListener('click', () => {
     : '<i class="fas fa-moon"></i>';
 });
 
-// Opening timer z obsługą dni zamkniętych
+// Opening timer — śr-pt 12:00-20:00, sob-nd 14:00-22:00
 function updateTimer() {
   const now = new Date();
-  const day = now.getDay();
-  const hours = now.getHours();
-  const minutes = now.getMinutes();
-  const totalMinutes = hours * 60 + minutes;
-  
-  const openMinutes = 12 * 60;
-  const closeMinutes = 20 * 60;
-  
-  const dniOtwarcia = [2, 3, 4, 5, 6];
-  const nazwyDni = ['Niedzielę', 'Poniedziałek', 'Wtorek', 'Środę', 'Czwartek', 'Piątek', 'Sobota'];
-  
+  const day = now.getDay(); // 0=nd, 1=pon, 2=wt, 3=śr, 4=czw, 5=pt, 6=sb
+  const totalMinutes = now.getHours() * 60 + now.getMinutes();
+
+  const harmonogram = {
+    3: { open: 12 * 60, close: 20 * 60 }, // środa
+    4: { open: 12 * 60, close: 20 * 60 }, // czwartek
+    5: { open: 12 * 60, close: 20 * 60 }, // piątek
+    6: { open: 14 * 60, close: 22 * 60 }, // sobota
+    0: { open: 14 * 60, close: 22 * 60 }, // niedziela
+  };
+
+  const nazwyDni = ['Niedzielę', 'Poniedziałek', 'Wtorek', 'Środę', 'Czwartek', 'Piątek', 'Sobotę'];
+
   const timerText = document.getElementById('timerText');
   const timerCountdown = document.getElementById('timerCountdown');
   const timerSubtext = document.getElementById('timerSubtext');
   if (timerSubtext) timerSubtext.textContent = '';
 
-  if (dniOtwarcia.includes(day) && totalMinutes >= openMinutes && totalMinutes < closeMinutes) {
-    const remaining = closeMinutes - totalMinutes;
+  const dzisiaj = harmonogram[day];
+
+  // Czy teraz otwarte?
+  if (dzisiaj && totalMinutes >= dzisiaj.open && totalMinutes < dzisiaj.close) {
+    const remaining = dzisiaj.close - totalMinutes;
     const h = Math.floor(remaining / 60);
     const m = remaining % 60;
     timerText.textContent = '🟢 Teraz otwarte! Zamykamy za:';
@@ -573,31 +578,34 @@ function updateTimer() {
     return;
   }
 
+  // Szukamy następnego otwarcia
   let dniDoOtwarcia = 0;
   let nastepnyDzien = day;
-  
-  if (dniOtwarcia.includes(day) && totalMinutes < openMinutes) {
-    dniDoOtwarcia = 0;
+  let nastepneGodziny;
+
+  if (dzisiaj && totalMinutes < dzisiaj.open) {
+    nastepneGodziny = dzisiaj;
   } else {
     do {
       dniDoOtwarcia++;
       nastepnyDzien = (day + dniDoOtwarcia) % 7;
-    } while (!dniOtwarcia.includes(nastepnyDzien));
+      nastepneGodziny = harmonogram[nastepnyDzien];
+    } while (!nastepneGodziny);
   }
-  
-  const minutesToOpen = (dniDoOtwarcia * 24 * 60) + openMinutes - totalMinutes;
+
+  const minutesToOpen = dniDoOtwarcia * 24 * 60 + nastepneGodziny.open - totalMinutes;
   const dni = Math.floor(minutesToOpen / (24 * 60));
   const h = Math.floor((minutesToOpen % (24 * 60)) / 60);
   const m = minutesToOpen % 60;
-  
-  let odliczanie = dni > 0 ? `${dni}d ${h}h ${m}min` : `${h}h ${m}min`;
-  
+  const odliczanie = dni > 0 ? `${dni}d ${h}h ${m}min` : `${h}h ${m}min`;
+  const godzinaOtwarcia = nastepneGodziny.open === 12 * 60 ? '12:00' : '14:00';
+
   timerText.textContent = '🔴 Aktualnie zamknięte.';
-  
+
   if (dniDoOtwarcia === 0) {
     timerCountdown.textContent = `Otwieramy za: ${odliczanie}`;
   } else {
-    timerCountdown.textContent = `Zapraszamy w ${nazwyDni[nastepnyDzien]} od 12:00`;
+    timerCountdown.textContent = `Zapraszamy w ${nazwyDni[nastepnyDzien]} od ${godzinaOtwarcia}`;
     if (timerSubtext) timerSubtext.textContent = `Otwarcie za: ${odliczanie}`;
   }
 }
