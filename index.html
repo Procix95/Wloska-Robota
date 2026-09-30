@@ -151,7 +151,7 @@ body.dark footer {background: #0a0a0a;}
 </style>
 </head>
 <body>
-
+ 
 <header id="header">
   <div class="container">
     <nav>
@@ -171,7 +171,7 @@ body.dark footer {background: #0a0a0a;}
     </nav>
   </div>
 </header>
-
+ 
 <section class="hero" id="home">
   <video class="hero-bg" autoplay muted loop playsinline preload="metadata" poster="images/DSC01358.JPG">
     <source src="video/C0024.mp4" type="video/mp4">
@@ -191,7 +191,7 @@ body.dark footer {background: #0a0a0a;}
     </div>
   </div>
 </section>
-
+ 
 <section class="about" id="about">
   <div class="container">
     <h2 class="section-title fade-in">Dlaczego <span>Włoska Robota</span>?</h2>
@@ -230,7 +230,7 @@ body.dark footer {background: #0a0a0a;}
     </div>
   </div>
 </section>
-
+ 
 <section class="skladniki" id="skladniki">
   <div class="sk-eyebrow">Jakość bez kompromisów</div>
   <div class="container">
@@ -287,7 +287,7 @@ body.dark footer {background: #0a0a0a;}
     </div>
   </div>
 </section>
-
+ 
 <section class="menu" id="menu">
   <div class="container">
     <h2 class="section-title fade-in">Nasze <span>Menu</span></h2>
@@ -298,6 +298,8 @@ body.dark footer {background: #0a0a0a;}
       <button class="category-btn" data-category="miesne">Mięsne</button>
       <button class="category-btn" data-category="vege">Wege</button>
       <button class="category-btn" data-category="sosy">Sosy</button>
+      <button class="category-btn" data-category="makarony">Makarony</button>
+      <button class="category-btn" data-category="dodatki">Dodatki</button>
     </div>
     <div class="menu-grid" id="menuGrid">
       <div class="menu-item" data-category="klasyczne">
@@ -380,6 +382,16 @@ body.dark footer {background: #0a0a0a;}
           <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
         </div>
       </div>
+      <div class="menu-item" data-category="miesne">
+        <div class="menu-item-content">
+          <div class="menu-item-header">
+            <h3 class="menu-item-title">9. NDUJA</h3>
+            <span class="menu-item-price">40 zł</span>
+          </div>
+          <p class="menu-item-desc">Sos pomidorowy San Marzano, grana padano, czerwona cebula, mozzarella fior di latte, nduja, mascarpone</p>
+          <div class="menu-item-sizes"><span class="size-badge">30cm</span><span class="size-badge">24h</span></div>
+        </div>
+      </div>
       <div class="menu-item" data-category="sosy">
         <div class="menu-item-content">
           <div class="menu-item-header">
@@ -392,16 +404,34 @@ body.dark footer {background: #0a0a0a;}
       <div class="menu-item" data-category="sosy">
         <div class="menu-item-content">
           <div class="menu-item-header">
-            <h3 class="menu-item-title">SOS MARINARA</h3>
+            <h3 class="menu-item-title">SOS POMIDOROWY</h3>
             <span class="menu-item-price">5 zł</span>
           </div>
           <p class="menu-item-desc">Klasyczny sos pomidorowy ziołowy</p>
         </div>
       </div>
+      <div class="menu-item" data-category="makarony">
+        <div class="menu-item-content">
+          <div class="menu-item-header">
+            <h3 class="menu-item-title">SPAGHETTI BOLOGNESE</h3>
+            <span class="menu-item-price">25 zł</span>
+          </div>
+          <p class="menu-item-desc">Makaron spaghetti w domowym sosie bolognese</p>
+        </div>
+      </div>
+      <div class="menu-item" data-category="dodatki">
+        <div class="menu-item-content">
+          <div class="menu-item-header">
+            <h3 class="menu-item-title">FRYTKI</h3>
+            <span class="menu-item-price">10 zł</span>
+          </div>
+          <p class="menu-item-desc">Chrupiące frytki</p>
+        </div>
+      </div>
     </div>
   </div>
 </section>
-
+ 
 <section class="gallery" id="gallery">
   <div class="container">
     <h2 class="section-title fade-in">Nasza <span>Galeria</span></h2>
@@ -419,7 +449,7 @@ body.dark footer {background: #0a0a0a;}
     </div>
   </div>
 </section>
-
+ 
 <section class="contact" id="contact">
   <div class="container">
     <h2 class="section-title fade-in">Zamów <span>Teraz</span></h2>
@@ -464,7 +494,7 @@ body.dark footer {background: #0a0a0a;}
     </div>
   </div>
 </section>
-
+ 
 <footer>
   <div class="container">
     <div class="footer-content">
@@ -494,9 +524,9 @@ body.dark footer {background: #0a0a0a;}
     </div>
   </div>
 </footer>
-
+ 
 <a href="tel:668862396" class="sticky-phone"><i class="fas fa-phone"></i></a>
-
+ 
 <script>
 // Mobile menu
 const mobileToggle = document.getElementById('mobileToggle');
@@ -513,10 +543,10 @@ navLinks.querySelectorAll('a').forEach(link => {
     mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
   });
 });
-
+ 
 // Aktualny rok w stopce
 document.getElementById('currentYear').textContent = new Date().getFullYear();
-
+ 
 // Filtrowanie menu po kategoriach
 const categoryBtns = document.querySelectorAll('.category-btn');
 const menuItems = document.querySelectorAll('.menu-item');
@@ -535,7 +565,7 @@ categoryBtns.forEach(btn => {
     });
   });
 });
-
+ 
 // Dark mode
 const themeToggle = document.getElementById('themeToggle');
 themeToggle.addEventListener('click', () => {
@@ -544,13 +574,19 @@ themeToggle.addEventListener('click', () => {
     ? '<i class="fas fa-sun"></i>' 
     : '<i class="fas fa-moon"></i>';
 });
-
+ 
+// ========================================
+// DNI CAŁKOWICIE ZAMKNIĘTE (wyjątki, np. urlop, święto)
+// Format: 'RRRR-MM-DD'. Żeby usunąć wyjątek, po prostu skasuj wpis z tej listy.
+// ========================================
+const dniZamkniete = [];
+ 
 // Opening timer — śr-pt 12:00-20:00, sob-nd 14:00-22:00
 function updateTimer() {
   const now = new Date();
   const day = now.getDay(); // 0=nd, 1=pon, 2=wt, 3=śr, 4=czw, 5=pt, 6=sb
   const totalMinutes = now.getHours() * 60 + now.getMinutes();
-
+ 
   const harmonogram = {
     3: { open: 12 * 60, close: 20 * 60 }, // środa
     4: { open: 12 * 60, close: 20 * 60 }, // czwartek
@@ -558,16 +594,25 @@ function updateTimer() {
     6: { open: 14 * 60, close: 22 * 60 }, // sobota
     0: { open: 14 * 60, close: 22 * 60 }, // niedziela
   };
-
+ 
   const nazwyDni = ['Niedzielę', 'Poniedziałek', 'Wtorek', 'Środę', 'Czwartek', 'Piątek', 'Sobotę'];
-
+ 
   const timerText = document.getElementById('timerText');
   const timerCountdown = document.getElementById('timerCountdown');
   const timerSubtext = document.getElementById('timerSubtext');
   if (timerSubtext) timerSubtext.textContent = '';
-
-  const dzisiaj = harmonogram[day];
-
+ 
+  // Pomocnicza funkcja: czy dana data (jako obiekt Date) jest w liście dni zamkniętych
+  function jestZamknieteDnia(dataObj) {
+    const y = dataObj.getFullYear();
+    const m = String(dataObj.getMonth() + 1).padStart(2, '0');
+    const d = String(dataObj.getDate()).padStart(2, '0');
+    return dniZamkniete.includes(`${y}-${m}-${d}`);
+  }
+ 
+  const dzisiajZamkniete = jestZamknieteDnia(now);
+  const dzisiaj = dzisiajZamkniete ? null : harmonogram[day];
+ 
   // Czy teraz otwarte?
   if (dzisiaj && totalMinutes >= dzisiaj.open && totalMinutes < dzisiaj.close) {
     const remaining = dzisiaj.close - totalMinutes;
@@ -577,31 +622,34 @@ function updateTimer() {
     timerCountdown.textContent = `${h}h ${m}min`;
     return;
   }
-
-  // Szukamy następnego otwarcia
+ 
+  // Szukamy następnego otwarcia (pomijając dni w dniZamkniete)
   let dniDoOtwarcia = 0;
   let nastepnyDzien = day;
   let nastepneGodziny;
-
+  let dataSzukana = new Date(now);
+ 
   if (dzisiaj && totalMinutes < dzisiaj.open) {
     nastepneGodziny = dzisiaj;
   } else {
     do {
       dniDoOtwarcia++;
-      nastepnyDzien = (day + dniDoOtwarcia) % 7;
-      nastepneGodziny = harmonogram[nastepnyDzien];
+      dataSzukana = new Date(now);
+      dataSzukana.setDate(now.getDate() + dniDoOtwarcia);
+      nastepnyDzien = dataSzukana.getDay();
+      nastepneGodziny = jestZamknieteDnia(dataSzukana) ? null : harmonogram[nastepnyDzien];
     } while (!nastepneGodziny);
   }
-
+ 
   const minutesToOpen = dniDoOtwarcia * 24 * 60 + nastepneGodziny.open - totalMinutes;
   const dni = Math.floor(minutesToOpen / (24 * 60));
   const h = Math.floor((minutesToOpen % (24 * 60)) / 60);
   const m = minutesToOpen % 60;
   const odliczanie = dni > 0 ? `${dni}d ${h}h ${m}min` : `${h}h ${m}min`;
   const godzinaOtwarcia = nastepneGodziny.open === 12 * 60 ? '12:00' : '14:00';
-
+ 
   timerText.textContent = '🔴 Aktualnie zamknięte.';
-
+ 
   if (dniDoOtwarcia === 0) {
     timerCountdown.textContent = `Otwieramy za: ${odliczanie}`;
   } else {
@@ -609,10 +657,10 @@ function updateTimer() {
     if (timerSubtext) timerSubtext.textContent = `Otwarcie za: ${odliczanie}`;
   }
 }
-
+ 
 updateTimer();
 setInterval(updateTimer, 60000);
-
+ 
 // Fade in on scroll
 const fadeEls = document.querySelectorAll('.fade-in');
 const observer = new IntersectionObserver((entries) => {
@@ -624,6 +672,6 @@ const observer = new IntersectionObserver((entries) => {
 }, {threshold: 0.1});
 fadeEls.forEach(el => observer.observe(el));
 </script>
-
+ 
 </body>
 </html>
