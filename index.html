@@ -165,7 +165,7 @@ body.dark footer {background: #0a0a0a;}
         <li><a href="#menu">Menu</a></li>
         <li><a href="#gallery">Galeria</a></li>
         <li><a href="#contact">Kontakt</a></li>
-        <li><a href="#rabat">Rabat</a></li>
+        <li><a href="#konto">Konto</a></li>
         <li><button class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i></button></li>
       </ul>
       <button class="mobile-toggle" id="mobileToggle"><i class="fas fa-bars"></i></button>
@@ -677,7 +677,7 @@ fadeEls.forEach(el => observer.observe(el));
 <!-- =====================================================================
      ZAKŁADKA "RABAT" – Włoska Robota
      Wklej CAŁY ten plik tuż przed </body> w index.html.
-     Do menu dodaj link:  <a href="#rabat">Rabat</a>
+     Do menu dodaj link:  <a href="#konto">Konto</a>
      Przed użyciem uzupełnij firebaseConfig (patrz INSTRUKCJA.md).
      ===================================================================== -->
 
@@ -729,19 +729,30 @@ fadeEls.forEach(el => observer.observe(el));
 #rabat-overlay .rb-res{border-radius:12px;padding:12px;margin-bottom:10px;background:var(--rb-card);border:1px solid var(--rb-border)}
 #rabat-overlay .rb-res.ok{border-color:#2c6e49}
 #rabat-overlay .rb-res.bad{border-color:#a33}
+#rabat-overlay .rb-res.big{padding:16px;text-align:center}
+#rabat-overlay .rb-res.big.ok{background:#12301f}
+#rabat-overlay .rb-res.big.bad{background:#341616}
+#rabat-overlay .rb-big{font-size:24px;font-weight:800;margin-bottom:6px}
+#rabat-overlay .rb-res.big .rb-actions{justify-content:center}
+#rabat-overlay .rb-atab{flex:1;padding:9px 6px;border:1px solid var(--rb-border);background:transparent;color:var(--rb-text);border-radius:10px;cursor:pointer;font-size:14px;font-family:inherit}
+#rabat-overlay .rb-atab.active{background:var(--rb-accent);border-color:var(--rb-accent)}
+#rabat-overlay #rb-s-box video{width:100%;max-height:55vh;border-radius:12px;background:#000;object-fit:cover;display:block;margin-bottom:8px}
+#rabat-overlay .rb-qr{width:170px;max-width:100%;background:#fff;border-radius:10px;padding:6px;margin-top:10px}
+#rabat-overlay .rb-qr:empty{display:none}
+#rabat-overlay .rb-qr svg{display:block;width:100%;height:auto}
 </style>
 
 <!-- ===== RABAT: HTML ===== -->
 <div id="rabat-overlay" role="dialog" aria-modal="true" aria-labelledby="rb-title">
   <div class="rb-box">
     <button type="button" class="rb-close" id="rb-close" aria-label="Zamknij">&times;</button>
-    <h2 id="rb-title">Rabat</h2>
+    <h2 id="rb-title">Konto</h2>
 
     <div id="rb-loading">Ładowanie…</div>
 
     <!-- Logowanie / rejestracja -->
     <div id="rb-auth" hidden>
-      <p class="rb-meta" style="margin-top:0">Zaloguj się, aby zobaczyć swoje kody rabatowe.</p>
+      <p class="rb-meta" style="margin-top:0">Zaloguj się, aby wejść na swoje konto i zobaczyć kody rabatowe.</p>
       <div class="rb-tabs">
         <button type="button" class="rb-tab active" data-mode="login">Logowanie</button>
         <button type="button" class="rb-tab" data-mode="register">Rejestracja</button>
@@ -771,39 +782,62 @@ fadeEls.forEach(el => observer.observe(el));
       <div class="rb-admin" id="rb-admin" hidden>
         <h3>Panel administratora</h3>
         <div class="rb-stats" id="rb-stats"></div>
-
-        <h4>Sprawdź kod</h4>
-        <div class="rb-row">
-          <input id="rb-c-code" type="text" maxlength="40" placeholder="Kod od klienta" autocapitalize="characters" autocomplete="off">
-          <button type="button" class="rb-btn small" id="rb-c-btn" style="margin-bottom:10px">Sprawdź</button>
+        <div class="rb-tabs">
+          <button type="button" class="rb-atab active" data-pane="check">Sprawdź kod</button>
+          <button type="button" class="rb-atab" data-pane="grant">Przyznaj</button>
+          <button type="button" class="rb-atab" data-pane="list">Kody</button>
         </div>
-        <div id="rb-c-result"></div>
 
-        <h4>Przyznaj kod</h4>
-        <label for="rb-a-filter">Szukaj klienta</label>
-        <input id="rb-a-filter" type="search" placeholder="e-mail lub imię">
-        <label for="rb-a-user">Klient</label>
-        <select id="rb-a-user"></select>
-        <label for="rb-a-tpl">Szablon rabatu</label>
-        <select id="rb-a-tpl"></select>
-        <label for="rb-a-desc">Opis rabatu</label>
-        <input id="rb-a-desc" type="text" maxlength="120" placeholder="np. -20% na pizzę Margherita">
-        <div class="rb-actions" style="margin:0 0 10px">
-          <button type="button" class="rb-btn secondary small" id="rb-a-savetpl">Zapisz opis jako szablon</button>
-          <button type="button" class="rb-btn secondary small" id="rb-a-deltpl">Usuń wybrany szablon</button>
-        </div>
-        <label for="rb-a-code">Kod (przy „Wszyscy klienci” wpisz tylko przedrostek, np. WEEKEND)</label>
-        <div class="rb-row">
-          <input id="rb-a-code" type="text" maxlength="30" placeholder="np. PIZZA-7K2M9Q" autocapitalize="characters">
-          <button type="button" class="rb-btn secondary small" id="rb-a-gen" style="margin-bottom:10px">Losuj</button>
-        </div>
-        <label for="rb-a-exp">Ważny do (opcjonalnie)</label>
-        <input id="rb-a-exp" type="date">
-        <button type="button" class="rb-btn" id="rb-a-add">Przyznaj kod</button>
-        <div class="rb-msg" id="rb-a-msg" role="status"></div>
+        <!-- Zakładka: Sprawdź kod (skaner QR na telefonie + wpisanie ręczne) -->
+        <div class="rb-pane" data-pane="check">
+          <button type="button" class="rb-btn" id="rb-s-start" hidden>📷 Skanuj kod QR</button>
+          <div class="rb-meta" id="rb-s-hint" hidden></div>
+          <div id="rb-s-box" hidden>
+            <video id="rb-s-video" playsinline muted></video>
+            <div class="rb-actions" style="margin:0 0 8px"><button type="button" class="rb-btn secondary small" id="rb-s-stop">Zamknij aparat</button></div>
+          </div>
+          <div class="rb-msg" id="rb-s-msg" role="status"></div>
+          <div id="rb-s-result"></div>
 
-        <h4>Wszystkie przyznane kody</h4>
-        <div id="rb-a-list"></div>
+          <h4>Albo wpisz kod ręcznie</h4>
+          <div class="rb-row">
+            <input id="rb-c-code" type="text" maxlength="40" placeholder="Kod od klienta" autocapitalize="characters" autocomplete="off">
+            <button type="button" class="rb-btn small" id="rb-c-btn" style="margin-bottom:10px">Sprawdź</button>
+          </div>
+          <div class="rb-msg" id="rb-c-msg" role="status"></div>
+          <div id="rb-c-result"></div>
+        </div>
+
+        <!-- Zakładka: Przyznaj kod -->
+        <div class="rb-pane" data-pane="grant" hidden>
+          <label for="rb-a-filter">Szukaj klienta</label>
+          <input id="rb-a-filter" type="search" placeholder="e-mail lub imię">
+          <label for="rb-a-user">Klient</label>
+          <select id="rb-a-user"></select>
+          <label for="rb-a-tpl">Szablon rabatu</label>
+          <select id="rb-a-tpl"></select>
+          <label for="rb-a-desc">Opis rabatu</label>
+          <input id="rb-a-desc" type="text" maxlength="120" placeholder="np. -20% na pizzę Margherita">
+          <div class="rb-actions" style="margin:0 0 10px">
+            <button type="button" class="rb-btn secondary small" id="rb-a-savetpl">Zapisz opis jako szablon</button>
+            <button type="button" class="rb-btn secondary small" id="rb-a-deltpl">Usuń wybrany szablon</button>
+          </div>
+          <label for="rb-a-code">Kod (przy „Wszyscy klienci” wpisz tylko przedrostek, np. WEEKEND)</label>
+          <div class="rb-row">
+            <input id="rb-a-code" type="text" maxlength="30" placeholder="np. PIZZA-7K2M9Q" autocapitalize="characters">
+            <button type="button" class="rb-btn secondary small" id="rb-a-gen" style="margin-bottom:10px">Losuj</button>
+          </div>
+          <label for="rb-a-exp">Ważny do (opcjonalnie)</label>
+          <input id="rb-a-exp" type="date">
+          <button type="button" class="rb-btn" id="rb-a-add">Przyznaj kod</button>
+          <div class="rb-msg" id="rb-a-msg" role="status"></div>
+        </div>
+
+        <!-- Zakładka: lista wszystkich kodów -->
+        <div class="rb-pane" data-pane="list" hidden>
+          <h4>Wszystkie przyznane kody</h4>
+          <div id="rb-a-list"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -818,7 +852,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot,
-  addDoc, updateDoc, deleteDoc, serverTimestamp, Timestamp, writeBatch
+  addDoc, updateDoc, deleteDoc, serverTimestamp, Timestamp, writeBatch, runTransaction
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 /* ▼▼▼ WKLEJ TUTAJ SWOJĄ KONFIGURACJĘ Z FIREBASE (Ustawienia projektu → Twoje aplikacje) ▼▼▼ */
@@ -876,22 +910,23 @@ const overlay = $("rabat-overlay");
 function openRabat() {
   overlay.classList.add("open");
   document.body.style.overflow = "hidden";
-  if (location.hash !== "#rabat") history.replaceState(null, "", "#rabat");
+  if (location.hash !== "#konto") history.replaceState(null, "", "#konto");
 }
 function closeRabat() {
+  stopScanner();
   overlay.classList.remove("open");
   document.body.style.overflow = "";
-  if (location.hash === "#rabat") history.replaceState(null, "", location.pathname + location.search);
+  if (location.hash === "#konto") history.replaceState(null, "", location.pathname + location.search);
 }
 document.addEventListener("click", (e) => {
-  const a = e.target.closest('a[href="#rabat"], [data-open-rabat]');
+  const a = e.target.closest('a[href="#konto"], [data-open-rabat]');
   if (a) { e.preventDefault(); openRabat(); }
 });
 $("rb-close").addEventListener("click", closeRabat);
 overlay.addEventListener("mousedown", (e) => { if (e.target === overlay) closeRabat(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && overlay.classList.contains("open")) closeRabat(); });
-window.addEventListener("hashchange", () => { if (location.hash === "#rabat") openRabat(); });
-if (location.hash === "#rabat") openRabat();
+window.addEventListener("hashchange", () => { if (location.hash === "#konto") openRabat(); });
+if (location.hash === "#konto") openRabat();
 
 /* ---------- logowanie / rejestracja ---------- */
 let mode = "login";
@@ -964,6 +999,7 @@ let allTemplates = [];
 let lastCheck = "";
 
 function cleanup() {
+  stopScanner();
   unsubs.forEach((u) => { try { u(); } catch (_) {} });
   unsubs = [];
   isAdmin = false; myCoupons = []; allUsers = []; allCoupons = []; allTemplates = []; lastCheck = "";
@@ -1057,9 +1093,10 @@ function renderMy() {
       <div class="rb-code">${esc(c.code)}<span class="rb-badge${st.off ? " bad" : ""}">${st.label}</span></div>
       <div class="rb-desc">${esc(c.description)}</div>
       <div class="rb-meta">${c.expiresAt ? "Ważny do: " + fmtDate(c.expiresAt) : "Bez terminu ważności"}</div>
-      ${st.off ? "" : `<div class="rb-actions"><button type="button" class="rb-btn secondary small" data-act="copy" data-code="${esc(c.code)}">Kopiuj kod</button></div>`}
+      ${st.off ? "" : `<div class="rb-qr" data-qr="${esc(c.code)}"></div><div class="rb-meta" style="margin-top:6px">Pokaż ten kod przy kasie</div><div class="rb-actions"><button type="button" class="rb-btn secondary small" data-act="copy" data-code="${esc(c.code)}">Kopiuj kod</button></div>`}
     </div>`;
   }).join("");
+  drawQRs(box);
 }
 
 $("rb-my-list").addEventListener("click", async (e) => {
@@ -1212,7 +1249,7 @@ function renderCheck() {
     return `<div class="rb-res ${st.off ? "bad" : "ok"}">
       <div>${st.off ? "❌" : "✅"} <b>${esc(c.code)}</b> — ${st.label}</div>
       <div class="rb-desc">${esc(c.description)}</div>
-      <div class="rb-meta">${esc(ownerName(c))} · ${c.expiresAt ? "ważny do " + fmtDate(c.expiresAt) : "bez terminu"}</div>
+      <div class="rb-meta">${esc(ownerName(c))} · ${c.expiresAt ? "ważny do " + fmtDate(c.expiresAt) : "bez terminu"}${c.used && c.usedAt ? " · wykorzystano " + fmtDateTime(c.usedAt) : ""}</div>
       ${st.off ? "" : `<div class="rb-actions"><button type="button" class="rb-btn small" data-act="use" data-id="${esc(c.id)}">Wykorzystaj</button></div>`}
     </div>`;
   }).join("");
@@ -1226,8 +1263,9 @@ $("rb-c-code").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.p
 $("rb-c-result").addEventListener("click", async (e) => {
   const b = e.target.closest('[data-act="use"]');
   if (!b) return;
-  try { await updateDoc(doc(db, "coupons", b.dataset.id), { used: true }); }
-  catch (err) { console.error(err); setMsg(aMsg, errText(err), "err"); }
+  setMsg(cMsg, "");
+  const r = await redeem(b.dataset.id);
+  if (!r.ok) setMsg(cMsg, r.reason, "err");
 });
 
 /* ---------- szablony rabatów ---------- */
@@ -1271,6 +1309,257 @@ $("rb-a-deltpl").addEventListener("click", async () => {
     $("rb-a-tpl").value = "";
     setMsg(aMsg, "Szablon usunięty.", "ok");
   } catch (err) { console.error(err); setMsg(aMsg, errText(err), "err"); }
+});
+
+/* ---------- zakładki panelu admina ---------- */
+const cMsg = $("rb-c-msg");
+const sMsg = $("rb-s-msg");
+function setAdminTab(name) {
+  document.querySelectorAll("#rb-admin .rb-atab").forEach((b) => b.classList.toggle("active", b.dataset.pane === name));
+  document.querySelectorAll("#rb-admin .rb-pane").forEach((p) => { p.hidden = p.dataset.pane !== name; });
+  if (name !== "check") stopScanner();
+}
+document.querySelectorAll("#rb-admin .rb-atab").forEach((b) => b.addEventListener("click", () => setAdminTab(b.dataset.pane)));
+
+/* ---------- pomocnicze ---------- */
+function fmtDateTime(ts) {
+  return ts && ts.toDate ? ts.toDate().toLocaleString("pl-PL", { dateStyle: "short", timeStyle: "short" }) : "";
+}
+function pickFn(mod) {
+  let f = mod && mod.default;
+  if (f && typeof f !== "function" && typeof f.default === "function") f = f.default;
+  return typeof f === "function" ? f : null;
+}
+function parseCode(raw) {
+  let t = String(raw || "").trim().toUpperCase();
+  if (t.startsWith("WR:")) t = t.slice(3);
+  return /^[A-Z0-9-]{3,40}$/.test(t) ? t : "";
+}
+function buzz(pattern) { try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (_) {} }
+
+/* ---------- wykorzystanie kodu (transakcja: nie da się użyć dwa razy) ---------- */
+async function redeem(id) {
+  const ref = doc(db, "coupons", id);
+  try {
+    return await runTransaction(db, async (tx) => {
+      const snap = await tx.get(ref);
+      if (!snap.exists()) return { ok: false, reason: "Kod nie istnieje." };
+      const d = snap.data();
+      if (d.used) return { ok: false, reason: "Kod już wykorzystany." };
+      if (d.expiresAt && d.expiresAt.toDate() < new Date()) return { ok: false, reason: "Kod wygasł." };
+      tx.update(ref, { used: true, usedAt: serverTimestamp() });
+      return { ok: true };
+    });
+  } catch (err) {
+    console.error(err);
+    return { ok: false, reason: errText(err) };
+  }
+}
+
+/* ---------- kod QR na kuponie klienta ---------- */
+const qrCache = new Map();
+let QRfn = null;
+function qrSvg(text) {
+  const qr = QRfn(0, "M");
+  qr.addData(text);
+  qr.make();
+  const n = qr.getModuleCount(), m = 4, size = n + m * 2;
+  let d = "";
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (qr.isDark(r, c)) d += "M" + (c + m) + "," + (r + m) + "h1v1h-1z";
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + size + " " + size + '" shape-rendering="crispEdges" role="img" aria-label="Kod QR"><rect width="' + size + '" height="' + size + '" fill="#fff"/><path d="' + d + '" fill="#000"/></svg>';
+}
+async function drawQRs(root) {
+  const boxes = [...root.querySelectorAll(".rb-qr[data-qr]")];
+  if (!boxes.length) return;
+  try {
+    if (!QRfn) QRfn = pickFn(await import("https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/+esm"));
+    if (!QRfn) return;
+    boxes.forEach((el) => {
+      const code = el.dataset.qr;
+      if (!qrCache.has(code)) qrCache.set(code, qrSvg("WR:" + code));
+      el.innerHTML = qrCache.get(code);
+    });
+  } catch (err) { console.warn("Kod QR niedostępny:", err); }
+}
+
+/* ---------- skaner QR (tylko telefon) ---------- */
+const IS_PHONE = matchMedia("(pointer: coarse)").matches || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+const HAS_CAM = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+const PHONE_CAM = IS_PHONE && HAS_CAM;
+$("rb-s-start").hidden = !PHONE_CAM;
+if (!PHONE_CAM) {
+  const hint = $("rb-s-hint");
+  hint.hidden = false;
+  hint.textContent = IS_PHONE
+    ? "Aparat jest niedostępny w tej przeglądarce. Wpisz kod ręcznie."
+    : "Skanowanie kodów QR działa na telefonie: otwórz stronę na telefonie i zaloguj się kontem administratora. Tutaj możesz wpisać kod ręcznie.";
+}
+
+let stream = null, scanning = false, busy = false, scanTimer = 0;
+let detector = null, detectorBroken = false, jsQRfn = null, scanCanvas = null;
+
+async function ensureReader() {
+  if (detector || jsQRfn) return true;
+  if (!detectorBroken && "BarcodeDetector" in window) {
+    try { detector = new BarcodeDetector({ formats: ["qr_code"] }); return true; } catch (_) { detectorBroken = true; }
+  }
+  try { jsQRfn = pickFn(await import("https://cdn.jsdelivr.net/npm/jsqr@1.4.0/+esm")); return !!jsQRfn; }
+  catch (_) { return false; }
+}
+
+async function startScanner() {
+  setMsg(sMsg, "");
+  if (stream) { resumeScan(); return; }
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
+  } catch (err) {
+    console.error(err);
+    setMsg(sMsg, err && err.name === "NotAllowedError"
+      ? "Zezwól na dostęp do aparatu (ikona kłódki przy adresie), potem spróbuj ponownie."
+      : "Nie udało się włączyć aparatu.", "err");
+    return;
+  }
+  const video = $("rb-s-video");
+  video.srcObject = stream;
+  $("rb-s-box").hidden = false;
+  $("rb-s-start").hidden = true;
+  try { await video.play(); } catch (_) {}
+  if (!(await ensureReader())) {
+    setMsg(sMsg, "Nie udało się wczytać czytnika kodów QR (sprawdź internet).", "err");
+    stopScanner();
+    return;
+  }
+  busy = false;
+  scanning = true;
+  scanLoop();
+}
+
+function stopScanner() {
+  scanning = false;
+  busy = false;
+  clearTimeout(scanTimer);
+  if (stream) { stream.getTracks().forEach((t) => t.stop()); stream = null; }
+  const v = $("rb-s-video");
+  if (v) v.srcObject = null;
+  const box = $("rb-s-box");
+  if (box) box.hidden = true;
+  const st = $("rb-s-start");
+  if (st) st.hidden = !PHONE_CAM;
+}
+
+function resumeScan() {
+  if (!stream) { startScanner(); return; }
+  busy = false;
+  scanning = true;
+  scanLoop();
+}
+
+async function tick(video) {
+  try {
+    if (video.readyState < 2 || !video.videoWidth) return "";
+    if (detector) {
+      const r = await detector.detect(video);
+      return r.length ? r[0].rawValue : "";
+    }
+    if (jsQRfn) {
+      const w = Math.min(480, video.videoWidth);
+      const h = Math.round(video.videoHeight * w / video.videoWidth);
+      const cv = scanCanvas || (scanCanvas = document.createElement("canvas"));
+      cv.width = w; cv.height = h;
+      const ctx = cv.getContext("2d", { willReadFrequently: true });
+      ctx.drawImage(video, 0, 0, w, h);
+      const r = jsQRfn(ctx.getImageData(0, 0, w, h).data, w, h, { inversionAttempts: "dontInvert" });
+      return r ? r.data : "";
+    }
+  } catch (err) {
+    if (detector) { detector = null; detectorBroken = true; await ensureReader(); }
+  }
+  return "";
+}
+
+function scanLoop() {
+  clearTimeout(scanTimer);
+  if (!scanning) return;
+  tick($("rb-s-video")).then((text) => {
+    if (!scanning) return;
+    if (text) { handleScan(text); return; }
+    scanTimer = setTimeout(scanLoop, 120);
+  });
+}
+
+function scanCard(kind, title, c, note, withUndo) {
+  const body = c
+    ? `<div class="rb-code" style="font-size:18px">${esc(c.code)}</div>
+       <div class="rb-desc" style="font-size:18px">${esc(c.description)}</div>
+       <div class="rb-meta">${esc(ownerName(c))}${c.expiresAt ? " · ważny do " + fmtDate(c.expiresAt) : ""}</div>`
+    : "";
+  return `<div class="rb-res big ${kind}">
+    <div class="rb-big">${title}</div>
+    ${body}
+    ${note ? `<div class="rb-meta" style="margin-top:6px">${note}</div>` : ""}
+    <div class="rb-actions">
+      ${withUndo ? `<button type="button" class="rb-btn secondary small" data-act="undo" data-id="${esc(c.id)}">Cofnij (pomyłka)</button>` : ""}
+      <button type="button" class="rb-btn small" data-act="next">Skanuj następny</button>
+    </div>
+  </div>`;
+}
+
+async function handleScan(raw) {
+  if (busy) return;
+  busy = true;
+  scanning = false;
+  const out = $("rb-s-result");
+  try {
+    const code = parseCode(raw);
+    if (!code) {
+      out.innerHTML = scanCard("bad", "❌ To nie jest kod rabatowy", null, "Zeskanowano: " + esc(String(raw).slice(0, 40)));
+      buzz([120, 60, 120]);
+      return;
+    }
+    const matches = allCoupons.filter((x) => x.code === code);
+    const c = matches.find((x) => !couponState(x).off) || matches[0];
+    if (!c) {
+      out.innerHTML = scanCard("bad", "❌ Nie znaleziono kodu", null, "Kod: <b>" + esc(code) + "</b>");
+      buzz([120, 60, 120]);
+      return;
+    }
+    if (couponState(c).off) {
+      const usedNote = c.used && c.usedAt ? "Wykorzystano: " + fmtDateTime(c.usedAt) : "";
+      out.innerHTML = scanCard("bad", c.used ? "❌ Kod już wykorzystany" : "❌ Kod wygasł", c, usedNote);
+      buzz([120, 60, 120]);
+      return;
+    }
+    const r = await redeem(c.id);
+    if (r.ok) {
+      out.innerHTML = scanCard("ok", "✅ ZATWIERDZONE", c, "Kod został unieważniony. Nie da się go użyć ponownie.", true);
+      buzz(200);
+    } else {
+      out.innerHTML = scanCard("bad", "❌ " + esc(r.reason), c, "");
+      buzz([120, 60, 120]);
+    }
+  } finally {
+    busy = false;
+    out.scrollIntoView({ block: "nearest" });
+  }
+}
+
+$("rb-s-start").addEventListener("click", startScanner);
+$("rb-s-stop").addEventListener("click", stopScanner);
+$("rb-s-result").addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-act]");
+  if (!b) return;
+  if (b.dataset.act === "next") {
+    $("rb-s-result").innerHTML = "";
+    resumeScan();
+  } else if (b.dataset.act === "undo") {
+    try {
+      await updateDoc(doc(db, "coupons", b.dataset.id), { used: false, usedAt: null });
+      $("rb-s-result").innerHTML = '<div class="rb-res"><div>↩️ Cofnięto. Kod znów jest aktywny.</div><div class="rb-actions"><button type="button" class="rb-btn small" data-act="next">Skanuj następny</button></div></div>';
+    } catch (err) {
+      console.error(err);
+      setMsg(sMsg, errText(err), "err");
+    }
+  }
 });
 </script>
 <!-- ===== RABAT: KONIEC ===== -->
