@@ -722,6 +722,13 @@ fadeEls.forEach(el => observer.observe(el));
 #rabat-overlay .rb-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 #rabat-overlay .rb-admin{margin-top:28px;padding-top:8px;border-top:1px solid var(--rb-border)}
 #rabat-overlay .rb-empty{color:var(--rb-muted);font-size:14px;padding:8px 0}
+#rabat-overlay .rb-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;margin-bottom:8px}
+#rabat-overlay .rb-stat{background:var(--rb-card);border:1px solid var(--rb-border);border-radius:10px;padding:10px;text-align:center}
+#rabat-overlay .rb-stat b{display:block;font-size:22px}
+#rabat-overlay .rb-stat span{font-size:12px;color:var(--rb-muted)}
+#rabat-overlay .rb-res{border-radius:12px;padding:12px;margin-bottom:10px;background:var(--rb-card);border:1px solid var(--rb-border)}
+#rabat-overlay .rb-res.ok{border-color:#2c6e49}
+#rabat-overlay .rb-res.bad{border-color:#a33}
 </style>
 
 <!-- ===== RABAT: HTML ===== -->
@@ -763,13 +770,29 @@ fadeEls.forEach(el => observer.observe(el));
       <!-- Panel administratora (widoczny tylko dla admina) -->
       <div class="rb-admin" id="rb-admin" hidden>
         <h3>Panel administratora</h3>
+        <div class="rb-stats" id="rb-stats"></div>
+
+        <h4>Sprawdź kod</h4>
+        <div class="rb-row">
+          <input id="rb-c-code" type="text" maxlength="40" placeholder="Kod od klienta" autocapitalize="characters" autocomplete="off">
+          <button type="button" class="rb-btn small" id="rb-c-btn" style="margin-bottom:10px">Sprawdź</button>
+        </div>
+        <div id="rb-c-result"></div>
+
+        <h4>Przyznaj kod</h4>
         <label for="rb-a-filter">Szukaj klienta</label>
         <input id="rb-a-filter" type="search" placeholder="e-mail lub imię">
         <label for="rb-a-user">Klient</label>
         <select id="rb-a-user"></select>
+        <label for="rb-a-tpl">Szablon rabatu</label>
+        <select id="rb-a-tpl"></select>
         <label for="rb-a-desc">Opis rabatu</label>
         <input id="rb-a-desc" type="text" maxlength="120" placeholder="np. -20% na pizzę Margherita">
-        <label for="rb-a-code">Kod</label>
+        <div class="rb-actions" style="margin:0 0 10px">
+          <button type="button" class="rb-btn secondary small" id="rb-a-savetpl">Zapisz opis jako szablon</button>
+          <button type="button" class="rb-btn secondary small" id="rb-a-deltpl">Usuń wybrany szablon</button>
+        </div>
+        <label for="rb-a-code">Kod (przy „Wszyscy klienci” wpisz tylko przedrostek, np. WEEKEND)</label>
         <div class="rb-row">
           <input id="rb-a-code" type="text" maxlength="30" placeholder="np. PIZZA-7K2M9Q" autocapitalize="characters">
           <button type="button" class="rb-btn secondary small" id="rb-a-gen" style="margin-bottom:10px">Losuj</button>
@@ -795,7 +818,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot,
-  addDoc, updateDoc, deleteDoc, serverTimestamp, Timestamp
+  addDoc, updateDoc, deleteDoc, serverTimestamp, Timestamp, writeBatch
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 /* ▼▼▼ WKLEJ TUTAJ SWOJĄ KONFIGURACJĘ Z FIREBASE (Ustawienia projektu → Twoje aplikacje) ▼▼▼ */
@@ -835,9 +858,17 @@ const ERR = {
   "auth/popup-closed-by-user": "",
   "auth/cancelled-popup-request": "",
   "auth/account-exists-with-different-credential": "Konto z tym e-mailem istnieje już z innym sposobem logowania.",
+  "auth/operation-not-allowed": "Logowanie Google nie jest włączone w Firebase (Authentication → Sign-in method → Google → Enable).",
+  "auth/unauthorized-domain": "Ta domena nie jest dodana w Firebase (Authentication → Settings → Authorized domains).",
+  "auth/configuration-not-found": "W Firebase kliknij najpierw „Get started” w zakładce Authentication.",
+  "auth/invalid-api-key": "Błędny klucz API w index.html (firebaseConfig).",
+  "auth/api-key-not-valid": "Błędny klucz API w index.html (firebaseConfig).",
   "permission-denied": "Brak uprawnień do tej operacji."
 };
-const errText = (e) => (e && e.code in ERR ? ERR[e.code] : "Coś poszło nie tak. Spróbuj ponownie.");
+const errText = (e) => {
+  if (e && e.code in ERR) return ERR[e.code];
+  return "Coś poszło nie tak (" + ((e && (e.code || e.message)) || "nieznany błąd") + ").";
+};
 function setMsg(el, text, type) { el.textContent = text || ""; el.className = "rb-msg" + (type ? " " + type : ""); }
 
 /* ---------- otwieranie / zamykanie zakładki ---------- */
@@ -909,7 +940,7 @@ $("rb-form").addEventListener("submit", async (e) => {
 $("rb-google").addEventListener("click", async () => {
   setMsg(authMsg, "");
   try { await signInWithPopup(auth, new GoogleAuthProvider()); }
-  catch (err) { setMsg(authMsg, errText(err), "err"); }
+  catch (err) { console.error("Rabat Google:", err); setMsg(authMsg, errText(err), "err"); }
 });
 
 $("rb-reset").addEventListener("click", async () => {
@@ -929,11 +960,13 @@ let isAdmin = false;
 let myCoupons = [];
 let allUsers = [];
 let allCoupons = [];
+let allTemplates = [];
+let lastCheck = "";
 
 function cleanup() {
   unsubs.forEach((u) => { try { u(); } catch (_) {} });
   unsubs = [];
-  isAdmin = false; myCoupons = []; allUsers = []; allCoupons = [];
+  isAdmin = false; myCoupons = []; allUsers = []; allCoupons = []; allTemplates = []; lastCheck = "";
 }
 function showOnly(which) {
   $("rb-loading").hidden = which !== "loading";
@@ -943,21 +976,29 @@ function showOnly(which) {
 
 onAuthStateChanged(auth, (user) => { if (!registering) handleUser(user); });
 
+const withTimeout = (p, ms = 12000) =>
+  Promise.race([p, new Promise((_, rej) => setTimeout(() => rej({ code: "timeout" }), ms))]);
+
 async function handleUser(user) {
   cleanup();
   if (!user) { showOnly("auth"); return; }
   showOnly("loading");
   try {
     const uref = doc(db, "users", user.uid);
-    const snap = await getDoc(uref);
+    const snap = await withTimeout(getDoc(uref));
     if (!snap.exists()) {
-      await setDoc(uref, { email: user.email || "", name: user.displayName || "", createdAt: serverTimestamp() });
+      await withTimeout(setDoc(uref, { email: user.email || "", name: user.displayName || "", createdAt: serverTimestamp() }));
     }
-    isAdmin = (await getDoc(doc(db, "admins", user.uid))).exists();
+    isAdmin = (await withTimeout(getDoc(doc(db, "admins", user.uid)))).exists();
   } catch (err) {
     console.error("Rabat:", err);
     showOnly("auth");
-    setMsg(authMsg, "Nie udało się wczytać konta. Spróbuj ponownie.", "err");
+    const hint = err.code === "timeout"
+      ? "Baza Firestore nie odpowiada. Sprawdź w Firebase, czy ją utworzyłeś (Firestore Database → Create database)."
+      : err.code === "permission-denied"
+        ? "Brak uprawnień. Wklej i opublikuj reguły z pliku firestore.rules (Firestore → zakładka Rules)."
+        : "Szczegóły: " + (err.code || err.message);
+    setMsg(authMsg, "Nie udało się wczytać konta. " + hint, "err");
     return;
   }
 
@@ -968,7 +1009,7 @@ async function handleUser(user) {
   unsubs.push(onSnapshot(
     query(collection(db, "coupons"), where("uid", "==", user.uid)),
     (s) => { myCoupons = s.docs.map((d) => ({ id: d.id, ...d.data() })); renderMy(); },
-    (err) => { console.error(err); $("rb-my-list").innerHTML = '<div class="rb-empty">Nie udało się wczytać kodów.</div>'; }
+    (err) => { console.error(err); $("rb-my-list").innerHTML = '<div class="rb-empty">Nie udało się wczytać kodów (' + esc(err.code || err.message) + ').</div>'; }
   ));
 
   if (isAdmin) {
@@ -976,12 +1017,23 @@ async function handleUser(user) {
       allUsers = s.docs.map((d) => ({ id: d.id, ...d.data() }))
         .sort((a, b) => String(a.email).localeCompare(String(b.email)));
       renderUserSelect();
+      renderStats();
     }, console.error));
     unsubs.push(onSnapshot(collection(db, "coupons"), (s) => {
       allCoupons = s.docs.map((d) => ({ id: d.id, ...d.data() }))
         .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
       renderAdminList();
     }, console.error));
+    renderTemplates();
+    unsubs.push(onSnapshot(collection(db, "templates"), (s) => {
+      allTemplates = s.docs.map((d) => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
+      renderTemplates();
+    }, (err) => {
+      console.warn("Szablony niedostępne (opublikuj nowe reguły z firestore.rules):", err.code);
+      allTemplates = [];
+      renderTemplates();
+    }));
   }
 }
 
@@ -1026,44 +1078,65 @@ function renderUserSelect() {
   const prev = sel.value;
   const q = $("rb-a-filter").value.trim().toLowerCase();
   const items = allUsers.filter((u) => !q || (u.email || "").toLowerCase().includes(q) || (u.name || "").toLowerCase().includes(q));
-  sel.innerHTML = items.length
-    ? items.map((u) => `<option value="${esc(u.id)}">${esc(u.name ? u.name + " — " : "")}${esc(u.email)}</option>`).join("")
-    : '<option value="">Brak klientów</option>';
-  if (items.some((u) => u.id === prev)) sel.value = prev;
+  sel.innerHTML = '<option value="__all__">★ Wszyscy klienci (' + allUsers.length + ')</option>'
+    + items.map((u) => `<option value="${esc(u.id)}">${esc(u.name ? u.name + " — " : "")}${esc(u.email)}</option>`).join("");
+  if (prev && [...sel.options].some((o) => o.value === prev)) sel.value = prev;
+  else if (items.length) sel.value = items[0].id;
 }
 $("rb-a-filter").addEventListener("input", renderUserSelect);
 
-function genCode() {
+function genCode(prefix = "PIZZA") {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // bez 0/O/1/I
   const buf = new Uint32Array(6);
   crypto.getRandomValues(buf);
-  return "PIZZA-" + Array.from(buf, (n) => alphabet[n % alphabet.length]).join("");
+  return prefix + "-" + Array.from(buf, (n) => alphabet[n % alphabet.length]).join("");
 }
 $("rb-a-gen").addEventListener("click", () => { $("rb-a-code").value = genCode(); });
 
 $("rb-a-add").addEventListener("click", async () => {
   setMsg(aMsg, "");
-  const uid = $("rb-a-user").value;
-  const user = allUsers.find((u) => u.id === uid);
+  const sel = $("rb-a-user").value;
   const description = $("rb-a-desc").value.trim();
-  let code = $("rb-a-code").value.trim().toUpperCase();
+  const codeIn = $("rb-a-code").value.trim().toUpperCase();
   const exp = $("rb-a-exp").value;
-  if (!user) { setMsg(aMsg, "Wybierz klienta.", "err"); return; }
+  const expiresAt = exp ? Timestamp.fromDate(new Date(exp + "T23:59:59")) : null;
+  if (!sel) { setMsg(aMsg, "Wybierz klienta.", "err"); return; }
   if (!description) { setMsg(aMsg, "Wpisz opis rabatu.", "err"); return; }
-  if (!code) { code = genCode(); $("rb-a-code").value = code; }
-  if (!/^[A-Z0-9-]{3,30}$/.test(code)) { setMsg(aMsg, "Kod: 3–30 znaków (litery, cyfry, myślnik).", "err"); return; }
   try {
-    await addDoc(collection(db, "coupons"), {
-      uid,
-      userEmail: user.email || "",
-      code,
-      description,
-      expiresAt: exp ? Timestamp.fromDate(new Date(exp + "T23:59:59")) : null,
-      used: false,
-      createdAt: serverTimestamp()
-    });
-    setMsg(aMsg, "Kod " + code + " przyznany: " + (user.email || ""), "ok");
-    $("rb-a-desc").value = ""; $("rb-a-code").value = ""; $("rb-a-exp").value = "";
+    if (sel === "__all__") {
+      const prefix = codeIn || "PIZZA";
+      if (!/^[A-Z0-9-]{2,18}$/.test(prefix)) { setMsg(aMsg, "Przedrostek: 2–18 znaków (litery, cyfry, myślnik).", "err"); return; }
+      if (!allUsers.length) { setMsg(aMsg, "Nie ma jeszcze żadnych klientów.", "err"); return; }
+      if (!confirm("Przyznać ten rabat WSZYSTKIM klientom (" + allUsers.length + ")?")) return;
+      const taken = new Set(allCoupons.map((c) => c.code));
+      let n = 0;
+      for (let i = 0; i < allUsers.length; i += 400) {
+        const batch = writeBatch(db);
+        allUsers.slice(i, i + 400).forEach((u) => {
+          let code;
+          do { code = genCode(prefix); } while (taken.has(code));
+          taken.add(code);
+          batch.set(doc(collection(db, "coupons")), {
+            uid: u.id, userEmail: u.email || "", code, description, expiresAt, used: false, createdAt: serverTimestamp()
+          });
+          n++;
+        });
+        await batch.commit();
+      }
+      setMsg(aMsg, "Przyznano " + n + " kodów (" + prefix + "-XXXXXX), każdy klient ma własny.", "ok");
+    } else {
+      const user = allUsers.find((u) => u.id === sel);
+      if (!user) { setMsg(aMsg, "Wybierz klienta.", "err"); return; }
+      let code = codeIn;
+      if (!code) { code = genCode(); $("rb-a-code").value = code; }
+      if (!/^[A-Z0-9-]{3,30}$/.test(code)) { setMsg(aMsg, "Kod: 3–30 znaków (litery, cyfry, myślnik).", "err"); return; }
+      if (allCoupons.some((c) => c.code === code)) { setMsg(aMsg, "Taki kod już istnieje. Wpisz inny albo kliknij Losuj.", "err"); return; }
+      await addDoc(collection(db, "coupons"), {
+        uid: user.id, userEmail: user.email || "", code, description, expiresAt, used: false, createdAt: serverTimestamp()
+      });
+      setMsg(aMsg, "Kod " + code + " przyznany: " + (user.email || ""), "ok");
+    }
+    $("rb-a-desc").value = ""; $("rb-a-code").value = ""; $("rb-a-exp").value = ""; $("rb-a-tpl").value = "";
   } catch (err) {
     console.error(err);
     setMsg(aMsg, errText(err), "err");
@@ -1071,6 +1144,8 @@ $("rb-a-add").addEventListener("click", async () => {
 });
 
 function renderAdminList() {
+  renderStats();
+  renderCheck();
   const box = $("rb-a-list");
   if (!allCoupons.length) { box.innerHTML = '<div class="rb-empty">Brak przyznanych kodów.</div>'; return; }
   box.innerHTML = allCoupons.map((c) => {
@@ -1102,6 +1177,100 @@ $("rb-a-list").addEventListener("click", async (e) => {
     console.error(err);
     setMsg(aMsg, errText(err), "err");
   }
+});
+
+/* ---------- statystyki ---------- */
+function renderStats() {
+  const box = $("rb-stats");
+  if (!box) return;
+  let active = 0, used = 0, expired = 0;
+  allCoupons.forEach((c) => {
+    const st = couponState(c);
+    if (c.used) used++; else if (st.off) expired++; else active++;
+  });
+  box.innerHTML = [["Klienci", allUsers.length], ["Przyznane", allCoupons.length], ["Aktywne", active], ["Wykorzystane", used], ["Wygasłe", expired]]
+    .map(([label, n]) => `<div class="rb-stat"><b>${n}</b><span>${label}</span></div>`).join("");
+}
+
+/* ---------- sprawdzanie kodu ---------- */
+function ownerName(c) {
+  const u = allUsers.find((x) => x.id === c.uid);
+  if (u) return (u.name ? u.name + " — " : "") + (u.email || "");
+  return c.userEmail || "nieznany klient";
+}
+function renderCheck() {
+  const box = $("rb-c-result");
+  if (!box) return;
+  if (!lastCheck) { box.innerHTML = ""; return; }
+  const found = allCoupons.filter((c) => c.code === lastCheck);
+  if (!found.length) {
+    box.innerHTML = `<div class="rb-res bad">❌ Nie znaleziono kodu <b>${esc(lastCheck)}</b></div>`;
+    return;
+  }
+  box.innerHTML = found.map((c) => {
+    const st = couponState(c);
+    return `<div class="rb-res ${st.off ? "bad" : "ok"}">
+      <div>${st.off ? "❌" : "✅"} <b>${esc(c.code)}</b> — ${st.label}</div>
+      <div class="rb-desc">${esc(c.description)}</div>
+      <div class="rb-meta">${esc(ownerName(c))} · ${c.expiresAt ? "ważny do " + fmtDate(c.expiresAt) : "bez terminu"}</div>
+      ${st.off ? "" : `<div class="rb-actions"><button type="button" class="rb-btn small" data-act="use" data-id="${esc(c.id)}">Wykorzystaj</button></div>`}
+    </div>`;
+  }).join("");
+}
+function runCheck() {
+  lastCheck = $("rb-c-code").value.trim().toUpperCase();
+  renderCheck();
+}
+$("rb-c-btn").addEventListener("click", runCheck);
+$("rb-c-code").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); runCheck(); } });
+$("rb-c-result").addEventListener("click", async (e) => {
+  const b = e.target.closest('[data-act="use"]');
+  if (!b) return;
+  try { await updateDoc(doc(db, "coupons", b.dataset.id), { used: true }); }
+  catch (err) { console.error(err); setMsg(aMsg, errText(err), "err"); }
+});
+
+/* ---------- szablony rabatów ---------- */
+const DEFAULT_TPL = ["-10% na całe zamówienie", "-20% na pizzę", "-5 zł na zamówienie", "Darmowy sos do pizzy", "Darmowe frytki", "Darmowy dowóz"];
+
+function renderTemplates() {
+  const sel = $("rb-a-tpl");
+  if (!sel) return;
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">— wybierz szablon —</option>'
+    + DEFAULT_TPL.map((t, i) => `<option value="d:${i}">${esc(t)}</option>`).join("")
+    + allTemplates.map((t) => `<option value="c:${esc(t.id)}">★ ${esc(t.text)}</option>`).join("");
+  if ([...sel.options].some((o) => o.value === prev)) sel.value = prev;
+}
+$("rb-a-tpl").addEventListener("change", () => {
+  const v = $("rb-a-tpl").value;
+  if (!v) return;
+  const id = v.slice(2);
+  const text = v[0] === "d" ? DEFAULT_TPL[Number(id)] : (allTemplates.find((t) => t.id === id) || {}).text;
+  if (text) $("rb-a-desc").value = text;
+});
+$("rb-a-savetpl").addEventListener("click", async () => {
+  setMsg(aMsg, "");
+  const text = $("rb-a-desc").value.trim();
+  if (!text) { setMsg(aMsg, "Najpierw wpisz opis rabatu.", "err"); return; }
+  if (DEFAULT_TPL.includes(text) || allTemplates.some((t) => t.text === text)) { setMsg(aMsg, "Taki szablon już istnieje.", "err"); return; }
+  try {
+    await addDoc(collection(db, "templates"), { text, createdAt: serverTimestamp() });
+    setMsg(aMsg, "Szablon zapisany.", "ok");
+  } catch (err) {
+    console.error(err);
+    setMsg(aMsg, err.code === "permission-denied" ? "Aby zapisywać szablony, opublikuj nowe reguły z pliku firestore.rules." : errText(err), "err");
+  }
+});
+$("rb-a-deltpl").addEventListener("click", async () => {
+  setMsg(aMsg, "");
+  const v = $("rb-a-tpl").value;
+  if (!v.startsWith("c:")) { setMsg(aMsg, "Wybierz własny szablon (oznaczony ★), żeby go usunąć.", "err"); return; }
+  try {
+    await deleteDoc(doc(db, "templates", v.slice(2)));
+    $("rb-a-tpl").value = "";
+    setMsg(aMsg, "Szablon usunięty.", "ok");
+  } catch (err) { console.error(err); setMsg(aMsg, errText(err), "err"); }
 });
 </script>
 <!-- ===== RABAT: KONIEC ===== -->
