@@ -165,6 +165,7 @@ body.dark footer {background: #0a0a0a;}
         <li><a href="#menu">Menu</a></li>
         <li><a href="#gallery">Galeria</a></li>
         <li><a href="#contact">Kontakt</a></li>
+        <li><a href="#rabat">Rabat</a></li>
         <li><button class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i></button></li>
       </ul>
       <button class="mobile-toggle" id="mobileToggle"><i class="fas fa-bars"></i></button>
@@ -673,5 +674,437 @@ const observer = new IntersectionObserver((entries) => {
 fadeEls.forEach(el => observer.observe(el));
 </script>
  
+<!-- =====================================================================
+     ZAKŁADKA "RABAT" – Włoska Robota
+     Wklej CAŁY ten plik tuż przed </body> w index.html.
+     Do menu dodaj link:  <a href="#rabat">Rabat</a>
+     Przed użyciem uzupełnij firebaseConfig (patrz INSTRUKCJA.md).
+     ===================================================================== -->
+
+<!-- ===== RABAT: STYLE ===== -->
+<style>
+#rabat-overlay{--rb-accent:#e63946;--rb-bg:#17171c;--rb-card:#212128;--rb-text:#f3f3f5;--rb-muted:#9b9ba8;--rb-border:#33333d;
+  display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);overflow-y:auto;padding:16px;box-sizing:border-box}
+#rabat-overlay *{box-sizing:border-box}
+#rabat-overlay.open{display:block}
+#rabat-overlay [hidden]{display:none!important}
+#rabat-overlay .rb-box{position:relative;max-width:640px;margin:24px auto;background:var(--rb-bg);color:var(--rb-text);
+  border:1px solid var(--rb-border);border-radius:16px;padding:24px;line-height:1.45}
+#rabat-overlay h2{margin:0 0 16px;font-size:26px}
+#rabat-overlay h3{margin:24px 0 12px;font-size:18px}
+#rabat-overlay h4{margin:20px 0 10px;font-size:15px;color:var(--rb-muted)}
+#rabat-overlay .rb-close{position:absolute;top:10px;right:14px;background:none;border:0;color:var(--rb-muted);font-size:30px;line-height:1;cursor:pointer}
+#rabat-overlay .rb-tabs{display:flex;gap:8px;margin-bottom:16px}
+#rabat-overlay .rb-tab{flex:1;padding:10px;border:1px solid var(--rb-border);background:transparent;color:var(--rb-text);border-radius:10px;cursor:pointer;font-size:15px}
+#rabat-overlay .rb-tab.active{background:var(--rb-accent);border-color:var(--rb-accent)}
+#rabat-overlay input,#rabat-overlay select{width:100%;padding:11px 12px;margin-bottom:10px;border-radius:10px;border:1px solid var(--rb-border);
+  background:var(--rb-card);color:var(--rb-text);font-size:16px;font-family:inherit}
+#rabat-overlay label{display:block;font-size:13px;color:var(--rb-muted);margin:4px 0}
+#rabat-overlay .rb-btn{display:block;width:100%;padding:12px;border:0;border-radius:10px;background:var(--rb-accent);color:#fff;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit}
+#rabat-overlay .rb-btn.secondary{background:transparent;border:1px solid var(--rb-border);color:var(--rb-text);font-weight:500}
+#rabat-overlay .rb-btn.small{display:inline-block;width:auto;padding:7px 12px;font-size:13px}
+#rabat-overlay .rb-google{background:#fff;color:#222;margin-top:10px}
+#rabat-overlay .rb-or{text-align:center;color:var(--rb-muted);margin:14px 0 4px;font-size:13px}
+#rabat-overlay .rb-link{background:none;border:0;color:var(--rb-muted);text-decoration:underline;cursor:pointer;font-size:13px;padding:8px 0}
+#rabat-overlay .rb-msg{min-height:1.3em;font-size:14px;margin:8px 0}
+#rabat-overlay .rb-msg.err{color:#ff6b6b}
+#rabat-overlay .rb-msg.ok{color:#5fd68a}
+#rabat-overlay .rb-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;color:var(--rb-muted);font-size:14px}
+#rabat-overlay .rb-row{display:flex;gap:8px}
+#rabat-overlay .rb-row input{flex:1}
+#rabat-overlay .rb-coupon{background:var(--rb-card);border:1px dashed var(--rb-accent);border-radius:12px;padding:14px;margin-bottom:12px}
+#rabat-overlay .rb-coupon.off{opacity:.55;border-color:var(--rb-border)}
+#rabat-overlay .rb-code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:22px;font-weight:700;letter-spacing:2px;word-break:break-all}
+#rabat-overlay .rb-desc{margin:4px 0}
+#rabat-overlay .rb-meta{font-size:13px;color:var(--rb-muted)}
+#rabat-overlay .rb-badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:12px;background:#2c6e49;color:#fff;margin-left:6px;vertical-align:middle}
+#rabat-overlay .rb-badge.bad{background:#6b6b78}
+#rabat-overlay .rb-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+#rabat-overlay .rb-admin{margin-top:28px;padding-top:8px;border-top:1px solid var(--rb-border)}
+#rabat-overlay .rb-empty{color:var(--rb-muted);font-size:14px;padding:8px 0}
+</style>
+
+<!-- ===== RABAT: HTML ===== -->
+<div id="rabat-overlay" role="dialog" aria-modal="true" aria-labelledby="rb-title">
+  <div class="rb-box">
+    <button type="button" class="rb-close" id="rb-close" aria-label="Zamknij">&times;</button>
+    <h2 id="rb-title">Rabat</h2>
+
+    <div id="rb-loading">Ładowanie…</div>
+
+    <!-- Logowanie / rejestracja -->
+    <div id="rb-auth" hidden>
+      <p class="rb-meta" style="margin-top:0">Zaloguj się, aby zobaczyć swoje kody rabatowe.</p>
+      <div class="rb-tabs">
+        <button type="button" class="rb-tab active" data-mode="login">Logowanie</button>
+        <button type="button" class="rb-tab" data-mode="register">Rejestracja</button>
+      </div>
+      <form id="rb-form" novalidate>
+        <input id="rb-name" type="text" placeholder="Imię" autocomplete="given-name" maxlength="60" hidden>
+        <input id="rb-email" type="email" placeholder="E-mail" autocomplete="email" required>
+        <input id="rb-pass" type="password" placeholder="Hasło (min. 6 znaków)" autocomplete="current-password" minlength="6" required>
+        <button type="submit" class="rb-btn" id="rb-submit">Zaloguj się</button>
+      </form>
+      <div class="rb-or">lub</div>
+      <button type="button" class="rb-btn rb-google" id="rb-google">Kontynuuj z Google</button>
+      <button type="button" class="rb-link" id="rb-reset">Nie pamiętam hasła</button>
+      <div class="rb-msg" id="rb-auth-msg" role="status"></div>
+    </div>
+
+    <!-- Widok zalogowanego -->
+    <div id="rb-user" hidden>
+      <div class="rb-top">
+        <span id="rb-who"></span>
+        <button type="button" class="rb-btn secondary small" id="rb-logout">Wyloguj</button>
+      </div>
+      <h3 style="margin-top:8px">Twoje kody rabatowe</h3>
+      <div id="rb-my-list"></div>
+
+      <!-- Panel administratora (widoczny tylko dla admina) -->
+      <div class="rb-admin" id="rb-admin" hidden>
+        <h3>Panel administratora</h3>
+        <label for="rb-a-filter">Szukaj klienta</label>
+        <input id="rb-a-filter" type="search" placeholder="e-mail lub imię">
+        <label for="rb-a-user">Klient</label>
+        <select id="rb-a-user"></select>
+        <label for="rb-a-desc">Opis rabatu</label>
+        <input id="rb-a-desc" type="text" maxlength="120" placeholder="np. -20% na pizzę Margherita">
+        <label for="rb-a-code">Kod</label>
+        <div class="rb-row">
+          <input id="rb-a-code" type="text" maxlength="30" placeholder="np. PIZZA-7K2M9Q" autocapitalize="characters">
+          <button type="button" class="rb-btn secondary small" id="rb-a-gen" style="margin-bottom:10px">Losuj</button>
+        </div>
+        <label for="rb-a-exp">Ważny do (opcjonalnie)</label>
+        <input id="rb-a-exp" type="date">
+        <button type="button" class="rb-btn" id="rb-a-add">Przyznaj kod</button>
+        <div class="rb-msg" id="rb-a-msg" role="status"></div>
+
+        <h4>Wszystkie przyznane kody</h4>
+        <div id="rb-a-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RABAT: SKRYPT ===== -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  signInWithPopup, GoogleAuthProvider, signOut, sendPasswordResetEmail, sendEmailVerification, updateProfile
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot,
+  addDoc, updateDoc, deleteDoc, serverTimestamp, Timestamp
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+/* ▼▼▼ WKLEJ TUTAJ SWOJĄ KONFIGURACJĘ Z FIREBASE (Ustawienia projektu → Twoje aplikacje) ▼▼▼ */
+const firebaseConfig = {
+  apiKey: "AIzaSyDoqjW1vcVdcDh_zEhrI3s6jLxINedh8G0",
+  authDomain: "wloskarobota-4c044.firebaseapp.com",
+  projectId: "wloskarobota-4c044",
+  storageBucket: "wloskarobota-4c044.firebasestorage.app",
+  messagingSenderId: "304699522128",
+  appId: "1:304699522128:web:eb35d88706ef3a6f6a6555",
+  measurementId: "G-2VZPB4ZEH3"
+};
+/* ▲▲▲ */
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+auth.languageCode = "pl";
+const db = getFirestore(app);
+
+/* ---------- pomocnicze ---------- */
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmtDate = (ts) => (ts && ts.toDate ? ts.toDate().toLocaleDateString("pl-PL") : "");
+
+const ERR = {
+  "auth/invalid-email": "Niepoprawny adres e-mail.",
+  "auth/missing-password": "Wpisz hasło.",
+  "auth/weak-password": "Hasło jest za słabe (min. 6 znaków).",
+  "auth/email-already-in-use": "Konto z tym adresem e-mail już istnieje.",
+  "auth/invalid-credential": "Błędny e-mail lub hasło.",
+  "auth/wrong-password": "Błędny e-mail lub hasło.",
+  "auth/user-not-found": "Błędny e-mail lub hasło.",
+  "auth/too-many-requests": "Za dużo prób. Spróbuj ponownie za chwilę.",
+  "auth/network-request-failed": "Brak połączenia z internetem.",
+  "auth/popup-blocked": "Przeglądarka zablokowała okno logowania Google. Zezwól na wyskakujące okna.",
+  "auth/popup-closed-by-user": "",
+  "auth/cancelled-popup-request": "",
+  "auth/account-exists-with-different-credential": "Konto z tym e-mailem istnieje już z innym sposobem logowania.",
+  "permission-denied": "Brak uprawnień do tej operacji."
+};
+const errText = (e) => (e && e.code in ERR ? ERR[e.code] : "Coś poszło nie tak. Spróbuj ponownie.");
+function setMsg(el, text, type) { el.textContent = text || ""; el.className = "rb-msg" + (type ? " " + type : ""); }
+
+/* ---------- otwieranie / zamykanie zakładki ---------- */
+const overlay = $("rabat-overlay");
+function openRabat() {
+  overlay.classList.add("open");
+  document.body.style.overflow = "hidden";
+  if (location.hash !== "#rabat") history.replaceState(null, "", "#rabat");
+}
+function closeRabat() {
+  overlay.classList.remove("open");
+  document.body.style.overflow = "";
+  if (location.hash === "#rabat") history.replaceState(null, "", location.pathname + location.search);
+}
+document.addEventListener("click", (e) => {
+  const a = e.target.closest('a[href="#rabat"], [data-open-rabat]');
+  if (a) { e.preventDefault(); openRabat(); }
+});
+$("rb-close").addEventListener("click", closeRabat);
+overlay.addEventListener("mousedown", (e) => { if (e.target === overlay) closeRabat(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && overlay.classList.contains("open")) closeRabat(); });
+window.addEventListener("hashchange", () => { if (location.hash === "#rabat") openRabat(); });
+if (location.hash === "#rabat") openRabat();
+
+/* ---------- logowanie / rejestracja ---------- */
+let mode = "login";
+let registering = false;
+const authMsg = $("rb-auth-msg");
+
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll("#rabat-overlay .rb-tab").forEach((b) => b.classList.toggle("active", b.dataset.mode === m));
+  $("rb-name").hidden = m !== "register";
+  $("rb-reset").hidden = m !== "login";
+  $("rb-submit").textContent = m === "register" ? "Załóż konto" : "Zaloguj się";
+  $("rb-pass").autocomplete = m === "register" ? "new-password" : "current-password";
+  setMsg(authMsg, "");
+}
+document.querySelectorAll("#rabat-overlay .rb-tab").forEach((b) => b.addEventListener("click", () => setMode(b.dataset.mode)));
+setMode("login");
+
+$("rb-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const email = $("rb-email").value.trim();
+  const pass = $("rb-pass").value;
+  const name = $("rb-name").value.trim();
+  setMsg(authMsg, "");
+  if (!email || !pass) { setMsg(authMsg, "Wpisz e-mail i hasło.", "err"); return; }
+  const wasRegister = mode === "register";
+  try {
+    if (wasRegister) {
+      registering = true;
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      if (name) await updateProfile(cred.user, { displayName: name });
+      try { await sendEmailVerification(cred.user); } catch (_) { /* nieistotne */ }
+    } else {
+      await signInWithEmailAndPassword(auth, email, pass);
+    }
+  } catch (err) {
+    setMsg(authMsg, errText(err), "err");
+  } finally {
+    if (wasRegister) {
+      registering = false;
+      if (auth.currentUser) handleUser(auth.currentUser);
+    }
+  }
+});
+
+$("rb-google").addEventListener("click", async () => {
+  setMsg(authMsg, "");
+  try { await signInWithPopup(auth, new GoogleAuthProvider()); }
+  catch (err) { setMsg(authMsg, errText(err), "err"); }
+});
+
+$("rb-reset").addEventListener("click", async () => {
+  const email = $("rb-email").value.trim();
+  if (!email) { setMsg(authMsg, "Wpisz swój e-mail w polu powyżej.", "err"); return; }
+  try {
+    await sendPasswordResetEmail(auth, email);
+    setMsg(authMsg, "Jeśli konto istnieje, wysłaliśmy link do zmiany hasła.", "ok");
+  } catch (err) { setMsg(authMsg, errText(err), "err"); }
+});
+
+$("rb-logout").addEventListener("click", () => signOut(auth));
+
+/* ---------- stan aplikacji ---------- */
+let unsubs = [];
+let isAdmin = false;
+let myCoupons = [];
+let allUsers = [];
+let allCoupons = [];
+
+function cleanup() {
+  unsubs.forEach((u) => { try { u(); } catch (_) {} });
+  unsubs = [];
+  isAdmin = false; myCoupons = []; allUsers = []; allCoupons = [];
+}
+function showOnly(which) {
+  $("rb-loading").hidden = which !== "loading";
+  $("rb-auth").hidden = which !== "auth";
+  $("rb-user").hidden = which !== "user";
+}
+
+onAuthStateChanged(auth, (user) => { if (!registering) handleUser(user); });
+
+async function handleUser(user) {
+  cleanup();
+  if (!user) { showOnly("auth"); return; }
+  showOnly("loading");
+  try {
+    const uref = doc(db, "users", user.uid);
+    const snap = await getDoc(uref);
+    if (!snap.exists()) {
+      await setDoc(uref, { email: user.email || "", name: user.displayName || "", createdAt: serverTimestamp() });
+    }
+    isAdmin = (await getDoc(doc(db, "admins", user.uid))).exists();
+  } catch (err) {
+    console.error("Rabat:", err);
+    showOnly("auth");
+    setMsg(authMsg, "Nie udało się wczytać konta. Spróbuj ponownie.", "err");
+    return;
+  }
+
+  $("rb-who").textContent = "Zalogowano: " + (user.displayName || user.email) + (isAdmin ? " (administrator)" : "");
+  $("rb-admin").hidden = !isAdmin;
+  showOnly("user");
+
+  unsubs.push(onSnapshot(
+    query(collection(db, "coupons"), where("uid", "==", user.uid)),
+    (s) => { myCoupons = s.docs.map((d) => ({ id: d.id, ...d.data() })); renderMy(); },
+    (err) => { console.error(err); $("rb-my-list").innerHTML = '<div class="rb-empty">Nie udało się wczytać kodów.</div>'; }
+  ));
+
+  if (isAdmin) {
+    unsubs.push(onSnapshot(collection(db, "users"), (s) => {
+      allUsers = s.docs.map((d) => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => String(a.email).localeCompare(String(b.email)));
+      renderUserSelect();
+    }, console.error));
+    unsubs.push(onSnapshot(collection(db, "coupons"), (s) => {
+      allCoupons = s.docs.map((d) => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+      renderAdminList();
+    }, console.error));
+  }
+}
+
+/* ---------- kody klienta ---------- */
+function couponState(c) {
+  if (c.used) return { off: true, label: "Wykorzystany" };
+  if (c.expiresAt && c.expiresAt.toDate && c.expiresAt.toDate() < new Date()) return { off: true, label: "Wygasł" };
+  return { off: false, label: "Aktywny" };
+}
+
+function renderMy() {
+  const box = $("rb-my-list");
+  if (!myCoupons.length) {
+    box.innerHTML = '<div class="rb-empty">Nie masz jeszcze żadnych kodów. Zaglądaj tu — dostaniesz je od nas!</div>';
+    return;
+  }
+  const list = [...myCoupons].sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+  box.innerHTML = list.map((c) => {
+    const st = couponState(c);
+    return `<div class="rb-coupon${st.off ? " off" : ""}">
+      <div class="rb-code">${esc(c.code)}<span class="rb-badge${st.off ? " bad" : ""}">${st.label}</span></div>
+      <div class="rb-desc">${esc(c.description)}</div>
+      <div class="rb-meta">${c.expiresAt ? "Ważny do: " + fmtDate(c.expiresAt) : "Bez terminu ważności"}</div>
+      ${st.off ? "" : `<div class="rb-actions"><button type="button" class="rb-btn secondary small" data-act="copy" data-code="${esc(c.code)}">Kopiuj kod</button></div>`}
+    </div>`;
+  }).join("");
+}
+
+$("rb-my-list").addEventListener("click", async (e) => {
+  const b = e.target.closest('[data-act="copy"]');
+  if (!b) return;
+  try { await navigator.clipboard.writeText(b.dataset.code); b.textContent = "Skopiowano ✓"; }
+  catch (_) { b.textContent = b.dataset.code; }
+  setTimeout(() => { if (b.isConnected) b.textContent = "Kopiuj kod"; }, 2000);
+});
+
+/* ---------- panel administratora ---------- */
+const aMsg = $("rb-a-msg");
+
+function renderUserSelect() {
+  const sel = $("rb-a-user");
+  const prev = sel.value;
+  const q = $("rb-a-filter").value.trim().toLowerCase();
+  const items = allUsers.filter((u) => !q || (u.email || "").toLowerCase().includes(q) || (u.name || "").toLowerCase().includes(q));
+  sel.innerHTML = items.length
+    ? items.map((u) => `<option value="${esc(u.id)}">${esc(u.name ? u.name + " — " : "")}${esc(u.email)}</option>`).join("")
+    : '<option value="">Brak klientów</option>';
+  if (items.some((u) => u.id === prev)) sel.value = prev;
+}
+$("rb-a-filter").addEventListener("input", renderUserSelect);
+
+function genCode() {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // bez 0/O/1/I
+  const buf = new Uint32Array(6);
+  crypto.getRandomValues(buf);
+  return "PIZZA-" + Array.from(buf, (n) => alphabet[n % alphabet.length]).join("");
+}
+$("rb-a-gen").addEventListener("click", () => { $("rb-a-code").value = genCode(); });
+
+$("rb-a-add").addEventListener("click", async () => {
+  setMsg(aMsg, "");
+  const uid = $("rb-a-user").value;
+  const user = allUsers.find((u) => u.id === uid);
+  const description = $("rb-a-desc").value.trim();
+  let code = $("rb-a-code").value.trim().toUpperCase();
+  const exp = $("rb-a-exp").value;
+  if (!user) { setMsg(aMsg, "Wybierz klienta.", "err"); return; }
+  if (!description) { setMsg(aMsg, "Wpisz opis rabatu.", "err"); return; }
+  if (!code) { code = genCode(); $("rb-a-code").value = code; }
+  if (!/^[A-Z0-9-]{3,30}$/.test(code)) { setMsg(aMsg, "Kod: 3–30 znaków (litery, cyfry, myślnik).", "err"); return; }
+  try {
+    await addDoc(collection(db, "coupons"), {
+      uid,
+      userEmail: user.email || "",
+      code,
+      description,
+      expiresAt: exp ? Timestamp.fromDate(new Date(exp + "T23:59:59")) : null,
+      used: false,
+      createdAt: serverTimestamp()
+    });
+    setMsg(aMsg, "Kod " + code + " przyznany: " + (user.email || ""), "ok");
+    $("rb-a-desc").value = ""; $("rb-a-code").value = ""; $("rb-a-exp").value = "";
+  } catch (err) {
+    console.error(err);
+    setMsg(aMsg, errText(err), "err");
+  }
+});
+
+function renderAdminList() {
+  const box = $("rb-a-list");
+  if (!allCoupons.length) { box.innerHTML = '<div class="rb-empty">Brak przyznanych kodów.</div>'; return; }
+  box.innerHTML = allCoupons.map((c) => {
+    const st = couponState(c);
+    return `<div class="rb-coupon${st.off ? " off" : ""}">
+      <div class="rb-code" style="font-size:18px">${esc(c.code)}<span class="rb-badge${st.off ? " bad" : ""}">${st.label}</span></div>
+      <div class="rb-desc">${esc(c.description)}</div>
+      <div class="rb-meta">${esc(c.userEmail)} · ${c.expiresAt ? "do " + fmtDate(c.expiresAt) : "bez terminu"} · przyznano ${fmtDate(c.createdAt)}</div>
+      <div class="rb-actions">
+        <button type="button" class="rb-btn secondary small" data-act="toggle" data-id="${esc(c.id)}">${c.used ? "Przywróć" : "Oznacz jako wykorzystany"}</button>
+        <button type="button" class="rb-btn secondary small" data-act="del" data-id="${esc(c.id)}">Usuń</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+$("rb-a-list").addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-act]");
+  if (!b) return;
+  const c = allCoupons.find((x) => x.id === b.dataset.id);
+  if (!c) return;
+  try {
+    if (b.dataset.act === "toggle") {
+      await updateDoc(doc(db, "coupons", c.id), { used: !c.used });
+    } else if (b.dataset.act === "del") {
+      if (confirm("Usunąć kod " + c.code + "?")) await deleteDoc(doc(db, "coupons", c.id));
+    }
+  } catch (err) {
+    console.error(err);
+    setMsg(aMsg, errText(err), "err");
+  }
+});
+</script>
+<!-- ===== RABAT: KONIEC ===== -->
+
 </body>
 </html>
