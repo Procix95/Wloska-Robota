@@ -740,6 +740,8 @@ fadeEls.forEach(el => observer.observe(el));
 #rabat-overlay .rb-qr{width:170px;max-width:100%;background:#fff;border-radius:10px;padding:6px;margin-top:10px}
 #rabat-overlay .rb-qr:empty{display:none}
 #rabat-overlay .rb-qr svg{display:block;width:100%;height:auto}
+#rabat-overlay #rb-admin .rb-tabs{gap:6px;flex-wrap:wrap}
+#rabat-overlay .rb-atab{flex:1 1 auto;padding:9px 8px;font-size:13px}
 </style>
 
 <!-- ===== RABAT: HTML ===== -->
@@ -775,6 +777,7 @@ fadeEls.forEach(el => observer.observe(el));
         <span id="rb-who"></span>
         <button type="button" class="rb-btn secondary small" id="rb-logout">Wyloguj</button>
       </div>
+      <div class="rb-res ok" id="rb-welcome" hidden>🎉 Witaj! Na start dostajesz rabat <b>5 zł</b> na zamówienie. Znajdziesz go poniżej, pokaż jego kod QR przy kasie.</div>
       <h3 style="margin-top:8px">Twoje kody rabatowe</h3>
       <div id="rb-my-list"></div>
 
@@ -785,6 +788,7 @@ fadeEls.forEach(el => observer.observe(el));
         <div class="rb-tabs">
           <button type="button" class="rb-atab active" data-pane="check">Sprawdź kod</button>
           <button type="button" class="rb-atab" data-pane="grant">Przyznaj</button>
+          <button type="button" class="rb-atab" data-pane="builder">Rabaty</button>
           <button type="button" class="rb-atab" data-pane="list">Kody</button>
         </div>
 
@@ -814,14 +818,11 @@ fadeEls.forEach(el => observer.observe(el));
           <input id="rb-a-filter" type="search" placeholder="e-mail lub imię">
           <label for="rb-a-user">Klient</label>
           <select id="rb-a-user"></select>
-          <label for="rb-a-tpl">Szablon rabatu</label>
+          <label for="rb-a-tpl">Gotowy rabat (własne oznaczone ★)</label>
           <select id="rb-a-tpl"></select>
+          <div class="rb-meta" style="margin:-4px 0 10px">Własne rabaty tworzysz w zakładce „Rabaty”.</div>
           <label for="rb-a-desc">Opis rabatu</label>
           <input id="rb-a-desc" type="text" maxlength="120" placeholder="np. -20% na pizzę Margherita">
-          <div class="rb-actions" style="margin:0 0 10px">
-            <button type="button" class="rb-btn secondary small" id="rb-a-savetpl">Zapisz opis jako szablon</button>
-            <button type="button" class="rb-btn secondary small" id="rb-a-deltpl">Usuń wybrany szablon</button>
-          </div>
           <label for="rb-a-code">Kod (przy „Wszyscy klienci” wpisz tylko przedrostek, np. WEEKEND)</label>
           <div class="rb-row">
             <input id="rb-a-code" type="text" maxlength="30" placeholder="np. PIZZA-7K2M9Q" autocapitalize="characters">
@@ -831,6 +832,36 @@ fadeEls.forEach(el => observer.observe(el));
           <input id="rb-a-exp" type="date">
           <button type="button" class="rb-btn" id="rb-a-add">Przyznaj kod</button>
           <div class="rb-msg" id="rb-a-msg" role="status"></div>
+        </div>
+
+        <!-- Zakładka: własne rabaty (kreator) -->
+        <div class="rb-pane" data-pane="builder" hidden>
+          <h4>Stwórz własny rabat</h4>
+          <label for="rb-t-type">Rodzaj rabatu</label>
+          <select id="rb-t-type">
+            <option value="percent">Procent (np. -20%)</option>
+            <option value="amount">Kwota (np. -5 zł)</option>
+            <option value="free">Produkt gratis</option>
+            <option value="custom">Własny opis</option>
+          </select>
+          <div id="rb-t-valwrap">
+            <label for="rb-t-value" id="rb-t-vallabel">Ile procent (%)</label>
+            <input id="rb-t-value" type="number" min="1" step="any" inputmode="decimal" placeholder="np. 20">
+          </div>
+          <div id="rb-t-scopewrap">
+            <label for="rb-t-scope">Dotyczy (opcjonalnie)</label>
+            <input id="rb-t-scope" type="text" maxlength="60" placeholder="np. pizzę Margherita (puste = całe zamówienie)">
+          </div>
+          <label for="rb-t-text">Opis, który zobaczy klient</label>
+          <input id="rb-t-text" type="text" maxlength="120" placeholder="np. -20% na pizzę Margherita">
+          <label for="rb-t-days">Ważność w dniach od przyznania (opcjonalnie)</label>
+          <input id="rb-t-days" type="number" min="1" max="3650" inputmode="numeric" placeholder="np. 30">
+          <label for="rb-t-prefix">Przedrostek kodu (opcjonalnie)</label>
+          <input id="rb-t-prefix" type="text" maxlength="12" placeholder="np. WEEKEND" autocapitalize="characters">
+          <button type="button" class="rb-btn" id="rb-t-save">Zapisz rabat</button>
+          <div class="rb-msg" id="rb-t-msg" role="status"></div>
+          <h4>Twoje rabaty</h4>
+          <div id="rb-t-list"></div>
         </div>
 
         <!-- Zakładka: lista wszystkich kodów -->
@@ -996,6 +1027,7 @@ let myCoupons = [];
 let allUsers = [];
 let allCoupons = [];
 let allTemplates = [];
+let selTpl = {};
 let lastCheck = "";
 
 function cleanup() {
@@ -1015,16 +1047,45 @@ onAuthStateChanged(auth, (user) => { if (!registering) handleUser(user); });
 const withTimeout = (p, ms = 12000) =>
   Promise.race([p, new Promise((_, rej) => setTimeout(() => rej({ code: "timeout" }), ms))]);
 
+const WELCOME_DESC = "-5 zł na zamówienie (kod powitalny)";
+
+/* Tworzy profil klienta. Przy pierwszym logowaniu dodaje w tej samej operacji kod powitalny -5 zł.
+   Zwraca true, gdy kod powitalny został przyznany. */
+async function ensureProfile(user) {
+  const uref = doc(db, "users", user.uid);
+  const snap = await withTimeout(getDoc(uref));
+  if (snap.exists()) return false;
+  const profile = { email: user.email || "", name: user.displayName || "", createdAt: serverTimestamp() };
+  const batch = writeBatch(db);
+  batch.set(uref, profile);
+  batch.set(doc(db, "coupons", "welcome_" + user.uid), {
+    uid: user.uid,
+    userEmail: user.email || "",
+    code: "WITAJ5-" + user.uid.slice(0, 6).toUpperCase(),
+    description: WELCOME_DESC,
+    expiresAt: null,
+    used: false,
+    createdAt: serverTimestamp()
+  });
+  try {
+    await withTimeout(batch.commit());
+    return true;
+  } catch (err) {
+    // np. reguły jeszcze nieopublikowane: konto ma się założyć mimo to
+    console.warn("Kod powitalny nie został utworzony:", err && (err.code || err.message));
+    const again = await withTimeout(getDoc(uref));
+    if (!again.exists()) await withTimeout(setDoc(uref, profile));
+    return false;
+  }
+}
+
 async function handleUser(user) {
   cleanup();
   if (!user) { showOnly("auth"); return; }
   showOnly("loading");
+  let gotWelcome = false;
   try {
-    const uref = doc(db, "users", user.uid);
-    const snap = await withTimeout(getDoc(uref));
-    if (!snap.exists()) {
-      await withTimeout(setDoc(uref, { email: user.email || "", name: user.displayName || "", createdAt: serverTimestamp() }));
-    }
+    gotWelcome = await ensureProfile(user);
     isAdmin = (await withTimeout(getDoc(doc(db, "admins", user.uid)))).exists();
   } catch (err) {
     console.error("Rabat:", err);
@@ -1040,6 +1101,7 @@ async function handleUser(user) {
 
   $("rb-who").textContent = "Zalogowano: " + (user.displayName || user.email) + (isAdmin ? " (administrator)" : "");
   $("rb-admin").hidden = !isAdmin;
+  $("rb-welcome").hidden = !gotWelcome;
   showOnly("user");
 
   unsubs.push(onSnapshot(
@@ -1128,7 +1190,7 @@ function genCode(prefix = "PIZZA") {
   crypto.getRandomValues(buf);
   return prefix + "-" + Array.from(buf, (n) => alphabet[n % alphabet.length]).join("");
 }
-$("rb-a-gen").addEventListener("click", () => { $("rb-a-code").value = genCode(); });
+$("rb-a-gen").addEventListener("click", () => { $("rb-a-code").value = genCode(selTpl.prefix || "PIZZA"); });
 
 $("rb-a-add").addEventListener("click", async () => {
   setMsg(aMsg, "");
@@ -1141,7 +1203,7 @@ $("rb-a-add").addEventListener("click", async () => {
   if (!description) { setMsg(aMsg, "Wpisz opis rabatu.", "err"); return; }
   try {
     if (sel === "__all__") {
-      const prefix = codeIn || "PIZZA";
+      const prefix = codeIn || selTpl.prefix || "PIZZA";
       if (!/^[A-Z0-9-]{2,18}$/.test(prefix)) { setMsg(aMsg, "Przedrostek: 2–18 znaków (litery, cyfry, myślnik).", "err"); return; }
       if (!allUsers.length) { setMsg(aMsg, "Nie ma jeszcze żadnych klientów.", "err"); return; }
       if (!confirm("Przyznać ten rabat WSZYSTKIM klientom (" + allUsers.length + ")?")) return;
@@ -1165,7 +1227,7 @@ $("rb-a-add").addEventListener("click", async () => {
       const user = allUsers.find((u) => u.id === sel);
       if (!user) { setMsg(aMsg, "Wybierz klienta.", "err"); return; }
       let code = codeIn;
-      if (!code) { code = genCode(); $("rb-a-code").value = code; }
+      if (!code) { code = genCode(selTpl.prefix || "PIZZA"); $("rb-a-code").value = code; }
       if (!/^[A-Z0-9-]{3,30}$/.test(code)) { setMsg(aMsg, "Kod: 3–30 znaków (litery, cyfry, myślnik).", "err"); return; }
       if (allCoupons.some((c) => c.code === code)) { setMsg(aMsg, "Taki kod już istnieje. Wpisz inny albo kliknij Losuj.", "err"); return; }
       await addDoc(collection(db, "coupons"), {
@@ -1173,7 +1235,7 @@ $("rb-a-add").addEventListener("click", async () => {
       });
       setMsg(aMsg, "Kod " + code + " przyznany: " + (user.email || ""), "ok");
     }
-    $("rb-a-desc").value = ""; $("rb-a-code").value = ""; $("rb-a-exp").value = ""; $("rb-a-tpl").value = "";
+    $("rb-a-desc").value = ""; $("rb-a-code").value = ""; $("rb-a-exp").value = ""; $("rb-a-tpl").value = ""; selTpl = {};
   } catch (err) {
     console.error(err);
     setMsg(aMsg, errText(err), "err");
@@ -1275,40 +1337,134 @@ function renderTemplates() {
   const sel = $("rb-a-tpl");
   if (!sel) return;
   const prev = sel.value;
-  sel.innerHTML = '<option value="">— wybierz szablon —</option>'
+  sel.innerHTML = '<option value="">— wybierz gotowy rabat —</option>'
     + DEFAULT_TPL.map((t, i) => `<option value="d:${i}">${esc(t)}</option>`).join("")
     + allTemplates.map((t) => `<option value="c:${esc(t.id)}">★ ${esc(t.text)}</option>`).join("");
-  if ([...sel.options].some((o) => o.value === prev)) sel.value = prev;
+  if ([...sel.options].some((o) => o.value === prev)) sel.value = prev; else selTpl = {};
+  renderOwnList();
+}
+/* ---------- gotowe rabaty: wybór w zakładce Przyznaj ---------- */
+function ymd(d) {
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 }
 $("rb-a-tpl").addEventListener("change", () => {
   const v = $("rb-a-tpl").value;
+  selTpl = {};
   if (!v) return;
   const id = v.slice(2);
-  const text = v[0] === "d" ? DEFAULT_TPL[Number(id)] : (allTemplates.find((t) => t.id === id) || {}).text;
-  if (text) $("rb-a-desc").value = text;
-});
-$("rb-a-savetpl").addEventListener("click", async () => {
-  setMsg(aMsg, "");
-  const text = $("rb-a-desc").value.trim();
-  if (!text) { setMsg(aMsg, "Najpierw wpisz opis rabatu.", "err"); return; }
-  if (DEFAULT_TPL.includes(text) || allTemplates.some((t) => t.text === text)) { setMsg(aMsg, "Taki szablon już istnieje.", "err"); return; }
-  try {
-    await addDoc(collection(db, "templates"), { text, createdAt: serverTimestamp() });
-    setMsg(aMsg, "Szablon zapisany.", "ok");
-  } catch (err) {
-    console.error(err);
-    setMsg(aMsg, err.code === "permission-denied" ? "Aby zapisywać szablony, opublikuj nowe reguły z pliku firestore.rules." : errText(err), "err");
+  if (v[0] === "d") { $("rb-a-desc").value = DEFAULT_TPL[Number(id)] || ""; return; }
+  const t = allTemplates.find((x) => x.id === id);
+  if (!t) return;
+  $("rb-a-desc").value = t.text || "";
+  selTpl = { prefix: t.prefix || "" };
+  if (t.validDays) {
+    const d = new Date();
+    d.setDate(d.getDate() + Number(t.validDays));
+    $("rb-a-exp").value = ymd(d);
   }
 });
-$("rb-a-deltpl").addEventListener("click", async () => {
-  setMsg(aMsg, "");
-  const v = $("rb-a-tpl").value;
-  if (!v.startsWith("c:")) { setMsg(aMsg, "Wybierz własny szablon (oznaczony ★), żeby go usunąć.", "err"); return; }
+
+/* ---------- kreator własnych rabatów ---------- */
+const tMsg = $("rb-t-msg");
+let tTextTouched = false;
+
+function buildText() {
+  const type = $("rb-t-type").value;
+  const raw = $("rb-t-value").value.trim();
+  const val = raw.replace(",", ".");
+  const scope = $("rb-t-scope").value.trim();
+  if (!raw) return "";
+  if (type === "percent") return "-" + val + "% na " + (scope || "całe zamówienie");
+  if (type === "amount") return "-" + val + " zł na " + (scope || "zamówienie");
+  if (type === "free") return "Gratis: " + raw;
+  return "";
+}
+function syncBuilder() {
+  const type = $("rb-t-type").value;
+  const isFree = type === "free", isCustom = type === "custom";
+  const vi = $("rb-t-value");
+  $("rb-t-valwrap").hidden = isCustom;
+  $("rb-t-scopewrap").hidden = isCustom || isFree;
+  vi.type = isFree ? "text" : "number";
+  vi.placeholder = isFree ? "np. sos czosnkowy" : (type === "percent" ? "np. 20" : "np. 5");
+  $("rb-t-vallabel").textContent = type === "percent" ? "Ile procent (%)" : type === "amount" ? "Ile złotych (zł)" : "Jaki produkt gratis";
+  if (!tTextTouched) $("rb-t-text").value = buildText();
+}
+$("rb-t-type").addEventListener("change", () => { $("rb-t-value").value = ""; tTextTouched = false; syncBuilder(); });
+["rb-t-value", "rb-t-scope"].forEach((id) => $(id).addEventListener("input", () => { if (!tTextTouched) $("rb-t-text").value = buildText(); }));
+$("rb-t-text").addEventListener("input", () => { tTextTouched = $("rb-t-text").value !== ""; });
+syncBuilder();
+
+$("rb-t-save").addEventListener("click", async () => {
+  setMsg(tMsg, "");
+  const type = $("rb-t-type").value;
+  const rawVal = $("rb-t-value").value.trim().replace(",", ".");
+  const scope = $("rb-t-scope").value.trim();
+  const text = $("rb-t-text").value.trim();
+  const daysRaw = $("rb-t-days").value.trim();
+  const prefix = $("rb-t-prefix").value.trim().toUpperCase();
+  let value = null;
+  if (type === "percent") {
+    value = Number(rawVal);
+    if (!(value >= 1 && value <= 100)) { setMsg(tMsg, "Procent: liczba od 1 do 100.", "err"); return; }
+  } else if (type === "amount") {
+    value = Number(rawVal);
+    if (!(value > 0 && value <= 1000)) { setMsg(tMsg, "Kwota: liczba większa od 0 (do 1000 zł).", "err"); return; }
+  } else if (type === "free") {
+    value = $("rb-t-value").value.trim();
+    if (!value) { setMsg(tMsg, "Wpisz, jaki produkt ma być gratis.", "err"); return; }
+  }
+  if (!text) { setMsg(tMsg, "Wpisz opis rabatu.", "err"); return; }
+  let validDays = null;
+  if (daysRaw) {
+    validDays = Math.floor(Number(daysRaw));
+    if (!(validDays >= 1 && validDays <= 3650)) { setMsg(tMsg, "Ważność: liczba dni od 1 do 3650.", "err"); return; }
+  }
+  if (prefix && !/^[A-Z0-9-]{2,12}$/.test(prefix)) { setMsg(tMsg, "Przedrostek: 2–12 znaków (litery, cyfry, myślnik).", "err"); return; }
+  if (allTemplates.some((t) => t.text === text) || DEFAULT_TPL.includes(text)) { setMsg(tMsg, "Taki rabat już istnieje.", "err"); return; }
   try {
-    await deleteDoc(doc(db, "templates", v.slice(2)));
-    $("rb-a-tpl").value = "";
-    setMsg(aMsg, "Szablon usunięty.", "ok");
-  } catch (err) { console.error(err); setMsg(aMsg, errText(err), "err"); }
+    await addDoc(collection(db, "templates"), {
+      text, type, value,
+      scope: (type === "percent" || type === "amount") && scope ? scope : null,
+      validDays, prefix: prefix || null, createdAt: serverTimestamp()
+    });
+    setMsg(tMsg, "Rabat zapisany. Przyznasz go w zakładce „Przyznaj”.", "ok");
+    ["rb-t-value", "rb-t-scope", "rb-t-text", "rb-t-days", "rb-t-prefix"].forEach((id) => { $(id).value = ""; });
+    tTextTouched = false;
+    syncBuilder();
+  } catch (err) {
+    console.error(err);
+    setMsg(tMsg, err.code === "permission-denied" ? "Brak uprawnień. Opublikuj reguły z pliku firestore.rules." : errText(err), "err");
+  }
+});
+
+function renderOwnList() {
+  const box = $("rb-t-list");
+  if (!box) return;
+  if (!allTemplates.length) { box.innerHTML = '<div class="rb-empty">Nie masz jeszcze własnych rabatów.</div>'; return; }
+  box.innerHTML = allTemplates.map((t) => `<div class="rb-coupon">
+      <div class="rb-desc" style="font-size:17px;font-weight:700">${esc(t.text)}</div>
+      <div class="rb-meta">${t.validDays ? "ważny " + esc(t.validDays) + " dni od przyznania" : "bez terminu"}${t.prefix ? " · kod: " + esc(t.prefix) + "-XXXXXX" : ""}</div>
+      <div class="rb-actions">
+        <button type="button" class="rb-btn small" data-act="grant" data-id="${esc(t.id)}">Przyznaj…</button>
+        <button type="button" class="rb-btn secondary small" data-act="del" data-id="${esc(t.id)}">Usuń</button>
+      </div>
+    </div>`).join("");
+}
+$("rb-t-list").addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-act]");
+  if (!b) return;
+  const id = b.dataset.id;
+  if (b.dataset.act === "grant") {
+    $("rb-a-tpl").value = "c:" + id;
+    $("rb-a-tpl").dispatchEvent(new Event("change"));
+    setAdminTab("grant");
+  } else if (b.dataset.act === "del") {
+    const t = allTemplates.find((x) => x.id === id);
+    if (!t || !confirm("Usunąć rabat „" + t.text + "”? Już przyznane kody zostaną.")) return;
+    try { await deleteDoc(doc(db, "templates", id)); }
+    catch (err) { console.error(err); setMsg(tMsg, errText(err), "err"); }
+  }
 });
 
 /* ---------- zakładki panelu admina ---------- */
