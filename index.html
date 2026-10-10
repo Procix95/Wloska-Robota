@@ -837,6 +837,23 @@ body.dark #rabat-overlay{--rb-accent:#0fa65a;--rb-accent2:#0c8c4c;--rb-bg:#17171
 }
 #rabat-overlay #rb-admin.staffonly .rb-tabs,#rabat-overlay #rb-admin.staffonly .rb-stats,#rabat-overlay #rb-admin.staffonly .rb-pane:not([data-pane="check"]){display:none!important}
 #rabat-overlay #rb-admin.staffonly{margin-top:8px}
+
+/* ===== karta lojalnościowa ===== */
+#rabat-overlay .rb-loyal{background:var(--rb-card);border:1px solid var(--rb-border);border-radius:16px;padding:16px;margin-bottom:18px}
+#rabat-overlay .rb-loyal.full{border-color:var(--rb-gold);box-shadow:0 0 0 2px rgba(212,175,55,.35)}
+#rabat-overlay .rb-stamps{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:12px 0}
+#rabat-overlay .rb-stamp{aspect-ratio:1;border-radius:50%;border:2px dashed var(--rb-border);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--rb-muted);background:var(--rb-bg)}
+#rabat-overlay .rb-stamp.on{border:2px solid var(--rb-accent);background:var(--rb-okbg);font-size:22px}
+#rabat-overlay .rb-loyal-txt{font-size:14px;text-align:center;margin-bottom:4px}
+#rabat-overlay .rb-loyal-free{font-size:16px;font-weight:700;text-align:center;color:var(--rb-text);background:var(--rb-gold);color:#222;border-radius:12px;padding:10px;margin-bottom:8px}
+#rabat-overlay .rb-cust .rb-stamps{max-width:320px;margin:12px auto}
+#rabat-overlay .rb-cust{text-align:left}
+#rabat-overlay .rb-cust .rb-big{text-align:center}
+#rabat-overlay .rb-cust .rb-meta{text-align:center}
+#rabat-overlay .rb-cust .rb-actions{justify-content:center}
+#rabat-overlay .rb-cust .rb-btn.small{min-height:44px;font-size:15px}
+#rabat-overlay .rb-cust-sub{margin:14px 0 6px;font-size:13px;font-weight:600;color:var(--rb-muted)}
+#rabat-overlay .rb-cust-cp{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid var(--rb-border);font-size:14px}
 @media (prefers-reduced-motion:reduce){#rabat-overlay *{animation:none!important}}
 </style>
 
@@ -888,6 +905,14 @@ body.dark #rabat-overlay{--rb-accent:#0fa65a;--rb-accent2:#0c8c4c;--rb-bg:#17171
         <button type="button" class="rb-btn secondary small" id="rb-logout">Wyloguj</button>
       </div>
       <div class="rb-res ok" id="rb-welcome" hidden>🎉 Witaj! Na start dostajesz rabat <b>5 zł</b> na zamówienie. Znajdziesz go poniżej, pokaż jego kod QR przy kasie.</div>
+      <div class="rb-loyal" id="rb-loyal" hidden>
+        <div class="rb-sec" style="margin-top:0"><h3>🍕 Karta lojalnościowa</h3><span id="rb-loyal-count"></span></div>
+        <div class="rb-stamps" id="rb-stamps"></div>
+        <div class="rb-loyal-free" id="rb-loyal-free" hidden>🎉 Masz jedną pizzę gratis! Pokaż kartę przy zamówieniu.</div>
+        <div class="rb-loyal-txt" id="rb-loyal-txt"></div>
+        <div class="rb-qrwrap"><div class="rb-qr" id="rb-card-qr"></div>
+          <div class="rb-qrcap">Twój kod klienta<small>pokazuj go przy każdym zamówieniu — dostaniesz pieczątkę i rabaty</small></div></div>
+      </div>
       <div class="rb-sec"><h3>Twoje kody rabatowe</h3><span id="rb-count"></span></div>
       <div id="rb-my-list"></div>
       <div class="rb-how"><b>Jak użyć kodu?</b><ol><li>Wybierz kod, który chcesz wykorzystać.</li><li>Pokaż jego kod QR (lub podaj kod) przy zamówieniu.</li><li>My go skanujemy — rabat się nalicza, a kod gaśnie.</li></ol></div>
@@ -917,7 +942,7 @@ body.dark #rabat-overlay{--rb-accent:#0fa65a;--rb-accent2:#0c8c4c;--rb-bg:#17171
 
           <h4>Albo wpisz kod ręcznie</h4>
           <div class="rb-row">
-            <input id="rb-c-code" type="text" maxlength="40" placeholder="Kod od klienta" autocapitalize="characters" autocomplete="off">
+            <input id="rb-c-code" type="text" maxlength="40" placeholder="Kod rabatowy lub e-mail klienta" autocapitalize="characters" autocomplete="off">
             <button type="button" class="rb-btn small" id="rb-c-btn" style="margin-bottom:10px">Sprawdź</button>
           </div>
           <div class="rb-msg" id="rb-c-msg" role="status"></div>
@@ -1159,6 +1184,10 @@ $("rb-logout").addEventListener("click", () => signOut(auth));
 let unsubs = [];
 let isAdmin = false;
 let isStaff = false;
+let myLoyal = null;
+let custView = null;
+const LOYAL_GOAL = 10;        // tyle pieczątek = pizza gratis (to samo w firestore.rules)
+const STAMP_COOLDOWN_H = 2;   // min. odstęp między pieczątkami (to samo w firestore.rules)
 let allStaff = [];
 let staffFound = [];
 let myCoupons = [];
@@ -1172,7 +1201,7 @@ function cleanup() {
   stopScanner();
   unsubs.forEach((u) => { try { u(); } catch (_) {} });
   unsubs = [];
-  isAdmin = false; isStaff = false; allStaff = []; staffFound = []; myCoupons = []; allUsers = []; allCoupons = []; allTemplates = []; lastCheck = "";
+  isAdmin = false; isStaff = false; allStaff = []; staffFound = []; myLoyal = null; custView = null; myCoupons = []; allUsers = []; allCoupons = []; allTemplates = []; lastCheck = "";
 }
 function showOnly(which) {
   $("rb-loading").hidden = which !== "loading";
@@ -1217,6 +1246,16 @@ async function ensureProfile(user) {
   }
 }
 
+async function ensureLoyalty(user) {
+  const ref = doc(db, "loyalty", user.uid);
+  const snap = await withTimeout(getDoc(ref));
+  if (snap.exists()) return;
+  await withTimeout(setDoc(ref, {
+    email: (user.email || "").toLowerCase(), name: user.displayName || "",
+    stamps: 0, total: 0, rewards: 0, lastStampAt: null, lastRewardAt: null, createdAt: serverTimestamp()
+  }));
+}
+
 async function handleUser(user) {
   cleanup();
   if (!user) { showOnly("auth"); return; }
@@ -1230,6 +1269,7 @@ async function handleUser(user) {
     }
     // konto obsługi nie jest klientem: bez profilu i bez kodu powitalnego
     if (!isStaff) gotWelcome = await ensureProfile(user);
+    if (!isStaff) { try { await ensureLoyalty(user); } catch (e) { console.warn("Karta lojalnościowa nie została założona (opublikuj nowe reguły):", e && (e.code || e.message)); } }
   } catch (err) {
     console.error("Rabat:", err);
     showOnly("auth");
@@ -1253,6 +1293,11 @@ async function handleUser(user) {
   $("rb-welcome").hidden = !gotWelcome;
   showOnly("user");
 
+  if (!isStaff) {
+    unsubs.push(onSnapshot(doc(db, "loyalty", user.uid),
+      (d) => { myLoyal = d.exists() ? d.data() : null; renderLoyal(user); },
+      (err) => { console.warn("Karta lojalnościowa niedostępna:", err.code); myLoyal = null; renderLoyal(user); }));
+  }
   unsubs.push(onSnapshot(
     query(collection(db, "coupons"), where("uid", "==", user.uid)),
     (s) => { myCoupons = s.docs.map((d) => ({ id: d.id, ...d.data() })); renderMy(); },
@@ -1287,6 +1332,30 @@ async function handleUser(user) {
       renderTemplates();
     }));
   }
+}
+
+/* ---------- karta lojalnościowa klienta ---------- */
+function stampDots(n) {
+  return Array.from({ length: LOYAL_GOAL }, (_, i) => `<span class="rb-stamp${i < n ? " on" : ""}">${i < n ? "🍕" : i + 1}</span>`).join("");
+}
+function renderLoyal(user) {
+  const box = $("rb-loyal");
+  if (!myLoyal || isStaff) { box.hidden = true; return; }
+  const n = Math.min(LOYAL_GOAL, myLoyal.stamps || 0);
+  const full = n >= LOYAL_GOAL;
+  box.hidden = false;
+  box.classList.toggle("full", full);
+  $("rb-stamps").innerHTML = stampDots(n);
+  $("rb-loyal-count").textContent = n + " / " + LOYAL_GOAL;
+  $("rb-loyal-free").hidden = !full;
+  const left = LOYAL_GOAL - n;
+  $("rb-loyal-txt").textContent = full
+    ? "Karta pełna! Pizza gratis czeka na Twoje następne zamówienie."
+    : "Za każde zamówienie dostajesz pieczątkę. Jeszcze " + left + " " + (left === 1 ? "pieczątka" : left < 5 ? "pieczątki" : "pieczątek") + " do pizzy gratis (1 sztuka)."
+      + (myLoyal.rewards ? " Odebrane dotąd: " + myLoyal.rewards + "." : "");
+  const qr = $("rb-card-qr");
+  qr.dataset.qrfull = "KL:" + user.uid;
+  drawQRs(box);
 }
 
 /* ---------- kody klienta ---------- */
@@ -1477,6 +1546,7 @@ async function lookupCode(code) {
 function renderCheck() {
   const box = $("rb-c-result");
   if (!box) return;
+  if (custView && custView.target === box) return;
   if (!lastCheck) { box.innerHTML = ""; return; }
   const found = isAdmin ? allCoupons.filter((c) => c.code === lastCheck) : staffFound;
   if (!found.length) {
@@ -1494,7 +1564,24 @@ function renderCheck() {
   }).join("");
 }
 async function runCheck() {
-  lastCheck = $("rb-c-code").value.trim().toUpperCase();
+  const raw = $("rb-c-code").value.trim();
+  setMsg(cMsg, "");
+  if (/^kl:/i.test(raw) || raw.includes("@")) {
+    lastCheck = "";
+    const box = $("rb-c-result");
+    try {
+      let uid = /^kl:/i.test(raw) ? raw.slice(3).trim() : "";
+      if (!uid) {
+        const sn = await getDocs(query(collection(db, "loyalty"), where("email", "==", raw.toLowerCase())));
+        uid = sn.docs[0] ? sn.docs[0].id : "";
+      }
+      if (!uid) { custView = null; box.innerHTML = '<div class="rb-res bad">❌ Nie znaleziono klienta o takim e-mailu (musi raz otworzyć Konto).</div>'; return; }
+      await showCustomer(uid, box, false);
+    } catch (err) { custView = null; setMsg(cMsg, errText(err), "err"); }
+    return;
+  }
+  if (custView && custView.target === $("rb-c-result")) custView = null;
+  lastCheck = raw.toUpperCase();
   if (!isAdmin && lastCheck) {
     try { staffFound = await lookupCode(lastCheck); }
     catch (err) { staffFound = []; setMsg(cMsg, errText(err), "err"); }
@@ -1511,6 +1598,109 @@ $("rb-c-result").addEventListener("click", async (e) => {
   if (!r.ok) setMsg(cMsg, r.reason, "err");
   if (!isAdmin) await runCheck();
 });
+
+/* ---------- skan karty klienta: pieczątki, nagroda, rabaty ---------- */
+async function loadCustomer(uid) {
+  const [ls, cs] = await Promise.all([
+    getDoc(doc(db, "loyalty", uid)),
+    getDocs(query(collection(db, "coupons"), where("uid", "==", uid)))
+  ]);
+  return { loyal: ls.exists() ? ls.data() : null, coupons: cs.docs.map((d) => ({ id: d.id, ...d.data() })) };
+}
+async function showCustomer(uid, target, withNext) {
+  custView = { uid, target, withNext: !!withNext, data: null };
+  try { custView.data = await loadCustomer(uid); }
+  catch (err) { console.error(err); target.innerHTML = '<div class="rb-res bad">❌ ' + esc(errText(err)) + "</div>"; custView = null; return; }
+  renderCustomer();
+}
+function renderCustomer() {
+  if (!custView || !custView.data) return;
+  const { uid, target, withNext, data } = custView;
+  const L = data.loyal;
+  const active = data.coupons.filter((c) => !couponState(c).off);
+  let head, body = "";
+  if (!L) {
+    head = '<div class="rb-big">👤 Klient bez karty</div><div class="rb-meta">Ten klient musi raz otworzyć zakładkę Konto na swoim telefonie.</div>';
+  } else {
+    const n = Math.min(LOYAL_GOAL, L.stamps || 0);
+    const full = n >= LOYAL_GOAL;
+    const last = L.lastStampAt && L.lastStampAt.toDate ? L.lastStampAt.toDate() : null;
+    const next = last ? new Date(last.getTime() + STAMP_COOLDOWN_H * 3600000) : null;
+    const cool = !isAdmin && next && next > new Date();
+    head = `<div class="rb-big">👤 ${esc(L.name || L.email)}</div><div class="rb-meta">${esc(L.email)} · pieczątek łącznie: ${L.total || 0} · darmowe pizze: ${L.rewards || 0}</div>
+      <div class="rb-stamps">${stampDots(n)}</div>
+      <div class="rb-loyal-txt"><b>${n} / ${LOYAL_GOAL}</b>${full ? " — 🎉 należy się pizza gratis (1 szt.)" : ""}</div>`;
+    body = `<div class="rb-actions">
+      ${full
+        ? `<button type="button" class="rb-btn small" data-act="reward">🍕 Wydaj pizzę gratis</button>`
+        : `<button type="button" class="rb-btn small" data-act="stamp"${cool ? " disabled" : ""}>➕ Dodaj pieczątkę</button>`}
+      ${isAdmin && n > 0 && !full ? `<button type="button" class="rb-btn secondary small" data-act="unstamp">↩ Cofnij pieczątkę</button>` : ""}
+    </div>${cool ? `<div class="rb-meta" style="margin-top:6px">Pieczątka była dodana ${fmtDateTime(L.lastStampAt)} — kolejna możliwa po ${next.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" })}.</div>` : ""}`;
+  }
+  const cps = active.length
+    ? `<div class="rb-cust-sub">Aktywne rabaty klienta</div>` + active.map((c) => `<div class="rb-cust-cp"><span><b>${esc(c.code)}</b><br>${esc(c.description)}</span><button type="button" class="rb-btn small" data-act="cuse" data-id="${esc(c.id)}">Wykorzystaj</button></div>`).join("")
+    : `<div class="rb-cust-sub">Klient nie ma aktywnych rabatów</div>`;
+  target.innerHTML = `<div class="rb-res big ok rb-cust">${head}${body}${cps}
+    <div class="rb-actions" style="margin-top:10px">
+      ${isAdmin ? `<button type="button" class="rb-btn secondary small" data-act="grant">🎟 Przyznaj rabat</button>` : ""}
+      ${withNext ? `<button type="button" class="rb-btn secondary small" data-act="next">Skanuj następny</button>` : ""}
+    </div></div>`;
+}
+async function customerClick(e) {
+  const b = e.target.closest('[data-act="stamp"],[data-act="reward"],[data-act="unstamp"],[data-act="grant"],[data-act="cuse"]');
+  if (!b || !custView) return;
+  const act = b.dataset.act;
+  const msg = custView.target === $("rb-s-result") ? sMsg : cMsg;
+  setMsg(msg, "");
+  if (act === "grant") {
+    setAdminTab("grant");
+    $("rb-a-filter").value = "";
+    renderUserSelect();
+    $("rb-a-user").value = custView.uid;
+    $("rb-a-desc").scrollIntoView({ block: "center" });
+    return;
+  }
+  const ref = doc(db, "loyalty", custView.uid);
+  b.disabled = true;
+  try {
+    if (act === "stamp") {
+      await runTransaction(db, async (tx) => {
+        const sn = await tx.get(ref);
+        if (!sn.exists()) throw new Error("Klient nie ma karty.");
+        const d = sn.data();
+        if ((d.stamps || 0) >= LOYAL_GOAL) throw new Error("Karta pełna — najpierw wydaj pizzę gratis.");
+        tx.update(ref, { stamps: (d.stamps || 0) + 1, total: (d.total || 0) + 1, lastStampAt: serverTimestamp() });
+      });
+      buzz(150);
+    } else if (act === "reward") {
+      await runTransaction(db, async (tx) => {
+        const sn = await tx.get(ref);
+        const d = sn.exists() ? sn.data() : {};
+        if ((d.stamps || 0) < LOYAL_GOAL) throw new Error("Karta nie jest jeszcze pełna.");
+        tx.update(ref, { stamps: 0, rewards: (d.rewards || 0) + 1, lastRewardAt: serverTimestamp() });
+      });
+      buzz([100, 50, 100]);
+    } else if (act === "unstamp") {
+      if (!confirm("Cofnąć ostatnią pieczątkę?")) { b.disabled = false; return; }
+      await runTransaction(db, async (tx) => {
+        const sn = await tx.get(ref);
+        const d = sn.data();
+        tx.update(ref, { stamps: Math.max(0, (d.stamps || 0) - 1), total: Math.max(0, (d.total || 0) - 1), lastStampAt: null });
+      });
+    } else if (act === "cuse") {
+      const r = await redeem(b.dataset.id);
+      if (!r.ok) setMsg(msg, r.reason, "err"); else buzz(200);
+    }
+  } catch (err) {
+    console.error(err);
+    setMsg(msg, err.code === "permission-denied"
+      ? "Odmowa: za krótko od poprzedniej pieczątki (min. " + STAMP_COOLDOWN_H + " h) albo nowe reguły nie są opublikowane."
+      : (err.code ? errText(err) : err.message), "err");
+  }
+  try { custView.data = await loadCustomer(custView.uid); renderCustomer(); } catch (_) {}
+}
+$("rb-s-result").addEventListener("click", customerClick);
+$("rb-c-result").addEventListener("click", customerClick);
 
 /* ---------- szablony rabatów ---------- */
 const DEFAULT_TPL = ["-10% na całe zamówienie", "-20% na pizzę", "-5 zł na zamówienie", "Darmowy sos do pizzy", "Darmowe frytki", "Darmowy dowóz"];
@@ -1773,15 +1963,15 @@ function qrSvg(text) {
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + size + " " + size + '" shape-rendering="crispEdges" role="img" aria-label="Kod QR"><rect width="' + size + '" height="' + size + '" fill="#fff"/><path d="' + d + '" fill="#000"/></svg>';
 }
 async function drawQRs(root) {
-  const boxes = [...root.querySelectorAll(".rb-qr[data-qr]")];
+  const boxes = [...root.querySelectorAll(".rb-qr[data-qr],.rb-qr[data-qrfull]")];
   if (!boxes.length) return;
   try {
     if (!QRfn) QRfn = pickFn(await import("https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/+esm"));
     if (!QRfn) return;
     boxes.forEach((el) => {
-      const code = el.dataset.qr;
-      if (!qrCache.has(code)) qrCache.set(code, qrSvg("WR:" + code));
-      el.innerHTML = qrCache.get(code);
+      const text = el.dataset.qrfull || ("WR:" + el.dataset.qr);
+      if (!qrCache.has(text)) qrCache.set(text, qrSvg(text));
+      el.innerHTML = qrCache.get(text);
     });
   } catch (err) { console.warn("Kod QR niedostępny:", err); }
 }
@@ -1914,6 +2104,12 @@ async function handleScan(raw) {
   scanning = false;
   const out = $("rb-s-result");
   try {
+    const km = /^KL:([A-Za-z0-9]{10,40})$/.exec(String(raw).trim());
+    if (km) {
+      await showCustomer(km[1], out, true);
+      buzz(120);
+      return;
+    }
     const code = parseCode(raw);
     if (!code) {
       out.innerHTML = scanCard("bad", "❌ To nie jest kod rabatowy", null, "Zeskanowano: " + esc(String(raw).slice(0, 40)));
@@ -1953,6 +2149,7 @@ $("rb-s-result").addEventListener("click", async (e) => {
   const b = e.target.closest("[data-act]");
   if (!b) return;
   if (b.dataset.act === "next") {
+    if (custView && custView.target === $("rb-s-result")) custView = null;
     $("rb-s-result").innerHTML = "";
     resumeScan();
   } else if (b.dataset.act === "undo") {
