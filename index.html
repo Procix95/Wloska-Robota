@@ -1378,24 +1378,24 @@ function expiryInfo(c) {
 function renderMy() {
   const box = $("rb-my-list");
   const cnt = $("rb-count");
-  if (!myCoupons.length) {
+  // wykorzystane i wygasłe kody znikają z konta klienta (od razu po zeskanowaniu)
+  const list = myCoupons.filter((c) => !couponState(c).off)
+    .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+  if (!list.length) {
     cnt.textContent = "";
-    box.innerHTML = '<div class="rb-empty2"><span class="rb-emoji">🎟️</span><b>Nie masz jeszcze żadnych kodów</b><br>Zaglądaj tu — kody rabatowe od nas pojawią się w tym miejscu.</div>';
+    box.innerHTML = '<div class="rb-empty2"><span class="rb-emoji">🎟️</span><b>Nie masz teraz aktywnych kodów</b><br>Zaglądaj tu — nowe kody rabatowe od nas pojawią się w tym miejscu.</div>';
     return;
   }
-  const list = [...myCoupons].sort((a, b) =>
-    (couponState(a).off - couponState(b).off) || ((b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
-  const active = list.filter((c) => !couponState(c).off).length;
-  cnt.textContent = active ? "aktywne: " + active : "brak aktywnych";
+  cnt.textContent = "aktywne: " + list.length;
   box.innerHTML = list.map((c) => {
     const st = couponState(c);
     const ex = expiryInfo(c);
-    return `<div class="rb-ticket${st.off ? " off" : ""}">
-      <div class="rb-ticket-top"><span class="rb-badge${st.off ? " bad" : ""}">${st.off ? st.label : "✓ " + st.label}</span></div>
+    return `<div class="rb-ticket">
+      <div class="rb-ticket-top"><span class="rb-badge">✓ ${st.label}</span></div>
       <div class="rb-ticket-desc">${esc(c.description)}</div>
-      <div class="rb-codebox"><span class="rb-code">${esc(c.code)}</span>${st.off ? "" : `<button type="button" class="rb-btn secondary small rb-copy" data-act="copy" data-code="${esc(c.code)}">Kopiuj</button>`}</div>
-      <div class="rb-expiry${ex.soon && !st.off ? " soon" : ""}">${ex.text}</div>
-      ${st.off ? "" : `<div class="rb-qrwrap"><div class="rb-qr" data-qr="${esc(c.code)}"></div><div class="rb-qrcap">Pokaż ten kod QR przy kasie<small>albo podaj kod słownie</small></div></div>`}
+      <div class="rb-codebox"><span class="rb-code">${esc(c.code)}</span><button type="button" class="rb-btn secondary small rb-copy" data-act="copy" data-code="${esc(c.code)}">Kopiuj</button></div>
+      <div class="rb-expiry${ex.soon ? " soon" : ""}">${ex.text}</div>
+      <div class="rb-qrwrap"><div class="rb-qr" data-qr="${esc(c.code)}"></div><div class="rb-qrcap">Pokaż ten kod QR przy kasie<small>albo podaj kod słownie</small></div></div>
     </div>`;
   }).join("");
   drawQRs(box);
