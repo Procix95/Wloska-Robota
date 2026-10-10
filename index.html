@@ -683,10 +683,14 @@ fadeEls.forEach(el => observer.observe(el));
 
 <!-- ===== RABAT: STYLE ===== -->
 <style>
-#rabat-overlay{--rb-accent:#e63946;--rb-bg:#17171c;--rb-card:#212128;--rb-text:#f3f3f5;--rb-muted:#9b9ba8;--rb-border:#33333d;
-  display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);overflow-y:auto;padding:16px;box-sizing:border-box}
+#rabat-overlay{--rb-accent:#009246;--rb-accent2:#007a3b;--rb-red:#CD212A;--rb-gold:#D4AF37;
+  --rb-bg:#ffffff;--rb-card:#f5f5f2;--rb-text:#1a1a1a;--rb-muted:#6b6b6b;--rb-border:#e2e2dc;--rb-input:#ffffff;
+  --rb-okbg:#e8f6ee;--rb-badbg:#fdecee;--rb-err:#c62828;--rb-okt:#0a7a3d;
+  display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);overflow-y:auto;padding:16px;box-sizing:border-box;font-family:'Poppins',system-ui,sans-serif}
+body.dark #rabat-overlay{--rb-accent:#0fa65a;--rb-accent2:#0c8c4c;--rb-bg:#17171c;--rb-card:#212128;--rb-text:#f3f3f5;--rb-muted:#a2a2b0;--rb-border:#33333d;--rb-input:#121217;
+  --rb-okbg:#12301f;--rb-badbg:#341616;--rb-err:#ff6b6b;--rb-okt:#5fd68a}
 #rabat-overlay *{box-sizing:border-box}
-#rabat-overlay.open{display:block}
+#rabat-overlay.open{display:block;animation:rbFade .18s ease}
 #rabat-overlay [hidden]{display:none!important}
 #rabat-overlay .rb-box{position:relative;max-width:640px;margin:24px auto;background:var(--rb-bg);color:var(--rb-text);
   border:1px solid var(--rb-border);border-radius:16px;padding:24px;line-height:1.45}
@@ -707,8 +711,8 @@ fadeEls.forEach(el => observer.observe(el));
 #rabat-overlay .rb-or{text-align:center;color:var(--rb-muted);margin:14px 0 4px;font-size:13px}
 #rabat-overlay .rb-link{background:none;border:0;color:var(--rb-muted);text-decoration:underline;cursor:pointer;font-size:13px;padding:8px 0}
 #rabat-overlay .rb-msg{min-height:1.3em;font-size:14px;margin:8px 0}
-#rabat-overlay .rb-msg.err{color:#ff6b6b}
-#rabat-overlay .rb-msg.ok{color:#5fd68a}
+#rabat-overlay .rb-msg.err{color:var(--rb-err)}
+#rabat-overlay .rb-msg.ok{color:var(--rb-okt)}
 #rabat-overlay .rb-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;color:var(--rb-muted);font-size:14px}
 #rabat-overlay .rb-row{display:flex;gap:8px}
 #rabat-overlay .rb-row input{flex:1}
@@ -730,8 +734,8 @@ fadeEls.forEach(el => observer.observe(el));
 #rabat-overlay .rb-res.ok{border-color:#2c6e49}
 #rabat-overlay .rb-res.bad{border-color:#a33}
 #rabat-overlay .rb-res.big{padding:16px;text-align:center}
-#rabat-overlay .rb-res.big.ok{background:#12301f}
-#rabat-overlay .rb-res.big.bad{background:#341616}
+#rabat-overlay .rb-res.big.ok{background:var(--rb-okbg)}
+#rabat-overlay .rb-res.big.bad{background:var(--rb-badbg)}
 #rabat-overlay .rb-big{font-size:24px;font-weight:800;margin-bottom:6px}
 #rabat-overlay .rb-res.big .rb-actions{justify-content:center}
 #rabat-overlay .rb-atab{flex:1;padding:9px 6px;border:1px solid var(--rb-border);background:transparent;color:var(--rb-text);border-radius:10px;cursor:pointer;font-size:14px;font-family:inherit}
@@ -742,31 +746,136 @@ fadeEls.forEach(el => observer.observe(el));
 #rabat-overlay .rb-qr svg{display:block;width:100%;height:auto}
 #rabat-overlay #rb-admin .rb-tabs{gap:6px;flex-wrap:wrap}
 #rabat-overlay .rb-atab{flex:1 1 auto;padding:9px 8px;font-size:13px}
+
+/* ===== nowy wygląd: konto klienta ===== */
+@keyframes rbFade{from{opacity:0}to{opacity:1}}
+@keyframes rbUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes rbSpin{to{transform:rotate(360deg)}}
+#rabat-overlay .rb-box{border-radius:20px;padding:0 0 24px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.45);animation:rbUp .22s ease}
+#rabat-overlay .rb-box::before{content:"";display:block;height:6px;background:linear-gradient(90deg,var(--rb-accent) 0 33.3%,#fff 33.3% 66.6%,var(--rb-red) 66.6%)}
+#rabat-overlay .rb-inner{padding:20px 22px 0}
+#rabat-overlay .rb-head{display:flex;align-items:center;gap:10px;padding:18px 22px 0}
+#rabat-overlay .rb-head h2{margin:0;font-family:'Playfair Display',Georgia,serif;font-size:24px;flex:1}
+#rabat-overlay .rb-close{position:static;width:40px;height:40px;border-radius:50%;background:var(--rb-card);display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--rb-text)}
+#rabat-overlay .rb-close:hover{background:var(--rb-border)}
+#rabat-overlay .rb-box>#rb-loading{padding:50px 22px;text-align:center;color:var(--rb-muted)}
+#rabat-overlay .rb-spin{display:block;width:34px;height:34px;margin:0 auto 12px;border:3px solid var(--rb-border);border-top-color:var(--rb-accent);border-radius:50%;animation:rbSpin .8s linear infinite}
+#rabat-overlay #rb-auth,#rabat-overlay #rb-user{padding:6px 22px 0}
+/* logowanie */
+#rabat-overlay .rb-hello{text-align:center;padding:6px 0 14px}
+#rabat-overlay .rb-hello .rb-emoji{font-size:44px;line-height:1}
+#rabat-overlay .rb-hello h3{margin:8px 0 4px;font-size:21px}
+#rabat-overlay .rb-hello p{margin:0;color:var(--rb-muted);font-size:14px}
+#rabat-overlay .rb-perks{display:grid;gap:8px;margin:0 0 16px}
+#rabat-overlay .rb-perk{display:flex;gap:12px;align-items:center;background:var(--rb-card);border-radius:12px;padding:10px 12px;font-size:14px}
+#rabat-overlay .rb-perk b{font-weight:600}
+#rabat-overlay .rb-perk i{font-style:normal;font-size:22px;width:34px;text-align:center}
+#rabat-overlay .rb-perk.gift{background:var(--rb-okbg);border:1px solid var(--rb-accent)}
+#rabat-overlay .rb-btn.rb-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin:0;background:#fff;color:#3c4043;border:1px solid #dadce0;box-shadow:0 1px 3px rgba(0,0,0,.12);font-weight:600}
+#rabat-overlay .rb-btn.rb-google:hover{background:#f1f3f4}
+#rabat-overlay .rb-google svg{width:22px;height:22px;flex:none}
+#rabat-overlay .rb-or{display:flex;align-items:center;gap:12px;margin:16px 0 12px}
+#rabat-overlay .rb-or::before,#rabat-overlay .rb-or::after{content:"";flex:1;height:1px;background:var(--rb-border)}
+#rabat-overlay .rb-tabs{background:var(--rb-card);border-radius:12px;padding:4px;gap:4px}
+#rabat-overlay .rb-tab{border:0;padding:10px;border-radius:9px;color:var(--rb-muted);font-weight:500;font-family:inherit}
+#rabat-overlay .rb-tab.active{background:var(--rb-bg);color:var(--rb-text);box-shadow:0 1px 4px rgba(0,0,0,.18);font-weight:600}
+#rabat-overlay input,#rabat-overlay select{background:var(--rb-input);color:var(--rb-text);font-family:inherit;font-size:16px;padding:12px 14px;border-radius:12px}
+#rabat-overlay input:focus,#rabat-overlay select:focus{outline:2px solid var(--rb-accent);outline-offset:0;border-color:var(--rb-accent)}
+#rabat-overlay .rb-passwrap{position:relative}
+#rabat-overlay .rb-passwrap input{padding-right:48px}
+#rabat-overlay .rb-eye{position:absolute;right:4px;top:2px;width:42px;height:44px;background:none;border:0;cursor:pointer;font-size:18px;color:var(--rb-muted)}
+#rabat-overlay .rb-btn{border-radius:12px;min-height:48px;font-family:inherit;background:var(--rb-accent);transition:background .15s,transform .05s}
+#rabat-overlay .rb-btn:hover{background:var(--rb-accent2)}
+#rabat-overlay .rb-btn:active{transform:scale(.98)}
+#rabat-overlay .rb-btn.secondary{background:transparent;color:var(--rb-text)}
+#rabat-overlay .rb-btn.secondary:hover{background:var(--rb-card)}
+#rabat-overlay .rb-btn.small{min-height:38px}
+#rabat-overlay .rb-btn:disabled{opacity:.6;cursor:wait}
+#rabat-overlay .rb-link{display:block;margin:4px auto 0;color:var(--rb-muted)}
+#rabat-overlay .rb-atab{border-radius:10px;font-weight:500;min-height:40px}
+#rabat-overlay .rb-atab.active{background:var(--rb-accent);color:#fff}
+/* nagłówek zalogowanego */
+#rabat-overlay .rb-top{background:var(--rb-card);border-radius:16px;padding:12px 14px;margin-bottom:14px;color:var(--rb-text)}
+#rabat-overlay .rb-avatar{width:46px;height:46px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--rb-accent),var(--rb-red))}
+#rabat-overlay .rb-who{flex:1;min-width:0;line-height:1.3}
+#rabat-overlay .rb-who b{display:block;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#rabat-overlay .rb-who small{display:block;color:var(--rb-muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#rabat-overlay .rb-adminpill{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:99px;background:var(--rb-gold);color:#222;font-size:11px;font-weight:700;vertical-align:middle}
+#rabat-overlay #rb-welcome{background:var(--rb-okbg);border:1px solid var(--rb-accent);border-radius:14px;padding:14px;font-size:15px;line-height:1.45;animation:rbUp .3s ease}
+#rabat-overlay .rb-sec{display:flex;align-items:baseline;justify-content:space-between;margin:6px 0 12px}
+#rabat-overlay .rb-sec h3{margin:0;font-size:18px}
+#rabat-overlay .rb-sec span{font-size:13px;color:var(--rb-muted)}
+/* bilet-kupon */
+#rabat-overlay .rb-ticket{position:relative;background:var(--rb-card);border:1px solid var(--rb-border);border-left:6px solid var(--rb-accent);border-radius:16px;padding:16px;margin-bottom:14px}
+#rabat-overlay .rb-ticket.off{border-left-color:#9a9aa6;opacity:.6}
+#rabat-overlay .rb-ticket-desc{font-size:18px;font-weight:700;line-height:1.3;margin:0 0 10px;padding-right:4px}
+#rabat-overlay .rb-ticket-top{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px}
+#rabat-overlay .rb-ticket .rb-badge{margin:0}
+#rabat-overlay .rb-codebox{display:flex;align-items:center;justify-content:space-between;gap:10px;border:2px dashed var(--rb-accent);border-radius:12px;padding:8px 8px 8px 14px;background:var(--rb-bg)}
+#rabat-overlay .rb-ticket.off .rb-codebox{border-color:var(--rb-border)}
+#rabat-overlay .rb-codebox .rb-code{font-size:21px;letter-spacing:2px}
+#rabat-overlay .rb-copy{flex:none}
+#rabat-overlay .rb-expiry{margin-top:10px;font-size:13px;color:var(--rb-muted)}
+#rabat-overlay .rb-expiry.soon{color:var(--rb-red);font-weight:600}
+#rabat-overlay .rb-qrwrap{margin-top:14px;text-align:center;border-top:1px dashed var(--rb-border);padding-top:14px}
+#rabat-overlay .rb-qrwrap .rb-qr{width:210px;margin:0 auto;padding:10px;border:1px solid #eee}
+#rabat-overlay .rb-qrcap{margin-top:8px;font-size:14px;font-weight:600}
+#rabat-overlay .rb-qrcap small{display:block;font-weight:400;color:var(--rb-muted);font-size:12px}
+#rabat-overlay .rb-empty2{text-align:center;padding:26px 14px;background:var(--rb-card);border:1px dashed var(--rb-border);border-radius:16px;color:var(--rb-muted);font-size:14px}
+#rabat-overlay .rb-empty2 .rb-emoji{display:block;font-size:38px;margin-bottom:6px}
+#rabat-overlay .rb-how{margin-top:6px;background:var(--rb-card);border-radius:14px;padding:12px 14px;font-size:13px;color:var(--rb-muted)}
+#rabat-overlay .rb-how b{color:var(--rb-text)}
+#rabat-overlay .rb-how ol{margin:6px 0 0 18px;padding:0}
+#rabat-overlay .rb-admin{margin-top:26px;padding-top:6px}
+#rabat-overlay .rb-admin>h3{display:flex;align-items:center;gap:8px}
+@media (max-width:560px){
+  #rabat-overlay{padding:0;background:var(--rb-bg)}
+  #rabat-overlay .rb-box{margin:0;min-height:100%;border-radius:0;box-shadow:none}
+  #rabat-overlay .rb-inner,#rabat-overlay #rb-auth,#rabat-overlay #rb-user{padding-left:16px;padding-right:16px}
+  #rabat-overlay .rb-head{padding-left:16px;padding-right:12px}
+  #rabat-overlay .rb-codebox .rb-code{font-size:19px}
+}
+#rabat-overlay #rb-admin.staffonly .rb-tabs,#rabat-overlay #rb-admin.staffonly .rb-stats,#rabat-overlay #rb-admin.staffonly .rb-pane:not([data-pane="check"]){display:none!important}
+#rabat-overlay #rb-admin.staffonly{margin-top:8px}
+@media (prefers-reduced-motion:reduce){#rabat-overlay *{animation:none!important}}
 </style>
 
 <!-- ===== RABAT: HTML ===== -->
 <div id="rabat-overlay" role="dialog" aria-modal="true" aria-labelledby="rb-title">
   <div class="rb-box">
-    <button type="button" class="rb-close" id="rb-close" aria-label="Zamknij">&times;</button>
-    <h2 id="rb-title">Konto</h2>
+    <div class="rb-head">
+      <h2 id="rb-title">Konto</h2>
+      <button type="button" class="rb-close" id="rb-close" aria-label="Zamknij">&times;</button>
+    </div>
 
-    <div id="rb-loading">Ładowanie…</div>
+    <div id="rb-loading"><span class="rb-spin"></span>Ładowanie…</div>
 
     <!-- Logowanie / rejestracja -->
     <div id="rb-auth" hidden>
-      <p class="rb-meta" style="margin-top:0">Zaloguj się, aby wejść na swoje konto i zobaczyć kody rabatowe.</p>
+      <div class="rb-hello">
+        <div class="rb-emoji">🍕</div>
+        <h3>Twoje konto w Włoskiej Robocie</h3>
+        <p>Zaloguj się, aby zobaczyć swoje kody rabatowe.</p>
+      </div>
+      <div class="rb-perks">
+        <div class="rb-perk gift"><i>🎁</i><span><b>−5 zł na start</b><br>kod powitalny dla każdego nowego konta</span></div>
+        <div class="rb-perk"><i>📱</i><span><b>Kody zawsze pod ręką</b><br>pokaż kod QR przy kasie</span></div>
+      </div>
+      <button type="button" class="rb-btn rb-google" id="rb-google"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.4-4.1 7-10.1 7-17.6z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 010-9.4l-7.9-6.1a24 24 0 000 21.6l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg><span>Kontynuuj z Google</span></button>
+      <div class="rb-or">lub e-mailem</div>
       <div class="rb-tabs">
         <button type="button" class="rb-tab active" data-mode="login">Logowanie</button>
         <button type="button" class="rb-tab" data-mode="register">Rejestracja</button>
       </div>
-      <form id="rb-form" novalidate>
-        <input id="rb-name" type="text" placeholder="Imię" autocomplete="given-name" maxlength="60" hidden>
-        <input id="rb-email" type="email" placeholder="E-mail" autocomplete="email" required>
-        <input id="rb-pass" type="password" placeholder="Hasło (min. 6 znaków)" autocomplete="current-password" minlength="6" required>
+      <form id="rb-form" novalidate style="margin-top:12px">
+        <input id="rb-name" type="text" placeholder="Twoje imię" autocomplete="given-name" maxlength="60" hidden>
+        <input id="rb-email" type="email" placeholder="E-mail" autocomplete="email" inputmode="email" required>
+        <div class="rb-passwrap">
+          <input id="rb-pass" type="password" placeholder="Hasło (min. 6 znaków)" autocomplete="current-password" minlength="6" required>
+          <button type="button" class="rb-eye" id="rb-eye" aria-label="Pokaż hasło">👁</button>
+        </div>
         <button type="submit" class="rb-btn" id="rb-submit">Zaloguj się</button>
       </form>
-      <div class="rb-or">lub</div>
-      <button type="button" class="rb-btn rb-google" id="rb-google">Kontynuuj z Google</button>
       <button type="button" class="rb-link" id="rb-reset">Nie pamiętam hasła</button>
       <div class="rb-msg" id="rb-auth-msg" role="status"></div>
     </div>
@@ -774,22 +883,25 @@ fadeEls.forEach(el => observer.observe(el));
     <!-- Widok zalogowanego -->
     <div id="rb-user" hidden>
       <div class="rb-top">
-        <span id="rb-who"></span>
+        <div class="rb-avatar" id="rb-avatar" aria-hidden="true">?</div>
+        <div class="rb-who"><b id="rb-who"></b><small id="rb-mail"></small></div>
         <button type="button" class="rb-btn secondary small" id="rb-logout">Wyloguj</button>
       </div>
       <div class="rb-res ok" id="rb-welcome" hidden>🎉 Witaj! Na start dostajesz rabat <b>5 zł</b> na zamówienie. Znajdziesz go poniżej, pokaż jego kod QR przy kasie.</div>
-      <h3 style="margin-top:8px">Twoje kody rabatowe</h3>
+      <div class="rb-sec"><h3>Twoje kody rabatowe</h3><span id="rb-count"></span></div>
       <div id="rb-my-list"></div>
+      <div class="rb-how"><b>Jak użyć kodu?</b><ol><li>Wybierz kod, który chcesz wykorzystać.</li><li>Pokaż jego kod QR (lub podaj kod) przy zamówieniu.</li><li>My go skanujemy — rabat się nalicza, a kod gaśnie.</li></ol></div>
 
       <!-- Panel administratora (widoczny tylko dla admina) -->
       <div class="rb-admin" id="rb-admin" hidden>
-        <h3>Panel administratora</h3>
+        <h3 id="rb-admin-title">🛠 Panel administratora</h3>
         <div class="rb-stats" id="rb-stats"></div>
         <div class="rb-tabs">
           <button type="button" class="rb-atab active" data-pane="check">Sprawdź kod</button>
           <button type="button" class="rb-atab" data-pane="grant">Przyznaj</button>
           <button type="button" class="rb-atab" data-pane="builder">Rabaty</button>
           <button type="button" class="rb-atab" data-pane="list">Kody</button>
+          <button type="button" class="rb-atab" data-pane="staff">Obsługa</button>
         </div>
 
         <!-- Zakładka: Sprawdź kod (skaner QR na telefonie + wpisanie ręczne) -->
@@ -823,9 +935,9 @@ fadeEls.forEach(el => observer.observe(el));
           <div class="rb-meta" style="margin:-4px 0 10px">Własne rabaty tworzysz w zakładce „Rabaty”.</div>
           <label for="rb-a-desc">Opis rabatu</label>
           <input id="rb-a-desc" type="text" maxlength="120" placeholder="np. -20% na pizzę Margherita">
-          <label for="rb-a-code">Kod (przy „Wszyscy klienci” wpisz tylko przedrostek, np. WEEKEND)</label>
+          <label for="rb-a-code">Kod (puste = losowy; przy „Wszyscy klienci” możesz wpisać przedrostek, np. WEEKEND)</label>
           <div class="rb-row">
-            <input id="rb-a-code" type="text" maxlength="30" placeholder="np. PIZZA-7K2M9Q" autocapitalize="characters">
+            <input id="rb-a-code" type="text" maxlength="30" placeholder="np. 7K2M9Q" autocapitalize="characters">
             <button type="button" class="rb-btn secondary small" id="rb-a-gen" style="margin-bottom:10px">Losuj</button>
           </div>
           <label for="rb-a-exp">Ważny do (opcjonalnie)</label>
@@ -864,6 +976,21 @@ fadeEls.forEach(el => observer.observe(el));
           <div id="rb-t-list"></div>
         </div>
 
+        <!-- Zakładka: konta obsługi (tylko skanowanie) -->
+        <div class="rb-pane" data-pane="staff" hidden>
+          <h4>Konta do skanowania rabatów</h4>
+          <div class="rb-meta" style="margin:-4px 0 10px">Pracownik z takim kontem widzi tylko skaner i sprawdzanie kodów. Nie widzi klientów, nie przyznaje ani nie usuwa rabatów.</div>
+          <form id="rb-st-form" novalidate>
+            <input id="rb-st-name" type="text" maxlength="60" placeholder="Imię pracownika" autocomplete="off">
+            <input id="rb-st-email" type="email" placeholder="E-mail pracownika" autocomplete="off" inputmode="email">
+            <input id="rb-st-pass" type="text" placeholder="Hasło startowe (min. 6 znaków)" autocomplete="off">
+            <button type="submit" class="rb-btn" id="rb-st-add">Utwórz konto obsługi</button>
+          </form>
+          <div class="rb-msg" id="rb-st-msg" role="status"></div>
+          <h4>Aktywne konta obsługi</h4>
+          <div id="rb-st-list"></div>
+        </div>
+
         <!-- Zakładka: lista wszystkich kodów -->
         <div class="rb-pane" data-pane="list" hidden>
           <h4>Wszystkie przyznane kody</h4>
@@ -883,7 +1010,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot,
-  addDoc, updateDoc, deleteDoc, serverTimestamp, Timestamp, writeBatch, runTransaction
+  addDoc, updateDoc, deleteDoc, serverTimestamp, Timestamp, writeBatch, runTransaction, getDocs
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 /* ▼▼▼ WKLEJ TUTAJ SWOJĄ KONFIGURACJĘ Z FIREBASE (Ustawienia projektu → Twoje aplikacje) ▼▼▼ */
@@ -976,6 +1103,14 @@ function setMode(m) {
 document.querySelectorAll("#rabat-overlay .rb-tab").forEach((b) => b.addEventListener("click", () => setMode(b.dataset.mode)));
 setMode("login");
 
+$("rb-eye").addEventListener("click", () => {
+  const p = $("rb-pass");
+  const show = p.type === "password";
+  p.type = show ? "text" : "password";
+  $("rb-eye").textContent = show ? "🙈" : "👁";
+  $("rb-eye").setAttribute("aria-label", show ? "Ukryj hasło" : "Pokaż hasło");
+});
+
 $("rb-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const email = $("rb-email").value.trim();
@@ -1023,6 +1158,9 @@ $("rb-logout").addEventListener("click", () => signOut(auth));
 /* ---------- stan aplikacji ---------- */
 let unsubs = [];
 let isAdmin = false;
+let isStaff = false;
+let allStaff = [];
+let staffFound = [];
 let myCoupons = [];
 let allUsers = [];
 let allCoupons = [];
@@ -1034,7 +1172,7 @@ function cleanup() {
   stopScanner();
   unsubs.forEach((u) => { try { u(); } catch (_) {} });
   unsubs = [];
-  isAdmin = false; myCoupons = []; allUsers = []; allCoupons = []; allTemplates = []; lastCheck = "";
+  isAdmin = false; isStaff = false; allStaff = []; staffFound = []; myCoupons = []; allUsers = []; allCoupons = []; allTemplates = []; lastCheck = "";
 }
 function showOnly(which) {
   $("rb-loading").hidden = which !== "loading";
@@ -1085,8 +1223,13 @@ async function handleUser(user) {
   showOnly("loading");
   let gotWelcome = false;
   try {
-    gotWelcome = await ensureProfile(user);
     isAdmin = (await withTimeout(getDoc(doc(db, "admins", user.uid)))).exists();
+    if (!isAdmin) {
+      try { isStaff = (await withTimeout(getDoc(doc(db, "staff", user.uid)))).exists(); }
+      catch (e) { console.warn("Sprawdzanie roli obsługi nie powiodło się (opublikuj nowe reguły):", e.code); isStaff = false; }
+    }
+    // konto obsługi nie jest klientem: bez profilu i bez kodu powitalnego
+    if (!isStaff) gotWelcome = await ensureProfile(user);
   } catch (err) {
     console.error("Rabat:", err);
     showOnly("auth");
@@ -1099,8 +1242,14 @@ async function handleUser(user) {
     return;
   }
 
-  $("rb-who").textContent = "Zalogowano: " + (user.displayName || user.email) + (isAdmin ? " (administrator)" : "");
-  $("rb-admin").hidden = !isAdmin;
+  const shownName = user.displayName || (user.email || "").split("@")[0] || "Klient";
+  $("rb-who").innerHTML = esc("Cześć, " + shownName.split(" ")[0] + "!") + (isAdmin ? '<span class="rb-adminpill">ADMIN</span>' : isStaff ? '<span class="rb-adminpill">OBSŁUGA</span>' : "");
+  $("rb-mail").textContent = user.email || "";
+  $("rb-avatar").textContent = (shownName.trim()[0] || "?").toUpperCase();
+  $("rb-admin").hidden = !(isAdmin || isStaff);
+  $("rb-admin").classList.toggle("staffonly", !isAdmin && isStaff);
+  $("rb-admin-title").textContent = isAdmin ? "🛠 Panel administratora" : "📷 Skanowanie rabatów";
+  if (!isAdmin && isStaff) setAdminTab("check");
   $("rb-welcome").hidden = !gotWelcome;
   showOnly("user");
 
@@ -1123,6 +1272,11 @@ async function handleUser(user) {
       renderAdminList();
     }, console.error));
     renderTemplates();
+    unsubs.push(onSnapshot(collection(db, "staff"), (s) => {
+      allStaff = s.docs.map((d) => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => String(a.email).localeCompare(String(b.email)));
+      renderStaff();
+    }, (err) => { console.warn("Lista obsługi niedostępna (opublikuj nowe reguły):", err.code); allStaff = []; renderStaff(); }));
     unsubs.push(onSnapshot(collection(db, "templates"), (s) => {
       allTemplates = s.docs.map((d) => ({ id: d.id, ...d.data() }))
         .sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
@@ -1142,20 +1296,37 @@ function couponState(c) {
   return { off: false, label: "Aktywny" };
 }
 
+function expiryInfo(c) {
+  if (!c.expiresAt || !c.expiresAt.toDate) return { text: "Bez terminu ważności", soon: false };
+  const d = c.expiresAt.toDate();
+  const days = Math.ceil((d - new Date()) / 86400000);
+  let extra = "";
+  if (days === 1) extra = " · zostaje 1 dzień";
+  else if (days > 1 && days <= 14) extra = " · zostało " + days + " dni";
+  return { text: "Ważny do: " + fmtDate(c.expiresAt) + extra, soon: days >= 0 && days <= 3 };
+}
+
 function renderMy() {
   const box = $("rb-my-list");
+  const cnt = $("rb-count");
   if (!myCoupons.length) {
-    box.innerHTML = '<div class="rb-empty">Nie masz jeszcze żadnych kodów. Zaglądaj tu — dostaniesz je od nas!</div>';
+    cnt.textContent = "";
+    box.innerHTML = '<div class="rb-empty2"><span class="rb-emoji">🎟️</span><b>Nie masz jeszcze żadnych kodów</b><br>Zaglądaj tu — kody rabatowe od nas pojawią się w tym miejscu.</div>';
     return;
   }
-  const list = [...myCoupons].sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+  const list = [...myCoupons].sort((a, b) =>
+    (couponState(a).off - couponState(b).off) || ((b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
+  const active = list.filter((c) => !couponState(c).off).length;
+  cnt.textContent = active ? "aktywne: " + active : "brak aktywnych";
   box.innerHTML = list.map((c) => {
     const st = couponState(c);
-    return `<div class="rb-coupon${st.off ? " off" : ""}">
-      <div class="rb-code">${esc(c.code)}<span class="rb-badge${st.off ? " bad" : ""}">${st.label}</span></div>
-      <div class="rb-desc">${esc(c.description)}</div>
-      <div class="rb-meta">${c.expiresAt ? "Ważny do: " + fmtDate(c.expiresAt) : "Bez terminu ważności"}</div>
-      ${st.off ? "" : `<div class="rb-qr" data-qr="${esc(c.code)}"></div><div class="rb-meta" style="margin-top:6px">Pokaż ten kod przy kasie</div><div class="rb-actions"><button type="button" class="rb-btn secondary small" data-act="copy" data-code="${esc(c.code)}">Kopiuj kod</button></div>`}
+    const ex = expiryInfo(c);
+    return `<div class="rb-ticket${st.off ? " off" : ""}">
+      <div class="rb-ticket-top"><span class="rb-badge${st.off ? " bad" : ""}">${st.off ? st.label : "✓ " + st.label}</span></div>
+      <div class="rb-ticket-desc">${esc(c.description)}</div>
+      <div class="rb-codebox"><span class="rb-code">${esc(c.code)}</span>${st.off ? "" : `<button type="button" class="rb-btn secondary small rb-copy" data-act="copy" data-code="${esc(c.code)}">Kopiuj</button>`}</div>
+      <div class="rb-expiry${ex.soon && !st.off ? " soon" : ""}">${ex.text}</div>
+      ${st.off ? "" : `<div class="rb-qrwrap"><div class="rb-qr" data-qr="${esc(c.code)}"></div><div class="rb-qrcap">Pokaż ten kod QR przy kasie<small>albo podaj kod słownie</small></div></div>`}
     </div>`;
   }).join("");
   drawQRs(box);
@@ -1166,7 +1337,7 @@ $("rb-my-list").addEventListener("click", async (e) => {
   if (!b) return;
   try { await navigator.clipboard.writeText(b.dataset.code); b.textContent = "Skopiowano ✓"; }
   catch (_) { b.textContent = b.dataset.code; }
-  setTimeout(() => { if (b.isConnected) b.textContent = "Kopiuj kod"; }, 2000);
+  setTimeout(() => { if (b.isConnected) b.textContent = "Kopiuj"; }, 2000);
 });
 
 /* ---------- panel administratora ---------- */
@@ -1184,13 +1355,14 @@ function renderUserSelect() {
 }
 $("rb-a-filter").addEventListener("input", renderUserSelect);
 
-function genCode(prefix = "PIZZA") {
+function genCode(prefix = "") {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // bez 0/O/1/I
   const buf = new Uint32Array(6);
   crypto.getRandomValues(buf);
-  return prefix + "-" + Array.from(buf, (n) => alphabet[n % alphabet.length]).join("");
+  const body = Array.from(buf, (n) => alphabet[n % alphabet.length]).join("");
+  return prefix ? prefix + "-" + body : body;
 }
-$("rb-a-gen").addEventListener("click", () => { $("rb-a-code").value = genCode(selTpl.prefix || "PIZZA"); });
+$("rb-a-gen").addEventListener("click", () => { $("rb-a-code").value = genCode(selTpl.prefix || ""); });
 
 $("rb-a-add").addEventListener("click", async () => {
   setMsg(aMsg, "");
@@ -1203,8 +1375,8 @@ $("rb-a-add").addEventListener("click", async () => {
   if (!description) { setMsg(aMsg, "Wpisz opis rabatu.", "err"); return; }
   try {
     if (sel === "__all__") {
-      const prefix = codeIn || selTpl.prefix || "PIZZA";
-      if (!/^[A-Z0-9-]{2,18}$/.test(prefix)) { setMsg(aMsg, "Przedrostek: 2–18 znaków (litery, cyfry, myślnik).", "err"); return; }
+      const prefix = codeIn || selTpl.prefix || "";
+      if (prefix && !/^[A-Z0-9-]{2,18}$/.test(prefix)) { setMsg(aMsg, "Przedrostek: 2–18 znaków (litery, cyfry, myślnik).", "err"); return; }
       if (!allUsers.length) { setMsg(aMsg, "Nie ma jeszcze żadnych klientów.", "err"); return; }
       if (!confirm("Przyznać ten rabat WSZYSTKIM klientom (" + allUsers.length + ")?")) return;
       const taken = new Set(allCoupons.map((c) => c.code));
@@ -1222,12 +1394,12 @@ $("rb-a-add").addEventListener("click", async () => {
         });
         await batch.commit();
       }
-      setMsg(aMsg, "Przyznano " + n + " kodów (" + prefix + "-XXXXXX), każdy klient ma własny.", "ok");
+      setMsg(aMsg, "Przyznano " + n + " kodów" + (prefix ? " (" + prefix + "-XXXXXX)" : "") + ", każdy klient ma własny.", "ok");
     } else {
       const user = allUsers.find((u) => u.id === sel);
       if (!user) { setMsg(aMsg, "Wybierz klienta.", "err"); return; }
       let code = codeIn;
-      if (!code) { code = genCode(selTpl.prefix || "PIZZA"); $("rb-a-code").value = code; }
+      if (!code) { code = genCode(selTpl.prefix || ""); $("rb-a-code").value = code; }
       if (!/^[A-Z0-9-]{3,30}$/.test(code)) { setMsg(aMsg, "Kod: 3–30 znaków (litery, cyfry, myślnik).", "err"); return; }
       if (allCoupons.some((c) => c.code === code)) { setMsg(aMsg, "Taki kod już istnieje. Wpisz inny albo kliknij Losuj.", "err"); return; }
       await addDoc(collection(db, "coupons"), {
@@ -1297,11 +1469,16 @@ function ownerName(c) {
   if (u) return (u.name ? u.name + " — " : "") + (u.email || "");
   return c.userEmail || "nieznany klient";
 }
+async function lookupCode(code) {
+  if (isAdmin) return allCoupons.filter((c) => c.code === code);
+  const snap = await getDocs(query(collection(db, "coupons"), where("code", "==", code)));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
 function renderCheck() {
   const box = $("rb-c-result");
   if (!box) return;
   if (!lastCheck) { box.innerHTML = ""; return; }
-  const found = allCoupons.filter((c) => c.code === lastCheck);
+  const found = isAdmin ? allCoupons.filter((c) => c.code === lastCheck) : staffFound;
   if (!found.length) {
     box.innerHTML = `<div class="rb-res bad">❌ Nie znaleziono kodu <b>${esc(lastCheck)}</b></div>`;
     return;
@@ -1316,8 +1493,12 @@ function renderCheck() {
     </div>`;
   }).join("");
 }
-function runCheck() {
+async function runCheck() {
   lastCheck = $("rb-c-code").value.trim().toUpperCase();
+  if (!isAdmin && lastCheck) {
+    try { staffFound = await lookupCode(lastCheck); }
+    catch (err) { staffFound = []; setMsg(cMsg, errText(err), "err"); }
+  }
   renderCheck();
 }
 $("rb-c-btn").addEventListener("click", runCheck);
@@ -1328,6 +1509,7 @@ $("rb-c-result").addEventListener("click", async (e) => {
   setMsg(cMsg, "");
   const r = await redeem(b.dataset.id);
   if (!r.ok) setMsg(cMsg, r.reason, "err");
+  if (!isAdmin) await runCheck();
 });
 
 /* ---------- szablony rabatów ---------- */
@@ -1467,6 +1649,72 @@ $("rb-t-list").addEventListener("click", async (e) => {
   }
 });
 
+/* ---------- konta obsługi (skanowanie) ---------- */
+const stMsg = $("rb-st-msg");
+let staffApp = null;
+function renderStaff() {
+  const box = $("rb-st-list");
+  if (!box) return;
+  if (!allStaff.length) { box.innerHTML = '<div class="rb-empty">Brak kont obsługi.</div>'; return; }
+  box.innerHTML = allStaff.map((u) => `<div class="rb-res"><div><b>${esc(u.name || u.email)}</b></div>
+    <div class="rb-meta">${esc(u.email)}</div>
+    <div class="rb-actions"><button type="button" class="rb-btn secondary small" data-act="revoke" data-id="${esc(u.id)}">Odbierz dostęp</button></div></div>`).join("");
+}
+async function grantStaff(uid, email, name) {
+  await setDoc(doc(db, "staff", uid), { email, name: name || "", createdAt: serverTimestamp() });
+}
+$("rb-st-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  setMsg(stMsg, "");
+  const name = $("rb-st-name").value.trim();
+  const email = $("rb-st-email").value.trim().toLowerCase();
+  const pass = $("rb-st-pass").value;
+  if (!email || !/^\S+@\S+\.\S+$/.test(email)) { setMsg(stMsg, "Wpisz poprawny e-mail.", "err"); return; }
+  if (pass.length < 6) { setMsg(stMsg, "Hasło musi mieć min. 6 znaków.", "err"); return; }
+  const btn = $("rb-st-add");
+  btn.disabled = true;
+  try {
+    // druga, osobna instancja logowania — dzięki temu Ty zostajesz zalogowany jako admin
+    if (!staffApp) staffApp = initializeApp(firebaseConfig, "staff-creator");
+    const auth2 = getAuth(staffApp);
+    try {
+      const cred = await createUserWithEmailAndPassword(auth2, email, pass);
+      if (name) { try { await updateProfile(cred.user, { displayName: name }); } catch (_) {} }
+      const uid = cred.user.uid;
+      await signOut(auth2);
+      await grantStaff(uid, email, name);
+      setMsg(stMsg, "Gotowe! Konto obsługi " + email + " utworzone. Przekaż pracownikowi e-mail i hasło.", "ok");
+      $("rb-st-form").reset();
+    } catch (err) {
+      try { await signOut(auth2); } catch (_) {}
+      if (err.code === "auth/email-already-in-use") {
+        const u = allUsers.find((x) => (x.email || "").toLowerCase() === email);
+        if (u && confirm("Konto " + email + " już istnieje. Nadać mu uprawnienia do skanowania?")) {
+          await grantStaff(u.id, u.email, u.name || name);
+          setMsg(stMsg, "Nadano uprawnienia do skanowania: " + email, "ok");
+          $("rb-st-form").reset();
+        } else if (!u) {
+          setMsg(stMsg, "Takie konto już istnieje, ale nie ma go na liście klientów (musi się najpierw raz zalogować na stronie).", "err");
+        }
+      } else {
+        throw err;
+      }
+    }
+  } catch (err) {
+    console.error(err);
+    setMsg(stMsg, errText(err), "err");
+  } finally {
+    btn.disabled = false;
+  }
+});
+$("rb-st-list").addEventListener("click", async (e) => {
+  const b = e.target.closest('[data-act="revoke"]');
+  if (!b) return;
+  if (!confirm("Odebrać temu kontu uprawnienia do skanowania?")) return;
+  try { await deleteDoc(doc(db, "staff", b.dataset.id)); setMsg(stMsg, "Dostęp odebrany.", "ok"); }
+  catch (err) { setMsg(stMsg, errText(err), "err"); }
+});
+
 /* ---------- zakładki panelu admina ---------- */
 const cMsg = $("rb-c-msg");
 const sMsg = $("rb-s-msg");
@@ -1548,7 +1796,7 @@ if (!PHONE_CAM) {
   hint.hidden = false;
   hint.textContent = IS_PHONE
     ? "Aparat jest niedostępny w tej przeglądarce. Wpisz kod ręcznie."
-    : "Skanowanie kodów QR działa na telefonie: otwórz stronę na telefonie i zaloguj się kontem administratora. Tutaj możesz wpisać kod ręcznie.";
+    : "Skanowanie kodów QR działa na telefonie: otwórz stronę na telefonie i zaloguj się kontem administratora lub obsługi. Tutaj możesz wpisać kod ręcznie.";
 }
 
 let stream = null, scanning = false, busy = false, scanTimer = 0;
@@ -1672,7 +1920,7 @@ async function handleScan(raw) {
       buzz([120, 60, 120]);
       return;
     }
-    const matches = allCoupons.filter((x) => x.code === code);
+    const matches = await lookupCode(code);
     const c = matches.find((x) => !couponState(x).off) || matches[0];
     if (!c) {
       out.innerHTML = scanCard("bad", "❌ Nie znaleziono kodu", null, "Kod: <b>" + esc(code) + "</b>");
