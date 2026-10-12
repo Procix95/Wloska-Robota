@@ -551,20 +551,21 @@ document.getElementById('currentYear').textContent = new Date().getFullYear();
  
 // Filtrowanie menu po kategoriach
 const categoryBtns = document.querySelectorAll('.category-btn');
-const menuItems = document.querySelectorAll('.menu-item');
+// Filtr liczy pozycje na bieżąco (administrator może dodać nowe produkty już po załadowaniu strony)
+function applyMenuFilter() {
+  const act = document.querySelector('.category-btn.active');
+  const category = act ? act.dataset.category : 'all';
+  document.querySelectorAll('#menuGrid .menu-item').forEach(item => {
+    const itemCategories = (item.dataset.category || '').split(' ');
+    item.style.display = (category === 'all' || itemCategories.includes(category)) ? '' : 'none';
+  });
+}
+window.applyMenuFilter = applyMenuFilter;
 categoryBtns.forEach(btn => {
   btn.addEventListener('click', () => {
     categoryBtns.forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    const category = btn.dataset.category;
-    menuItems.forEach(item => {
-      const itemCategories = item.dataset.category.split(' ');
-      if (category === 'all' || itemCategories.includes(category)) {
-        item.style.display = '';
-      } else {
-        item.style.display = 'none';
-      }
-    });
+    applyMenuFilter();
   });
 });
  
@@ -870,6 +871,7 @@ body.has-notice .hero{margin-top:0}
 .menu-item.is-unavail:hover{transform:none}
 .unavail-badge{display:inline-block;margin-top:.6rem;padding:.15rem .7rem;border-radius:99px;background:var(--red);color:#fff;font-size:.8rem;font-weight:700}
 .menu-item.is-dish{outline:3px solid var(--gold);outline-offset:-3px}
+.menu-item.is-hidden{display:none!important}
 #site-dish{display:none;margin:0 auto 2rem;max-width:720px;padding:1.2rem 1.4rem;border-radius:20px;background:linear-gradient(135deg,rgba(212,175,55,.18),rgba(212,175,55,.06));border:2px solid var(--gold);text-align:center}
 #site-dish .sd-label{font-size:.85rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
 #site-dish .sd-name{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:800;margin:.2rem 0}
@@ -885,6 +887,13 @@ body.dark #site-dish .sd-text{color:#bbb}
 #rabat-overlay .rb-site-name small{display:block;font-weight:400;color:var(--rb-muted);font-size:12px}
 #rabat-overlay .rb-site-row input.rb-site-price{margin:0;padding:8px 10px;text-align:right}
 #rabat-overlay .rb-site-un{grid-column:1 / -1;display:flex;align-items:center;font-size:13px;color:var(--rb-muted);cursor:pointer}
+#rabat-overlay .rb-prod{border:1px solid var(--rb-border);border-radius:14px;padding:12px;margin:10px 0;background:var(--rb-input)}
+#rabat-overlay .rb-prod .rb-prod-top{display:grid;grid-template-columns:1fr 92px;gap:8px}
+#rabat-overlay .rb-prod input,#rabat-overlay .rb-prod select,#rabat-overlay .rb-prod textarea{margin-bottom:8px}
+#rabat-overlay .rb-prod input.rb-prod-price{text-align:right}
+#rabat-overlay .rb-prod .rb-prod-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+#rabat-overlay .rb-prod .rb-check{margin:0}
+#rabat-overlay .rb-site-hide{display:flex;align-items:center;font-size:13px;color:var(--rb-muted);cursor:pointer}
 #rabat-overlay .rb-ev{padding:8px 0;border-top:1px solid var(--rb-border);font-size:13px}
 #rabat-overlay .rb-ev b{font-size:14px}
 #rabat-overlay .rb-ev .rb-meta{margin-top:1px}
@@ -1078,8 +1087,13 @@ body.dark #site-dish .sd-text{color:#bbb}
           <input id="rb-site-dish-text" type="text" maxlength="120" placeholder="Opis (opcjonalnie), np. Dziś z podwójną mozzarellą!">
           <label class="rb-check"><input id="rb-site-dish-on" type="checkbox"> Wyróżnij na stronie</label>
 
-          <h4>Ceny i dostępność</h4>
-          <div class="rb-meta" style="margin:-4px 0 6px">Zmień cenę (np. 36 zł) albo zaznacz „niedostępne”, gdy czegoś zabrakło — pozycja się wyszarzy. Nowych pozycji tu nie dodasz.</div>
+          <h4>Własne produkty</h4>
+          <div class="rb-meta" style="margin:-4px 0 6px">Dodaj nową pozycję do menu (np. nową pizzę, napój, deser). Pojawi się na stronie w wybranej kategorii.</div>
+          <div id="rb-prod-list"></div>
+          <button type="button" class="rb-btn secondary small" id="rb-prod-add">+ Dodaj produkt</button>
+
+          <h4>Ceny i dostępność pozycji ze strony</h4>
+          <div class="rb-meta" style="margin:-4px 0 6px">Zmień cenę (np. 36 zł), zaznacz „niedostępne”, gdy czegoś zabrakło (pozycja się wyszarzy), albo „ukryj”, żeby zdjąć pozycję z menu.</div>
           <div id="rb-site-items"></div>
           <div class="rb-actions" style="margin-top:10px">
             <button type="button" class="rb-btn secondary small" id="rb-site-reset">Przywróć ceny z kodu</button>
@@ -2073,7 +2087,9 @@ $("rb-st-list").addEventListener("click", async (e) => {
 
 /* ---------- treści strony z bazy: ceny, dostępność, komunikat, pizza dnia ---------- */
 const SITE_CACHE_KEY = "wr_site_cfg_v1";
-let siteCfg = { prices: {}, unavailable: {}, notice: null, dish: null };
+let siteCfg = { prices: {}, unavailable: {}, hidden: {}, products: [], notice: null, dish: null };
+const PROD_CATS = [["klasyczne", "Klasyczne"], ["miesne", "Mięsne"], ["vege", "Wege"], ["sosy", "Sosy"], ["makarony", "Makarony"], ["dodatki", "Dodatki"]];
+const MAX_PRODUCTS = 40;
 const menuEls = () => [...document.querySelectorAll("#menuGrid .menu-item")];
 const itemKey = (el) => ((el.querySelector(".menu-item-title") || {}).textContent || "").replace(/^\s*\d+\.\s*/, "").trim().toLowerCase();
 const itemName = (el) => ((el.querySelector(".menu-item-title") || {}).textContent || "").trim();
@@ -2085,13 +2101,13 @@ const tsMs = (t) => (t ? (t.toDate ? t.toDate().getTime() : (t.seconds ? t.secon
 
 function plainCfg(c) {
   const n = c.notice ? { ...c.notice, until: c.notice.until ? { seconds: Math.floor(tsMs(c.notice.until) / 1000) } : null } : null;
-  return { prices: c.prices || {}, unavailable: c.unavailable || {}, notice: n, dish: c.dish || null };
+  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, products: c.products || [], notice: n, dish: c.dish || null };
 }
 
 function renderDish() {
   let box = $("site-dish");
   const d = siteCfg.dish;
-  const el = d && d.active ? menuEls().find((e) => itemKey(e) === d.key) : null;
+  const el = d && d.active ? menuEls().find((e) => itemKey(e) === d.key && !e.classList.contains("is-hidden")) : null;
   if (!el) { if (box) box.style.display = "none"; return; }
   if (!box) {
     box = document.createElement("div");
@@ -2134,13 +2150,41 @@ function renderNotice() {
   document.body.classList.add("has-notice");
 }
 
+function validProduct(p) {
+  return !!(p && typeof p.name === "string" && p.name.trim() && typeof p.price === "string" && p.price.trim());
+}
+
+function renderProducts() {
+  document.querySelectorAll("#menuGrid .menu-item[data-custom]").forEach((e) => e.remove());
+  const grid = $("menuGrid");
+  if (!grid) return;
+  siteCfg.products.filter(validProduct).slice(0, MAX_PRODUCTS).forEach((p) => {
+    const el = document.createElement("div");
+    el.className = "menu-item";
+    el.dataset.custom = "1";
+    el.dataset.category = PROD_CATS.some((c) => c[0] === p.cat) ? p.cat : "dodatki";
+    el.dataset.origPrice = p.price;
+    if (p.unavail) el.dataset.customUn = "1";
+    const tags = (Array.isArray(p.tags) ? p.tags : []).filter((t) => typeof t === "string" && t.trim()).slice(0, 3);
+    el.innerHTML = '<div class="menu-item-content"><div class="menu-item-header"><h3 class="menu-item-title">' + esc(p.name) + '</h3><span class="menu-item-price">' + esc(p.price) + "</span></div>" +
+      (p.desc ? '<p class="menu-item-desc">' + esc(p.desc) + "</p>" : "") +
+      (tags.length ? '<div class="menu-item-sizes">' + tags.map((t) => '<span class="size-badge">' + esc(t) + "</span>").join("") + "</div>" : "") + "</div>";
+    grid.appendChild(el);
+  });
+}
+
 function applySite(cfg) {
-  siteCfg = { prices: (cfg && cfg.prices) || {}, unavailable: (cfg && cfg.unavailable) || {}, notice: (cfg && cfg.notice) || null, dish: (cfg && cfg.dish) || null };
+  siteCfg = {
+    prices: (cfg && cfg.prices) || {}, unavailable: (cfg && cfg.unavailable) || {}, hidden: (cfg && cfg.hidden) || {},
+    products: Array.isArray(cfg && cfg.products) ? cfg.products : [], notice: (cfg && cfg.notice) || null, dish: (cfg && cfg.dish) || null
+  };
+  renderProducts();
   menuEls().forEach((el) => {
     const key = itemKey(el);
     const pEl = el.querySelector(".menu-item-price");
-    if (pEl) pEl.textContent = siteCfg.prices[key] || el.dataset.origPrice || pEl.textContent;
-    const un = !!siteCfg.unavailable[key];
+    if (pEl) pEl.textContent = (!el.dataset.custom && siteCfg.prices[key]) || el.dataset.origPrice || pEl.textContent;
+    el.classList.toggle("is-hidden", !el.dataset.custom && !!siteCfg.hidden[key]);
+    const un = !!siteCfg.unavailable[key] || el.dataset.customUn === "1";
     el.classList.toggle("is-unavail", un);
     let b = el.querySelector(".unavail-badge");
     if (un && !b) {
@@ -2153,6 +2197,7 @@ function applySite(cfg) {
     if (!un && b) b.remove();
     el.classList.toggle("is-dish", !!(siteCfg.dish && siteCfg.dish.active && siteCfg.dish.key === key));
   });
+  if (window.applyMenuFilter) window.applyMenuFilter();
   renderDish();
   renderNotice();
 }
@@ -2179,8 +2224,27 @@ async function loadSite() {
 /* ---------- panel admina: zakładka Strona ---------- */
 const siteMsg = $("rb-site-msg");
 const NOTICE_TYPES = ["info", "promo", "warn"];
+function prodRowHtml(p) {
+  p = p || {};
+  const id = p.id || (Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
+  return `<div class="rb-prod" data-id="${esc(id)}">
+    <div class="rb-prod-top">
+      <input type="text" class="rb-prod-name" maxlength="60" placeholder="Nazwa, np. PIZZA TRUFLOWA" value="${esc(p.name || "")}" aria-label="Nazwa produktu">
+      <input type="text" class="rb-prod-price" inputmode="decimal" maxlength="12" placeholder="np. 39 zł" value="${esc(p.price || "")}" aria-label="Cena">
+    </div>
+    <select class="rb-prod-cat" aria-label="Kategoria">${PROD_CATS.map((c) => `<option value="${c[0]}"${p.cat === c[0] ? " selected" : ""}>${c[1]}</option>`).join("")}</select>
+    <textarea class="rb-prod-desc" rows="2" maxlength="200" placeholder="Opis (skład, opcjonalnie)">${esc(p.desc || "")}</textarea>
+    <input type="text" class="rb-prod-tags" maxlength="60" placeholder="Plakietki (opcjonalnie, po przecinku), np. 30cm, 24h" value="${esc((p.tags || []).join(", "))}" aria-label="Plakietki">
+    <div class="rb-prod-foot">
+      <label class="rb-check"><input type="checkbox" class="rb-prod-un"${p.unavail ? " checked" : ""}> niedostępne dziś</label>
+      <button type="button" class="rb-btn secondary small rb-prod-del">Usuń produkt</button>
+    </div>
+  </div>`;
+}
+
 function fillSiteForm() {
-  const items = menuEls();
+  $("rb-prod-list").innerHTML = siteCfg.products.filter(validProduct).map(prodRowHtml).join("");
+  const items = menuEls().filter((el) => !el.dataset.custom);
   $("rb-site-items").innerHTML = items.map((el) => {
     const key = itemKey(el);
     const cur = siteCfg.prices[key] || el.dataset.origPrice || "";
@@ -2188,9 +2252,10 @@ function fillSiteForm() {
       <div class="rb-site-name">${esc(itemName(el))}<small>w kodzie strony: ${esc(el.dataset.origPrice || "")}</small></div>
       <input type="text" class="rb-site-price" inputmode="decimal" maxlength="12" value="${esc(cur)}" aria-label="Cena: ${esc(itemName(el))}">
       <label class="rb-site-un"><input type="checkbox" class="rb-site-unav"${siteCfg.unavailable[key] ? " checked" : ""}> niedostępne dziś</label>
+      <label class="rb-site-un"><input type="checkbox" class="rb-site-hide"${siteCfg.hidden[key] ? " checked" : ""}> ukryj na stronie</label>
     </div>`;
   }).join("");
-  $("rb-site-dish").innerHTML = '<option value="">— brak —</option>' + items.map((el) => `<option value="${esc(itemKey(el))}">${esc(itemName(el))}</option>`).join("");
+  $("rb-site-dish").innerHTML = '<option value="">— brak —</option>' + menuEls().map((el) => `<option value="${esc(itemKey(el))}">${esc(itemName(el))}</option>`).join("");
   const n = siteCfg.notice || {};
   $("rb-site-notice-text").value = n.text || "";
   $("rb-site-notice-type").value = NOTICE_TYPES.includes(n.type) ? n.type : "info";
@@ -2203,18 +2268,35 @@ function fillSiteForm() {
   $("rb-site-dish-on").checked = !!d.active;
 }
 
+$("rb-prod-add").addEventListener("click", () => {
+  const list = $("rb-prod-list");
+  if (list.querySelectorAll(".rb-prod").length >= MAX_PRODUCTS) { setMsg(siteMsg, "Maksymalnie " + MAX_PRODUCTS + " własnych produktów.", "err"); return; }
+  list.insertAdjacentHTML("beforeend", prodRowHtml());
+  const last = list.lastElementChild;
+  last.scrollIntoView({ behavior: "smooth", block: "center" });
+  last.querySelector(".rb-prod-name").focus();
+});
+$("rb-prod-list").addEventListener("click", (e) => {
+  const b = e.target.closest(".rb-prod-del");
+  if (!b) return;
+  const row = b.closest(".rb-prod");
+  const nm = row.querySelector(".rb-prod-name").value.trim();
+  if (confirm("Usunąć produkt" + (nm ? " „" + nm + "”" : "") + "? Zmiana wejdzie po kliknięciu „Zapisz i opublikuj”.")) row.remove();
+});
+
 $("rb-site-reset").addEventListener("click", () => {
   document.querySelectorAll("#rb-site-items .rb-site-row").forEach((row) => {
     const el = menuEls().find((e) => itemKey(e) === row.dataset.key);
     if (el) row.querySelector(".rb-site-price").value = el.dataset.origPrice || "";
     row.querySelector(".rb-site-unav").checked = false;
+    row.querySelector(".rb-site-hide").checked = false;
   });
   setMsg(siteMsg, "Przywrócono ceny z kodu strony. Kliknij „Zapisz i opublikuj”, żeby zatwierdzić.", "ok");
 });
 
 $("rb-site-save").addEventListener("click", async () => {
   setMsg(siteMsg, "");
-  const prices = {}, unavailable = {};
+  const prices = {}, unavailable = {}, hidden = {};
   let bad = "";
   document.querySelectorAll("#rb-site-items .rb-site-row").forEach((row) => {
     if (bad) return;
@@ -2226,8 +2308,32 @@ $("rb-site-save").addEventListener("click", async () => {
     if (!/^\d+([.,]\d{1,2})? zł$/.test(v)) { bad = itemName(el); return; }
     if (!el || v !== el.dataset.origPrice) prices[key] = v;
     if (row.querySelector(".rb-site-unav").checked) unavailable[key] = true;
+    if (row.querySelector(".rb-site-hide").checked) hidden[key] = true;
   });
   if (bad) { setMsg(siteMsg, "Popraw cenę przy: " + bad + " (np. 36 zł).", "err"); return; }
+  const products = [];
+  const usedKeys = new Set(menuEls().filter((el) => !el.dataset.custom).map(itemKey));
+  let prodBad = "";
+  document.querySelectorAll("#rb-prod-list .rb-prod").forEach((row) => {
+    if (prodBad) return;
+    const name = row.querySelector(".rb-prod-name").value.replace(/\s+/g, " ").trim().toLocaleUpperCase("pl");
+    let price = row.querySelector(".rb-prod-price").value.replace(/ /g, " ").trim().replace(/\s+/g, " ");
+    const desc = row.querySelector(".rb-prod-desc").value.replace(/\s+/g, " ").trim();
+    const cat = row.querySelector(".rb-prod-cat").value;
+    const tags = row.querySelector(".rb-prod-tags").value.split(",").map((t) => t.trim()).filter(Boolean).slice(0, 3).map((t) => t.slice(0, 20));
+    if (!name && !price && !desc) return; // pusty wiersz ignorujemy
+    if (!name) { prodBad = "Wpisz nazwę każdego nowego produktu."; return; }
+    if (/^\d+([.,]\d{1,2})?$/.test(price)) price += " zł";
+    price = price.replace(/\s?zł$/i, " zł");
+    if (!/^\d+([.,]\d{1,2})? zł$/.test(price)) { prodBad = "Popraw cenę produktu „" + name + "” (np. 39 zł)."; return; }
+    if (!PROD_CATS.some((c) => c[0] === cat)) { prodBad = "Wybierz kategorię produktu „" + name + "”."; return; }
+    const k = name.replace(/^\s*\d+\.\s*/, "").trim().toLowerCase();
+    if (usedKeys.has(k)) { prodBad = "Produkt „" + name + "” już istnieje w menu — zmień nazwę."; return; }
+    usedKeys.add(k);
+    products.push({ id: row.dataset.id, name, price, cat, desc, tags, unavail: row.querySelector(".rb-prod-un").checked });
+  });
+  if (prodBad) { setMsg(siteMsg, prodBad, "err"); return; }
+  if (products.length > MAX_PRODUCTS) { setMsg(siteMsg, "Maksymalnie " + MAX_PRODUCTS + " własnych produktów.", "err"); return; }
   const text = $("rb-site-notice-text").value.trim();
   const until = $("rb-site-notice-until").value;
   const notice = {
@@ -2240,9 +2346,10 @@ $("rb-site-save").addEventListener("click", async () => {
   const btn = $("rb-site-save");
   btn.disabled = true;
   try {
-    await setDoc(doc(db, "site", "config"), { prices, unavailable, notice, dish, updatedAt: serverTimestamp() });
-    const cfg = { prices, unavailable, notice, dish };
+    await setDoc(doc(db, "site", "config"), { prices, unavailable, hidden, products, notice, dish, updatedAt: serverTimestamp() });
+    const cfg = { prices, unavailable, hidden, products, notice, dish };
     applySite(cfg);
+    fillSiteForm();
     try { localStorage.setItem(SITE_CACHE_KEY, JSON.stringify(plainCfg(cfg))); } catch (_) {}
     setMsg(siteMsg, "Zapisano. Zmiany są już na stronie.", "ok");
   } catch (err) {
