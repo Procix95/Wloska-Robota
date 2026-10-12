@@ -522,6 +522,7 @@ body.dark footer {background: #0a0a0a;}
     </div>
     <div class="footer-bottom">
       <p>&copy; <span id="currentYear">2026</span> Włoska Robota. Wszelkie prawa zastrzeżone.</p>
+      <p style="margin-top:.4rem;font-size:.85rem"><a href="polityka-prywatnosci.html" style="color:inherit;opacity:.8">Polityka prywatności</a> · <a href="regulamin.html" style="color:inherit;opacity:.8">Regulamin</a> · <a href="usun-konto.html" style="color:inherit;opacity:.8">Usuwanie konta</a></p>
     </div>
   </div>
 </footer>
@@ -854,6 +855,39 @@ body.dark #rabat-overlay{--rb-accent:#0fa65a;--rb-accent2:#0c8c4c;--rb-bg:#17171
 #rabat-overlay .rb-cust .rb-btn.small{min-height:44px;font-size:15px}
 #rabat-overlay .rb-cust-sub{margin:14px 0 6px;font-size:13px;font-weight:600;color:var(--rb-muted)}
 #rabat-overlay .rb-cust-cp{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid var(--rb-border);font-size:14px}
+#rabat-overlay .rb-legal{margin-top:14px;text-align:center;font-size:12px;color:var(--rb-muted)}
+#rabat-overlay .rb-legal a{color:var(--rb-muted)}
+#rabat-overlay #rb-delete{color:var(--rb-err)}
+
+/* ===== treści strony z bazy (komunikat, pizza dnia, niedostępne) ===== */
+#site-notice{display:none;position:relative;padding:.75rem 2.8rem .75rem 1rem;text-align:center;font-weight:600;font-size:.95rem;color:#fff;z-index:5;line-height:1.4}
+#site-notice.info{background:var(--green)}
+#site-notice.promo{background:var(--gold);color:#222}
+#site-notice.warn{background:var(--red)}
+#site-notice button{position:absolute;right:.6rem;top:50%;transform:translateY(-50%);background:none;border:0;color:inherit;font-size:1.5rem;line-height:1;cursor:pointer;padding:.2rem .5rem}
+body.has-notice .hero{margin-top:0}
+.menu-item.is-unavail{opacity:.55;filter:grayscale(.75)}
+.menu-item.is-unavail:hover{transform:none}
+.unavail-badge{display:inline-block;margin-top:.6rem;padding:.15rem .7rem;border-radius:99px;background:var(--red);color:#fff;font-size:.8rem;font-weight:700}
+.menu-item.is-dish{outline:3px solid var(--gold);outline-offset:-3px}
+#site-dish{display:none;margin:0 auto 2rem;max-width:720px;padding:1.2rem 1.4rem;border-radius:20px;background:linear-gradient(135deg,rgba(212,175,55,.18),rgba(212,175,55,.06));border:2px solid var(--gold);text-align:center}
+#site-dish .sd-label{font-size:.85rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+#site-dish .sd-name{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:800;margin:.2rem 0}
+#site-dish .sd-text{color:var(--gray);margin-bottom:.4rem}
+body.dark #site-dish .sd-text{color:#bbb}
+#site-dish .sd-price{font-size:1.5rem;font-weight:800;color:var(--red)}
+
+#rabat-overlay input[type=checkbox]{width:auto;margin:0 8px 0 0;padding:0;flex:none;accent-color:var(--rb-accent)}
+#rabat-overlay .rb-check{display:flex;align-items:center;font-size:14px;color:var(--rb-text);margin:6px 0 10px;cursor:pointer}
+#rabat-overlay textarea{width:100%;padding:12px 14px;margin-bottom:10px;border-radius:12px;border:1px solid var(--rb-border);background:var(--rb-input);color:var(--rb-text);font:inherit;font-size:16px;resize:vertical}
+#rabat-overlay .rb-site-row{display:grid;grid-template-columns:1fr 92px;gap:6px 10px;align-items:center;padding:10px 0;border-top:1px solid var(--rb-border)}
+#rabat-overlay .rb-site-name{font-size:14px;font-weight:600}
+#rabat-overlay .rb-site-name small{display:block;font-weight:400;color:var(--rb-muted);font-size:12px}
+#rabat-overlay .rb-site-row input.rb-site-price{margin:0;padding:8px 10px;text-align:right}
+#rabat-overlay .rb-site-un{grid-column:1 / -1;display:flex;align-items:center;font-size:13px;color:var(--rb-muted);cursor:pointer}
+#rabat-overlay .rb-ev{padding:8px 0;border-top:1px solid var(--rb-border);font-size:13px}
+#rabat-overlay .rb-ev b{font-size:14px}
+#rabat-overlay .rb-ev .rb-meta{margin-top:1px}
 @media (prefers-reduced-motion:reduce){#rabat-overlay *{animation:none!important}}
 </style>
 
@@ -918,6 +952,13 @@ body.dark #rabat-overlay{--rb-accent:#0fa65a;--rb-accent2:#0c8c4c;--rb-bg:#17171
       <div class="rb-how"><b>Jak użyć kodu?</b><ol><li>Wybierz kod, który chcesz wykorzystać.</li><li>Pokaż jego kod QR (lub podaj kod) przy zamówieniu.</li><li>My go skanujemy — rabat się nalicza, a kod gaśnie.</li></ol></div>
 
       <!-- Panel administratora (widoczny tylko dla admina) -->
+      <div class="rb-legal" id="rb-legal">
+        <a href="polityka-prywatnosci.html" target="_blank" rel="noopener">Polityka prywatności</a> ·
+        <a href="regulamin.html" target="_blank" rel="noopener">Regulamin</a> ·
+        <a href="usun-konto.html" target="_blank" rel="noopener">Usuwanie konta</a>
+        <div><button type="button" class="rb-link" id="rb-delete" hidden>Usuń moje konto</button></div>
+        <div class="rb-msg" id="rb-del-msg" role="status"></div>
+      </div>
       <div class="rb-admin" id="rb-admin" hidden>
         <h3 id="rb-admin-title">🛠 Panel administratora</h3>
         <div class="rb-stats" id="rb-stats"></div>
@@ -927,6 +968,8 @@ body.dark #rabat-overlay{--rb-accent:#0fa65a;--rb-accent2:#0c8c4c;--rb-bg:#17171
           <button type="button" class="rb-atab" data-pane="builder">Rabaty</button>
           <button type="button" class="rb-atab" data-pane="list">Kody</button>
           <button type="button" class="rb-atab" data-pane="staff">Obsługa</button>
+          <button type="button" class="rb-atab" data-pane="site">Strona</button>
+          <button type="button" class="rb-atab" data-pane="report">Raport</button>
         </div>
 
         <!-- Zakładka: Sprawdź kod (skaner QR na telefonie + wpisanie ręczne) -->
@@ -1016,6 +1059,63 @@ body.dark #rabat-overlay{--rb-accent:#0fa65a;--rb-accent2:#0c8c4c;--rb-bg:#17171
           <div id="rb-st-list"></div>
         </div>
 
+        <!-- Zakładka: Strona (ceny, dostępność, komunikat, pizza dnia) -->
+        <div class="rb-pane" data-pane="site" hidden>
+          <h4>Komunikat na górze strony</h4>
+          <textarea id="rb-site-notice-text" rows="2" maxlength="200" placeholder="np. Dziś zamykamy o 20:00. Zapraszamy jutro!"></textarea>
+          <label for="rb-site-notice-type">Rodzaj</label>
+          <select id="rb-site-notice-type">
+            <option value="info">Informacja (zielony)</option>
+            <option value="promo">Promocja (złoty)</option>
+            <option value="warn">Uwaga (czerwony)</option>
+          </select>
+          <label for="rb-site-notice-until">Wyświetlaj do (puste = dopóki nie wyłączysz)</label>
+          <input id="rb-site-notice-until" type="date">
+          <label class="rb-check"><input id="rb-site-notice-on" type="checkbox"> Pokazuj komunikat na stronie</label>
+
+          <h4>Pizza dnia</h4>
+          <select id="rb-site-dish"></select>
+          <input id="rb-site-dish-text" type="text" maxlength="120" placeholder="Opis (opcjonalnie), np. Dziś z podwójną mozzarellą!">
+          <label class="rb-check"><input id="rb-site-dish-on" type="checkbox"> Wyróżnij na stronie</label>
+
+          <h4>Ceny i dostępność</h4>
+          <div class="rb-meta" style="margin:-4px 0 6px">Zmień cenę (np. 36 zł) albo zaznacz „niedostępne”, gdy czegoś zabrakło — pozycja się wyszarzy. Nowych pozycji tu nie dodasz.</div>
+          <div id="rb-site-items"></div>
+          <div class="rb-actions" style="margin-top:10px">
+            <button type="button" class="rb-btn secondary small" id="rb-site-reset">Przywróć ceny z kodu</button>
+          </div>
+          <button type="button" class="rb-btn" id="rb-site-save" style="margin-top:14px">Zapisz i opublikuj na stronie</button>
+          <div class="rb-msg" id="rb-site-msg" role="status"></div>
+        </div>
+
+        <!-- Zakładka: Raport (dziennik skanów) -->
+        <div class="rb-pane" data-pane="report" hidden>
+          <div class="rb-row">
+            <select id="rb-rp-range">
+              <option value="today">Dziś</option>
+              <option value="7">Ostatnie 7 dni</option>
+              <option value="30">Ostatnie 30 dni</option>
+            </select>
+            <button type="button" class="rb-btn secondary small" id="rb-rp-refresh" style="margin-bottom:10px">Odśwież</button>
+          </div>
+          <div class="rb-stats" id="rb-rp-stats"></div>
+          <h4>Według pracownika</h4>
+          <div id="rb-rp-staff"></div>
+          <h4>Ostatnie zdarzenia</h4>
+          <select id="rb-rp-type">
+            <option value="">Wszystkie zdarzenia</option>
+            <option value="stamp">Pieczątki</option>
+            <option value="reward">Pizze gratis</option>
+            <option value="coupon">Kody rabatowe</option>
+            <option value="unstamp">Cofnięte pieczątki</option>
+          </select>
+          <div id="rb-rp-list"></div>
+          <div class="rb-actions" style="margin-top:10px">
+            <button type="button" class="rb-btn secondary small" id="rb-rp-csv">Pobierz CSV</button>
+          </div>
+          <div class="rb-msg" id="rb-rp-msg" role="status"></div>
+        </div>
+
         <!-- Zakładka: lista wszystkich kodów -->
         <div class="rb-pane" data-pane="list" hidden>
           <h4>Wszystkie przyznane kody</h4>
@@ -1031,11 +1131,12 @@ body.dark #rabat-overlay{--rb-accent:#0fa65a;--rb-accent2:#0c8c4c;--rb-bg:#17171
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {
   getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  signInWithPopup, GoogleAuthProvider, signOut, sendPasswordResetEmail, sendEmailVerification, updateProfile
+  signInWithPopup, GoogleAuthProvider, signOut, sendPasswordResetEmail, sendEmailVerification, updateProfile,
+  deleteUser, reauthenticateWithPopup, reauthenticateWithCredential, EmailAuthProvider
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot,
-  addDoc, updateDoc, deleteDoc, serverTimestamp, Timestamp, writeBatch, runTransaction, getDocs
+  addDoc, updateDoc, deleteDoc, serverTimestamp, Timestamp, writeBatch, runTransaction, getDocs, orderBy, limit
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 /* ▼▼▼ WKLEJ TUTAJ SWOJĄ KONFIGURACJĘ Z FIREBASE (Ustawienia projektu → Twoje aplikacje) ▼▼▼ */
@@ -1180,6 +1281,32 @@ $("rb-reset").addEventListener("click", async () => {
 
 $("rb-logout").addEventListener("click", () => signOut(auth));
 
+/* ---------- usuwanie konta ---------- */
+$("rb-delete").addEventListener("click", async () => {
+  const msg = $("rb-del-msg");
+  setMsg(msg, "");
+  const user = auth.currentUser;
+  if (!user) return;
+  if (!confirm("Usunąć konto?\n\nTrwale usuniemy Twoje konto, kartę lojalnościową z pieczątkami i wszystkie kody rabatowe. Tej operacji nie można cofnąć.")) return;
+  try {
+    // 1) ponowne potwierdzenie tożsamości (wymóg Firebase)
+    if (user.providerData.some((p) => p.providerId === "google.com")) {
+      await reauthenticateWithPopup(user, new GoogleAuthProvider());
+    } else {
+      const pass = prompt("Podaj hasło, aby potwierdzić usunięcie konta:");
+      if (!pass) return;
+      await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, pass));
+    }
+    // 2) prośba o usunięcie danych (administrator czyści bazę przy najbliższym wejściu w panel)
+    await setDoc(doc(db, "deletionRequests", user.uid), { email: user.email || "", requestedAt: serverTimestamp() });
+    // 3) usunięcie konta logowania
+    await deleteUser(user);
+  } catch (err) {
+    console.error(err);
+    setMsg(msg, errText(err), "err");
+  }
+});
+
 /* ---------- stan aplikacji ---------- */
 let unsubs = [];
 let isAdmin = false;
@@ -1286,6 +1413,7 @@ async function handleUser(user) {
   $("rb-who").innerHTML = esc("Cześć, " + shownName.split(" ")[0] + "!") + (isAdmin ? '<span class="rb-adminpill">ADMIN</span>' : isStaff ? '<span class="rb-adminpill">OBSŁUGA</span>' : "");
   $("rb-mail").textContent = user.email || "";
   $("rb-avatar").textContent = (shownName.trim()[0] || "?").toUpperCase();
+  $("rb-delete").hidden = isAdmin || isStaff;
   $("rb-admin").hidden = !(isAdmin || isStaff);
   $("rb-admin").classList.toggle("staffonly", !isAdmin && isStaff);
   $("rb-admin-title").textContent = isAdmin ? "🛠 Panel administratora" : "📷 Skanowanie rabatów";
@@ -1317,6 +1445,9 @@ async function handleUser(user) {
       renderAdminList();
     }, console.error));
     renderTemplates();
+    unsubs.push(onSnapshot(collection(db, "deletionRequests"), (s) => {
+      s.docs.forEach((d) => purgeDeleted(d.id));
+    }, (err) => console.warn("Prośby o usunięcie niedostępne (opublikuj nowe reguły):", err.code)));
     unsubs.push(onSnapshot(collection(db, "staff"), (s) => {
       allStaff = s.docs.map((d) => ({ id: d.id, ...d.data() }))
         .sort((a, b) => String(a.email).localeCompare(String(b.email)));
@@ -1356,6 +1487,23 @@ function renderLoyal(user) {
   const qr = $("rb-card-qr");
   qr.dataset.qrfull = "KL:" + user.uid;
   drawQRs(box);
+}
+
+/* ---------- admin: czyszczenie danych usuniętych kont ---------- */
+const purging = new Set();
+async function purgeDeleted(uid) {
+  if (purging.has(uid)) return;
+  purging.add(uid);
+  try {
+    const cs = await getDocs(query(collection(db, "coupons"), where("uid", "==", uid)));
+    for (const c of cs.docs) await deleteDoc(doc(db, "coupons", c.id));
+    await deleteDoc(doc(db, "loyalty", uid));
+    await deleteDoc(doc(db, "users", uid));
+    await deleteDoc(doc(db, "deletionRequests", uid));
+  } catch (err) {
+    console.error("Czyszczenie danych konta nie powiodło się:", err);
+    purging.delete(uid);
+  }
 }
 
 /* ---------- kody klienta ---------- */
@@ -1509,7 +1657,10 @@ $("rb-a-list").addEventListener("click", async (e) => {
   if (!c) return;
   try {
     if (b.dataset.act === "toggle") {
-      await updateDoc(doc(db, "coupons", c.id), { used: !c.used });
+      const lb = writeBatch(db);
+      lb.update(doc(db, "coupons", c.id), { used: !c.used });
+      lb.set(newLogRef(), logData(c.used ? "couponundo" : "coupon", { uid: c.uid, name: c.userEmail }, c.code + " (ręcznie z listy kodów)"));
+      await lb.commit();
     } else if (b.dataset.act === "del") {
       if (confirm("Usunąć kod " + c.code + "?")) await deleteDoc(doc(db, "coupons", c.id));
     }
@@ -1599,6 +1750,17 @@ $("rb-c-result").addEventListener("click", async (e) => {
   if (!isAdmin) await runCheck();
 });
 
+/* ---------- dziennik zdarzeń (kto, kiedy, komu) ---------- */
+function logData(type, cust, detail) {
+  const u = auth.currentUser || {};
+  return {
+    type, byUid: u.uid || "", byName: u.displayName || u.email || "",
+    customerUid: (cust && cust.uid) || "", customerName: (cust && cust.name) || "",
+    detail: detail || "", at: serverTimestamp()
+  };
+}
+const newLogRef = () => doc(collection(db, "logs"));
+
 /* ---------- skan karty klienta: pieczątki, nagroda, rabaty ---------- */
 async function loadCustomer(uid) {
   const [ls, cs] = await Promise.all([
@@ -1670,6 +1832,7 @@ async function customerClick(e) {
         const d = sn.data();
         if ((d.stamps || 0) >= LOYAL_GOAL) throw new Error("Karta pełna — najpierw wydaj pizzę gratis.");
         tx.update(ref, { stamps: (d.stamps || 0) + 1, total: (d.total || 0) + 1, lastStampAt: serverTimestamp() });
+        tx.set(newLogRef(), logData("stamp", { uid: custView.uid, name: d.name || d.email }, ((d.stamps || 0) + 1) + "/" + LOYAL_GOAL));
       });
       buzz(150);
     } else if (act === "reward") {
@@ -1678,6 +1841,7 @@ async function customerClick(e) {
         const d = sn.exists() ? sn.data() : {};
         if ((d.stamps || 0) < LOYAL_GOAL) throw new Error("Karta nie jest jeszcze pełna.");
         tx.update(ref, { stamps: 0, rewards: (d.rewards || 0) + 1, lastRewardAt: serverTimestamp() });
+        tx.set(newLogRef(), logData("reward", { uid: custView.uid, name: d.name || d.email }, "pizza gratis nr " + ((d.rewards || 0) + 1)));
       });
       buzz([100, 50, 100]);
     } else if (act === "unstamp") {
@@ -1686,6 +1850,7 @@ async function customerClick(e) {
         const sn = await tx.get(ref);
         const d = sn.data();
         tx.update(ref, { stamps: Math.max(0, (d.stamps || 0) - 1), total: Math.max(0, (d.total || 0) - 1), lastStampAt: null });
+        tx.set(newLogRef(), logData("unstamp", { uid: custView.uid, name: d.name || d.email }, "cofnięto do " + Math.max(0, (d.stamps || 0) - 1) + "/" + LOYAL_GOAL));
       });
     } else if (act === "cuse") {
       const r = await redeem(b.dataset.id);
@@ -1905,6 +2070,259 @@ $("rb-st-list").addEventListener("click", async (e) => {
   catch (err) { setMsg(stMsg, errText(err), "err"); }
 });
 
+
+/* ---------- treści strony z bazy: ceny, dostępność, komunikat, pizza dnia ---------- */
+const SITE_CACHE_KEY = "wr_site_cfg_v1";
+let siteCfg = { prices: {}, unavailable: {}, notice: null, dish: null };
+const menuEls = () => [...document.querySelectorAll("#menuGrid .menu-item")];
+const itemKey = (el) => ((el.querySelector(".menu-item-title") || {}).textContent || "").replace(/^\s*\d+\.\s*/, "").trim().toLowerCase();
+const itemName = (el) => ((el.querySelector(".menu-item-title") || {}).textContent || "").trim();
+menuEls().forEach((el) => {
+  const pEl = el.querySelector(".menu-item-price");
+  if (pEl && !el.dataset.origPrice) el.dataset.origPrice = pEl.textContent.replace(/ /g, " ").trim();
+});
+const tsMs = (t) => (t ? (t.toDate ? t.toDate().getTime() : (t.seconds ? t.seconds * 1000 : 0)) : 0);
+
+function plainCfg(c) {
+  const n = c.notice ? { ...c.notice, until: c.notice.until ? { seconds: Math.floor(tsMs(c.notice.until) / 1000) } : null } : null;
+  return { prices: c.prices || {}, unavailable: c.unavailable || {}, notice: n, dish: c.dish || null };
+}
+
+function renderDish() {
+  let box = $("site-dish");
+  const d = siteCfg.dish;
+  const el = d && d.active ? menuEls().find((e) => itemKey(e) === d.key) : null;
+  if (!el) { if (box) box.style.display = "none"; return; }
+  if (!box) {
+    box = document.createElement("div");
+    box.id = "site-dish";
+    const anchor = document.querySelector("#menu .menu-categories") || $("menuGrid");
+    anchor.parentNode.insertBefore(box, anchor);
+  }
+  const desc = d.text || ((el.querySelector(".menu-item-desc") || {}).textContent || "");
+  const price = (el.querySelector(".menu-item-price") || {}).textContent || "";
+  box.innerHTML = '<div class="sd-label">⭐ Pizza dnia</div><div class="sd-name">' + esc(itemName(el)) + '</div><div class="sd-text">' + esc(desc) + '</div><div class="sd-price">' + esc(price) + "</div>";
+  box.style.display = "block";
+}
+
+function renderNotice() {
+  const n = siteCfg.notice;
+  let bar = $("site-notice");
+  let closed = "";
+  try { closed = sessionStorage.getItem("wr_notice_closed") || ""; } catch (_) {}
+  const until = n ? tsMs(n.until) : 0;
+  const show = !!(n && n.active && n.text && (!until || until > Date.now()) && closed !== n.text);
+  if (!show) { if (bar) bar.style.display = "none"; document.body.classList.remove("has-notice"); return; }
+  if (!bar) {
+    bar = document.createElement("div");
+    bar.id = "site-notice";
+    bar.setAttribute("role", "status");
+    bar.innerHTML = '<span id="site-notice-text"></span><button type="button" aria-label="Zamknij komunikat">&times;</button>';
+    const hero = $("home");
+    hero.parentNode.insertBefore(bar, hero);
+    bar.querySelector("button").addEventListener("click", () => {
+      try { sessionStorage.setItem("wr_notice_closed", (siteCfg.notice && siteCfg.notice.text) || ""); } catch (_) {}
+      bar.style.display = "none";
+      document.body.classList.remove("has-notice");
+    });
+  }
+  $("site-notice-text").textContent = n.text;
+  bar.className = ["info", "promo", "warn"].includes(n.type) ? n.type : "info";
+  const h = $("header");
+  bar.style.marginTop = (h ? h.offsetHeight : 70) + "px";
+  bar.style.display = "block";
+  document.body.classList.add("has-notice");
+}
+
+function applySite(cfg) {
+  siteCfg = { prices: (cfg && cfg.prices) || {}, unavailable: (cfg && cfg.unavailable) || {}, notice: (cfg && cfg.notice) || null, dish: (cfg && cfg.dish) || null };
+  menuEls().forEach((el) => {
+    const key = itemKey(el);
+    const pEl = el.querySelector(".menu-item-price");
+    if (pEl) pEl.textContent = siteCfg.prices[key] || el.dataset.origPrice || pEl.textContent;
+    const un = !!siteCfg.unavailable[key];
+    el.classList.toggle("is-unavail", un);
+    let b = el.querySelector(".unavail-badge");
+    if (un && !b) {
+      b = document.createElement("div");
+      b.className = "unavail-badge";
+      b.textContent = "Niedostępne dziś";
+      const c = el.querySelector(".menu-item-content") || el;
+      c.appendChild(b);
+    }
+    if (!un && b) b.remove();
+    el.classList.toggle("is-dish", !!(siteCfg.dish && siteCfg.dish.active && siteCfg.dish.key === key));
+  });
+  renderDish();
+  renderNotice();
+}
+
+async function loadSite() {
+  try {
+    const c = localStorage.getItem(SITE_CACHE_KEY);
+    if (c && !loadSite.done) applySite(JSON.parse(c));
+  } catch (_) {}
+  try {
+    const d = await withTimeout(getDoc(doc(db, "site", "config")), 8000);
+    loadSite.done = true;
+    if (d.exists()) {
+      const cfg = d.data();
+      applySite(cfg);
+      try { localStorage.setItem(SITE_CACHE_KEY, JSON.stringify(plainCfg(cfg))); } catch (_) {}
+    } else {
+      applySite({});
+      try { localStorage.removeItem(SITE_CACHE_KEY); } catch (_) {}
+    }
+  } catch (e) { console.warn("Ustawienia strony niedostępne:", e && (e.code || e.message)); }
+}
+
+/* ---------- panel admina: zakładka Strona ---------- */
+const siteMsg = $("rb-site-msg");
+const NOTICE_TYPES = ["info", "promo", "warn"];
+function fillSiteForm() {
+  const items = menuEls();
+  $("rb-site-items").innerHTML = items.map((el) => {
+    const key = itemKey(el);
+    const cur = siteCfg.prices[key] || el.dataset.origPrice || "";
+    return `<div class="rb-site-row" data-key="${esc(key)}">
+      <div class="rb-site-name">${esc(itemName(el))}<small>w kodzie strony: ${esc(el.dataset.origPrice || "")}</small></div>
+      <input type="text" class="rb-site-price" inputmode="decimal" maxlength="12" value="${esc(cur)}" aria-label="Cena: ${esc(itemName(el))}">
+      <label class="rb-site-un"><input type="checkbox" class="rb-site-unav"${siteCfg.unavailable[key] ? " checked" : ""}> niedostępne dziś</label>
+    </div>`;
+  }).join("");
+  $("rb-site-dish").innerHTML = '<option value="">— brak —</option>' + items.map((el) => `<option value="${esc(itemKey(el))}">${esc(itemName(el))}</option>`).join("");
+  const n = siteCfg.notice || {};
+  $("rb-site-notice-text").value = n.text || "";
+  $("rb-site-notice-type").value = NOTICE_TYPES.includes(n.type) ? n.type : "info";
+  const um = tsMs(n.until);
+  $("rb-site-notice-until").value = um ? ymd(new Date(um)) : "";
+  $("rb-site-notice-on").checked = !!n.active;
+  const d = siteCfg.dish || {};
+  $("rb-site-dish").value = d.key || "";
+  $("rb-site-dish-text").value = d.text || "";
+  $("rb-site-dish-on").checked = !!d.active;
+}
+
+$("rb-site-reset").addEventListener("click", () => {
+  document.querySelectorAll("#rb-site-items .rb-site-row").forEach((row) => {
+    const el = menuEls().find((e) => itemKey(e) === row.dataset.key);
+    if (el) row.querySelector(".rb-site-price").value = el.dataset.origPrice || "";
+    row.querySelector(".rb-site-unav").checked = false;
+  });
+  setMsg(siteMsg, "Przywrócono ceny z kodu strony. Kliknij „Zapisz i opublikuj”, żeby zatwierdzić.", "ok");
+});
+
+$("rb-site-save").addEventListener("click", async () => {
+  setMsg(siteMsg, "");
+  const prices = {}, unavailable = {};
+  let bad = "";
+  document.querySelectorAll("#rb-site-items .rb-site-row").forEach((row) => {
+    if (bad) return;
+    const key = row.dataset.key;
+    const el = menuEls().find((e) => itemKey(e) === key);
+    let v = row.querySelector(".rb-site-price").value.replace(/ /g, " ").trim().replace(/\s+/g, " ");
+    if (/^\d+([.,]\d{1,2})?$/.test(v)) v += " zł";
+    v = v.replace(/\s?zł$/i, " zł");
+    if (!/^\d+([.,]\d{1,2})? zł$/.test(v)) { bad = itemName(el); return; }
+    if (!el || v !== el.dataset.origPrice) prices[key] = v;
+    if (row.querySelector(".rb-site-unav").checked) unavailable[key] = true;
+  });
+  if (bad) { setMsg(siteMsg, "Popraw cenę przy: " + bad + " (np. 36 zł).", "err"); return; }
+  const text = $("rb-site-notice-text").value.trim();
+  const until = $("rb-site-notice-until").value;
+  const notice = {
+    text, type: $("rb-site-notice-type").value,
+    active: $("rb-site-notice-on").checked && !!text,
+    until: until ? Timestamp.fromDate(new Date(until + "T23:59:59")) : null
+  };
+  const dishKey = $("rb-site-dish").value;
+  const dish = { key: dishKey, text: $("rb-site-dish-text").value.trim(), active: $("rb-site-dish-on").checked && !!dishKey };
+  const btn = $("rb-site-save");
+  btn.disabled = true;
+  try {
+    await setDoc(doc(db, "site", "config"), { prices, unavailable, notice, dish, updatedAt: serverTimestamp() });
+    const cfg = { prices, unavailable, notice, dish };
+    applySite(cfg);
+    try { localStorage.setItem(SITE_CACHE_KEY, JSON.stringify(plainCfg(cfg))); } catch (_) {}
+    setMsg(siteMsg, "Zapisano. Zmiany są już na stronie.", "ok");
+  } catch (err) {
+    console.error(err);
+    setMsg(siteMsg, errText(err), "err");
+  } finally { btn.disabled = false; }
+});
+
+/* ---------- panel admina: zakładka Raport (dziennik zdarzeń) ---------- */
+const rpMsg = $("rb-rp-msg");
+let reportEvents = [];
+const EV_LABEL = { stamp: "➕ Pieczątka", reward: "🍕 Pizza gratis", unstamp: "↩ Cofnięta pieczątka", coupon: "🎟 Kod", couponundo: "↩ Cofnięty kod" };
+
+function reportStart() {
+  const r = $("rb-rp-range").value;
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  if (r === "7") d.setDate(d.getDate() - 6);
+  if (r === "30") d.setDate(d.getDate() - 29);
+  return d;
+}
+async function loadReport() {
+  setMsg(rpMsg, "Wczytuję…");
+  const since = new Date();
+  since.setHours(0, 0, 0, 0);
+  since.setDate(since.getDate() - 29);
+  try {
+    const snap = await getDocs(query(collection(db, "logs"), where("at", ">=", Timestamp.fromDate(since)), orderBy("at", "desc"), limit(3000)));
+    reportEvents = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    setMsg(rpMsg, "");
+    renderReport();
+  } catch (err) {
+    console.error(err);
+    setMsg(rpMsg, errText(err) + " (czy opublikowałeś nowe reguły?)", "err");
+  }
+}
+function visibleEvents() {
+  const start = reportStart().getTime();
+  const type = $("rb-rp-type").value;
+  return reportEvents.filter((e) => tsMs(e.at) >= start && (!type || e.type === type || (type === "coupon" && e.type === "couponundo")));
+}
+function renderReport() {
+  const start = reportStart().getTime();
+  const evs = reportEvents.filter((e) => tsMs(e.at) >= start);
+  const cnt = (t) => evs.filter((e) => e.type === t).length;
+  const newClients = allUsers.filter((u) => tsMs(u.createdAt) >= start).length;
+  $("rb-rp-stats").innerHTML = [
+    [cnt("stamp"), "pieczątek"], [cnt("reward"), "pizz gratis"], [cnt("coupon"), "kodów"], [newClients, "nowych klientów"]
+  ].map(([n, l]) => `<div class="rb-stat"><b>${n}</b><span>${l}</span></div>`).join("");
+  const by = {};
+  evs.forEach((e) => {
+    const k = e.byName || "(nieznany)";
+    (by[k] ||= { stamp: 0, reward: 0, coupon: 0, unstamp: 0 });
+    if (by[k][e.type] !== undefined) by[k][e.type]++;
+  });
+  const names = Object.keys(by).sort();
+  $("rb-rp-staff").innerHTML = names.length
+    ? names.map((n) => `<div class="rb-ev"><b>${esc(n)}</b><div class="rb-meta">➕ ${by[n].stamp} · 🍕 ${by[n].reward} · 🎟 ${by[n].coupon}${by[n].unstamp ? " · ↩ " + by[n].unstamp : ""}</div></div>`).join("")
+    : '<div class="rb-empty">Brak zdarzeń w tym okresie.</div>';
+  const list = visibleEvents().slice(0, 100);
+  $("rb-rp-list").innerHTML = list.length
+    ? list.map((e) => `<div class="rb-ev"><b>${esc(EV_LABEL[e.type] || e.type)}</b> — ${esc(e.customerName || "")}
+        <div class="rb-meta">${fmtDateTime(e.at)} · ${esc(e.byName || "")}${e.detail ? " · " + esc(e.detail) : ""}</div></div>`).join("")
+    : '<div class="rb-empty">Brak zdarzeń.</div>';
+}
+$("rb-rp-range").addEventListener("change", renderReport);
+$("rb-rp-type").addEventListener("change", renderReport);
+$("rb-rp-refresh").addEventListener("click", loadReport);
+$("rb-rp-csv").addEventListener("click", () => {
+  const rows = [["Czas", "Zdarzenie", "Pracownik", "Klient", "Szczegóły"]];
+  visibleEvents().forEach((e) => rows.push([fmtDateTime(e.at), EV_LABEL[e.type] || e.type, e.byName || "", e.customerName || "", e.detail || ""]));
+  const csv = "﻿" + rows.map((r) => r.map((c) => '"' + String(c).replace(/"/g, '""') + '"').join(";")).join("\r\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+  a.download = "raport-" + ymd(new Date()) + ".csv";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+});
+
 /* ---------- zakładki panelu admina ---------- */
 const cMsg = $("rb-c-msg");
 const sMsg = $("rb-s-msg");
@@ -1912,6 +2330,8 @@ function setAdminTab(name) {
   document.querySelectorAll("#rb-admin .rb-atab").forEach((b) => b.classList.toggle("active", b.dataset.pane === name));
   document.querySelectorAll("#rb-admin .rb-pane").forEach((p) => { p.hidden = p.dataset.pane !== name; });
   if (name !== "check") stopScanner();
+  if (name === "site") loadSite().then(fillSiteForm);
+  if (name === "report") loadReport();
 }
 document.querySelectorAll("#rb-admin .rb-atab").forEach((b) => b.addEventListener("click", () => setAdminTab(b.dataset.pane)));
 
@@ -1942,6 +2362,7 @@ async function redeem(id) {
       if (d.used) return { ok: false, reason: "Kod już wykorzystany." };
       if (d.expiresAt && d.expiresAt.toDate() < new Date()) return { ok: false, reason: "Kod wygasł." };
       tx.update(ref, { used: true, usedAt: serverTimestamp() });
+      tx.set(newLogRef(), logData("coupon", { uid: d.uid, name: d.userEmail }, d.code + " — " + d.description));
       return { ok: true };
     });
   } catch (err) {
@@ -2154,7 +2575,11 @@ $("rb-s-result").addEventListener("click", async (e) => {
     resumeScan();
   } else if (b.dataset.act === "undo") {
     try {
-      await updateDoc(doc(db, "coupons", b.dataset.id), { used: false, usedAt: null });
+      const ub = writeBatch(db);
+      const uc = allCoupons.find((x) => x.id === b.dataset.id) || {};
+      ub.update(doc(db, "coupons", b.dataset.id), { used: false, usedAt: null });
+      ub.set(newLogRef(), logData("couponundo", { uid: uc.uid, name: uc.userEmail }, (uc.code || b.dataset.id) + " (cofnięcie po skanie)"));
+      await ub.commit();
       $("rb-s-result").innerHTML = '<div class="rb-res"><div>↩️ Cofnięto. Kod znów jest aktywny.</div><div class="rb-actions"><button type="button" class="rb-btn small" data-act="next">Skanuj następny</button></div></div>';
     } catch (err) {
       console.error(err);
@@ -2162,6 +2587,7 @@ $("rb-s-result").addEventListener("click", async (e) => {
     }
   }
 });
+loadSite();
 </script>
 <!-- ===== RABAT: KONIEC ===== -->
 
