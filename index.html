@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Włoska Robota - Pizza z Pieca | Głuponie</title>
-<meta name="description" content="Pizzeria Włoska Robota w Głuponiach. Pizza 30cm z pieca, ciasto fermentowane 24h. Dowóz: Głuponie, Lwówek, Pniewy i okolice. Tel. 668 862 396. Śr-Pt 12:00-20:00, Sob-Nd 14:00-22:00.">
+<meta name="description" content="Pizzeria Włoska Robota w Głuponiach. Pizza 30cm z pieca, ciasto fermentowane 24h. Dowóz: Głuponie, Kuślin, Michorzewo i okolice. Tel. 668 862 396. Śr-Pt 12:00-20:00, Sob-Nd 14:00-22:00.">
 <meta name="theme-color" content="#CD212A">
 <link rel="canonical" href="https://wloskarobota.eu/">
 <meta property="og:type" content="restaurant">
 <meta property="og:site_name" content="Włoska Robota">
 <meta property="og:locale" content="pl_PL">
 <meta property="og:title" content="Włoska Robota - Pizza z Pieca | Głuponie">
-<meta property="og:description" content="Pizza 30cm prosto z pieca, ciasto fermentowane 24h. Dowóz: Głuponie, Lwówek, Pniewy. Zadzwoń: 668 862 396.">
+<meta property="og:description" content="Pizza 30cm prosto z pieca, ciasto fermentowane 24h. Dowóz: Głuponie, Kuślin, Michorzewo i okolice. Zadzwoń: 668 862 396.">
 <meta property="og:url" content="https://wloskarobota.eu/">
 <meta property="og:image" content="https://wloskarobota.eu/og-image.jpg">
 <meta property="og:image:width" content="1200">
@@ -19,7 +19,7 @@
 <meta property="og:image:alt" content="Włoska Robota - pizzeria w Głuponiach">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Włoska Robota - Pizza z Pieca | Głuponie">
-<meta name="twitter:description" content="Pizza 30cm prosto z pieca. Dowóz: Głuponie, Lwówek, Pniewy.">
+<meta name="twitter:description" content="Pizza 30cm prosto z pieca. Dowóz: Głuponie, Kuślin, Michorzewo i okolice.">
 <meta name="twitter:image" content="https://wloskarobota.eu/og-image.jpg">
 <script type="application/ld+json">
 {
@@ -41,7 +41,7 @@
     {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Wednesday", "Thursday", "Friday"], "opens": "12:00", "closes": "20:00"},
     {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Saturday", "Sunday"], "opens": "14:00", "closes": "22:00"}
   ],
-  "areaServed": ["Głuponie", "Lwówek", "Pniewy", "Kuślin", "Michorzewo", "Michorzewko"],
+  "areaServed": ["Głuponie", "Trzcianka", "Michorzewo", "Kuślin", "Chraplewo", "Michorzewko", "Dąbrowa Nowa", "Rudniki", "Wąsowo", "Jastrzębniki"],
   "hasMenu": "https://wloskarobota.eu/#menu",
   "sameAs": ["https://www.facebook.com/profile.php?id=61591198263542"]
 }
@@ -495,7 +495,7 @@ body.dark footer {background: #0a0a0a;}
 <section class="contact" id="contact">
   <div class="container">
     <h2 class="section-title fade-in">Zamów <span>Teraz</span></h2>
-    <p class="section-subtitle fade-in" id="deliverySub">Dowóz: Głuponie, Lwówek, Pniewy, Kuślin, Michorzewo, Michorzewko i okolice</p>
+    <p class="section-subtitle fade-in" id="deliverySub">Dowóz: Głuponie, Kuślin, Michorzewo, Michorzewko i okolice</p>
     <div id="delivery-check" class="fade-in" hidden>
       <label for="dc-input">🚚 Czy dowozimy do Ciebie?</label>
       <input id="dc-input" type="text" list="dc-list" placeholder="Wpisz swoją miejscowość" autocomplete="off" maxlength="40">
@@ -524,8 +524,8 @@ body.dark footer {background: #0a0a0a;}
       <div class="contact-card fade-in">
         <div class="contact-icon"><i class="fas fa-truck"></i></div>
         <h3>Dowóz</h3>
-        <p>Głuponie, Lwówek</p>
-        <p>Pniewy i okolice</p>
+        <p>Głuponie, Kuślin, Michorzewo</p>
+        <p>i okolice (koszt dowozu niżej)</p>
       </div>
     </div>
     <div class="map-wrapper fade-in">
@@ -1184,7 +1184,16 @@ body.dark #site-dish .sd-text{color:#bbb}
           <label class="rb-check"><input id="rb-site-dish-on" type="checkbox"> Wyróżnij na stronie</label>
 
           <h4>Dowóz</h4>
-          <div class="rb-meta" style="margin:-4px 0 6px">Miejscowości, do których dowozisz. Klient wpisuje swoją na stronie i od razu widzi koszt oraz minimalne zamówienie. Puste pole kosztu lub minimum = informacja się nie pokazuje; koszt 0 = dowóz gratis.</div>
+          <div class="rb-meta" style="margin:-4px 0 6px">Miejscowości, do których dowozisz (na start: okolice do ok. 10 km, koszt 10 zł). Klient wpisuje swoją na stronie i od razu widzi koszt oraz minimalne zamówienie. Zmień kwoty przy każdej miejscowości, dodaj lub usuń miejscowości, a potem zapisz na dole. Puste pole kosztu lub minimum = informacja się nie pokazuje; koszt 0 = dowóz gratis.</div>
+          <div class="rb-del">
+            <div class="rb-meta" style="margin-bottom:6px"><b>Ustaw wszystkim naraz</b> (wypełnia pola we wszystkich wierszach poniżej; puste pole zostawia bez zmian)</div>
+            <div class="rb-del-nums">
+              <div><label>Koszt dowozu (zł)</label><input type="text" id="rb-del-bulk-fee" inputmode="decimal" maxlength="7" placeholder="np. 10"></div>
+              <div><label>Minimum (zł)</label><input type="text" id="rb-del-bulk-min" inputmode="decimal" maxlength="7" placeholder="np. 40"></div>
+              <div><label>Gratis od (zł)</label><input type="text" id="rb-del-bulk-free" inputmode="decimal" maxlength="7" placeholder="opcj."></div>
+            </div>
+            <button type="button" class="rb-btn secondary small" id="rb-del-bulk">Zastosuj do wszystkich</button>
+          </div>
           <div id="rb-del-list"></div>
           <button type="button" class="rb-btn secondary small" id="rb-del-add">+ Dodaj miejscowość</button>
 
@@ -2277,7 +2286,10 @@ $("rb-st-list").addEventListener("click", async (e) => {
 
 /* ---------- treści strony z bazy: ceny, dostępność, komunikat, pizza dnia ---------- */
 const SITE_CACHE_KEY = "wr_site_cfg_v1";
-let siteCfg = { prices: {}, unavailable: {}, hidden: {}, products: [], notice: null, dish: null, delivery: { places: [] }, googleReviewUrl: "" };
+// Domyślna lista dowozu (do ok. 10 km od lokalu, koszt 10 zł). Obowiązuje, dopóki admin nie zapisze własnej listy w panelu (Strona → Dowóz).
+const DELIVERY_DEFAULT = ["Głuponie", "Trzcianka", "Tomaszewo", "Michorzewo", "Kuślin", "Zygmuntowo", "Chraplewo", "Marszewo", "Michorzewko", "Wymysłowo", "Dąbrowa", "Łęczyce", "Dąbrowa Nowa", "Rudniki", "Wąsowo", "Jastrzębniki"]
+  .map((name) => ({ name, fee: 10, min: null, freeFrom: null }));
+let siteCfg = { prices: {}, unavailable: {}, hidden: {}, products: [], notice: null, dish: null, delivery: { places: DELIVERY_DEFAULT }, googleReviewUrl: "" };
 const PROD_CATS = [["klasyczne", "Klasyczne"], ["miesne", "Mięsne"], ["vege", "Wege"], ["sosy", "Sosy"], ["makarony", "Makarony"], ["dodatki", "Dodatki"]];
 const MAX_PRODUCTS = 40;
 const menuEls = () => [...document.querySelectorAll("#menuGrid .menu-item")];
@@ -2291,7 +2303,7 @@ const tsMs = (t) => (t ? (t.toDate ? t.toDate().getTime() : (t.seconds ? t.secon
 
 function plainCfg(c) {
   const n = c.notice ? { ...c.notice, until: c.notice.until ? { seconds: Math.floor(tsMs(c.notice.until) / 1000) } : null } : null;
-  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, products: c.products || [], notice: n, dish: c.dish || null, delivery: c.delivery || { places: [] }, googleReviewUrl: c.googleReviewUrl || "" };
+  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, products: c.products || [], notice: n, dish: c.dish || null, delivery: c.delivery || null, googleReviewUrl: c.googleReviewUrl || "" };
 }
 
 function renderDish() {
@@ -2367,7 +2379,7 @@ function applySite(cfg) {
   siteCfg = {
     prices: (cfg && cfg.prices) || {}, unavailable: (cfg && cfg.unavailable) || {}, hidden: (cfg && cfg.hidden) || {},
     products: Array.isArray(cfg && cfg.products) ? cfg.products : [], notice: (cfg && cfg.notice) || null, dish: (cfg && cfg.dish) || null,
-    delivery: { places: Array.isArray(cfg && cfg.delivery && cfg.delivery.places) ? cfg.delivery.places : [] },
+    delivery: { places: Array.isArray(cfg && cfg.delivery && cfg.delivery.places) ? cfg.delivery.places : DELIVERY_DEFAULT },
     googleReviewUrl: (cfg && typeof cfg.googleReviewUrl === "string") ? cfg.googleReviewUrl : ""
   };
   renderProducts();
@@ -2406,7 +2418,11 @@ function renderDelivery() {
   box.hidden = !places.length;
   $("dc-list").innerHTML = places.map((p) => '<option value="' + esc(p.name) + '"></option>').join("");
   const sub = $("deliverySub");
-  if (sub && places.length) sub.textContent = "Dowóz: " + places.map((p) => p.name).join(", ") + " i okolice";
+  if (sub && places.length) {
+    sub.textContent = places.length > 8
+      ? "Dowozimy do " + places.length + " miejscowości w okolicy Głuponi — wpisz swoją poniżej i sprawdź koszt"
+      : "Dowóz: " + places.map((p) => p.name).join(", ") + " i okolice";
+  }
   renderDeliveryResult();
 }
 function renderDeliveryResult() {
@@ -2474,7 +2490,6 @@ function prodRowHtml(p) {
   </div>`;
 }
 
-const DELIVERY_SEED = ["Głuponie", "Lwówek", "Pniewy", "Kuślin", "Michorzewo", "Michorzewko"];
 const numStr = (v) => (typeof v === "number" ? String(v).replace(".", ",") : "");
 function delRowHtml(p) {
   p = p || {};
@@ -2491,7 +2506,7 @@ function delRowHtml(p) {
 
 function fillSiteForm() {
   const dp = siteCfg.delivery.places.filter(validPlace);
-  $("rb-del-list").innerHTML = (dp.length ? dp : DELIVERY_SEED.map((name) => ({ name }))).map(delRowHtml).join("");
+  $("rb-del-list").innerHTML = dp.map(delRowHtml).join("");
   $("rb-site-google").value = siteCfg.googleReviewUrl || "";
   $("rb-prod-list").innerHTML = siteCfg.products.filter(validProduct).map(prodRowHtml).join("");
   const items = menuEls().filter((el) => !el.dataset.custom);
@@ -2523,6 +2538,14 @@ $("rb-del-add").addEventListener("click", () => {
   if (list.querySelectorAll(".rb-del").length >= 40) { setMsg(siteMsg, "Maksymalnie 40 miejscowości.", "err"); return; }
   list.insertAdjacentHTML("beforeend", delRowHtml());
   list.lastElementChild.querySelector(".rb-del-name").focus();
+});
+$("rb-del-bulk").addEventListener("click", () => {
+  const vals = { ".rb-del-fee": $("rb-del-bulk-fee").value.trim(), ".rb-del-min": $("rb-del-bulk-min").value.trim(), ".rb-del-free": $("rb-del-bulk-free").value.trim() };
+  if (!Object.values(vals).some(Boolean)) { setMsg(siteMsg, "Wpisz kwotę w co najmniej jednym polu „Ustaw wszystkim naraz”.", "err"); return; }
+  document.querySelectorAll("#rb-del-list .rb-del").forEach((row) => {
+    Object.entries(vals).forEach(([sel, v]) => { if (v) row.querySelector(sel).value = v; });
+  });
+  setMsg(siteMsg, "Wpisano we wszystkich wierszach. Kliknij „Zapisz i opublikuj na stronie”, żeby zatwierdzić.", "ok");
 });
 $("rb-del-list").addEventListener("click", (e) => {
   const b = e.target.closest(".rb-del-rm");
