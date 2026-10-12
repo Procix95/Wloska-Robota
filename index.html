@@ -4,7 +4,48 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Włoska Robota - Pizza z Pieca | Głuponie</title>
-<meta name="description" content="Pizzeria Włoska Robota w Głuponiach. Pizza 30cm prosto z pieca. Dowóz: Głuponie, Lwówek, Pniewy. Tel: 668 862 396. Otwarte 12:00-20:00">
+<meta name="description" content="Pizzeria Włoska Robota w Głuponiach. Pizza 30cm z pieca, ciasto fermentowane 24h. Dowóz: Głuponie, Lwówek, Pniewy i okolice. Tel. 668 862 396. Śr-Pt 12:00-20:00, Sob-Nd 14:00-22:00.">
+<meta name="theme-color" content="#CD212A">
+<link rel="canonical" href="https://wloskarobota.eu/">
+<meta property="og:type" content="restaurant">
+<meta property="og:site_name" content="Włoska Robota">
+<meta property="og:locale" content="pl_PL">
+<meta property="og:title" content="Włoska Robota - Pizza z Pieca | Głuponie">
+<meta property="og:description" content="Pizza 30cm prosto z pieca, ciasto fermentowane 24h. Dowóz: Głuponie, Lwówek, Pniewy. Zadzwoń: 668 862 396.">
+<meta property="og:url" content="https://wloskarobota.eu/">
+<meta property="og:image" content="https://wloskarobota.eu/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Włoska Robota - pizzeria w Głuponiach">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Włoska Robota - Pizza z Pieca | Głuponie">
+<meta name="twitter:description" content="Pizza 30cm prosto z pieca. Dowóz: Głuponie, Lwówek, Pniewy.">
+<meta name="twitter:image" content="https://wloskarobota.eu/og-image.jpg">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Restaurant",
+  "name": "Włoska Robota",
+  "url": "https://wloskarobota.eu/",
+  "image": "https://wloskarobota.eu/og-image.jpg",
+  "telephone": "+48668862396",
+  "servesCuisine": ["Pizza", "Włoska"],
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Głuponie 103",
+    "addressLocality": "Głuponie",
+    "addressRegion": "wielkopolskie",
+    "addressCountry": "PL"
+  },
+  "openingHoursSpecification": [
+    {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Wednesday", "Thursday", "Friday"], "opens": "12:00", "closes": "20:00"},
+    {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Saturday", "Sunday"], "opens": "14:00", "closes": "22:00"}
+  ],
+  "areaServed": ["Głuponie", "Lwówek", "Pniewy", "Kuślin", "Michorzewo", "Michorzewko"],
+  "hasMenu": "https://wloskarobota.eu/#menu",
+  "sameAs": ["https://www.facebook.com/profile.php?id=61591198263542"]
+}
+</script>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍕</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -454,7 +495,13 @@ body.dark footer {background: #0a0a0a;}
 <section class="contact" id="contact">
   <div class="container">
     <h2 class="section-title fade-in">Zamów <span>Teraz</span></h2>
-    <p class="section-subtitle fade-in">Dowóz: Głuponie, Lwówek, Pniewy, Kuślin, Michorzewo, Michorzewko i okolice</p>
+    <p class="section-subtitle fade-in" id="deliverySub">Dowóz: Głuponie, Lwówek, Pniewy, Kuślin, Michorzewo, Michorzewko i okolice</p>
+    <div id="delivery-check" class="fade-in" hidden>
+      <label for="dc-input">🚚 Czy dowozimy do Ciebie?</label>
+      <input id="dc-input" type="text" list="dc-list" placeholder="Wpisz swoją miejscowość" autocomplete="off" maxlength="40">
+      <datalist id="dc-list"></datalist>
+      <div id="dc-result" role="status" aria-live="polite"></div>
+    </div>
     <div class="contact-grid">
       <div class="contact-card fade-in">
         <div class="contact-icon"><i class="fas fa-phone"></i></div>
@@ -872,6 +919,20 @@ body.has-notice .hero{margin-top:0}
 .unavail-badge{display:inline-block;margin-top:.6rem;padding:.15rem .7rem;border-radius:99px;background:var(--red);color:#fff;font-size:.8rem;font-weight:700}
 .menu-item.is-dish{outline:3px solid var(--gold);outline-offset:-3px}
 .menu-item.is-hidden{display:none!important}
+#delivery-check{max-width:560px;margin:-1.5rem auto 2.5rem;padding:1.2rem 1.4rem;background:var(--light);border-radius:20px;box-shadow:0 5px 20px rgba(0,0,0,.08);text-align:center}
+body.dark #delivery-check{background:var(--dark-bg);box-shadow:0 5px 20px rgba(0,0,0,.3)}
+#delivery-check[hidden]{display:none}
+#delivery-check label{display:block;font-weight:700;margin-bottom:.6rem}
+#delivery-check input{width:100%;padding:.8rem 1rem;border-radius:12px;border:2px solid #ccc;font:inherit;font-size:1rem;background:#fff;color:var(--dark);text-align:center}
+body.dark #delivery-check input{background:#1e1e1e;color:#f8f8f8;border-color:#444}
+#delivery-check input:focus{outline:none;border-color:var(--green)}
+#dc-result{margin-top:.8rem;font-size:.98rem;line-height:1.5}
+#dc-result .dc-line{margin-top:.4rem}
+#dc-result.yes{color:var(--green)}
+body.dark #dc-result.yes{color:#5fd08f}
+#dc-result.no{color:var(--red)}
+body.dark #dc-result.no{color:#ff8a8f}
+#dc-result a{color:inherit;font-weight:700}
 #site-dish{display:none;margin:0 auto 2rem;max-width:720px;padding:1.2rem 1.4rem;border-radius:20px;background:linear-gradient(135deg,rgba(212,175,55,.18),rgba(212,175,55,.06));border:2px solid var(--gold);text-align:center}
 #site-dish .sd-label{font-size:.85rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
 #site-dish .sd-name{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:800;margin:.2rem 0}
@@ -893,6 +954,21 @@ body.dark #site-dish .sd-text{color:#bbb}
 #rabat-overlay .rb-prod input.rb-prod-price{text-align:right}
 #rabat-overlay .rb-prod .rb-prod-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 #rabat-overlay .rb-prod .rb-check{margin:0}
+#rabat-overlay a.rb-btn{text-decoration:none;text-align:center;box-sizing:border-box;line-height:24px}
+#rabat-overlay .rb-survey{background:var(--rb-card);border:1px solid var(--rb-border);border-radius:16px;padding:16px;margin-bottom:18px}
+#rabat-overlay .rb-sv-text{font-size:14px;text-align:center;margin-bottom:8px}
+#rabat-overlay .rb-stars{display:flex;justify-content:center;gap:4px;margin:6px 0 10px}
+#rabat-overlay .rb-stars button{background:none;border:0;font-size:36px;line-height:1;cursor:pointer;color:var(--rb-border);padding:2px 4px;min-width:44px;min-height:44px}
+#rabat-overlay .rb-stars button.on{color:var(--rb-gold)}
+#rabat-overlay .rb-bar{display:grid;grid-template-columns:34px 1fr 28px;gap:8px;align-items:center;font-size:13px;margin:3px 0}
+#rabat-overlay .rb-bar i{display:block;height:8px;border-radius:99px;background:var(--rb-gold)}
+#rabat-overlay .rb-bar span{background:var(--rb-border);border-radius:99px;overflow:hidden;display:block}
+#rabat-overlay .rb-fb .rb-fb-stars{color:var(--rb-gold);letter-spacing:1px}
+#rabat-overlay .rb-fb .rb-link{margin-top:2px}
+#rabat-overlay .rb-del{border:1px solid var(--rb-border);border-radius:14px;padding:12px;margin:10px 0;background:var(--rb-input)}
+#rabat-overlay .rb-del .rb-del-nums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#rabat-overlay .rb-del .rb-del-nums label{font-size:12px;color:var(--rb-muted);margin:0}
+#rabat-overlay .rb-del input{margin-bottom:8px}
 #rabat-overlay .rb-site-hide{display:flex;align-items:center;font-size:13px;color:var(--rb-muted);cursor:pointer}
 #rabat-overlay .rb-ev{padding:8px 0;border-top:1px solid var(--rb-border);font-size:13px}
 #rabat-overlay .rb-ev b{font-size:14px}
@@ -955,6 +1031,26 @@ body.dark #site-dish .sd-text{color:#bbb}
         <div class="rb-loyal-txt" id="rb-loyal-txt"></div>
         <div class="rb-qrwrap"><div class="rb-qr" id="rb-card-qr"></div>
           <div class="rb-qrcap">Twój kod klienta<small>pokazuj go przy każdym zamówieniu — dostaniesz pieczątkę i rabaty</small></div></div>
+      </div>
+      <div class="rb-survey" id="rb-survey" hidden>
+        <div class="rb-sec" style="margin-top:0"><h3>⭐ Jak było?</h3></div>
+        <div id="rb-sv-form">
+          <div class="rb-sv-text">Oceń swoją ostatnią wizytę — to zajmie 10 sekund.</div>
+          <div class="rb-stars" id="rb-stars" role="radiogroup" aria-label="Ocena od 1 do 5 gwiazdek">
+            <button type="button" data-v="1" role="radio" aria-checked="false" aria-label="1 gwiazdka">★</button>
+            <button type="button" data-v="2" role="radio" aria-checked="false" aria-label="2 gwiazdki">★</button>
+            <button type="button" data-v="3" role="radio" aria-checked="false" aria-label="3 gwiazdki">★</button>
+            <button type="button" data-v="4" role="radio" aria-checked="false" aria-label="4 gwiazdki">★</button>
+            <button type="button" data-v="5" role="radio" aria-checked="false" aria-label="5 gwiazdek">★</button>
+          </div>
+          <textarea id="rb-sv-comment" rows="3" maxlength="300" placeholder="Komentarz (opcjonalnie)"></textarea>
+          <button type="button" class="rb-btn" id="rb-sv-send" disabled>Wyślij ocenę</button>
+          <div class="rb-msg" id="rb-sv-msg" role="status"></div>
+        </div>
+        <div id="rb-sv-done" hidden>
+          <div class="rb-sv-text" id="rb-sv-done-text"></div>
+          <a class="rb-btn" id="rb-sv-google" target="_blank" rel="noopener" hidden>Zostaw opinię w Google</a>
+        </div>
       </div>
       <div class="rb-sec"><h3>Twoje kody rabatowe</h3><span id="rb-count"></span></div>
       <div id="rb-my-list"></div>
@@ -1087,6 +1183,15 @@ body.dark #site-dish .sd-text{color:#bbb}
           <input id="rb-site-dish-text" type="text" maxlength="120" placeholder="Opis (opcjonalnie), np. Dziś z podwójną mozzarellą!">
           <label class="rb-check"><input id="rb-site-dish-on" type="checkbox"> Wyróżnij na stronie</label>
 
+          <h4>Dowóz</h4>
+          <div class="rb-meta" style="margin:-4px 0 6px">Miejscowości, do których dowozisz. Klient wpisuje swoją na stronie i od razu widzi koszt oraz minimalne zamówienie. Puste pole kosztu lub minimum = informacja się nie pokazuje; koszt 0 = dowóz gratis.</div>
+          <div id="rb-del-list"></div>
+          <button type="button" class="rb-btn secondary small" id="rb-del-add">+ Dodaj miejscowość</button>
+
+          <h4>Opinie w Google</h4>
+          <div class="rb-meta" style="margin:-4px 0 6px">Link, pod którym klient może zostawić opinię w Google (przycisk pokaże się po ocenie 4–5 ★). Pusty = przycisku nie będzie.</div>
+          <input id="rb-site-google" type="url" maxlength="300" placeholder="https://g.page/r/.../review">
+
           <h4>Własne produkty</h4>
           <div class="rb-meta" style="margin:-4px 0 6px">Dodaj nową pozycję do menu (np. nową pizzę, napój, deser). Pojawi się na stronie w wybranej kategorii.</div>
           <div id="rb-prod-list"></div>
@@ -1128,6 +1233,12 @@ body.dark #site-dish .sd-text{color:#bbb}
             <button type="button" class="rb-btn secondary small" id="rb-rp-csv">Pobierz CSV</button>
           </div>
           <div class="rb-msg" id="rb-rp-msg" role="status"></div>
+
+          <h4>Opinie klientów</h4>
+          <div class="rb-stats" id="rb-fb-stats"></div>
+          <div id="rb-fb-bars"></div>
+          <label class="rb-check"><input type="checkbox" id="rb-fb-low"> Tylko niskie oceny (1–3 ★)</label>
+          <div id="rb-fb-list" class="rb-fb"></div>
         </div>
 
         <!-- Zakładka: lista wszystkich kodów -->
@@ -1326,6 +1437,7 @@ let unsubs = [];
 let isAdmin = false;
 let isStaff = false;
 let myLoyal = null;
+let svVisit = 0, svRating = 0, svDoneFor = 0;
 let custView = null;
 const LOYAL_GOAL = 10;        // tyle pieczątek = pizza gratis (to samo w firestore.rules)
 const STAMP_COOLDOWN_H = 2;   // min. odstęp między pieczątkami (to samo w firestore.rules)
@@ -1342,7 +1454,7 @@ function cleanup() {
   stopScanner();
   unsubs.forEach((u) => { try { u(); } catch (_) {} });
   unsubs = [];
-  isAdmin = false; isStaff = false; allStaff = []; staffFound = []; myLoyal = null; custView = null; myCoupons = []; allUsers = []; allCoupons = []; allTemplates = []; lastCheck = "";
+  isAdmin = false; isStaff = false; allStaff = []; staffFound = []; myLoyal = null; custView = null; myCoupons = []; allUsers = []; allCoupons = []; allTemplates = []; lastCheck = ""; svVisit = 0; svRating = 0; svDoneFor = 0;
 }
 function showOnly(which) {
   $("rb-loading").hidden = which !== "loading";
@@ -1501,7 +1613,83 @@ function renderLoyal(user) {
   const qr = $("rb-card-qr");
   qr.dataset.qrfull = "KL:" + user.uid;
   drawQRs(box);
+  renderSurvey(user);
 }
+
+/* ---------- ankieta po wizycie ---------- */
+const SURVEY_WINDOW_MS = 48 * 3600 * 1000;   // tyle czasu od pieczątki można ocenić wizytę (to samo w firestore.rules)
+function lastVisitSec() {
+  if (!myLoyal) return 0;
+  const ms = Math.max(tsMs(myLoyal.lastStampAt), tsMs(myLoyal.lastRewardAt));
+  return ms ? Math.floor(ms / 1000) : 0;
+}
+function paintStars(v) {
+  document.querySelectorAll("#rb-stars button").forEach((b) => {
+    const on = Number(b.dataset.v) <= v;
+    b.classList.toggle("on", on);
+    b.setAttribute("aria-checked", Number(b.dataset.v) === v ? "true" : "false");
+  });
+}
+function showSurveyDone(rating) {
+  $("rb-sv-form").hidden = true;
+  $("rb-sv-done").hidden = false;
+  const g = $("rb-sv-google");
+  const url = siteCfg.googleReviewUrl;
+  if (rating >= 4) {
+    $("rb-sv-done-text").textContent = "Dziękujemy za ocenę! 🙏 Cieszymy się, że smakowało." + (url ? " Jeśli masz chwilę, podziel się opinią także w Google — to dla nas bardzo ważne." : "");
+    if (url) { g.href = url; g.hidden = false; } else g.hidden = true;
+  } else {
+    $("rb-sv-done-text").textContent = "Dziękujemy za szczerą opinię. Przekażemy ją właścicielowi i postaramy się to poprawić.";
+    g.hidden = true;
+  }
+}
+async function renderSurvey(user) {
+  const box = $("rb-survey");
+  const sec = lastVisitSec();
+  if (isStaff || !myLoyal || !sec || Date.now() - sec * 1000 > SURVEY_WINDOW_MS) { box.hidden = true; return; }
+  if (svDoneFor === sec) { box.hidden = false; return; }          // właśnie oceniona w tej sesji
+  if (sec !== svVisit) {
+    svVisit = sec;
+    svRating = 0;
+    box.hidden = true;
+    $("rb-sv-form").hidden = false;
+    $("rb-sv-done").hidden = true;
+    $("rb-sv-comment").value = "";
+    $("rb-sv-send").disabled = true;
+    setMsg($("rb-sv-msg"), "");
+    paintStars(0);
+    let exists = true;
+    try { exists = (await getDoc(doc(db, "feedback", user.uid + "_" + sec))).exists(); }
+    catch (err) { console.warn("Ankieta niedostępna (opublikuj nowe reguły):", err.code); }
+    if (svVisit !== sec) return;
+    box.hidden = exists;
+  }
+}
+document.querySelectorAll("#rb-stars button").forEach((b) => b.addEventListener("click", () => {
+  svRating = Number(b.dataset.v);
+  paintStars(svRating);
+  $("rb-sv-send").disabled = false;
+}));
+$("rb-sv-send").addEventListener("click", async () => {
+  const user = auth.currentUser;
+  const sec = svVisit;
+  if (!user || !sec || !svRating) return;
+  const btn = $("rb-sv-send");
+  btn.disabled = true;
+  setMsg($("rb-sv-msg"), "");
+  const name = (user.displayName || (user.email || "").split("@")[0] || "Klient").slice(0, 60);
+  try {
+    await withTimeout(setDoc(doc(db, "feedback", user.uid + "_" + sec), {
+      uid: user.uid, name, rating: svRating, comment: $("rb-sv-comment").value.trim().slice(0, 300), visitSec: sec, createdAt: serverTimestamp()
+    }), 10000);
+    svDoneFor = sec;
+    showSurveyDone(svRating);
+  } catch (err) {
+    console.error(err);
+    setMsg($("rb-sv-msg"), errText(err), "err");
+    btn.disabled = false;
+  }
+});
 
 /* ---------- admin: czyszczenie danych usuniętych kont ---------- */
 const purging = new Set();
@@ -1511,6 +1699,8 @@ async function purgeDeleted(uid) {
   try {
     const cs = await getDocs(query(collection(db, "coupons"), where("uid", "==", uid)));
     for (const c of cs.docs) await deleteDoc(doc(db, "coupons", c.id));
+    const fbs = await getDocs(query(collection(db, "feedback"), where("uid", "==", uid)));
+    for (const f of fbs.docs) await deleteDoc(doc(db, "feedback", f.id));
     await deleteDoc(doc(db, "loyalty", uid));
     await deleteDoc(doc(db, "users", uid));
     await deleteDoc(doc(db, "deletionRequests", uid));
@@ -2087,7 +2277,7 @@ $("rb-st-list").addEventListener("click", async (e) => {
 
 /* ---------- treści strony z bazy: ceny, dostępność, komunikat, pizza dnia ---------- */
 const SITE_CACHE_KEY = "wr_site_cfg_v1";
-let siteCfg = { prices: {}, unavailable: {}, hidden: {}, products: [], notice: null, dish: null };
+let siteCfg = { prices: {}, unavailable: {}, hidden: {}, products: [], notice: null, dish: null, delivery: { places: [] }, googleReviewUrl: "" };
 const PROD_CATS = [["klasyczne", "Klasyczne"], ["miesne", "Mięsne"], ["vege", "Wege"], ["sosy", "Sosy"], ["makarony", "Makarony"], ["dodatki", "Dodatki"]];
 const MAX_PRODUCTS = 40;
 const menuEls = () => [...document.querySelectorAll("#menuGrid .menu-item")];
@@ -2101,7 +2291,7 @@ const tsMs = (t) => (t ? (t.toDate ? t.toDate().getTime() : (t.seconds ? t.secon
 
 function plainCfg(c) {
   const n = c.notice ? { ...c.notice, until: c.notice.until ? { seconds: Math.floor(tsMs(c.notice.until) / 1000) } : null } : null;
-  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, products: c.products || [], notice: n, dish: c.dish || null };
+  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, products: c.products || [], notice: n, dish: c.dish || null, delivery: c.delivery || { places: [] }, googleReviewUrl: c.googleReviewUrl || "" };
 }
 
 function renderDish() {
@@ -2176,7 +2366,9 @@ function renderProducts() {
 function applySite(cfg) {
   siteCfg = {
     prices: (cfg && cfg.prices) || {}, unavailable: (cfg && cfg.unavailable) || {}, hidden: (cfg && cfg.hidden) || {},
-    products: Array.isArray(cfg && cfg.products) ? cfg.products : [], notice: (cfg && cfg.notice) || null, dish: (cfg && cfg.dish) || null
+    products: Array.isArray(cfg && cfg.products) ? cfg.products : [], notice: (cfg && cfg.notice) || null, dish: (cfg && cfg.dish) || null,
+    delivery: { places: Array.isArray(cfg && cfg.delivery && cfg.delivery.places) ? cfg.delivery.places : [] },
+    googleReviewUrl: (cfg && typeof cfg.googleReviewUrl === "string") ? cfg.googleReviewUrl : ""
   };
   renderProducts();
   menuEls().forEach((el) => {
@@ -2200,7 +2392,47 @@ function applySite(cfg) {
   if (window.applyMenuFilter) window.applyMenuFilter();
   renderDish();
   renderNotice();
+  renderDelivery();
 }
+
+/* ---------- dowóz: sprawdzanie miejscowości ---------- */
+const normTxt = (t) => String(t || "").toLowerCase().replace(/ł/g, "l").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim();
+const money = (n) => String(n).replace(".", ",") + " zł";
+function validPlace(p) { return !!(p && typeof p.name === "string" && p.name.trim()); }
+function renderDelivery() {
+  const box = $("delivery-check");
+  if (!box) return;
+  const places = siteCfg.delivery.places.filter(validPlace);
+  box.hidden = !places.length;
+  $("dc-list").innerHTML = places.map((p) => '<option value="' + esc(p.name) + '"></option>').join("");
+  const sub = $("deliverySub");
+  if (sub && places.length) sub.textContent = "Dowóz: " + places.map((p) => p.name).join(", ") + " i okolice";
+  renderDeliveryResult();
+}
+function renderDeliveryResult() {
+  const out = $("dc-result");
+  if (!out) return;
+  const q = normTxt($("dc-input").value);
+  out.className = "";
+  if (q.length < 2) { out.textContent = ""; return; }
+  const places = siteCfg.delivery.places.filter(validPlace);
+  let m = places.filter((p) => normTxt(p.name) === q);
+  if (!m.length) m = places.filter((p) => { const n = normTxt(p.name); return n.includes(q) || q.includes(n); });
+  if (!m.length) {
+    out.className = "no";
+    out.innerHTML = 'Tej miejscowości nie ma na naszej liście dowozu. <a href="tel:668862396">Zadzwoń: 668 862 396</a> — ustalimy, albo zapraszamy po odbiór osobisty.';
+    return;
+  }
+  out.className = "yes";
+  out.innerHTML = m.slice(0, 3).map((p) => {
+    const info = [];
+    if (typeof p.fee === "number") info.push(p.fee === 0 ? "dowóz gratis" : "koszt dowozu " + money(p.fee));
+    if (typeof p.freeFrom === "number" && p.fee !== 0) info.push("gratis od " + money(p.freeFrom));
+    if (typeof p.min === "number" && p.min > 0) info.push("minimalne zamówienie " + money(p.min));
+    return '<div class="dc-line">✅ <b>Dowozimy: ' + esc(p.name) + "</b>" + (info.length ? "<br>" + esc(info.join(" · ")) : "") + "</div>";
+  }).join("");
+}
+$("dc-input").addEventListener("input", renderDeliveryResult);
 
 async function loadSite() {
   try {
@@ -2242,7 +2474,25 @@ function prodRowHtml(p) {
   </div>`;
 }
 
+const DELIVERY_SEED = ["Głuponie", "Lwówek", "Pniewy", "Kuślin", "Michorzewo", "Michorzewko"];
+const numStr = (v) => (typeof v === "number" ? String(v).replace(".", ",") : "");
+function delRowHtml(p) {
+  p = p || {};
+  return `<div class="rb-del">
+    <input type="text" class="rb-del-name" maxlength="40" placeholder="Miejscowość" value="${esc(p.name || "")}" aria-label="Miejscowość">
+    <div class="rb-del-nums">
+      <div><label>Koszt dowozu (zł)</label><input type="text" class="rb-del-fee" inputmode="decimal" maxlength="7" placeholder="np. 8" value="${esc(numStr(p.fee))}"></div>
+      <div><label>Minimum (zł)</label><input type="text" class="rb-del-min" inputmode="decimal" maxlength="7" placeholder="np. 40" value="${esc(numStr(p.min))}"></div>
+      <div><label>Gratis od (zł)</label><input type="text" class="rb-del-free" inputmode="decimal" maxlength="7" placeholder="opcj." value="${esc(numStr(p.freeFrom))}"></div>
+    </div>
+    <button type="button" class="rb-btn secondary small rb-del-rm">Usuń miejscowość</button>
+  </div>`;
+}
+
 function fillSiteForm() {
+  const dp = siteCfg.delivery.places.filter(validPlace);
+  $("rb-del-list").innerHTML = (dp.length ? dp : DELIVERY_SEED.map((name) => ({ name }))).map(delRowHtml).join("");
+  $("rb-site-google").value = siteCfg.googleReviewUrl || "";
   $("rb-prod-list").innerHTML = siteCfg.products.filter(validProduct).map(prodRowHtml).join("");
   const items = menuEls().filter((el) => !el.dataset.custom);
   $("rb-site-items").innerHTML = items.map((el) => {
@@ -2268,6 +2518,16 @@ function fillSiteForm() {
   $("rb-site-dish-on").checked = !!d.active;
 }
 
+$("rb-del-add").addEventListener("click", () => {
+  const list = $("rb-del-list");
+  if (list.querySelectorAll(".rb-del").length >= 40) { setMsg(siteMsg, "Maksymalnie 40 miejscowości.", "err"); return; }
+  list.insertAdjacentHTML("beforeend", delRowHtml());
+  list.lastElementChild.querySelector(".rb-del-name").focus();
+});
+$("rb-del-list").addEventListener("click", (e) => {
+  const b = e.target.closest(".rb-del-rm");
+  if (b) b.closest(".rb-del").remove();
+});
 $("rb-prod-add").addEventListener("click", () => {
   const list = $("rb-prod-list");
   if (list.querySelectorAll(".rb-prod").length >= MAX_PRODUCTS) { setMsg(siteMsg, "Maksymalnie " + MAX_PRODUCTS + " własnych produktów.", "err"); return; }
@@ -2333,6 +2593,32 @@ $("rb-site-save").addEventListener("click", async () => {
     products.push({ id: row.dataset.id, name, price, cat, desc, tags, unavail: row.querySelector(".rb-prod-un").checked });
   });
   if (prodBad) { setMsg(siteMsg, prodBad, "err"); return; }
+  const parseZl = (v) => {
+    v = String(v).trim().replace(",", ".");
+    if (v === "") return null;
+    return /^\d{1,4}(\.\d{1,2})?$/.test(v) ? Number(v) : NaN;
+  };
+  const places = [];
+  const seenPlaces = new Set();
+  let delBad = "";
+  document.querySelectorAll("#rb-del-list .rb-del").forEach((row) => {
+    if (delBad) return;
+    const name = row.querySelector(".rb-del-name").value.replace(/\s+/g, " ").trim();
+    const fee = parseZl(row.querySelector(".rb-del-fee").value);
+    const min = parseZl(row.querySelector(".rb-del-min").value);
+    const freeFrom = parseZl(row.querySelector(".rb-del-free").value);
+    if (!name && fee === null && min === null && freeFrom === null) return;
+    if (!name) { delBad = "Wpisz nazwę każdej miejscowości w sekcji Dowóz."; return; }
+    if ([fee, min, freeFrom].some((x) => Number.isNaN(x))) { delBad = "Popraw kwoty przy miejscowości „" + name + "” (np. 8 lub 8,50)."; return; }
+    const k = normTxt(name);
+    if (seenPlaces.has(k)) { delBad = "Miejscowość „" + name + "” jest na liście dwa razy."; return; }
+    seenPlaces.add(k);
+    places.push({ name, fee, min, freeFrom });
+  });
+  if (delBad) { setMsg(siteMsg, delBad, "err"); return; }
+  const googleReviewUrl = $("rb-site-google").value.trim();
+  if (googleReviewUrl && !/^https:\/\/\S+$/.test(googleReviewUrl)) { setMsg(siteMsg, "Link do opinii w Google musi zaczynać się od https://", "err"); return; }
+  const delivery = { places };
   if (products.length > MAX_PRODUCTS) { setMsg(siteMsg, "Maksymalnie " + MAX_PRODUCTS + " własnych produktów.", "err"); return; }
   const text = $("rb-site-notice-text").value.trim();
   const until = $("rb-site-notice-until").value;
@@ -2346,8 +2632,8 @@ $("rb-site-save").addEventListener("click", async () => {
   const btn = $("rb-site-save");
   btn.disabled = true;
   try {
-    await setDoc(doc(db, "site", "config"), { prices, unavailable, hidden, products, notice, dish, updatedAt: serverTimestamp() });
-    const cfg = { prices, unavailable, hidden, products, notice, dish };
+    await setDoc(doc(db, "site", "config"), { prices, unavailable, hidden, products, notice, dish, delivery, googleReviewUrl, updatedAt: serverTimestamp() });
+    const cfg = { prices, unavailable, hidden, products, notice, dish, delivery, googleReviewUrl };
     applySite(cfg);
     fillSiteForm();
     try { localStorage.setItem(SITE_CACHE_KEY, JSON.stringify(plainCfg(cfg))); } catch (_) {}
@@ -2417,7 +2703,51 @@ function renderReport() {
 }
 $("rb-rp-range").addEventListener("change", renderReport);
 $("rb-rp-type").addEventListener("change", renderReport);
-$("rb-rp-refresh").addEventListener("click", loadReport);
+$("rb-rp-refresh").addEventListener("click", () => { loadReport(); loadFeedback(); });
+
+let feedbackItems = [];
+const starStr = (n) => "★".repeat(n) + "☆".repeat(5 - n);
+async function loadFeedback() {
+  try {
+    const snap = await getDocs(query(collection(db, "feedback"), orderBy("createdAt", "desc"), limit(500)));
+    feedbackItems = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    renderFeedback();
+  } catch (err) {
+    console.error(err);
+    $("rb-fb-stats").innerHTML = "";
+    $("rb-fb-bars").innerHTML = "";
+    $("rb-fb-list").innerHTML = '<div class="rb-empty">Nie udało się wczytać opinii (' + esc(err.code || err.message) + ') — czy opublikowałeś nowe reguły?</div>';
+  }
+}
+function renderFeedback() {
+  const items = feedbackItems.filter((f) => Number.isInteger(f.rating) && f.rating >= 1 && f.rating <= 5);
+  const n = items.length;
+  const avg = n ? items.reduce((a, f) => a + f.rating, 0) / n : 0;
+  const low = items.filter((f) => f.rating <= 3).length;
+  $("rb-fb-stats").innerHTML = [[n ? avg.toFixed(1).replace(".", ",") + " ★" : "–", "średnia"], [n, "ocen"], [low, "niskich (1–3)"]]
+    .map(([v, l]) => `<div class="rb-stat"><b>${v}</b><span>${l}</span></div>`).join("");
+  $("rb-fb-bars").innerHTML = n ? [5, 4, 3, 2, 1].map((r) => {
+    const c = items.filter((f) => f.rating === r).length;
+    return `<div class="rb-bar"><b>${r} ★</b><span><i style="width:${Math.round((c / n) * 100)}%"></i></span><em>${c}</em></div>`;
+  }).join("") : "";
+  const shown = items.filter((f) => !$("rb-fb-low").checked || f.rating <= 3).slice(0, 100);
+  $("rb-fb-list").innerHTML = shown.length
+    ? shown.map((f) => `<div class="rb-ev"><span class="rb-fb-stars">${starStr(f.rating)}</span> <b>${esc(f.name || "Klient")}</b>
+        <div class="rb-meta">${fmtDateTime(f.createdAt)}</div>${f.comment ? `<div>${esc(f.comment)}</div>` : ""}
+        <button type="button" class="rb-link" data-fbdel="${esc(f.id)}">Usuń opinię</button></div>`).join("")
+    : '<div class="rb-empty">Brak opinii.</div>';
+}
+$("rb-fb-low").addEventListener("change", renderFeedback);
+$("rb-fb-list").addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-fbdel]");
+  if (!b) return;
+  if (!confirm("Usunąć tę opinię na stałe?")) return;
+  try {
+    await deleteDoc(doc(db, "feedback", b.dataset.fbdel));
+    feedbackItems = feedbackItems.filter((f) => f.id !== b.dataset.fbdel);
+    renderFeedback();
+  } catch (err) { console.error(err); alert(errText(err)); }
+});
 $("rb-rp-csv").addEventListener("click", () => {
   const rows = [["Czas", "Zdarzenie", "Pracownik", "Klient", "Szczegóły"]];
   visibleEvents().forEach((e) => rows.push([fmtDateTime(e.at), EV_LABEL[e.type] || e.type, e.byName || "", e.customerName || "", e.detail || ""]));
@@ -2438,7 +2768,7 @@ function setAdminTab(name) {
   document.querySelectorAll("#rb-admin .rb-pane").forEach((p) => { p.hidden = p.dataset.pane !== name; });
   if (name !== "check") stopScanner();
   if (name === "site") loadSite().then(fillSiteForm);
-  if (name === "report") loadReport();
+  if (name === "report") { loadReport(); loadFeedback(); }
 }
 document.querySelectorAll("#rb-admin .rb-atab").forEach((b) => b.addEventListener("click", () => setAdminTab(b.dataset.pane)));
 
