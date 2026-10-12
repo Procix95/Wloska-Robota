@@ -69,6 +69,8 @@ body.dark header {background: rgba(18,18,18,0.95); box-shadow: 0 2px 20px rgba(0
 nav {display: flex; justify-content: space-between; align-items: center; padding: 1rem 0;}
 .logo {display: flex; align-items: center; gap: 0.8rem; font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 800; color: var(--dark); text-decoration: none;}
 body.dark .logo {color: var(--light);}
+.logo-img {width: 45px; height: 45px; border-radius: 50%; flex: none; box-shadow: 0 2px 8px rgba(0,0,0,.25);}
+.footer-logo {width: 150px; height: 150px; border-radius: 18px; margin-bottom: 1rem; display: block; box-shadow: 0 4px 16px rgba(0,0,0,.35);}
 .logo-icon {width: 45px; height: 45px; background: linear-gradient(135deg, var(--green), var(--red)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;}
 .nav-links {display: flex; gap: 2rem; list-style: none; align-items: center;}
 .nav-links a {color: var(--dark); text-decoration: none; font-weight: 500; transition: var(--transition); position: relative;}
@@ -200,7 +202,7 @@ body.dark footer {background: #0a0a0a;}
   <div class="container">
     <nav>
       <a href="#" class="logo">
-        <div class="logo-icon"><i class="fas fa-pizza-slice"></i></div>
+        <img class="logo-img" src="/favicon-192.png" width="45" height="45" alt="">
         <span>Włoska Robota</span>
       </a>
       <ul class="nav-links" id="navLinks">
@@ -550,6 +552,7 @@ body.dark footer {background: #0a0a0a;}
   <div class="container">
     <div class="footer-content">
       <div class="footer-section">
+        <img class="footer-logo" src="/logo.jpg" width="150" height="150" loading="lazy" alt="Włoska Robota — pizza neapolitańska">
         <h4>Włoska Robota</h4>
         <p>Autentyczna pizza prosto z Neapolu.</p>
         <div class="social-links">
@@ -972,6 +975,7 @@ body.dark #site-dish .sd-text{color:#bbb}
 #rabat-overlay .rb-del .rb-del-nums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 #rabat-overlay .rb-del .rb-del-nums label{font-size:12px;color:var(--rb-muted);margin:0}
 #rabat-overlay .rb-del input{margin-bottom:8px}
+#rabat-overlay .rb-logo{display:block;width:84px;height:84px;border-radius:50%;margin:0 auto 8px;box-shadow:0 2px 10px rgba(0,0,0,.3)}
 #rabat-overlay .rb-site-hide{display:flex;align-items:center;font-size:13px;color:var(--rb-muted);cursor:pointer}
 #rabat-overlay .rb-ev{padding:8px 0;border-top:1px solid var(--rb-border);font-size:13px}
 #rabat-overlay .rb-ev b{font-size:14px}
@@ -992,7 +996,7 @@ body.dark #site-dish .sd-text{color:#bbb}
     <!-- Logowanie / rejestracja -->
     <div id="rb-auth" hidden>
       <div class="rb-hello">
-        <div class="rb-emoji">🍕</div>
+        <img class="rb-logo" src="/favicon-192.png" width="84" height="84" alt="Włoska Robota">
         <h3>Twoje konto w Włoskiej Robocie</h3>
         <p>Zaloguj się, aby zobaczyć swoje kody rabatowe.</p>
       </div>
@@ -2292,7 +2296,9 @@ const SITE_CACHE_KEY = "wr_site_cfg_v1";
 // Domyślna lista dowozu (do ok. 10 km od lokalu, koszt 10 zł). Obowiązuje, dopóki admin nie zapisze własnej listy w panelu (Strona → Dowóz).
 const DELIVERY_DEFAULT = ["Głuponie", "Trzcianka", "Tomaszewo", "Michorzewo", "Kuślin", "Zygmuntowo", "Chraplewo", "Marszewo", "Michorzewko", "Wymysłowo", "Dąbrowa", "Łęczyce", "Dąbrowa Nowa", "Rudniki", "Wąsowo", "Jastrzębniki"]
   .map((name) => ({ name, fee: 10, min: null, freeFrom: null }));
-let siteCfg = { prices: {}, unavailable: {}, hidden: {}, products: [], notice: null, dish: null, delivery: { places: DELIVERY_DEFAULT }, googleReviewUrl: "" };
+// Link do formularza opinii w Google (domyślny; admin może go zmienić lub wyczyścić w panelu: Strona → Opinie w Google).
+const GOOGLE_REVIEW_DEFAULT = "https://g.page/r/CUq2_T6CQcy5EAE/review";
+let siteCfg = { prices: {}, unavailable: {}, hidden: {}, products: [], notice: null, dish: null, delivery: { places: DELIVERY_DEFAULT }, googleReviewUrl: GOOGLE_REVIEW_DEFAULT };
 const PROD_CATS = [["klasyczne", "Klasyczne"], ["miesne", "Mięsne"], ["vege", "Wege"], ["sosy", "Sosy"], ["makarony", "Makarony"], ["dodatki", "Dodatki"]];
 const MAX_PRODUCTS = 40;
 const menuEls = () => [...document.querySelectorAll("#menuGrid .menu-item")];
@@ -2306,7 +2312,7 @@ const tsMs = (t) => (t ? (t.toDate ? t.toDate().getTime() : (t.seconds ? t.secon
 
 function plainCfg(c) {
   const n = c.notice ? { ...c.notice, until: c.notice.until ? { seconds: Math.floor(tsMs(c.notice.until) / 1000) } : null } : null;
-  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, products: c.products || [], notice: n, dish: c.dish || null, delivery: c.delivery || null, googleReviewUrl: c.googleReviewUrl || "" };
+  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, products: c.products || [], notice: n, dish: c.dish || null, delivery: c.delivery || null, googleReviewUrl: typeof c.googleReviewUrl === "string" ? c.googleReviewUrl : null };
 }
 
 function renderDish() {
@@ -2383,7 +2389,7 @@ function applySite(cfg) {
     prices: (cfg && cfg.prices) || {}, unavailable: (cfg && cfg.unavailable) || {}, hidden: (cfg && cfg.hidden) || {},
     products: Array.isArray(cfg && cfg.products) ? cfg.products : [], notice: (cfg && cfg.notice) || null, dish: (cfg && cfg.dish) || null,
     delivery: { places: Array.isArray(cfg && cfg.delivery && cfg.delivery.places) ? cfg.delivery.places : DELIVERY_DEFAULT },
-    googleReviewUrl: (cfg && typeof cfg.googleReviewUrl === "string") ? cfg.googleReviewUrl : ""
+    googleReviewUrl: (cfg && typeof cfg.googleReviewUrl === "string") ? cfg.googleReviewUrl : GOOGLE_REVIEW_DEFAULT
   };
   renderProducts();
   menuEls().forEach((el) => {
