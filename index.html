@@ -1633,7 +1633,7 @@ async function handleUser(user) {
     }
     // konto obsługi nie jest klientem: bez profilu i bez kodu powitalnego
     if (!isStaff) gotWelcome = await ensureProfile(user);
-    if (!isStaff) { try { await ensureLoyalty(user); } catch (e) { console.warn("Karta lojalnościowa nie została założona (opublikuj nowe reguły):", e && (e.code || e.message)); } }
+    if (!isStaff && !isAdmin) { try { await ensureLoyalty(user); } catch (e) { console.warn("Karta lojalnościowa nie została założona (opublikuj nowe reguły):", e && (e.code || e.message)); } }
   } catch (err) {
     console.error("Rabat:", err);
     showOnly("auth");
@@ -1661,7 +1661,7 @@ async function handleUser(user) {
   $("rb-welcome").hidden = !gotWelcome;
   showOnly("user");
 
-  if (!isStaff) {
+  if (!isStaff && !isAdmin) {
     unsubs.push(onSnapshot(doc(db, "loyalty", user.uid),
       (d) => { myLoyal = d.exists() ? d.data() : null; renderLoyal(user); },
       (err) => { console.warn("Karta lojalnościowa niedostępna:", err.code); myLoyal = null; renderLoyal(user); }));
@@ -1715,7 +1715,7 @@ function stampDots(n) {
 }
 function renderLoyal(user) {
   const box = $("rb-loyal");
-  if (!myLoyal || isStaff) { box.hidden = true; return; }
+  if (!myLoyal || isStaff || isAdmin) { box.hidden = true; return; }
   const n = Math.min(LOYAL_GOAL, myLoyal.stamps || 0);
   const full = n >= LOYAL_GOAL;
   box.hidden = false;
@@ -1764,7 +1764,7 @@ function showSurveyDone(rating) {
 async function renderSurvey(user) {
   const box = $("rb-survey");
   const sec = lastVisitSec();
-  if (isStaff || !myLoyal || !sec || Date.now() - sec * 1000 > SURVEY_WINDOW_MS) { box.hidden = true; return; }
+  if (isStaff || isAdmin || !myLoyal || !sec || Date.now() - sec * 1000 > SURVEY_WINDOW_MS) { box.hidden = true; return; }
   if (svDoneFor === sec) { box.hidden = false; return; }          // właśnie oceniona w tej sesji
   if (sec !== svVisit) {
     svVisit = sec;
@@ -3022,7 +3022,7 @@ function clientRows(opts) {
   const now = Date.now();
   const me = (auth.currentUser || {}).uid;
   const staffIds = new Set(allStaff.map((s) => s.id));
-  let rows = allUsers.map((u) => { const L = lm.get(u.id); return { u, L, last: lastVisitMs(L), created: tsMs(u.createdAt) }; });
+  let rows = allUsers.filter((u) => u.id !== me).map((u) => { const L = lm.get(u.id); return { u, L, last: lastVisitMs(L), created: tsMs(u.createdAt) }; });
   if (q) rows = rows.filter((r) => normTxt(r.u.name).includes(q) || normTxt(r.u.email).includes(q));
   const label = (r) => normTxt(r.u.name || r.u.email);
   if (f === "full") rows = rows.filter((r) => r.L && (r.L.stamps || 0) >= LOYAL_GOAL).sort((a, b) => b.last - a.last);
@@ -3188,7 +3188,7 @@ function renderToday() {
   const soon = allCoupons.filter((c) => !c.used && c.expiresAt && tsMs(c.expiresAt) > now && tsMs(c.expiresAt) <= now + 7 * DAY).length;
   if (soon) alerts.push({ cls: "", text: "🎟 " + soon + (soon === 1 ? " kod wygasa" : " kodów wygasa") + " w ciągu 7 dni", go: "list", btn: "Zobacz" });
   if (loaded && loyalOk) {
-    const full = allLoyal.filter((l) => (l.stamps || 0) >= LOYAL_GOAL).length;
+    const full = allLoyal.filter((l) => l.id !== (auth.currentUser || {}).uid && (l.stamps || 0) >= LOYAL_GOAL).length;
     if (full) alerts.push({ cls: "", text: "🍕 " + full + (full === 1 ? " klient ma" : " klientów ma") + " pełną kartę (pizza gratis czeka)", go: "clients", filter: "full", btn: "Pokaż" });
     const inact = clientRows({ filter: "inactive", days: 30, noSearch: true }).rows.length;
     if (inact) alerts.push({ cls: "", text: "😴 " + inact + (inact === 1 ? " klient nie był" : " klientów nie było") + " w lokalu od 30+ dni", sub: "Możesz wysłać im kod „zapraszamy z powrotem”.", go: "clients", filter: "inactive", btn: "Pokaż" });
