@@ -809,6 +809,27 @@ body.dark #rabat-overlay{--rb-accent:#0fa65a;--rb-accent2:#0c8c4c;--rb-bg:#17171
 #rabat-overlay .rb-qr svg{display:block;width:100%;height:auto}
 #rabat-overlay #rb-admin .rb-tabs{gap:6px;flex-wrap:wrap}
 #rabat-overlay .rb-atab{flex:1 1 auto;padding:9px 8px;font-size:13px}
+/* pulpit „Dziś” i zakładka Klienci */
+#rabat-overlay #rb-stats{grid-template-columns:repeat(5,1fr);gap:6px}
+#rabat-overlay #rb-stats .rb-stat{padding:8px 2px}
+#rabat-overlay #rb-stats .rb-stat b{font-size:18px}
+#rabat-overlay #rb-stats .rb-stat span{font-size:10.5px}
+#rabat-overlay .rb-stat em{display:block;font-style:normal;font-size:11px;color:var(--rb-muted);margin-top:3px;line-height:1.25}
+#rabat-overlay .rb-alert{display:flex;gap:10px;align-items:center;justify-content:space-between;background:var(--rb-card);border:1px solid var(--rb-border);border-left:5px solid var(--rb-gold);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:14px}
+#rabat-overlay .rb-alert.bad{border-left-color:var(--rb-red)}
+#rabat-overlay .rb-alert.ok{border-left-color:var(--rb-accent)}
+#rabat-overlay .rb-alert>div{min-width:0}
+#rabat-overlay .rb-alert small{display:block;color:var(--rb-muted);font-size:12px;margin-top:2px;overflow-wrap:anywhere}
+#rabat-overlay .rb-alert .rb-btn{flex:none}
+#rabat-overlay .rb-quick{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#rabat-overlay .rb-quick .rb-btn{width:100%;display:block}
+#rabat-overlay .rb-kcl{background:var(--rb-card);border:1px solid var(--rb-border);border-radius:12px;padding:12px;margin-bottom:8px}
+#rabat-overlay .rb-kcl .rb-badge{margin:0 0 0 6px}
+#rabat-overlay .rb-kcl .rb-dup{margin-top:4px;font-size:12px;color:#b7791f}
+#rabat-overlay .rb-badge.gold{background:var(--rb-gold);color:#222}
+#rabat-overlay .rb-badge.warn{background:#b7791f}
+#rabat-overlay #rb-k-more{display:block}
+#rabat-overlay #rb-k-card .rb-res{margin-bottom:6px}
 
 /* ===== nowy wygląd: konto klienta ===== */
 @keyframes rbFade{from{opacity:0}to{opacity:1}}
@@ -889,7 +910,7 @@ body.dark #rabat-overlay{--rb-accent:#0fa65a;--rb-accent2:#0c8c4c;--rb-bg:#17171
 #rabat-overlay .rb-how{margin-top:6px;background:var(--rb-card);border-radius:14px;padding:12px 14px;font-size:13px;color:var(--rb-muted)}
 #rabat-overlay .rb-how b{color:var(--rb-text)}
 #rabat-overlay .rb-how ol{margin:6px 0 0 18px;padding:0}
-#rabat-overlay .rb-admin{margin-top:26px;padding-top:6px}
+#rabat-overlay .rb-admin{margin-top:4px;padding-top:6px;margin-bottom:20px;border-top:0}
 #rabat-overlay .rb-admin>h3{display:flex;align-items:center;gap:8px}
 @media (max-width:560px){
   #rabat-overlay{padding:0;background:var(--rb-bg)}
@@ -1087,7 +1108,9 @@ body.dark #site-dish .sd-text{color:#bbb}
         <h3 id="rb-admin-title">🛠 Panel administratora</h3>
         <div class="rb-stats" id="rb-stats"></div>
         <div class="rb-tabs">
-          <button type="button" class="rb-atab active" data-pane="check">Sprawdź kod</button>
+          <button type="button" class="rb-atab active" data-pane="today">Dziś</button>
+          <button type="button" class="rb-atab" data-pane="check">Sprawdź kod</button>
+          <button type="button" class="rb-atab" data-pane="clients">Klienci</button>
           <button type="button" class="rb-atab" data-pane="grant">Przyznaj</button>
           <button type="button" class="rb-atab" data-pane="builder">Rabaty</button>
           <button type="button" class="rb-atab" data-pane="list">Kody</button>
@@ -1096,8 +1119,66 @@ body.dark #site-dish .sd-text{color:#bbb}
           <button type="button" class="rb-atab" data-pane="report">Raport</button>
         </div>
 
+        <!-- Zakładka: Dziś (pulpit admina) -->
+        <div class="rb-pane" data-pane="today">
+          <div class="rb-row rb-td-head">
+            <div class="rb-meta" id="rb-td-when" style="align-self:center;flex:1"></div>
+            <button type="button" class="rb-btn secondary small" id="rb-td-refresh" style="margin-bottom:10px;flex:none">Odśwież</button>
+          </div>
+          <div class="rb-msg" id="rb-td-msg" role="status"></div>
+          <div class="rb-stats" id="rb-td-stats"></div>
+          <h4>Wymaga uwagi</h4>
+          <div id="rb-td-alerts"></div>
+          <h4>Szybkie skróty</h4>
+          <div class="rb-quick">
+            <button type="button" class="rb-btn secondary small" data-go="check">📷 Skanuj kod</button>
+            <button type="button" class="rb-btn secondary small" data-go="clients">👥 Klienci</button>
+            <button type="button" class="rb-btn secondary small" data-go="grant">🎟 Przyznaj kod</button>
+            <button type="button" class="rb-btn secondary small" data-go="site">📢 Komunikat i menu</button>
+            <button type="button" class="rb-btn secondary small" data-go="report">📊 Raport i opinie</button>
+            <button type="button" class="rb-btn secondary small" data-go="list">🗂 Wszystkie kody</button>
+          </div>
+          <h4>Ostatnie zdarzenia</h4>
+          <div id="rb-td-recent"></div>
+        </div>
+
+        <!-- Zakładka: Klienci (wyszukiwarka, karta klienta, „wróć do nas”, duplikaty) -->
+        <div class="rb-pane" data-pane="clients" hidden>
+          <div id="rb-k-card"></div>
+          <div class="rb-msg" id="rb-k-msg" role="status"></div>
+          <input id="rb-k-search" type="search" placeholder="Szukaj klienta: imię lub e-mail" autocomplete="off">
+          <select id="rb-k-filter" aria-label="Filtr klientów">
+            <option value="all">Wszyscy klienci</option>
+            <option value="full">🍕 Pełna karta (pizza gratis czeka)</option>
+            <option value="inactive">😴 Nieaktywni (dawno nie byli)</option>
+            <option value="never">🆕 Jeszcze nie byli w lokalu</option>
+            <option value="dups">👥 Możliwe duplikaty kont</option>
+          </select>
+          <select id="rb-k-days" aria-label="Nieaktywni od" hidden>
+            <option value="14">nie było od 14+ dni</option>
+            <option value="30" selected>nie było od 30+ dni</option>
+            <option value="60">nie było od 60+ dni</option>
+            <option value="90">nie było od 90+ dni</option>
+          </select>
+          <div class="rb-meta" id="rb-k-hint" style="margin:-2px 0 8px"></div>
+          <div class="rb-res" id="rb-k-wb" hidden>
+            <div><b>🎟 Kod „zapraszamy z powrotem”</b></div>
+            <div class="rb-meta" style="margin:2px 0 8px">Każdy klient dostanie własny, jednorazowy kod. Zobaczy go po wejściu w Konto na stronie. Strona nie wysyła powiadomień, więc daj znać np. SMS-em, na Messengerze lub Facebooku.</div>
+            <label for="rb-k-wb-desc">Opis rabatu</label>
+            <input id="rb-k-wb-desc" type="text" maxlength="120">
+            <div class="rb-row">
+              <div style="flex:1"><label for="rb-k-wb-days">Ważny (dni)</label><input id="rb-k-wb-days" type="number" min="1" max="365" value="14" inputmode="numeric"></div>
+              <div style="flex:1"><label for="rb-k-wb-prefix">Przedrostek kodu</label><input id="rb-k-wb-prefix" type="text" maxlength="12" value="WROC" autocapitalize="characters"></div>
+            </div>
+            <button type="button" class="rb-btn" id="rb-k-wb-all">Przyznaj wszystkim z listy</button>
+            <div class="rb-msg" id="rb-k-wb-msg" role="status"></div>
+          </div>
+          <div id="rb-k-list"></div>
+          <button type="button" class="rb-btn secondary small" id="rb-k-more" hidden style="margin:6px auto 0">Pokaż więcej</button>
+        </div>
+
         <!-- Zakładka: Sprawdź kod (skaner QR na telefonie + wpisanie ręczne) -->
-        <div class="rb-pane" data-pane="check">
+        <div class="rb-pane" data-pane="check" hidden>
           <button type="button" class="rb-btn" id="rb-s-start" hidden>📷 Skanuj kod QR</button>
           <div class="rb-meta" id="rb-s-hint" hidden></div>
           <div id="rb-s-box" hidden>
@@ -1483,6 +1564,8 @@ function cleanup() {
   unsubs.forEach((u) => { try { u(); } catch (_) {} });
   unsubs = [];
   isAdmin = false; isStaff = false; allStaff = []; staffFound = []; myLoyal = null; custView = null; myCoupons = []; allUsers = []; allCoupons = []; allTemplates = []; lastCheck = ""; svVisit = 0; svRating = 0; svDoneFor = 0;
+  allLoyal = []; dataAt = 0; reportEvents = []; feedbackItems = []; kShown = KPAGE;
+  if ($("rb-k-card")) $("rb-k-card").innerHTML = "";
 }
 function showOnly(which) {
   $("rb-loading").hidden = which !== "loading";
@@ -1569,9 +1652,12 @@ async function handleUser(user) {
   $("rb-avatar").textContent = (shownName.trim()[0] || "?").toUpperCase();
   $("rb-delete").hidden = isAdmin || isStaff;
   $("rb-admin").hidden = !(isAdmin || isStaff);
+  // panel obsługi/admina od razu pod nagłówkiem, bez przewijania przez własną kartę i kody
+  if (isAdmin || isStaff) { const top = document.querySelector("#rb-user .rb-top"); if (top) top.after($("rb-admin")); }
   $("rb-admin").classList.toggle("staffonly", !isAdmin && isStaff);
   $("rb-admin-title").textContent = isAdmin ? "🛠 Panel administratora" : "📷 Skanowanie rabatów";
   if (!isAdmin && isStaff) setAdminTab("check");
+  else if (isAdmin) setAdminTab("today");
   $("rb-welcome").hidden = !gotWelcome;
   showOnly("user");
 
@@ -1592,11 +1678,15 @@ async function handleUser(user) {
         .sort((a, b) => String(a.email).localeCompare(String(b.email)));
       renderUserSelect();
       renderStats();
+      renderToday();
+      renderClients();
     }, console.error));
     unsubs.push(onSnapshot(collection(db, "coupons"), (s) => {
       allCoupons = s.docs.map((d) => ({ id: d.id, ...d.data() }))
         .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
       renderAdminList();
+      renderToday();
+      renderClients();
     }, console.error));
     renderTemplates();
     unsubs.push(onSnapshot(collection(db, "deletionRequests"), (s) => {
@@ -2021,7 +2111,11 @@ function renderCustomer() {
     const last = L.lastStampAt && L.lastStampAt.toDate ? L.lastStampAt.toDate() : null;
     const next = last ? new Date(last.getTime() + STAMP_COOLDOWN_H * 3600000) : null;
     const cool = !isAdmin && next && next > new Date();
-    head = `<div class="rb-big">👤 ${esc(L.name || L.email)}</div><div class="rb-meta">${esc(L.email)} · pieczątek łącznie: ${L.total || 0} · darmowe pizze: ${L.rewards || 0}</div>
+    const lastMs = Math.max(tsMs(L.lastStampAt), tsMs(L.lastRewardAt));
+    const adminInfo = isAdmin
+      ? `<div class="rb-meta">Konto od: ${L.createdAt ? new Date(tsMs(L.createdAt)).toLocaleDateString("pl-PL") : "—"} · ostatnia wizyta: ${lastMs ? new Date(lastMs).toLocaleDateString("pl-PL") + " (" + agoText(lastMs) + ")" : "jeszcze nie było"}</div>`
+      : "";
+    head = `<div class="rb-big">👤 ${esc(L.name || L.email)}</div><div class="rb-meta">${esc(L.email)} · pieczątek łącznie: ${L.total || 0} · darmowe pizze: ${L.rewards || 0}</div>${adminInfo}
       <div class="rb-stamps">${stampDots(n)}</div>
       <div class="rb-loyal-txt"><b>${n} / ${LOYAL_GOAL}</b>${full ? " — 🎉 należy się pizza gratis (1 szt.)" : ""}</div>`;
     body = `<div class="rb-actions">
@@ -2038,13 +2132,14 @@ function renderCustomer() {
     <div class="rb-actions" style="margin-top:10px">
       ${isAdmin ? `<button type="button" class="rb-btn secondary small" data-act="grant">🎟 Przyznaj rabat</button>` : ""}
       ${withNext ? `<button type="button" class="rb-btn secondary small" data-act="next">Skanuj następny</button>` : ""}
+      ${target.id === "rb-k-card" ? `<button type="button" class="rb-btn secondary small" data-act="kclose">✕ Zamknij kartę</button>` : ""}
     </div></div>`;
 }
 async function customerClick(e) {
   const b = e.target.closest('[data-act="stamp"],[data-act="reward"],[data-act="unstamp"],[data-act="grant"],[data-act="cuse"]');
   if (!b || !custView) return;
   const act = b.dataset.act;
-  const msg = custView.target === $("rb-s-result") ? sMsg : cMsg;
+  const msg = custView.target === $("rb-s-result") ? sMsg : custView.target === $("rb-k-card") ? $("rb-k-msg") : cMsg;
   setMsg(msg, "");
   if (act === "grant") {
     setAdminTab("grant");
@@ -2094,10 +2189,20 @@ async function customerClick(e) {
       ? "Odmowa: za krótko od poprzedniej pieczątki (min. " + STAMP_COOLDOWN_H + " h) albo nowe reguły nie są opublikowane."
       : (err.code ? errText(err) : err.message), "err");
   }
-  try { custView.data = await loadCustomer(custView.uid); renderCustomer(); } catch (_) {}
+  try {
+    if (!custView) return;
+    custView.data = await loadCustomer(custView.uid);
+    renderCustomer();
+    syncLoyalCache(custView.uid, custView.data.loyal);
+  } catch (_) {}
 }
 $("rb-s-result").addEventListener("click", customerClick);
 $("rb-c-result").addEventListener("click", customerClick);
+$("rb-k-card").addEventListener("click", (e) => {
+  const x = e.target.closest('[data-act="kclose"]');
+  if (x) { custView = null; $("rb-k-card").innerHTML = ""; return; }
+  customerClick(e);
+});
 
 /* ---------- szablony rabatów ---------- */
 const DEFAULT_TPL = ["-10% na całe zamówienie", "-20% na pizzę", "-5 zł na zamówienie", "Darmowy sos do pizzy", "Darmowe frytki", "Darmowy dowóz"];
@@ -2713,9 +2818,11 @@ async function loadReport() {
     reportEvents = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     setMsg(rpMsg, "");
     renderReport();
+    return true;
   } catch (err) {
     console.error(err);
     setMsg(rpMsg, errText(err) + " (czy opublikowałeś nowe reguły?)", "err");
+    return false;
   }
 }
 function visibleEvents() {
@@ -2758,11 +2865,13 @@ async function loadFeedback() {
     const snap = await getDocs(query(collection(db, "feedback"), orderBy("createdAt", "desc"), limit(500)));
     feedbackItems = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     renderFeedback();
+    return true;
   } catch (err) {
     console.error(err);
     $("rb-fb-stats").innerHTML = "";
     $("rb-fb-bars").innerHTML = "";
     $("rb-fb-list").innerHTML = '<div class="rb-empty">Nie udało się wczytać opinii (' + esc(err.code || err.message) + ') — czy opublikowałeś nowe reguły?</div>';
+    return false;
   }
 }
 function renderFeedback() {
@@ -2806,6 +2915,309 @@ $("rb-rp-csv").addEventListener("click", () => {
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
 });
 
+/* ---------- pulpit „Dziś” i zakładka Klienci (tylko admin) ---------- */
+const KPAGE = 30;
+const DAY = 86400000;
+let allLoyal = [];
+let loyalOk = false;
+let dataAt = 0;
+let dataBusy = null;
+let kShown = KPAGE;
+let kRows = [];
+const tdMsg = $("rb-td-msg");
+
+const dayStart = (back) => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - back); return d.getTime(); };
+function agoText(ms) {
+  if (!ms) return "nigdy";
+  const d = Math.floor((Date.now() - ms) / DAY);
+  if (d <= 0) return "dziś";
+  if (d === 1) return "wczoraj";
+  if (d < 60) return d + " dni temu";
+  return Math.floor(d / 30) + " mies. temu";
+}
+const pl1 = (n) => (Math.round(n * 10) / 10).toString().replace(".", ",");
+
+async function loadLoyaltyAll() {
+  try {
+    const s = await getDocs(collection(db, "loyalty"));
+    allLoyal = s.docs.map((d) => ({ id: d.id, ...d.data() }));
+    loyalOk = true;
+    return true;
+  } catch (err) {
+    console.warn("Karty lojalnościowe niedostępne (opublikuj nowe reguły):", err.code || err.message);
+    loyalOk = false;
+    return false;
+  }
+}
+function ensureData(force) {
+  if (!isAdmin) return Promise.resolve();
+  if (dataBusy) return dataBusy;
+  if (!force && dataAt && Date.now() - dataAt < 60000) { renderToday(); renderClients(); return Promise.resolve(); }
+  setMsg(tdMsg, "Wczytuję dane…");
+  dataBusy = (async () => {
+    const res = await Promise.all([loadReport(), loadFeedback(), loadLoyaltyAll()]);
+    if (!isAdmin) { reportEvents = []; feedbackItems = []; allLoyal = []; return; }
+    dataAt = Date.now();
+    const ok = res.every(Boolean);
+    setMsg(tdMsg, ok ? "" : "Część danych się nie wczytała (czy opublikowałeś nowe reguły?).", ok ? "" : "err");
+    renderToday();
+    renderClients();
+  })().finally(() => { dataBusy = null; });
+  return dataBusy;
+}
+function syncLoyalCache(uid, L) {
+  if (!isAdmin || !L) return;
+  const row = { id: uid, ...L };
+  const i = allLoyal.findIndex((x) => x.id === uid);
+  if (i >= 0) allLoyal[i] = row; else allLoyal.push(row);
+  renderClients();
+  renderToday();
+}
+
+/* wykrywanie duplikatów kont: ten sam adres Gmail z kropkami lub „+coś”, albo to samo imię i nazwisko */
+function emailKey(e) {
+  const s = String(e || "").trim().toLowerCase();
+  const at = s.lastIndexOf("@");
+  if (at < 1) return s;
+  let loc = s.slice(0, at).split("+")[0];
+  let dom = s.slice(at + 1);
+  if (dom === "googlemail.com") dom = "gmail.com";
+  if (dom === "gmail.com") loc = loc.replace(/\./g, "");
+  return loc + "@" + dom;
+}
+function nameKey(n) {
+  const k = normTxt(n);
+  return k.length >= 5 && k.split(" ").length >= 2 ? k : "";
+}
+function dupInfo() {
+  const byE = new Map(), byN = new Map();
+  allUsers.forEach((u) => {
+    const ek = emailKey(u.email);
+    if (ek) { if (!byE.has(ek)) byE.set(ek, []); byE.get(ek).push(u); }
+    const nk = nameKey(u.name);
+    if (nk) { if (!byN.has(nk)) byN.set(nk, []); byN.get(nk).push(u); }
+  });
+  const info = new Map();
+  let groups = 0;
+  byE.forEach((arr, key) => {
+    if (arr.length < 2) return;
+    groups++;
+    arr.forEach((u) => info.set(u.id, { kind: "email", key, others: arr.filter((x) => x.id !== u.id) }));
+  });
+  byN.forEach((arr, key) => {
+    if (arr.length < 2 || arr.every((u) => info.has(u.id))) return;
+    groups++;
+    arr.forEach((u) => { if (!info.has(u.id)) info.set(u.id, { kind: "name", key, others: arr.filter((x) => x.id !== u.id) }); });
+  });
+  return { info, groups };
+}
+const lastVisitMs = (L) => (L ? Math.max(tsMs(L.lastStampAt), tsMs(L.lastRewardAt)) : 0);
+
+function clientRows(opts) {
+  const f = (opts && opts.filter) || $("rb-k-filter").value;
+  const days = (opts && opts.days) || Number($("rb-k-days").value) || 30;
+  const q = opts && opts.noSearch ? "" : normTxt($("rb-k-search").value);
+  const lm = new Map(allLoyal.map((l) => [l.id, l]));
+  const dups = dupInfo();
+  const now = Date.now();
+  const me = (auth.currentUser || {}).uid;
+  const staffIds = new Set(allStaff.map((s) => s.id));
+  let rows = allUsers.map((u) => { const L = lm.get(u.id); return { u, L, last: lastVisitMs(L), created: tsMs(u.createdAt) }; });
+  if (q) rows = rows.filter((r) => normTxt(r.u.name).includes(q) || normTxt(r.u.email).includes(q));
+  const label = (r) => normTxt(r.u.name || r.u.email);
+  if (f === "full") rows = rows.filter((r) => r.L && (r.L.stamps || 0) >= LOYAL_GOAL).sort((a, b) => b.last - a.last);
+  else if (f === "inactive") rows = rows.filter((r) => r.u.id !== me && !staffIds.has(r.u.id) && r.last > 0 && now - r.last >= days * DAY).sort((a, b) => a.last - b.last);
+  else if (f === "never") rows = rows.filter((r) => r.u.id !== me && !staffIds.has(r.u.id) && !(r.L && ((r.L.total || 0) > 0 || (r.L.rewards || 0) > 0)) && (!r.created || now - r.created >= 2 * DAY)).sort((a, b) => a.created - b.created);
+  else if (f === "dups") rows = rows.filter((r) => dups.info.has(r.u.id)).sort((a, b) => dups.info.get(a.u.id).key.localeCompare(dups.info.get(b.u.id).key) || label(a).localeCompare(label(b)));
+  else rows = rows.sort((a, b) => label(a).localeCompare(label(b)));
+  return { rows, dups };
+}
+
+const DEF_WB = { inactive: "-10% na zamówienie (zapraszamy z powrotem!)", never: "-10% na pierwsze zamówienie" };
+function syncKFilterUI() {
+  const f = $("rb-k-filter").value;
+  $("rb-k-days").hidden = f !== "inactive";
+  const d = $("rb-k-wb-desc");
+  if (DEF_WB[f] && (!d.value || Object.values(DEF_WB).includes(d.value))) d.value = DEF_WB[f];
+}
+const K_HINT = {
+  all: "",
+  full: "Mają komplet pieczątek. Pizza gratis czeka na wydanie.",
+  inactive: "Byli w lokalu (mają pieczątkę), ale od dawna nie wrócili.",
+  never: "Konto starsze niż 2 dni, ale jeszcze bez żadnej pieczątki.",
+  dups: "Konta z tym samym adresem e-mail (kropki i „+coś” w Gmailu to ten sam adres) albo z tym samym imieniem i nazwiskiem. To tylko podejrzenie, więc sprawdź, zanim cokolwiek zrobisz."
+};
+function renderClients() {
+  if (!isAdmin) return;
+  const list = $("rb-k-list");
+  if (!list) return;
+  const f = $("rb-k-filter").value;
+  const needsLoyal = f === "full" || f === "inactive" || f === "never";
+  if (needsLoyal && !loyalOk) {
+    kRows = [];
+    $("rb-k-wb").hidden = true;
+    $("rb-k-more").hidden = true;
+    $("rb-k-hint").textContent = "";
+    list.innerHTML = '<div class="rb-empty">' + (dataAt ? "Nie udało się wczytać kart lojalnościowych. Kliknij „Odśwież” w zakładce Dziś (czy opublikowałeś nowe reguły?)." : "Wczytuję dane…") + "</div>";
+    return;
+  }
+  const { rows, dups } = clientRows();
+  kRows = rows;
+  $("rb-k-hint").textContent = (K_HINT[f] ? K_HINT[f] + " " : "") + "Znaleziono: " + rows.length + ".";
+  const wb = f === "inactive" || f === "never";
+  $("rb-k-wb").hidden = !wb;
+  if (wb) $("rb-k-wb-all").textContent = "Przyznaj wszystkim z listy (" + rows.length + ")";
+  $("rb-k-wb-all").disabled = !rows.length;
+  const shown = rows.slice(0, kShown);
+  $("rb-k-more").hidden = rows.length <= kShown;
+  if (!rows.length) { list.innerHTML = '<div class="rb-empty">Brak klientów w tym widoku.</div>'; return; }
+  const now = Date.now();
+  list.innerHTML = shown.map((r) => {
+    const { u, L } = r;
+    const n = L ? Math.min(LOYAL_GOAL, L.stamps || 0) : 0;
+    const badges = [];
+    if (L && (L.stamps || 0) >= LOYAL_GOAL) badges.push('<span class="rb-badge gold">Pełna karta</span>');
+    if (r.created && now - r.created < 7 * DAY) badges.push('<span class="rb-badge">Nowy</span>');
+    const di = dups.info.get(u.id);
+    if (f === "dups") {
+      const w = allCoupons.find((c) => c.id === "welcome_" + u.id);
+      if (w) badges.push(w.used ? '<span class="rb-badge warn">kod powitalny użyty</span>' : '<span class="rb-badge bad">kod powitalny nieużyty</span>');
+    }
+    const stats = loyalOk ? "🍕 " + n + "/" + LOYAL_GOAL + " · wizyt: " + (L ? L.total || 0 : 0) + " · ostatnio: " + (r.last ? agoText(r.last) : "jeszcze nie było") : "";
+    const dupLine = f === "dups" && di
+      ? '<div class="rb-dup">⚠️ ' + (di.kind === "email" ? "Ten sam adres e-mail co: " : "To samo imię i nazwisko co: ") + di.others.map((o) => esc(o.email)).join(", ") + "</div>" : "";
+    return `<div class="rb-kcl"><div><b>${esc(u.name || "(bez imienia)")}</b>${badges.join("")}</div>
+      <div class="rb-meta">${esc(u.email || "")}</div>
+      ${stats ? `<div class="rb-meta">${stats}</div>` : ""}${dupLine}
+      <div class="rb-actions"><button type="button" class="rb-btn small" data-kopen="${esc(u.id)}">Karta klienta</button>
+      ${wb ? `<button type="button" class="rb-btn secondary small" data-kwb="${esc(u.id)}">🎟 Wyślij kod</button>` : ""}</div></div>`;
+  }).join("");
+}
+
+async function grantWinback(users) {
+  const wm = $("rb-k-wb-msg");
+  setMsg(wm, "");
+  const description = $("rb-k-wb-desc").value.trim();
+  const days = Math.floor(Number($("rb-k-wb-days").value));
+  const prefix = $("rb-k-wb-prefix").value.trim().toUpperCase();
+  if (!description) { setMsg(wm, "Wpisz opis rabatu.", "err"); return; }
+  if (!(days >= 1 && days <= 365)) { setMsg(wm, "Ważność: od 1 do 365 dni.", "err"); return; }
+  if (prefix && !/^[A-Z0-9-]{2,12}$/.test(prefix)) { setMsg(wm, "Przedrostek: 2–12 znaków (litery, cyfry, myślnik).", "err"); return; }
+  const target = users.filter((u) => !allCoupons.some((c) => c.uid === u.id && c.description === description && !couponState(c).off));
+  const skipped = users.length - target.length;
+  if (!target.length) { setMsg(wm, "Każdy z listy ma już aktywny kod o takim opisie.", "err"); return; }
+  if (target.length > 1 && !confirm("Przyznać kod „" + description + "” (" + target.length + " os.), ważny " + days + " dni?")) return;
+  const end = new Date();
+  end.setDate(end.getDate() + days);
+  end.setHours(23, 59, 59, 0);
+  const expiresAt = Timestamp.fromDate(end);
+  const taken = new Set(allCoupons.map((c) => c.code));
+  const btns = [$("rb-k-wb-all"), ...document.querySelectorAll("#rb-k-list [data-kwb]")];
+  btns.forEach((b) => { b.disabled = true; });
+  try {
+    for (let i = 0; i < target.length; i += 400) {
+      const batch = writeBatch(db);
+      target.slice(i, i + 400).forEach((u) => {
+        let code;
+        do { code = genCode(prefix); } while (taken.has(code));
+        taken.add(code);
+        batch.set(doc(collection(db, "coupons")), { uid: u.id, userEmail: u.email || "", code, description, expiresAt, used: false, createdAt: serverTimestamp() });
+      });
+      await batch.commit();
+    }
+    setMsg(wm, "Przyznano " + target.length + (target.length === 1 ? " kod" : " kodów") + (skipped ? " (pominięto " + skipped + ": już mają taki kod)" : "") + ". Klienci zobaczą je w Koncie na stronie.", "ok");
+  } catch (err) {
+    console.error(err);
+    setMsg(wm, errText(err), "err");
+  }
+  btns.forEach((b) => { b.disabled = false; });
+  renderClients();
+}
+
+$("rb-k-search").addEventListener("input", () => { kShown = KPAGE; renderClients(); });
+$("rb-k-filter").addEventListener("change", () => { kShown = KPAGE; syncKFilterUI(); renderClients(); });
+$("rb-k-days").addEventListener("change", () => { kShown = KPAGE; renderClients(); });
+$("rb-k-more").addEventListener("click", () => { kShown += KPAGE; renderClients(); });
+$("rb-k-wb-all").addEventListener("click", () => grantWinback(kRows.map((r) => r.u)));
+$("rb-k-list").addEventListener("click", async (e) => {
+  const open = e.target.closest("[data-kopen]");
+  const wb = e.target.closest("[data-kwb]");
+  if (open) {
+    setMsg($("rb-k-msg"), "");
+    const card = $("rb-k-card");
+    await showCustomer(open.dataset.kopen, card, false);
+    if (card.scrollIntoView) card.scrollIntoView({ block: "start", behavior: "smooth" });
+    if (custView && custView.data) syncLoyalCache(custView.uid, custView.data.loyal);
+  } else if (wb) {
+    const r = kRows.find((x) => x.u.id === wb.dataset.kwb);
+    if (r) grantWinback([r.u]);
+  }
+});
+syncKFilterUI();
+
+function renderToday() {
+  if (!isAdmin) return;
+  const box = $("rb-td-stats");
+  if (!box) return;
+  const loaded = dataAt > 0;
+  const now = Date.now();
+  const t0 = dayStart(0), y0 = dayStart(1);
+  const evCnt = (type, from, to) => reportEvents.filter((e) => e.type === type && tsMs(e.at) >= from && tsMs(e.at) < to).length;
+  const usCnt = (from, to) => allUsers.filter((u) => { const m = tsMs(u.createdAt); return m >= from && m < to; }).length;
+  const d30 = dayStart(29);
+  const rows = [
+    ["pieczątek dziś", evCnt("stamp", t0, now + DAY), evCnt("stamp", y0, t0), evCnt("stamp", d30, now + DAY) / 30],
+    ["pizz gratis dziś", evCnt("reward", t0, now + DAY), evCnt("reward", y0, t0), evCnt("reward", d30, now + DAY) / 30],
+    ["kodów dziś", evCnt("coupon", t0, now + DAY), evCnt("coupon", y0, t0), evCnt("coupon", d30, now + DAY) / 30],
+    ["nowych klientów", usCnt(t0, now + DAY), usCnt(y0, t0), usCnt(d30, now + DAY) / 30]
+  ];
+  box.innerHTML = rows.map(([label, n, y, avg]) =>
+    `<div class="rb-stat"><b>${loaded || label === "nowych klientów" ? n : "…"}</b><span>${label}</span><em>${loaded || label === "nowych klientów" ? "wczoraj " + y + " · śr. " + pl1(avg) : "wczytuję…"}</em></div>`).join("");
+  $("rb-td-when").textContent = loaded
+    ? "Stan na " + new Date(dataAt).toLocaleString("pl-PL", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })
+    : "Wczytuję…";
+
+  const alerts = [];
+  const lows = feedbackItems.filter((f) => Number.isInteger(f.rating) && f.rating <= 3 && tsMs(f.createdAt) >= now - 7 * DAY)
+    .sort((a, b) => tsMs(b.createdAt) - tsMs(a.createdAt));
+  if (lows.length) {
+    const f = lows[0];
+    alerts.push({ cls: "bad", text: "⭐ " + lows.length + (lows.length === 1 ? " niska ocena" : " niskich ocen") + " (1–3 ★) z ostatnich 7 dni",
+      sub: starStr(f.rating) + " " + (f.name || "Klient") + (f.comment ? ": „" + (f.comment.length > 90 ? f.comment.slice(0, 90) + "…" : f.comment) + "”" : ""), go: "report", btn: "Zobacz" });
+  }
+  const soon = allCoupons.filter((c) => !c.used && c.expiresAt && tsMs(c.expiresAt) > now && tsMs(c.expiresAt) <= now + 7 * DAY).length;
+  if (soon) alerts.push({ cls: "", text: "🎟 " + soon + (soon === 1 ? " kod wygasa" : " kodów wygasa") + " w ciągu 7 dni", go: "list", btn: "Zobacz" });
+  if (loaded && loyalOk) {
+    const full = allLoyal.filter((l) => (l.stamps || 0) >= LOYAL_GOAL).length;
+    if (full) alerts.push({ cls: "", text: "🍕 " + full + (full === 1 ? " klient ma" : " klientów ma") + " pełną kartę (pizza gratis czeka)", go: "clients", filter: "full", btn: "Pokaż" });
+    const inact = clientRows({ filter: "inactive", days: 30, noSearch: true }).rows.length;
+    if (inact) alerts.push({ cls: "", text: "😴 " + inact + (inact === 1 ? " klient nie był" : " klientów nie było") + " w lokalu od 30+ dni", sub: "Możesz wysłać im kod „zapraszamy z powrotem”.", go: "clients", filter: "inactive", btn: "Pokaż" });
+  }
+  const dg = dupInfo();
+  if (dg.groups) alerts.push({ cls: "bad", text: "👥 Możliwe duplikaty kont: " + dg.info.size + " kont w " + dg.groups + (dg.groups === 1 ? " grupie" : " grupach"), sub: "Ten sam adres e-mail (aliasy) lub to samo imię i nazwisko.", go: "clients", filter: "dups", btn: "Sprawdź" });
+  $("rb-td-alerts").innerHTML = alerts.length
+    ? alerts.map((a) => `<div class="rb-alert ${a.cls}"><div>${esc(a.text)}${a.sub ? `<small>${esc(a.sub)}</small>` : ""}</div><button type="button" class="rb-btn secondary small" data-go="${a.go}"${a.filter ? ` data-filter="${a.filter}"` : ""}>${a.btn}</button></div>`).join("")
+    : (loaded ? '<div class="rb-alert ok"><div>✅ Nic pilnego. Wszystko w porządku.</div></div>' : '<div class="rb-empty">Wczytuję…</div>');
+
+  const recent = reportEvents.slice().sort((a, b) => tsMs(b.at) - tsMs(a.at)).slice(0, 6);
+  $("rb-td-recent").innerHTML = recent.length
+    ? recent.map((e) => `<div class="rb-ev"><b>${esc(EV_LABEL[e.type] || e.type)}</b> — ${esc(e.customerName || "")}
+        <div class="rb-meta">${fmtDateTime(e.at)} · ${esc(e.byName || "")}${e.detail ? " · " + esc(e.detail) : ""}</div></div>`).join("")
+    : '<div class="rb-empty">' + (loaded ? "Brak zdarzeń." : "Wczytuję…") + "</div>";
+}
+$("rb-td-refresh").addEventListener("click", () => ensureData(true));
+document.querySelector('#rb-admin .rb-pane[data-pane="today"]').addEventListener("click", (e) => {
+  const b = e.target.closest("[data-go]");
+  if (!b) return;
+  if (b.dataset.filter) {
+    $("rb-k-filter").value = b.dataset.filter;
+    $("rb-k-search").value = "";
+    kShown = KPAGE;
+    syncKFilterUI();
+  }
+  setAdminTab(b.dataset.go);
+});
+
 /* ---------- zakładki panelu admina ---------- */
 const cMsg = $("rb-c-msg");
 const sMsg = $("rb-s-msg");
@@ -2815,6 +3227,8 @@ function setAdminTab(name) {
   if (name !== "check") stopScanner();
   if (name === "site") loadSite().then(fillSiteForm);
   if (name === "report") { loadReport(); loadFeedback(); }
+  if (name === "today" || name === "clients") ensureData(false);
+  if (name === "clients") renderClients();
 }
 document.querySelectorAll("#rb-admin .rb-atab").forEach((b) => b.addEventListener("click", () => setAdminTab(b.dataset.pane)));
 
