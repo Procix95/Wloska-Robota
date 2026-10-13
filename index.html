@@ -814,6 +814,8 @@ body.dark #rabat-overlay{--rb-accent:#0fa65a;--rb-accent2:#0c8c4c;--rb-bg:#17171
 #rabat-overlay #rb-stats .rb-stat{padding:8px 2px}
 #rabat-overlay #rb-stats .rb-stat b{font-size:18px}
 #rabat-overlay #rb-stats .rb-stat span{font-size:10.5px}
+#rabat-overlay .rb-promo{background:var(--rb-card);border:1px dashed var(--rb-accent);border-radius:14px;padding:12px 14px 2px;margin-bottom:14px}
+#rabat-overlay .rb-promo label{margin:0 0 6px;font-weight:600;color:var(--rb-text)}
 #rabat-overlay .rb-stat em{display:block;font-style:normal;font-size:11px;color:var(--rb-muted);margin-top:3px;line-height:1.25}
 #rabat-overlay .rb-alert{display:flex;gap:10px;align-items:center;justify-content:space-between;background:var(--rb-card);border:1px solid var(--rb-border);border-left:5px solid var(--rb-gold);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:14px}
 #rabat-overlay .rb-alert.bad{border-left-color:var(--rb-red)}
@@ -1096,6 +1098,14 @@ body.dark #site-dish .sd-text{color:#bbb}
         </div>
       </div>
       <div class="rb-sec"><h3>Twoje kody rabatowe</h3><span id="rb-count"></span></div>
+      <div class="rb-promo" id="rb-promo">
+        <label for="rb-promo-in">Masz kod promocyjny?</label>
+        <div class="rb-row">
+          <input id="rb-promo-in" type="text" maxlength="20" placeholder="np. WLOSKAROBOTA5" autocapitalize="characters" autocomplete="off" spellcheck="false">
+          <button type="button" class="rb-btn small" id="rb-promo-btn" style="margin-bottom:10px">Odbierz</button>
+        </div>
+        <div class="rb-msg" id="rb-promo-msg" role="status"></div>
+      </div>
       <div id="rb-my-list"></div>
       <div class="rb-how"><b>Jak użyć kodu?</b><ol><li>Wybierz kod, który chcesz wykorzystać.</li><li>Pokaż jego kod QR (lub podaj kod) przy zamówieniu.</li><li>My go skanujemy — rabat się nalicza, a kod gaśnie.</li></ol></div>
 
@@ -1140,7 +1150,7 @@ body.dark #site-dish .sd-text{color:#bbb}
             <button type="button" class="rb-btn secondary small" data-go="grant">🎟 Przyznaj kod</button>
             <button type="button" class="rb-btn secondary small" data-go="site">📢 Komunikat i menu</button>
             <button type="button" class="rb-btn secondary small" data-go="report">📊 Raport i opinie</button>
-            <button type="button" class="rb-btn secondary small" data-go="list">🗂 Wszystkie kody</button>
+            <button type="button" class="rb-btn secondary small" data-go="list" data-lfilter="all">🗂 Wszystkie kody</button>
           </div>
           <h4>Ostatnie zdarzenia</h4>
           <div id="rb-td-recent"></div>
@@ -1221,6 +1231,24 @@ body.dark #site-dish .sd-text{color:#bbb}
           <input id="rb-a-exp" type="date">
           <button type="button" class="rb-btn" id="rb-a-add">Przyznaj kod</button>
           <div class="rb-msg" id="rb-a-msg" role="status"></div>
+
+          <h4>Kod promocyjny dla wszystkich</h4>
+          <div class="rb-meta" style="margin:-4px 0 10px">Jak w sklepach internetowych: klient wpisuje kod w swoim Koncie i dostaje rabat. Każdy klient może użyć danego kodu tylko raz. Po dacie ważności nie da się go już wpisać, a odebrany rabat przestaje działać tego samego dnia.</div>
+          <label for="rb-p-code">Kod (3–20 liter i cyfr)</label>
+          <div class="rb-row">
+            <input id="rb-p-code" type="text" maxlength="20" placeholder="np. WLOSKAROBOTA5" autocapitalize="characters" autocomplete="off" spellcheck="false">
+            <button type="button" class="rb-btn secondary small" id="rb-p-gen" style="margin-bottom:10px">Losuj</button>
+          </div>
+          <label for="rb-p-tpl">Gotowy rabat (własne oznaczone ★)</label>
+          <select id="rb-p-tpl"></select>
+          <label for="rb-p-desc">Opis rabatu (widzi klient)</label>
+          <input id="rb-p-desc" type="text" maxlength="120" placeholder="np. -5 zł na zamówienie">
+          <label for="rb-p-exp">Ważny do (puste = bez terminu)</label>
+          <input id="rb-p-exp" type="date">
+          <button type="button" class="rb-btn" id="rb-p-add">Utwórz kod promocyjny</button>
+          <div class="rb-msg" id="rb-p-msg" role="status"></div>
+          <h4>Twoje kody promocyjne</h4>
+          <div id="rb-p-list"></div>
         </div>
 
         <!-- Zakładka: własne rabaty (kreator) -->
@@ -1357,6 +1385,15 @@ body.dark #site-dish .sd-text{color:#bbb}
         <!-- Zakładka: lista wszystkich kodów -->
         <div class="rb-pane" data-pane="list" hidden>
           <h4>Wszystkie przyznane kody</h4>
+          <input id="rb-l-search" type="search" placeholder="Szukaj: kod lub e-mail klienta" autocomplete="off">
+          <select id="rb-l-filter" aria-label="Filtr kodów">
+            <option value="all">Wszystkie kody</option>
+            <option value="active">Aktywne</option>
+            <option value="soon">⏳ Wygasają w ciągu 7 dni</option>
+            <option value="used">Wykorzystane</option>
+            <option value="expired">Wygasłe</option>
+          </select>
+          <div class="rb-meta" id="rb-l-count" style="margin:-2px 0 8px"></div>
           <div id="rb-a-list"></div>
         </div>
       </div>
@@ -1601,6 +1638,7 @@ let myCoupons = [];
 let allUsers = [];
 let allCoupons = [];
 let allTemplates = [];
+let allPromos = [];
 let selTpl = {};
 let lastCheck = "";
 
@@ -1609,7 +1647,7 @@ function cleanup() {
   unsubs.forEach((u) => { try { u(); } catch (_) {} });
   unsubs = [];
   isAdmin = false; isStaff = false; allStaff = []; staffFound = []; myLoyal = null; custView = null; myCoupons = []; allUsers = []; allCoupons = []; allTemplates = []; lastCheck = ""; svVisit = 0; svRating = 0; svDoneFor = 0;
-  allLoyal = []; dataAt = 0; welcomeMigrated = false; reportEvents = []; feedbackItems = []; kShown = KPAGE;
+  allLoyal = []; allPromos = []; dataAt = 0; welcomeMigrated = false; reportEvents = []; feedbackItems = []; kShown = KPAGE;
   if ($("rb-k-card")) $("rb-k-card").innerHTML = "";
 }
 function showOnly(which) {
@@ -1741,6 +1779,7 @@ async function handleUser(user) {
       allCoupons = s.docs.map((d) => ({ id: d.id, ...d.data() }))
         .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
       renderAdminList();
+      renderPromos();
       renderToday();
       renderClients();
       migrateWelcome();
@@ -1754,6 +1793,11 @@ async function handleUser(user) {
         .sort((a, b) => String(a.email).localeCompare(String(b.email)));
       renderStaff();
     }, (err) => { console.warn("Lista obsługi niedostępna (opublikuj nowe reguły):", err.code); allStaff = []; renderStaff(); }));
+    unsubs.push(onSnapshot(collection(db, "promoCodes"), (s) => {
+      allPromos = s.docs.map((d) => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+      renderPromos();
+    }, (err) => { console.warn("Kody promocyjne niedostępne (opublikuj nowe reguły):", err.code); allPromos = []; renderPromos(); }));
     unsubs.push(onSnapshot(collection(db, "templates"), (s) => {
       allTemplates = s.docs.map((d) => ({ id: d.id, ...d.data() }))
         .sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
@@ -1936,6 +1980,97 @@ $("rb-my-list").addEventListener("click", async (e) => {
   setTimeout(() => { if (b.isConnected) b.textContent = "Kopiuj"; }, 2000);
 });
 
+/* ---------- kody promocyjne: klient wpisuje kod, admin tworzy ---------- */
+/* kolekcja promoCodes/{KOD}: { code, description, expiresAt|null, active, createdAt }
+   Odebrany rabat to zwykły kod w coupons/promo_{KOD}_{uid} (jeden na konto), z unikalnym kodem do skanowania: KOD-XXXXXX */
+const promoMsg = $("rb-promo-msg");
+$("rb-promo-btn").addEventListener("click", async () => {
+  setMsg(promoMsg, "");
+  const user = auth.currentUser;
+  if (!user) return;
+  const code = $("rb-promo-in").value.replace(/\s+/g, "").toUpperCase();
+  if (!/^[A-Z0-9]{3,20}$/.test(code)) { setMsg(promoMsg, "Wpisz kod: 3–20 liter lub cyfr.", "err"); return; }
+  const id = "promo_" + code + "_" + user.uid;
+  if (myCoupons.some((c) => c.id === id)) { setMsg(promoMsg, "Ten kod już wykorzystałeś na swoim koncie.", "err"); return; }
+  const btn = $("rb-promo-btn");
+  btn.disabled = true;
+  try {
+    const snap = await withTimeout(getDoc(doc(db, "promoCodes", code)));
+    const p = snap.exists() ? snap.data() : null;
+    if (!p || p.active !== true) { setMsg(promoMsg, "Nieprawidłowy kod.", "err"); return; }
+    if (p.expiresAt && tsMs(p.expiresAt) < Date.now()) { setMsg(promoMsg, "Ten kod już wygasł.", "err"); return; }
+    await withTimeout(setDoc(doc(db, "coupons", id), {
+      uid: user.uid, userEmail: user.email || "", code: code + "-" + user.uid.slice(0, 6).toUpperCase(),
+      description: p.description, expiresAt: p.expiresAt || null, used: false, createdAt: serverTimestamp(), promo: code
+    }));
+    $("rb-promo-in").value = "";
+    setMsg(promoMsg, "Gotowe! Rabat „" + p.description + "” dodany do Twoich kodów poniżej.", "ok");
+  } catch (err) {
+    console.error("Kod promocyjny:", err);
+    setMsg(promoMsg, err.code === "permission-denied" ? "Nie udało się. Kod mógł wygasnąć albo został już wykorzystany." : errText(err), "err");
+  } finally { btn.disabled = false; }
+});
+$("rb-promo-in").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); $("rb-promo-btn").click(); } });
+
+const pMsg = $("rb-p-msg");
+$("rb-p-gen").addEventListener("click", () => { $("rb-p-code").value = "WR" + genCode(); });
+$("rb-p-tpl").addEventListener("change", () => {
+  const v = $("rb-p-tpl").value;
+  if (!v) return;
+  if (v[0] === "d") $("rb-p-desc").value = DEFAULT_TPL[Number(v.slice(2))] || "";
+  else { const t = allTemplates.find((x) => x.id === v.slice(2)); if (t) $("rb-p-desc").value = t.text || ""; }
+});
+$("rb-p-add").addEventListener("click", async () => {
+  setMsg(pMsg, "");
+  const code = $("rb-p-code").value.replace(/\s+/g, "").toUpperCase();
+  const description = $("rb-p-desc").value.trim();
+  const exp = $("rb-p-exp").value;
+  if (!/^[A-Z0-9]{3,20}$/.test(code)) { setMsg(pMsg, "Kod: 3–20 liter i cyfr (bez spacji i polskich znaków).", "err"); return; }
+  if (!description) { setMsg(pMsg, "Wpisz opis rabatu, który zobaczy klient.", "err"); return; }
+  if (allPromos.some((p) => p.id === code)) { setMsg(pMsg, "Taki kod promocyjny już istnieje.", "err"); return; }
+  const expiresAt = exp ? Timestamp.fromDate(new Date(exp + "T23:59:59")) : null;
+  if (expiresAt && tsMs(expiresAt) < Date.now()) { setMsg(pMsg, "Data ważności jest w przeszłości.", "err"); return; }
+  try {
+    await setDoc(doc(db, "promoCodes", code), { code, description, expiresAt, active: true, createdAt: serverTimestamp() });
+    setMsg(pMsg, "Kod " + code + " utworzony. Klient wpisuje go w Koncie, w polu „Masz kod promocyjny?”.", "ok");
+    $("rb-p-code").value = ""; $("rb-p-desc").value = ""; $("rb-p-exp").value = ""; $("rb-p-tpl").value = "";
+  } catch (err) {
+    console.error(err);
+    setMsg(pMsg, err.code === "permission-denied" ? "Brak uprawnień. Opublikuj nowe reguły z pliku firestore.rules." : errText(err), "err");
+  }
+});
+function renderPromos() {
+  const box = $("rb-p-list");
+  if (!box) return;
+  if (!allPromos.length) { box.innerHTML = '<div class="rb-empty">Nie masz jeszcze kodów promocyjnych.</div>'; return; }
+  const now = Date.now();
+  box.innerHTML = allPromos.map((p) => {
+    const exp = p.expiresAt ? tsMs(p.expiresAt) : 0;
+    const expired = exp && exp < now;
+    const off = p.active !== true || expired;
+    const used = allCoupons.filter((c) => c.promo === p.id).length;
+    return `<div class="rb-coupon${off ? " off" : ""}">
+      <div class="rb-code" style="font-size:18px">${esc(p.id)}<span class="rb-badge${off ? " bad" : ""}">${expired ? "Wygasł" : p.active === true ? "Aktywny" : "Wyłączony"}</span></div>
+      <div class="rb-desc">${esc(p.description)}</div>
+      <div class="rb-meta">${exp ? "ważny do " + new Date(exp).toLocaleDateString("pl-PL") : "bez terminu"} · użyto: <b>${used}</b> ${used === 1 ? "raz" : "razy"}</div>
+      <div class="rb-actions">
+        ${expired ? "" : `<button type="button" class="rb-btn secondary small" data-pact="toggle" data-id="${esc(p.id)}">${p.active === true ? "Wyłącz" : "Włącz"}</button>`}
+        <button type="button" class="rb-btn secondary small" data-pact="del" data-id="${esc(p.id)}">Usuń</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+$("rb-p-list").addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-pact]");
+  if (!b) return;
+  const p = allPromos.find((x) => x.id === b.dataset.id);
+  if (!p) return;
+  try {
+    if (b.dataset.pact === "toggle") await updateDoc(doc(db, "promoCodes", p.id), { active: p.active !== true });
+    else if (confirm("Usunąć kod promocyjny " + p.id + "? Rabaty, które klienci już odebrali, zostają.")) await deleteDoc(doc(db, "promoCodes", p.id));
+  } catch (err) { console.error(err); setMsg(pMsg, errText(err), "err"); }
+});
+
 /* ---------- panel administratora ---------- */
 const aMsg = $("rb-a-msg");
 
@@ -2010,24 +2145,49 @@ $("rb-a-add").addEventListener("click", async () => {
   }
 });
 
+const SOON_DAYS = 7;
+function daysLeftText(ms) {
+  const d = Math.ceil((ms - Date.now()) / 86400000);
+  return d <= 0 ? "dziś" : d === 1 ? "jutro" : "za " + d + " dni";
+}
+function expiringSoon() {
+  const now = Date.now();
+  return allCoupons.filter((c) => !c.used && c.expiresAt && tsMs(c.expiresAt) > now && tsMs(c.expiresAt) <= now + SOON_DAYS * 86400000)
+    .sort((a, b) => tsMs(a.expiresAt) - tsMs(b.expiresAt));
+}
 function renderAdminList() {
   renderStats();
   renderCheck();
   const box = $("rb-a-list");
-  if (!allCoupons.length) { box.innerHTML = '<div class="rb-empty">Brak przyznanych kodów.</div>'; return; }
-  box.innerHTML = allCoupons.map((c) => {
+  if (!allCoupons.length) { box.innerHTML = '<div class="rb-empty">Brak przyznanych kodów.</div>'; $("rb-l-count").textContent = ""; return; }
+  const f = $("rb-l-filter").value;
+  const q = normTxt($("rb-l-search").value);
+  const now = Date.now();
+  let list = allCoupons;
+  if (f === "soon") list = expiringSoon();
+  else if (f === "active") list = allCoupons.filter((c) => !couponState(c).off);
+  else if (f === "used") list = allCoupons.filter((c) => c.used);
+  else if (f === "expired") list = allCoupons.filter((c) => !c.used && couponState(c).off);
+  if (q) list = list.filter((c) => normTxt(c.code).includes(q) || normTxt(c.userEmail).includes(q) || normTxt(c.description).includes(q));
+  $("rb-l-count").textContent = "Pokazano: " + list.length + " z " + allCoupons.length;
+  if (!list.length) { box.innerHTML = '<div class="rb-empty">Brak kodów w tym widoku.</div>'; return; }
+  box.innerHTML = list.slice(0, 200).map((c) => {
     const st = couponState(c);
+    const exp = c.expiresAt ? tsMs(c.expiresAt) : 0;
+    const soon = !c.used && exp > now && exp <= now + SOON_DAYS * 86400000;
     return `<div class="rb-coupon${st.off ? " off" : ""}">
-      <div class="rb-code" style="font-size:18px">${esc(c.code)}<span class="rb-badge${st.off ? " bad" : ""}">${st.label}</span></div>
+      <div class="rb-code" style="font-size:18px">${esc(c.code)}<span class="rb-badge${st.off ? " bad" : ""}">${st.label}</span>${soon ? `<span class="rb-badge warn">wygasa ${daysLeftText(exp)}</span>` : ""}</div>
       <div class="rb-desc">${esc(c.description)}</div>
-      <div class="rb-meta">${esc(c.userEmail)} · ${c.expiresAt ? "do " + fmtDate(c.expiresAt) : "bez terminu"} · przyznano ${fmtDate(c.createdAt)}</div>
+      <div class="rb-meta"><b>${esc(c.userEmail)}</b> · ${exp ? "do " + new Date(exp).toLocaleDateString("pl-PL") : "bez terminu"} · przyznano ${c.createdAt ? new Date(tsMs(c.createdAt)).toLocaleDateString("pl-PL") : ""}</div>
       <div class="rb-actions">
         <button type="button" class="rb-btn secondary small" data-act="toggle" data-id="${esc(c.id)}">${c.used ? "Przywróć" : "Oznacz jako wykorzystany"}</button>
         <button type="button" class="rb-btn secondary small" data-act="del" data-id="${esc(c.id)}">Usuń</button>
       </div>
     </div>`;
-  }).join("");
+  }).join("") + (list.length > 200 ? '<div class="rb-empty">Pokazano pierwsze 200. Zawęź wyszukiwanie.</div>' : "");
 }
+$("rb-l-filter").addEventListener("change", renderAdminList);
+$("rb-l-search").addEventListener("input", renderAdminList);
 
 $("rb-a-list").addEventListener("click", async (e) => {
   const b = e.target.closest("[data-act]");
@@ -2272,6 +2432,8 @@ function renderTemplates() {
     + DEFAULT_TPL.map((t, i) => `<option value="d:${i}">${esc(t)}</option>`).join("")
     + allTemplates.map((t) => `<option value="c:${esc(t.id)}">★ ${esc(t.text)}</option>`).join("");
   if ([...sel.options].some((o) => o.value === prev)) sel.value = prev; else selTpl = {};
+  const ps = $("rb-p-tpl");
+  if (ps) { const pv = ps.value; ps.innerHTML = sel.innerHTML; if ([...ps.options].some((o) => o.value === pv)) ps.value = pv; }
   renderOwnList();
 }
 /* ---------- gotowe rabaty: wybór w zakładce Przyznaj ---------- */
@@ -3264,8 +3426,11 @@ function renderToday() {
     alerts.push({ cls: "bad", text: "⭐ " + lows.length + (lows.length === 1 ? " niska ocena" : " niskich ocen") + " (1–3 ★) z ostatnich 7 dni",
       sub: starStr(f.rating) + " " + (f.name || "Klient") + (f.comment ? ": „" + (f.comment.length > 90 ? f.comment.slice(0, 90) + "…" : f.comment) + "”" : ""), go: "report", btn: "Zobacz" });
   }
-  const soon = allCoupons.filter((c) => !c.used && c.expiresAt && tsMs(c.expiresAt) > now && tsMs(c.expiresAt) <= now + 7 * DAY).length;
-  if (soon) alerts.push({ cls: "", text: "🎟 " + soon + (soon === 1 ? " kod wygasa" : " kodów wygasa") + " w ciągu 7 dni", go: "list", btn: "Zobacz" });
+  const soonList = expiringSoon();
+  const soon = soonList.length;
+  if (soon) alerts.push({ cls: "", text: "🎟 " + soon + (soon === 1 ? " kod wygasa" : " kodów wygasa") + " w ciągu 7 dni",
+    sub: soonList.slice(0, 3).map((c) => c.code + " — " + (c.userEmail || "?") + " (" + daysLeftText(tsMs(c.expiresAt)) + ")").join(" · ") + (soon > 3 ? " · …" : ""),
+    go: "list", lfilter: "soon", btn: "Zobacz" });
   if (loaded && loyalOk) {
     const full = allLoyal.filter((l) => l.id !== (auth.currentUser || {}).uid && (l.stamps || 0) >= LOYAL_GOAL).length;
     if (full) alerts.push({ cls: "", text: "🍕 " + full + (full === 1 ? " klient ma" : " klientów ma") + " pełną kartę (pizza gratis czeka)", go: "clients", filter: "full", btn: "Pokaż" });
@@ -3275,7 +3440,7 @@ function renderToday() {
   const dg = dupInfo();
   if (dg.groups) alerts.push({ cls: "bad", text: "👥 Możliwe duplikaty kont: " + dg.info.size + " kont w " + dg.groups + (dg.groups === 1 ? " grupie" : " grupach"), sub: "Ten sam adres e-mail (aliasy) lub to samo imię i nazwisko.", go: "clients", filter: "dups", btn: "Sprawdź" });
   $("rb-td-alerts").innerHTML = alerts.length
-    ? alerts.map((a) => `<div class="rb-alert ${a.cls}"><div>${esc(a.text)}${a.sub ? `<small>${esc(a.sub)}</small>` : ""}</div><button type="button" class="rb-btn secondary small" data-go="${a.go}"${a.filter ? ` data-filter="${a.filter}"` : ""}>${a.btn}</button></div>`).join("")
+    ? alerts.map((a) => `<div class="rb-alert ${a.cls}"><div>${esc(a.text)}${a.sub ? `<small>${esc(a.sub)}</small>` : ""}</div><button type="button" class="rb-btn secondary small" data-go="${a.go}"${a.filter ? ` data-filter="${a.filter}"` : ""}${a.lfilter ? ` data-lfilter="${a.lfilter}"` : ""}>${a.btn}</button></div>`).join("")
     : (loaded ? '<div class="rb-alert ok"><div>✅ Nic pilnego. Wszystko w porządku.</div></div>' : '<div class="rb-empty">Wczytuję…</div>');
 
   const recent = reportEvents.slice().sort((a, b) => tsMs(b.at) - tsMs(a.at)).slice(0, 6);
@@ -3288,6 +3453,11 @@ $("rb-td-refresh").addEventListener("click", () => ensureData(true));
 document.querySelector('#rb-admin .rb-pane[data-pane="today"]').addEventListener("click", (e) => {
   const b = e.target.closest("[data-go]");
   if (!b) return;
+  if (b.dataset.lfilter) {
+    $("rb-l-filter").value = b.dataset.lfilter;
+    $("rb-l-search").value = "";
+    renderAdminList();
+  }
   if (b.dataset.filter) {
     $("rb-k-filter").value = b.dataset.filter;
     $("rb-k-search").value = "";
