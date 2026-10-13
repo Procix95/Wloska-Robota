@@ -1036,10 +1036,11 @@ body.dark #site-dish .sd-text{color:#bbb}
         <p>Zaloguj się, aby zobaczyć swoje kody rabatowe.</p>
       </div>
       <div class="rb-perks">
-        <div class="rb-perk gift"><i>🎁</i><span><b>−5 zł na start</b><br>kod powitalny dla każdego nowego konta</span></div>
+        <div class="rb-perk gift"><i>🎁</i><span><b>−5 zł na start</b><br>kod powitalny dla każdego nowego konta (ważny miesiąc)</span></div>
         <div class="rb-perk"><i>📱</i><span><b>Kody zawsze pod ręką</b><br>pokaż kod QR przy kasie</span></div>
       </div>
       <button type="button" class="rb-btn rb-google" id="rb-google"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.4-4.1 7-10.1 7-17.6z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 010-9.4l-7.9-6.1a24 24 0 000 21.6l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg><span>Kontynuuj z Google</span></button>
+      <div id="rb-gsi" hidden style="display:flex;justify-content:center;min-height:44px"></div>
       <div class="rb-or">lub e-mailem</div>
       <div class="rb-tabs">
         <button type="button" class="rb-tab active" data-mode="login">Logowanie</button>
@@ -1065,7 +1066,7 @@ body.dark #site-dish .sd-text{color:#bbb}
         <div class="rb-who"><b id="rb-who"></b><small id="rb-mail"></small></div>
         <button type="button" class="rb-btn secondary small" id="rb-logout">Wyloguj</button>
       </div>
-      <div class="rb-res ok" id="rb-welcome" hidden>🎉 Witaj! Na start dostajesz rabat <b>5 zł</b> na zamówienie. Znajdziesz go poniżej, pokaż jego kod QR przy kasie.</div>
+      <div class="rb-res ok" id="rb-welcome" hidden>🎉 Witaj! Na start dostajesz rabat <b>5 zł</b> na zamówienie, ważny <b>miesiąc</b> od założenia konta. Znajdziesz go poniżej, pokaż jego kod QR przy kasie.</div>
       <div class="rb-loyal" id="rb-loyal" hidden>
         <div class="rb-sec" style="margin-top:0"><h3>🍕 Karta lojalnościowa</h3><span id="rb-loyal-count"></span></div>
         <div class="rb-stamps" id="rb-stamps"></div>
@@ -1128,6 +1129,7 @@ body.dark #site-dish .sd-text{color:#bbb}
             <button type="button" class="rb-btn secondary small" id="rb-td-refresh" style="margin-bottom:10px;flex:none">Odśwież</button>
           </div>
           <div class="rb-msg" id="rb-td-msg" role="status"></div>
+          <div class="rb-msg ok" id="rb-td-note" role="status"></div>
           <div class="rb-stats" id="rb-td-stats"></div>
           <h4>Wymaga uwagi</h4>
           <div id="rb-td-alerts"></div>
@@ -1367,7 +1369,7 @@ body.dark #site-dish .sd-text{color:#bbb}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {
   getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  signInWithPopup, GoogleAuthProvider, signOut, sendPasswordResetEmail, sendEmailVerification, updateProfile,
+  signInWithPopup, signInWithCredential, GoogleAuthProvider, signOut, sendPasswordResetEmail, sendEmailVerification, updateProfile,
   deleteUser, reauthenticateWithPopup, reauthenticateWithCredential, EmailAuthProvider
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
@@ -1500,6 +1502,47 @@ $("rb-form").addEventListener("submit", async (e) => {
   }
 });
 
+/* Logowanie Google przez Google Identity Services: okno Google pokazuje wtedy adres strony (wloskarobota.eu),
+   a nie wloskarobota-4c044.firebaseapp.com. Działa, gdy wpiszesz poniżej identyfikator klienta (patrz instrukcja).
+   Gdy pole jest puste albo skrypt Google się nie wczyta, przycisk „Kontynuuj z Google” działa po staremu. */
+const GOOGLE_CLIENT_ID = "304699522128-tap3upslskh66l3288aen46mkn5e53rk.apps.googleusercontent.com";
+let gsiTried = false;
+function loadGsi() {
+  return new Promise((resolve, reject) => {
+    if (window.google && window.google.accounts && window.google.accounts.id) return resolve();
+    const sc = document.createElement("script");
+    const t = setTimeout(() => reject(new Error("timeout")), 8000);
+    sc.src = "https://accounts.google.com/gsi/client";
+    sc.async = true;
+    sc.onload = () => { clearTimeout(t); resolve(); };
+    sc.onerror = () => { clearTimeout(t); reject(new Error("load")); };
+    document.head.appendChild(sc);
+  });
+}
+async function onGsiCredential(resp) {
+  setMsg(authMsg, "");
+  try { await signInWithCredential(auth, GoogleAuthProvider.credential(resp.credential)); }
+  catch (err) { console.error("Rabat Google (GIS):", err); setMsg(authMsg, errText(err), "err"); }
+}
+async function initGoogleButton() {
+  if (gsiTried || !GOOGLE_CLIENT_ID) return;
+  gsiTried = true;
+  try {
+    await loadGsi();
+    google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: onGsiCredential, ux_mode: "popup", auto_select: false });
+    google.accounts.id.renderButton($("rb-gsi"), {
+      type: "standard", theme: document.body.classList.contains("dark") ? "filled_black" : "outline",
+      size: "large", text: "continue_with", shape: "rectangular", locale: "pl",
+      width: Math.max(200, Math.min(400, $("rb-auth").clientWidth || 320))
+    });
+    $("rb-gsi").hidden = false;
+    $("rb-google").hidden = true;
+  } catch (err) {
+    console.warn("Google Identity Services niedostępne, używam zwykłego logowania:", err && err.message);
+    gsiTried = false;
+  }
+}
+
 $("rb-google").addEventListener("click", async () => {
   setMsg(authMsg, "");
   try { await signInWithPopup(auth, new GoogleAuthProvider()); }
@@ -1566,13 +1609,14 @@ function cleanup() {
   unsubs.forEach((u) => { try { u(); } catch (_) {} });
   unsubs = [];
   isAdmin = false; isStaff = false; allStaff = []; staffFound = []; myLoyal = null; custView = null; myCoupons = []; allUsers = []; allCoupons = []; allTemplates = []; lastCheck = ""; svVisit = 0; svRating = 0; svDoneFor = 0;
-  allLoyal = []; dataAt = 0; reportEvents = []; feedbackItems = []; kShown = KPAGE;
+  allLoyal = []; dataAt = 0; welcomeMigrated = false; reportEvents = []; feedbackItems = []; kShown = KPAGE;
   if ($("rb-k-card")) $("rb-k-card").innerHTML = "";
 }
 function showOnly(which) {
   $("rb-loading").hidden = which !== "loading";
   $("rb-auth").hidden = which !== "auth";
   $("rb-user").hidden = which !== "user";
+  if (which === "auth") initGoogleButton();
 }
 
 onAuthStateChanged(auth, (user) => { if (!registering) handleUser(user); });
@@ -1581,6 +1625,16 @@ const withTimeout = (p, ms = 12000) =>
   Promise.race([p, new Promise((_, rej) => setTimeout(() => rej({ code: "timeout" }), ms))]);
 
 const WELCOME_DESC = "-5 zł na zamówienie (kod powitalny)";
+
+/* Kod powitalny jest ważny miesiąc od założenia konta (do końca dnia). 31 stycznia + miesiąc = koniec lutego. */
+function welcomeExpiry(fromMs) {
+  const d = new Date(fromMs);
+  const day = d.getDate();
+  d.setMonth(d.getMonth() + 1);
+  if (d.getDate() !== day) d.setDate(0);
+  d.setHours(23, 59, 59, 0);
+  return Timestamp.fromDate(d);
+}
 
 /* Tworzy profil klienta. Przy pierwszym logowaniu dodaje w tej samej operacji kod powitalny -5 zł.
    Zwraca true, gdy kod powitalny został przyznany. */
@@ -1596,7 +1650,7 @@ async function ensureProfile(user) {
     userEmail: user.email || "",
     code: "WITAJ5-" + user.uid.slice(0, 6).toUpperCase(),
     description: WELCOME_DESC,
-    expiresAt: null,
+    expiresAt: welcomeExpiry(Date.now()),
     used: false,
     createdAt: serverTimestamp()
   });
@@ -1689,6 +1743,7 @@ async function handleUser(user) {
       renderAdminList();
       renderToday();
       renderClients();
+      migrateWelcome();
     }, console.error));
     renderTemplates();
     unsubs.push(onSnapshot(collection(db, "deletionRequests"), (s) => {
@@ -2925,6 +2980,7 @@ const KPAGE = 30;
 const DAY = 86400000;
 let allLoyal = [];
 let loyalOk = false;
+let welcomeMigrated = false;
 let dataAt = 0;
 let dataBusy = null;
 let kShown = KPAGE;
@@ -2969,6 +3025,24 @@ function ensureData(force) {
     renderClients();
   })().finally(() => { dataBusy = null; });
   return dataBusy;
+}
+/* Istniejące kody powitalne bez terminu dostają ważność: miesiąc od założenia konta (dla starszych kont: kod od razu wygasa). */
+async function migrateWelcome() {
+  if (!isAdmin || welcomeMigrated) return;
+  welcomeMigrated = true;
+  const todo = allCoupons.filter((c) => String(c.id).startsWith("welcome_") && !c.used && c.expiresAt == null && tsMs(c.createdAt) > 0);
+  if (!todo.length) return;
+  try {
+    for (let i = 0; i < todo.length; i += 400) {
+      const batch = writeBatch(db);
+      todo.slice(i, i + 400).forEach((c) => batch.update(doc(db, "coupons", c.id), { expiresAt: welcomeExpiry(tsMs(c.createdAt)) }));
+      await batch.commit();
+    }
+    const note = $("rb-td-note");
+    if (note) setMsg(note, "Ustawiono ważność miesiąca od założenia konta dla " + todo.length + " istniejących kodów powitalnych.", "ok");
+  } catch (err) {
+    console.warn("Nie udało się ustawić ważności kodów powitalnych:", err.code || err.message);
+  }
 }
 function syncLoyalCache(uid, L) {
   if (!isAdmin || !L) return;
