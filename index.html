@@ -41,7 +41,7 @@
     {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Wednesday", "Thursday", "Friday"], "opens": "12:00", "closes": "20:00"},
     {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Saturday", "Sunday"], "opens": "14:00", "closes": "22:00"}
   ],
-  "areaServed": ["Głuponie", "Trzcianka", "Michorzewo", "Kuślin", "Chraplewo", "Michorzewko", "Dąbrowa Nowa", "Rudniki", "Wąsowo", "Jastrzębniki"],
+  "areaServed": ["Głuponie", "Trzcianka", "Michorzewo", "Kuślin", "Chraplewo", "Michorzewko", "Dąbrowa Nowa", "Rudniki", "Wąsowo", "Jastrzębniki", "Krystianowo"],
   "hasMenu": "https://wloskarobota.eu/#menu",
   "sameAs": ["https://www.facebook.com/profile.php?id=61591198263542"]
 }
@@ -972,6 +972,8 @@ body.dark #dc-result.yes{color:#5fd08f}
 #dc-result.no{color:var(--red)}
 body.dark #dc-result.no{color:#ff8a8f}
 #dc-result a{color:inherit;font-weight:700}
+#dc-result a.dc-route{display:block;width:fit-content;margin:.8rem auto 0;padding:.7rem 1.3rem;border-radius:999px;background:var(--green);color:#fff;text-decoration:none;font-size:1rem;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#dc-result a.dc-route:hover{filter:brightness(1.1)}
 #site-dish{display:none;margin:0 auto 2rem;max-width:720px;padding:1.2rem 1.4rem;border-radius:20px;background:linear-gradient(135deg,rgba(212,175,55,.18),rgba(212,175,55,.06));border:2px solid var(--gold);text-align:center}
 #site-dish .sd-label{font-size:.85rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
 #site-dish .sd-name{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:800;margin:.2rem 0}
@@ -2411,7 +2413,7 @@ $("rb-st-list").addEventListener("click", async (e) => {
 /* ---------- treści strony z bazy: ceny, dostępność, komunikat, pizza dnia ---------- */
 const SITE_CACHE_KEY = "wr_site_cfg_v1";
 // Domyślna lista dowozu (do ok. 10 km od lokalu, koszt 10 zł). Obowiązuje, dopóki admin nie zapisze własnej listy w panelu (Strona → Dowóz).
-const DELIVERY_DEFAULT = ["Głuponie", "Trzcianka", "Tomaszewo", "Michorzewo", "Kuślin", "Zygmuntowo", "Chraplewo", "Marszewo", "Michorzewko", "Wymysłowo", "Dąbrowa", "Łęczyce", "Dąbrowa Nowa", "Rudniki", "Wąsowo", "Jastrzębniki"]
+const DELIVERY_DEFAULT = ["Głuponie", "Trzcianka", "Tomaszewo", "Michorzewo", "Kuślin", "Zygmuntowo", "Chraplewo", "Marszewo", "Michorzewko", "Wymysłowo", "Dąbrowa", "Łęczyce", "Dąbrowa Nowa", "Rudniki", "Wąsowo", "Jastrzębniki", "Krystianowo"]
   .map((name) => ({ name, fee: 10, min: null, freeFrom: null }));
 // Link do formularza opinii w Google (domyślny; admin może go zmienić lub wyczyścić w panelu: Strona → Opinie w Google).
 const GOOGLE_REVIEW_DEFAULT = "https://g.page/r/CUq2_T6CQcy5EAE/review";
@@ -2564,7 +2566,10 @@ function renderDeliveryResult() {
   if (!m.length) m = places.filter((p) => { const n = normTxt(p.name); return n.includes(q) || q.includes(n); });
   if (!m.length) {
     out.className = "no";
-    out.innerHTML = 'Tej miejscowości nie ma na naszej liście dowozu. <a href="tel:668862396">Zadzwoń: 668 862 396</a> — ustalimy, albo zapraszamy po odbiór osobisty.';
+    const from = $("dc-input").value.trim();
+    const route = "https://www.google.com/maps/dir/?api=1&origin=" + encodeURIComponent(from + ", Polska") + "&destination=" + encodeURIComponent("Głuponie 103, 64-316 Kuślin, Polska") + "&travelmode=driving";
+    out.innerHTML = 'Tej miejscowości nie ma na naszej liście dowozu. <a href="tel:668862396">Zadzwoń: 668 862 396</a> — ustalimy, albo zapraszamy po odbiór osobisty.'
+      + '<a class="dc-route" href="' + esc(route) + '" target="_blank" rel="noopener">🗺 TRASA do restauracji</a>';
     return;
   }
   out.className = "yes";
