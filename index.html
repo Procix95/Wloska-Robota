@@ -223,6 +223,7 @@ body.dark footer {background: #0a0a0a;}
         <li><a href="#gallery">Galeria</a></li>
         <li><a href="#contact">Kontakt</a></li>
         <li><a href="#konto">Konto</a></li>
+        <li data-pwa-show hidden><button type="button" class="pwa-nav-btn" data-pwa hidden aria-label="Zainstaluj aplikację Włoska Robota"><i class="fas fa-download"></i> <span class="pwa-long">Zainstaluj aplikację</span><span class="pwa-short">Aplikacja</span></button></li>
         <li><button class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i></button></li>
       </ul>
       <button class="mobile-toggle" id="mobileToggle"><i class="fas fa-bars"></i></button>
@@ -592,7 +593,7 @@ body.dark footer {background: #0a0a0a;}
       <p>&copy; <span id="currentYear">2026</span> Włoska Robota. Wszelkie prawa zastrzeżone.</p>
       <p style="margin-top:.4rem;font-size:.85rem">RadTom – Radosław Jaskuła · NIP 7831857899 · Głuponie 103, 64-316 Kuślin · e-mail: <a href="mailto:radtom72@gmail.com" style="color:inherit;opacity:.8">radtom72@gmail.com</a> · tel. <a href="tel:668862396" style="color:inherit;opacity:.8">668 862 396</a></p>
       <p style="margin-top:.4rem;font-size:.85rem"><a href="polityka-prywatnosci.html" style="color:inherit;opacity:.8">Polityka prywatności</a> · <a href="regulamin.html" style="color:inherit;opacity:.8">Regulamin</a> · <a href="usun-konto.html" style="color:inherit;opacity:.8">Usuwanie konta</a></p>
-      <p style="margin-top:.6rem"><button type="button" class="pwa-btn" data-pwa hidden>📲 Dodaj stronę do ekranu głównego</button><span data-pwa-hint hidden style="display:block;margin-top:.4rem;font-size:.85rem;opacity:.85"></span></p>
+      <p style="margin-top:.6rem"><button type="button" class="pwa-btn" data-pwa hidden>📲 Zainstaluj aplikację na telefonie</button></p>
     </div>
   </div>
 </footer>
@@ -776,6 +777,31 @@ body.dark #rabat-overlay{--rb-accent:#0fa65a;--rb-accent2:#0c8c4c;--rb-bg:#17171
 #rabat-overlay *{box-sizing:border-box}
 #rabat-overlay.open{display:block;animation:rbFade .18s ease}
 #rabat-overlay [hidden]{display:none!important}
+.pwa-nav-btn,.pwa-go{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;background:linear-gradient(135deg,var(--green),var(--red));color:#fff;border:0;border-radius:50px;padding:.5rem 1.1rem;font:inherit;font-weight:600;font-size:.92rem;cursor:pointer;box-shadow:0 6px 18px rgba(205,33,42,.28);transition:var(--transition);white-space:nowrap}
+.pwa-nav-btn:hover,.pwa-go:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(205,33,42,.4)}
+.pwa-nav-btn .pwa-short{display:none}
+@media (min-width:769px) and (max-width:1180px){.pwa-nav-btn .pwa-long{display:none}.pwa-nav-btn .pwa-short{display:inline}}
+#pwaCard{position:fixed;left:1rem;right:5.4rem;bottom:1rem;z-index:998;max-width:430px;background:#fff;color:#1a1a1a;border-radius:20px;box-shadow:0 14px 44px rgba(0,0,0,.28);padding:1rem;display:flex;gap:.85rem;align-items:flex-start;animation:pwaIn .5s cubic-bezier(.2,.8,.2,1)}
+body.dark #pwaCard{background:#1e1e1e;color:#f3f3f3}
+#pwaCard img{width:54px;height:54px;border-radius:14px;flex:none;box-shadow:0 4px 12px rgba(0,0,0,.18)}
+#pwaCard b{display:block;font-size:1rem;line-height:1.25}
+#pwaCard p{margin:.25rem 0 .7rem;font-size:.85rem;color:var(--gray);line-height:1.4}
+body.dark #pwaCard p{color:#aaa}
+#pwaCard .pwa-actions{display:flex;gap:.8rem;align-items:center;flex-wrap:wrap}
+#pwaCard .pwa-later{background:none;border:0;color:inherit;opacity:.65;font:inherit;font-size:.85rem;cursor:pointer;text-decoration:underline;padding:.3rem 0}
+@keyframes pwaIn{from{transform:translateY(26px);opacity:0}to{transform:none;opacity:1}}
+@media (min-width:769px){#pwaCard{left:auto;right:6.5rem;bottom:2rem;width:420px}}
+#pwaModal{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;padding:1rem}
+#pwaModal .box{background:#fff;color:#1a1a1a;border-radius:22px;padding:1.4rem 1.3rem 1.2rem;max-width:430px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:pwaIn .4s cubic-bezier(.2,.8,.2,1)}
+body.dark #pwaModal .box{background:#1e1e1e;color:#f3f3f3}
+#pwaModal h3{margin:0 0 .9rem;font-family:'Playfair Display',serif;font-size:1.25rem;line-height:1.25}
+#pwaModal ol{list-style:none;padding:0;margin:0 0 1rem;display:grid;gap:.75rem}
+#pwaModal li{display:flex;gap:.85rem;align-items:center;line-height:1.35;font-size:.95rem}
+#pwaModal li i{width:40px;height:40px;border-radius:12px;background:rgba(0,146,70,.13);color:var(--green);display:flex;align-items:center;justify-content:center;flex:none;font-size:1.05rem}
+#pwaModal .pwa-note{font-size:.8rem;opacity:.65;margin:0 0 .9rem}
+#pwaModal .pwa-go{width:100%;padding:.8rem 1rem}
+@media (min-width:769px){#pwaModal{align-items:center}}
+@media (prefers-reduced-motion:reduce){#pwaCard,#pwaModal .box{animation:none}.pwa-nav-btn:hover,.pwa-go:hover{transform:none}}
 .pwa-btn{background:none;border:1px solid currentColor;color:inherit;opacity:.85;border-radius:20px;padding:.35rem .9rem;cursor:pointer;font:inherit;font-size:.85rem}
 .pwa-btn:hover{opacity:1}
 #rabat-overlay .rb-cols{display:flex;align-items:flex-end;gap:3px;margin:8px 0 2px}
@@ -1129,7 +1155,7 @@ body.dark #site-dish .sd-text{color:#bbb}
         <div class="rb-who"><b id="rb-who"></b><small id="rb-mail"></small></div>
         <button type="button" class="rb-btn secondary small" id="rb-logout">Wyloguj</button>
       </div>
-      <div style="margin:0 0 12px"><button type="button" class="rb-btn secondary small" data-pwa hidden>📲 Dodaj do ekranu głównego telefonu</button><div class="rb-meta" data-pwa-hint hidden></div></div>
+      <div style="margin:0 0 12px"><button type="button" class="rb-btn secondary small" data-pwa hidden>📲 Zainstaluj aplikację na telefonie</button></div>
       <div class="rb-res ok" id="rb-welcome" hidden>🎉 Witaj! Na start dostajesz rabat <b>5 zł</b> na zamówienie, ważny <b>miesiąc</b> od założenia konta. Znajdziesz go poniżej, pokaż jego kod QR przy kasie.</div>
       <div class="rb-loyal" id="rb-loyal" hidden>
         <div class="rb-sec" style="margin-top:0"><h3>🍕 Karta lojalnościowa</h3><span id="rb-loyal-count"></span></div>
@@ -1479,6 +1505,11 @@ body.dark #site-dish .sd-text{color:#bbb}
             <button type="button" class="rb-btn secondary small" id="rb-rp-refresh" style="margin-bottom:10px">Odśwież</button>
           </div>
           <div class="rb-stats" id="rb-rp-stats"></div>
+          <details class="rb-res" id="rb-vis-box">
+            <summary><b>🌐 Odwiedziny strony</b></summary>
+            <div class="rb-meta" style="margin:6px 0 4px">Anonimowy licznik: ile razy otwarto stronę, z jakiego urządzenia i skąd. Nie liczy Twoich wejść, gdy jesteś zalogowany jako admin lub obsługa. Odświeżenie strony liczy się jako kolejne wejście.</div>
+            <div id="rb-vis-body"><div class="rb-empty">Wczytuję…</div></div>
+          </details>
           <details class="rb-res" id="rb-st-box">
             <summary><b>📈 Statystyki i wykresy</b></summary>
             <div class="rb-meta" style="margin:6px 0 4px">Wizyty = pieczątki i wydane pizze gratis z dziennika (ostatnie 90 dni). Klienci i kody liczone są ze wszystkich kont.</div>
@@ -1537,7 +1568,7 @@ body.dark #site-dish .sd-text{color:#bbb}
 
 <!-- ===== RABAT: SKRYPT ===== -->
 <script>
-/* Aplikacja na ekran główny (PWA): rejestracja service workera i przycisk „Dodaj do ekranu głównego” */
+/* Aplikacja na ekran główny (PWA): service worker, przycisk w menu, karta zachęty i instrukcja dla iPhone */
 (function () {
   try {
     if ("serviceWorker" in navigator && /^https:|^http:\/\/localhost/.test(location.href))
@@ -1545,24 +1576,53 @@ body.dark #site-dish .sd-text{color:#bbb}
   } catch (_) {}
   var standalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
   if (standalone) return;
-  var btns = document.querySelectorAll("[data-pwa]"), hints = document.querySelectorAll("[data-pwa-hint]");
+  var btns = document.querySelectorAll("[data-pwa]"), shows = document.querySelectorAll("[data-pwa-show]");
   var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  var deferred = null;
-  function setShown(on) { btns.forEach(function (b) { b.hidden = !on; }); if (!on) hints.forEach(function (h) { h.hidden = true; }); }
-  window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); deferred = e; setShown(true); });
-  window.addEventListener("appinstalled", function () { deferred = null; setShown(false); });
-  if (isIOS) setShown(true);
-  btns.forEach(function (b) {
-    b.addEventListener("click", async function () {
-      if (deferred) {
-        var d = deferred; deferred = null;
-        try { d.prompt(); await d.userChoice; } catch (_) {}
-        setShown(false);
-      } else if (isIOS) {
-        hints.forEach(function (h) { h.hidden = false; h.textContent = "Na iPhonie: stuknij ikonę Udostępnij (kwadrat ze strzałką), a potem „Do ekranu początkowego”."; });
-      }
-    });
-  });
+  var deferred = null, KEY = "wr_pwa_dismiss";
+  function setShown(on) { btns.forEach(function (b) { b.hidden = !on; }); shows.forEach(function (e) { e.hidden = !on; }); }
+  function dismissed() { try { var t = Number(localStorage.getItem(KEY)); return !!t && Date.now() - t < 14 * 86400000; } catch (_) { return false; } }
+  function remember() { try { localStorage.setItem(KEY, String(Date.now())); } catch (_) {} }
+  function closeCard() { var c = document.getElementById("pwaCard"); if (c) c.remove(); }
+  function closeModal() { var m = document.getElementById("pwaModal"); if (m) m.remove(); document.removeEventListener("keydown", onKey); }
+  function onKey(e) { if (e.key === "Escape") closeModal(); }
+  function openModal() {
+    if (document.getElementById("pwaModal")) return;
+    var m = document.createElement("div");
+    m.id = "pwaModal"; m.setAttribute("role", "dialog"); m.setAttribute("aria-modal", "true"); m.setAttribute("aria-labelledby", "pwaTitle");
+    m.innerHTML = '<div class="box"><h3 id="pwaTitle">Dodaj Włoską Robotę do ekranu głównego</h3><ol>' +
+      '<li><i class="fas fa-arrow-up-from-bracket"></i><span>Stuknij ikonę <b>Udostępnij</b> (kwadrat ze strzałką) na dole lub u góry przeglądarki.</span></li>' +
+      '<li><i class="fas fa-square-plus"></i><span>Wybierz <b>„Do ekranu początkowego”</b>.</span></li>' +
+      '<li><i class="fas fa-check"></i><span>Stuknij <b>„Dodaj”</b>. Ikona pojawi się obok Twoich aplikacji.</span></li></ol>' +
+      '<p class="pwa-note">Działa w przeglądarce Safari.</p><button type="button" class="pwa-go" id="pwaClose">Rozumiem</button></div>';
+    document.body.appendChild(m);
+    m.addEventListener("click", function (e) { if (e.target === m) closeModal(); });
+    m.querySelector("#pwaClose").addEventListener("click", closeModal);
+    m.querySelector("#pwaClose").focus();
+    document.addEventListener("keydown", onKey);
+  }
+  async function install() {
+    if (deferred) {
+      var d = deferred; deferred = null;
+      try { d.prompt(); var r = await d.userChoice; if (r && r.outcome !== "accepted") remember(); } catch (_) {}
+      setShown(false); closeCard();
+    } else if (isIOS) { closeCard(); openModal(); }
+  }
+  function showCard() {
+    if (dismissed() || document.getElementById("pwaCard") || (!deferred && !isIOS)) return;
+    var c = document.createElement("div");
+    c.id = "pwaCard"; c.setAttribute("role", "region"); c.setAttribute("aria-label", "Zainstaluj aplikację");
+    c.innerHTML = '<img src="/favicon-192.png" width="54" height="54" alt="">' +
+      '<div><b>Włoska Robota na ekranie telefonu</b><p>Karta lojalnościowa i rabaty zawsze pod ręką, jak zwykła aplikacja.</p>' +
+      '<div class="pwa-actions"><button type="button" class="pwa-go" id="pwaGo"><i class="fas fa-download"></i> ' + (isIOS ? "Jak dodać" : "Zainstaluj") + '</button>' +
+      '<button type="button" class="pwa-later" id="pwaLater">Nie teraz</button></div></div>';
+    document.body.appendChild(c);
+    c.querySelector("#pwaGo").addEventListener("click", install);
+    c.querySelector("#pwaLater").addEventListener("click", function () { remember(); closeCard(); });
+  }
+  window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); deferred = e; setShown(true); setTimeout(showCard, 4000); });
+  window.addEventListener("appinstalled", function () { deferred = null; setShown(false); closeCard(); });
+  if (isIOS) { setShown(true); setTimeout(showCard, 5000); }
+  btns.forEach(function (b) { b.addEventListener("click", install); });
 })();
 </script>
 <script type="module">
@@ -1574,7 +1634,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot,
-  addDoc, updateDoc, deleteDoc, serverTimestamp, Timestamp, writeBatch, runTransaction, getDocs, orderBy, limit
+  addDoc, updateDoc, deleteDoc, serverTimestamp, Timestamp, writeBatch, runTransaction, getDocs, orderBy, limit, increment, documentId
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 /* ▼▼▼ WKLEJ TUTAJ SWOJĄ KONFIGURACJĘ Z FIREBASE (Ustawienia projektu → Twoje aplikacje) ▼▼▼ */
@@ -1816,7 +1876,7 @@ function cleanup() {
   if ($("rb-bday-set")) delete $("rb-bday-set").dataset.filled;
   allLoyal = []; allPromos = []; dataAt = 0; welcomeMigrated = false; reportEvents = []; feedbackItems = []; kShown = KPAGE;
   if ($("rb-k-card")) $("rb-k-card").innerHTML = "";
-  scanHist = []; statsEvents = null; if ($("rb-s-hist")) $("rb-s-hist").innerHTML = "";
+  scanHist = []; statsEvents = null; visitDocs = null; if ($("rb-s-hist")) $("rb-s-hist").innerHTML = "";
 }
 function showOnly(which) {
   $("rb-loading").hidden = which !== "loading";
@@ -1826,7 +1886,10 @@ function showOnly(which) {
   if (which === "auth") initGoogleButton();
 }
 
-onAuthStateChanged(auth, (user) => { if (!registering) handleUser(user); });
+let visitCounted = false;
+onAuthStateChanged(auth, async (user) => {
+  try { if (!registering) await handleUser(user); } finally { if (!visitCounted) { visitCounted = true; countVisit(); } }
+});
 
 const withTimeout = (p, ms = 12000) =>
   Promise.race([p, new Promise((_, rej) => setTimeout(() => rej({ code: "timeout" }), ms))]);
@@ -1898,6 +1961,26 @@ $("rb-g-save").addEventListener("click", async () => {
     $("rb-g-skip").hidden = false;
   } finally { btn.disabled = false; }
 });
+
+/* ---------- anonimowy licznik odwiedzin (dzienne sumy, bez IP, cookies i identyfikatorów) ---------- */
+const WARSAW_DAY = (d) => new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Warsaw" }).format(d);
+async function countVisit() {
+  try {
+    if (isAdmin || isStaff) return;
+    if (navigator.webdriver || /bot|crawl|spider|slurp|headless|lighthouse|preview|facebookexternalhit/i.test(navigator.userAgent || "")) return;
+    if (!/^https:|^http:\/\/localhost/.test(location.href)) return;
+    const standalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
+    const mobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "") || (window.matchMedia && matchMedia("(pointer: coarse)").matches && innerWidth < 900);
+    let src = "s_other";
+    let host = "";
+    try { host = document.referrer ? new URL(document.referrer).hostname.replace(/^www\./, "") : ""; } catch (_) {}
+    if (standalone || /[?&]pwa=1\b/.test(location.search)) src = "s_app";
+    else if (!host || host === location.hostname.replace(/^www\./, "")) src = "s_direct";
+    else if (/(^|\.)(google|bing|duckduckgo|yahoo|ecosia|yandex|brave)\./i.test(host)) src = "s_search";
+    else if (/(facebook|fb|instagram|messenger|t\.co|twitter|x\.com|tiktok|linkedin|youtube|pinterest)/i.test(host)) src = "s_social";
+    await setDoc(doc(db, "visits", WARSAW_DAY(new Date())), { total: increment(1), [mobile ? "mobile" : "desktop"]: increment(1), [src]: increment(1) }, { merge: true });
+  } catch (_) { /* licznik nie może przeszkadzać stronie */ }
+}
 
 async function handleUser(user) {
   cleanup();
@@ -3493,7 +3576,7 @@ function renderReport() {
 }
 $("rb-rp-range").addEventListener("change", renderReport);
 $("rb-rp-type").addEventListener("change", renderReport);
-$("rb-rp-refresh").addEventListener("click", () => { loadReport(); loadFeedback(); statsEvents = null; refreshStats(false); });
+$("rb-rp-refresh").addEventListener("click", () => { loadReport(); loadFeedback(); statsEvents = null; visitDocs = null; refreshStats(false); refreshVisits(false); });
 
 /* ---------- statystyki i wykresy (bez zewnętrznych bibliotek) ---------- */
 let statsEvents = null;
@@ -3578,6 +3661,51 @@ async function refreshStats(force) {
   renderCharts();
 }
 $("rb-st-box").addEventListener("toggle", () => refreshStats(false));
+
+/* ---------- odwiedziny strony (panel admina) ---------- */
+let visitDocs = null;
+const SRC_LABELS = [["s_search", "Wyszukiwarki (Google itp.)"], ["s_direct", "Wpisany adres / zakładka"], ["s_social", "Media społecznościowe"], ["s_app", "Zainstalowana aplikacja"], ["s_other", "Inne strony"]];
+function renderVisits() {
+  const body = $("rb-vis-body");
+  if (!visitDocs) { body.innerHTML = '<div class="rb-empty">Wczytuję…</div>'; return; }
+  const map = new Map(visitDocs.map((d) => [d.id, d]));
+  const days = [];
+  for (let i = 29; i >= 0; i--) { const dt = new Date(); dt.setDate(dt.getDate() - i); days.push(WARSAW_DAY(dt)); }
+  const val = (k, f = "total") => (map.get(k) && map.get(k)[f]) || 0;
+  const sum = (arr, f = "total") => arr.reduce((a, k) => a + val(k, f), 0);
+  const today = days[29], yest = days[28];
+  const w7 = sum(days.slice(-7)), m30 = sum(days);
+  if (!visitDocs.length) { body.innerHTML = '<div class="rb-empty">Brak danych. Licznik zaczyna działać po opublikowaniu nowych reguł i strony; pierwsze wejścia pojawią się tu od razu.</div>'; return; }
+  const first = visitDocs.map((d) => d.id).sort()[0];
+  const pct = (n) => (m30 ? Math.round(n / m30 * 100) : 0);
+  const dev = [["Telefon", sum(days, "mobile")], ["Komputer", sum(days, "desktop")]];
+  body.innerHTML =
+    '<div class="rb-stats">' +
+    [["Dziś", val(today)], ["Wczoraj", val(yest)], ["7 dni", w7], ["30 dni", m30]].map(([l, v]) => `<div class="rb-stat"><b>${v}</b><span>${l}</span></div>`).join("") + "</div>" +
+    "<h4>Ostatnie 30 dni</h4>" + barsHtml(days.map((k) => ({ l: k.slice(8) + "." + k.slice(5, 7), v: val(k) }))) +
+    "<h4>Urządzenia (30 dni)</h4>" +
+    `<table class="rb-tbl"><tr><th>Typ</th><th>Wejść</th><th>%</th></tr>${dev.map(([l, n]) => `<tr><td>${l}</td><td>${n}</td><td>${pct(n)}%</td></tr>`).join("")}</table>` +
+    "<h4>Skąd przychodzą (30 dni)</h4>" +
+    `<table class="rb-tbl"><tr><th>Źródło</th><th>Wejść</th><th>%</th></tr>${SRC_LABELS.map(([k, l]) => { const n = sum(days, k); return `<tr><td>${l}</td><td>${n}</td><td>${pct(n)}%</td></tr>`; }).join("")}</table>` +
+    `<div class="rb-meta">Dane od ${esc(first)}. Wejścia z wyszukiwarek, mediów i aplikacji są rozpoznawane po stronie, z której przyszedł odwiedzający; wiele przeglądarek tego nie przekazuje, wtedy trafiają do „wpisany adres”.</div>`;
+}
+async function refreshVisits(force) {
+  if (!isAdmin) return;
+  if (!$("rb-vis-box").open) return;
+  if (!visitDocs || force) {
+    renderVisits();
+    try {
+      const snap = await getDocs(query(collection(db, "visits"), orderBy(documentId(), "desc"), limit(120)));
+      visitDocs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    } catch (err) {
+      console.error(err);
+      $("rb-vis-body").innerHTML = '<div class="rb-msg err">' + esc(errText(err)) + (err && err.code === "permission-denied" ? " (opublikuj najnowsze reguły Firestore)" : "") + "</div>";
+      return;
+    }
+  }
+  renderVisits();
+}
+$("rb-vis-box").addEventListener("toggle", () => refreshVisits(false));
 
 /* ---------- kopia zapasowa i eksport klientów ---------- */
 const bkMsg = $("rb-bk-msg");
