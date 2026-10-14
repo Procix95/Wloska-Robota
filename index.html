@@ -3695,7 +3695,8 @@ async function refreshVisits(force) {
   if (!visitDocs || force) {
     renderVisits();
     try {
-      const snap = await getDocs(query(collection(db, "visits"), orderBy(documentId(), "desc"), limit(120)));
+      const from = new Date(); from.setDate(from.getDate() - 60);
+      const snap = await getDocs(query(collection(db, "visits"), where(documentId(), ">=", WARSAW_DAY(from)), orderBy(documentId())));
       visitDocs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     } catch (err) {
       console.error(err);
