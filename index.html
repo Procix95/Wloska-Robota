@@ -1043,10 +1043,11 @@ body.dark #site-dish .sd-text{color:#bbb}
     <div id="rb-loading"><span class="rb-spin"></span>Ładowanie…</div>
     <div id="rb-gate" hidden>
       <h2>Zanim zaczniesz 🎂</h2>
-      <p class="rb-meta" style="font-size:15px;margin:0 0 14px">Podaj dzień i miesiąc swoich urodzin. W tym dniu dodamy Ci rabat. Roku nie pytamy, a datę można zapisać tylko raz.</p>
+      <p class="rb-meta" style="font-size:15px;margin:0 0 14px">Podaj datę urodzenia. W dniu urodzin dodamy Ci rabat, a data pozwala nam przygotowywać oferty tylko dla osób pełnoletnich (np. z alkoholem). Datę można zapisać tylko raz.</p>
       <div class="rb-row">
         <select id="rb-g-d" aria-label="Dzień"></select>
         <select id="rb-g-m" aria-label="Miesiąc"></select>
+        <select id="rb-g-y" aria-label="Rok"></select>
       </div>
       <label class="rb-check"><input type="checkbox" id="rb-g-mkt"> <span>Chcę dostawać e-mailem życzenia, promocje i informacje o akcjach (zgoda dobrowolna, możesz ją wycofać w każdej chwili w zakładce Konto).</span></label>
       <button type="button" class="rb-btn" id="rb-g-save">Zapisz i przejdź dalej</button>
@@ -1126,12 +1127,13 @@ body.dark #site-dish .sd-text{color:#bbb}
       <div class="rb-me" id="rb-me" hidden>
         <h3>🎂 Urodziny i wiadomości</h3>
         <div id="rb-bday-set" hidden>
-          <label>Kiedy masz urodziny? Dostaniesz wtedy od nas rabat. Rok ani wiek nie są potrzebne.</label>
+          <label>Podaj datę urodzenia. W dniu urodzin dostaniesz od nas rabat, a data pozwala nam przygotowywać oferty dla osób pełnoletnich.</label>
           <div class="rb-row">
             <select id="rb-bday-d" aria-label="Dzień"></select>
             <select id="rb-bday-m" aria-label="Miesiąc"></select>
-            <button type="button" class="rb-btn small" id="rb-bday-save" style="margin-bottom:10px">Zapisz</button>
+            <select id="rb-bday-y" aria-label="Rok"></select>
           </div>
+          <button type="button" class="rb-btn small" id="rb-bday-save" style="margin-bottom:10px">Zapisz datę</button>
           <div class="rb-meta" style="margin:-4px 0 8px">Datę można ustawić tylko raz. Rabat urodzinowy przysługuje po 7 dniach od założenia konta.</div>
         </div>
         <div id="rb-bday-done" class="rb-meta" style="margin-bottom:8px" hidden></div>
@@ -1722,6 +1724,7 @@ function cleanup() {
   unsubs.forEach((u) => { try { u(); } catch (_) {} });
   unsubs = [];
   isAdmin = false; isStaff = false; allStaff = []; staffFound = []; myLoyal = null; custView = null; myCoupons = []; allUsers = []; allCoupons = []; allTemplates = []; lastCheck = ""; svVisit = 0; svRating = 0; svDoneFor = 0; myProfile = null; couponsReady = false; bdayTried = false;
+  if ($("rb-bday-set")) delete $("rb-bday-set").dataset.filled;
   allLoyal = []; allPromos = []; dataAt = 0; welcomeMigrated = false; reportEvents = []; feedbackItems = []; kShown = KPAGE;
   if ($("rb-k-card")) $("rb-k-card").innerHTML = "";
 }
@@ -1795,20 +1798,11 @@ let gateUser = null;
 $("rb-g-out").addEventListener("click", () => signOut(auth));
 $("rb-g-skip").addEventListener("click", () => showOnly("user"));
 $("rb-g-save").addEventListener("click", async () => {
-  const user = auth.currentUser;
   const gm = $("rb-g-msg");
-  if (!user) return;
-  const d = Number($("rb-g-d").value), m = Number($("rb-g-m").value);
-  if (!d || !m) { setMsg(gm, "Wybierz dzień i miesiąc urodzin.", "err"); return; }
-  if (d > [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m - 1]) { setMsg(gm, "Taka data nie istnieje.", "err"); return; }
-  if (!confirm("Zapisać urodziny: " + d + " " + MONTHS_GEN[m - 1] + "? Datę można ustawić tylko raz.")) return;
   const btn = $("rb-g-save");
   btn.disabled = true;
   try {
-    const data = { bMonth: m, bDay: d };
-    if ($("rb-g-mkt").checked) data.marketing = true;
-    await withTimeout(updateDoc(doc(db, "users", user.uid), data));
-    showOnly("user");
+    if (await saveBirthday("rb-g", gm, $("rb-g-mkt").checked ? { marketing: true } : null)) showOnly("user");
   } catch (err) {
     setMsg(gm, errText(err), "err");
     $("rb-g-skip").hidden = false;
@@ -1832,7 +1826,8 @@ async function handleUser(user) {
     if (!isStaff && !isAdmin) {
       try {
         const ps = await withTimeout(getDoc(doc(db, "users", user.uid)));
-        needBday = ps.exists() && !Number.isInteger((ps.data() || {}).bMonth);
+        needBday = ps.exists() && !hasFullBday(ps.data());
+        if (needBday) { myProfile = ps.data(); prefillBdayForm("rb-g", myProfile); }
       } catch (e) { needBday = false; }
     }
     if (!isStaff && !isAdmin) { try { await ensureLoyalty(user); } catch (e) { console.warn("Karta lojalnościowa nie została założona (opublikuj nowe reguły):", e && (e.code || e.message)); } }
@@ -2069,11 +2064,49 @@ const meMsg = $("rb-me-msg");
 (function fillBdaySelects() {
   const dHtml = '<option value="">dzień</option>' + Array.from({ length: 31 }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join("");
   const mHtml = '<option value="">miesiąc</option>' + MONTHS_GEN.map((m, i) => `<option value="${i + 1}">${m}</option>`).join("");
+  const thisYear = new Date().getFullYear();
+  const yHtml = '<option value="">rok</option>' + Array.from({ length: thisYear - 1919 }, (_, i) => `<option value="${thisYear - i}">${thisYear - i}</option>`).join("");
   ["rb-bday-d", "rb-g-d"].forEach((id) => { $(id).innerHTML = dHtml; });
   ["rb-bday-m", "rb-g-m"].forEach((id) => { $(id).innerHTML = mHtml; });
+  ["rb-bday-y", "rb-g-y"].forEach((id) => { $(id).innerHTML = yHtml; });
 })();
 function bdayText(u) {
   return u && Number.isInteger(u.bMonth) && Number.isInteger(u.bDay) ? u.bDay + " " + MONTHS_GEN[u.bMonth - 1] : "urodziny: brak danych";
+}
+function ageOf(u) {
+  if (!u || !Number.isInteger(u.bYear) || !Number.isInteger(u.bMonth) || !Number.isInteger(u.bDay)) return null;
+  const t = new Date();
+  let a = t.getFullYear() - u.bYear;
+  if (t.getMonth() + 1 < u.bMonth || (t.getMonth() + 1 === u.bMonth && t.getDate() < u.bDay)) a--;
+  return a;
+}
+function bdayFull(u) {
+  if (!u || !Number.isInteger(u.bMonth) || !Number.isInteger(u.bDay)) return "data urodzenia: brak";
+  const a = ageOf(u);
+  return u.bDay + " " + MONTHS_GEN[u.bMonth - 1] + (Number.isInteger(u.bYear) ? " " + u.bYear + " (" + a + " lat" + (a >= 18 ? ", pełnoletni" : ", niepełnoletni") + ")" : " (bez roku)");
+}
+const dateExists = (d, m, y) => { const t = new Date(y, m - 1, d); return t.getFullYear() === y && t.getMonth() === m - 1 && t.getDate() === d; };
+const hasFullBday = (u) => !!u && Number.isInteger(u.bMonth) && Number.isInteger(u.bDay) && Number.isInteger(u.bYear);
+/* wspólny zapis daty urodzenia (ekran „Zanim zaczniesz” i pole w Koncie); dzień i miesiąc, które już są w profilu, zostają bez zmian */
+async function saveBirthday(pf, msgEl, extra) {
+  const user = auth.currentUser;
+  if (!user) return false;
+  const had = Number.isInteger((myProfile || {}).bMonth);
+  const d = Number($(pf + "-d").value), m = Number($(pf + "-m").value), y = Number($(pf + "-y").value);
+  if (!d || !m || !y) { setMsg(msgEl, "Wybierz dzień, miesiąc i rok urodzenia.", "err"); return false; }
+  if (!dateExists(d, m, y) || y > new Date().getFullYear()) { setMsg(msgEl, "Taka data nie istnieje.", "err"); return false; }
+  if (!confirm("Zapisać datę urodzenia: " + d + " " + MONTHS_GEN[m - 1] + " " + y + "? Datę można ustawić tylko raz.")) return false;
+  const data = had ? { bYear: y } : { bMonth: m, bDay: d, bYear: y };
+  Object.assign(data, extra || {});
+  await withTimeout(updateDoc(doc(db, "users", user.uid), data));
+  return true;
+}
+function prefillBdayForm(pf, prof) {
+  const has = !!prof && Number.isInteger(prof.bMonth);
+  $(pf + "-d").value = has ? String(prof.bDay) : "";
+  $(pf + "-m").value = has ? String(prof.bMonth) : "";
+  $(pf + "-y").value = "";
+  $(pf + "-d").disabled = has; $(pf + "-m").disabled = has;
 }
 function bdayInDays(u) {
   const m = u && u.bMonth, d = u && u.bDay;
@@ -2090,24 +2123,18 @@ function renderMe() {
   const show = !!myProfile && !isAdmin && !isStaff;
   box.hidden = !show;
   if (!show) return;
-  const has = Number.isInteger(myProfile.bMonth) && Number.isInteger(myProfile.bDay);
+  const has = hasFullBday(myProfile);
   $("rb-bday-set").hidden = has;
   $("rb-bday-done").hidden = !has;
-  if (has) $("rb-bday-done").textContent = "🎂 Twoje urodziny: " + bdayText(myProfile) + ". W tym dniu wejdź w Konto, a dodamy Ci urodzinowy rabat.";
+  if (!has && !$("rb-bday-set").dataset.filled) { prefillBdayForm("rb-bday", myProfile); $("rb-bday-set").dataset.filled = "1"; }
+  if (has) $("rb-bday-done").textContent = "🎂 Twoja data urodzenia: " + bdayText(myProfile) + " " + myProfile.bYear + ". W dniu urodzin wejdź w Konto, a dodamy Ci urodzinowy rabat.";
   $("rb-mkt").checked = myProfile.marketing === true;
 }
 $("rb-bday-save").addEventListener("click", async () => {
-  const user = auth.currentUser;
-  if (!user) return;
-  const d = Number($("rb-bday-d").value), m = Number($("rb-bday-m").value);
-  if (!d || !m) { setMsg(meMsg, "Wybierz dzień i miesiąc.", "err"); return; }
-  if (d > [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m - 1]) { setMsg(meMsg, "Taka data nie istnieje.", "err"); return; }
-  if (!confirm("Zapisać urodziny: " + d + " " + MONTHS_GEN[m - 1] + "? Datę można ustawić tylko raz.")) return;
   const btn = $("rb-bday-save");
   btn.disabled = true;
   try {
-    await withTimeout(updateDoc(doc(db, "users", user.uid), { bMonth: m, bDay: d }));
-    setMsg(meMsg, "Zapisane. Dziękujemy!", "ok");
+    if (await saveBirthday("rb-bday", meMsg)) setMsg(meMsg, "Zapisane. Dziękujemy!", "ok");
   } catch (err) { setMsg(meMsg, errText(err), "err"); }
   finally { btn.disabled = false; }
 });
@@ -2531,7 +2558,7 @@ function renderCustomer() {
     const lastMs = Math.max(tsMs(L.lastStampAt), tsMs(L.lastRewardAt));
     const uu = allUsers.find((x) => x.id === uid) || {};
     const adminInfo = isAdmin
-      ? `<div class="rb-meta">🎂 ${bdayText(uu)} · ✉ zgoda na e-mail: ${uu.marketing === true ? "tak" : "nie"}</div><div class="rb-meta">Konto od: ${L.createdAt ? new Date(tsMs(L.createdAt)).toLocaleDateString("pl-PL") : "—"} · ostatnia wizyta: ${lastMs ? new Date(lastMs).toLocaleDateString("pl-PL") + " (" + agoText(lastMs) + ")" : "jeszcze nie było"}</div>`
+      ? `<div class="rb-meta">🎂 ${esc(bdayFull(uu))} · ✉ zgoda na e-mail: ${uu.marketing === true ? "tak" : "nie"}</div><div class="rb-meta">Konto od: ${L.createdAt ? new Date(tsMs(L.createdAt)).toLocaleDateString("pl-PL") : "—"} · ostatnia wizyta: ${lastMs ? new Date(lastMs).toLocaleDateString("pl-PL") + " (" + agoText(lastMs) + ")" : "jeszcze nie było"}</div>`
       : "";
     head = `<div class="rb-big">👤 ${esc(L.name || L.email)}</div><div class="rb-meta">${esc(L.email)} · pieczątek łącznie: ${L.total || 0} · darmowe pizze: ${L.rewards || 0}</div>${adminInfo}
       <div class="rb-stamps">${stampDots(n)}</div>
