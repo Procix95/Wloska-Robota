@@ -1587,13 +1587,29 @@ body.dark #site-dish .sd-text{color:#bbb}
   function onKey(e) { if (e.key === "Escape") closeModal(); }
   function openModal() {
     if (document.getElementById("pwaModal")) return;
+    var android = /Android/i.test(navigator.userAgent);
+    var steps, note, title = "Dodaj Włoską Robotę do ekranu głównego";
+    if (isIOS) {
+      steps = ['<i class="fas fa-arrow-up-from-bracket"></i><span>Stuknij ikonę <b>Udostępnij</b> (kwadrat ze strzałką) na dole lub u góry przeglądarki.</span>',
+        '<i class="fas fa-square-plus"></i><span>Wybierz <b>„Do ekranu początkowego”</b>.</span>',
+        '<i class="fas fa-check"></i><span>Stuknij <b>„Dodaj”</b>. Ikona pojawi się obok Twoich aplikacji.</span>'];
+      note = "Działa w przeglądarce Safari.";
+    } else if (android) {
+      steps = ['<i class="fas fa-ellipsis-vertical"></i><span>Stuknij <b>menu przeglądarki</b> (trzy kropki w rogu).</span>',
+        '<i class="fas fa-square-plus"></i><span>Wybierz <b>„Zainstaluj aplikację”</b> albo <b>„Dodaj do ekranu głównego”</b>.</span>',
+        '<i class="fas fa-check"></i><span>Potwierdź. Ikona pojawi się na ekranie telefonu.</span>'];
+      note = "Jeśli nie widzisz takiej opcji, otwórz stronę w Chrome.";
+    } else {
+      title = "Zainstaluj Włoską Robotę na komputerze";
+      steps = ['<i class="fas fa-download"></i><span>Kliknij <b>ikonę instalacji</b> po prawej stronie paska adresu (monitor ze strzałką lub plus).</span>',
+        '<i class="fas fa-ellipsis-vertical"></i><span>Nie ma jej? Otwórz <b>menu przeglądarki</b> i poszukaj <b>„Zainstaluj…”</b> (w Chrome: Zapisz i udostępnij → Zainstaluj).</span>',
+        '<i class="fas fa-check"></i><span>Potwierdź. Aplikacja otworzy się we własnym oknie.</span>'];
+      note = "Działa w Chrome, Edge i Brave. Firefox nie instaluje stron jako aplikacji.";
+    }
     var m = document.createElement("div");
     m.id = "pwaModal"; m.setAttribute("role", "dialog"); m.setAttribute("aria-modal", "true"); m.setAttribute("aria-labelledby", "pwaTitle");
-    m.innerHTML = '<div class="box"><h3 id="pwaTitle">Dodaj Włoską Robotę do ekranu głównego</h3><ol>' +
-      '<li><i class="fas fa-arrow-up-from-bracket"></i><span>Stuknij ikonę <b>Udostępnij</b> (kwadrat ze strzałką) na dole lub u góry przeglądarki.</span></li>' +
-      '<li><i class="fas fa-square-plus"></i><span>Wybierz <b>„Do ekranu początkowego”</b>.</span></li>' +
-      '<li><i class="fas fa-check"></i><span>Stuknij <b>„Dodaj”</b>. Ikona pojawi się obok Twoich aplikacji.</span></li></ol>' +
-      '<p class="pwa-note">Działa w przeglądarce Safari.</p><button type="button" class="pwa-go" id="pwaClose">Rozumiem</button></div>';
+    m.innerHTML = '<div class="box"><h3 id="pwaTitle">' + title + '</h3><ol>' + steps.map(function (x) { return "<li>" + x + "</li>"; }).join("") +
+      '</ol><p class="pwa-note">' + note + '</p><button type="button" class="pwa-go" id="pwaClose">Rozumiem</button></div>';
     document.body.appendChild(m);
     m.addEventListener("click", function (e) { if (e.target === m) closeModal(); });
     m.querySelector("#pwaClose").addEventListener("click", closeModal);
@@ -1605,7 +1621,7 @@ body.dark #site-dish .sd-text{color:#bbb}
       var d = deferred; deferred = null;
       try { d.prompt(); var r = await d.userChoice; if (r && r.outcome !== "accepted") remember(); } catch (_) {}
       setShown(false); closeCard();
-    } else if (isIOS) { closeCard(); openModal(); }
+    } else { closeCard(); openModal(); }
   }
   function showCard() {
     if (dismissed() || document.getElementById("pwaCard") || (!deferred && !isIOS)) return;
@@ -1621,7 +1637,8 @@ body.dark #site-dish .sd-text{color:#bbb}
   }
   window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); deferred = e; setShown(true); setTimeout(showCard, 4000); });
   window.addEventListener("appinstalled", function () { deferred = null; setShown(false); closeCard(); });
-  if (isIOS) { setShown(true); setTimeout(showCard, 5000); }
+  setShown(true);
+  if (isIOS) setTimeout(showCard, 5000);
   btns.forEach(function (b) { b.addEventListener("click", install); });
 })();
 </script>
