@@ -34,6 +34,7 @@
     "@type": "PostalAddress",
     "streetAddress": "Głuponie 103",
     "addressLocality": "Głuponie",
+    "postalCode": "64-316",
     "addressRegion": "wielkopolskie",
     "addressCountry": "PL"
   },
@@ -816,6 +817,17 @@ body.dark #rabat-overlay{--rb-accent:#0fa65a;--rb-accent2:#0c8c4c;--rb-bg:#17171
 #rabat-overlay #rb-stats .rb-stat span{font-size:10.5px}
 #rabat-overlay .rb-promo{background:var(--rb-card);border:1px dashed var(--rb-accent);border-radius:14px;padding:12px 14px 2px;margin-bottom:14px}
 #rabat-overlay .rb-promo label{margin:0 0 6px;font-weight:600;color:var(--rb-text)}
+#rabat-overlay .rb-campaign{border-radius:12px;padding:11px 14px;margin:0 0 14px;font-weight:600;font-size:14px;line-height:1.4;color:#fff;background:var(--rb-accent)}
+#rabat-overlay .rb-campaign.promo{background:var(--rb-gold);color:#222}
+#rabat-overlay .rb-campaign.warn{background:var(--rb-red)}
+#rabat-overlay .rb-me{background:var(--rb-card);border:1px solid var(--rb-border);border-radius:14px;padding:12px 14px 6px;margin-bottom:14px}
+#rabat-overlay .rb-me h3{margin:0 0 8px;font-size:16px}
+#rabat-overlay .rb-me .rb-row select{flex:1;margin-bottom:10px}
+#rabat-overlay #rb-gate .rb-row select{flex:1}
+#rabat-overlay #rb-gate h2{margin-top:6px}
+#rabat-overlay .rb-camp{border:1px solid var(--rb-border);border-radius:14px;padding:12px;margin:10px 0;background:var(--rb-input)}
+#rabat-overlay .rb-msgbox a.rb-btn{text-decoration:none;text-align:center;margin-bottom:8px}
+#rabat-overlay .rb-msgbox textarea{width:100%;padding:11px 12px;margin-bottom:10px;border-radius:10px;border:1px solid var(--rb-border);background:var(--rb-card);color:var(--rb-text);font-size:15px;font-family:inherit;resize:vertical}
 #rabat-overlay .rb-stat em{display:block;font-style:normal;font-size:11px;color:var(--rb-muted);margin-top:3px;line-height:1.25}
 #rabat-overlay .rb-alert{display:flex;gap:10px;align-items:center;justify-content:space-between;background:var(--rb-card);border:1px solid var(--rb-border);border-left:5px solid var(--rb-gold);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:14px}
 #rabat-overlay .rb-alert.bad{border-left-color:var(--rb-red)}
@@ -846,7 +858,7 @@ body.dark #rabat-overlay{--rb-accent:#0fa65a;--rb-accent2:#0c8c4c;--rb-bg:#17171
 #rabat-overlay .rb-close:hover{background:var(--rb-border)}
 #rabat-overlay .rb-box>#rb-loading{padding:50px 22px;text-align:center;color:var(--rb-muted)}
 #rabat-overlay .rb-spin{display:block;width:34px;height:34px;margin:0 auto 12px;border:3px solid var(--rb-border);border-top-color:var(--rb-accent);border-radius:50%;animation:rbSpin .8s linear infinite}
-#rabat-overlay #rb-auth,#rabat-overlay #rb-user{padding:6px 22px 0}
+#rabat-overlay #rb-auth,#rabat-overlay #rb-user,#rabat-overlay #rb-gate{padding:6px 22px 0}
 /* logowanie */
 #rabat-overlay .rb-hello{text-align:center;padding:6px 0 14px}
 #rabat-overlay .rb-hello .rb-emoji{font-size:44px;line-height:1}
@@ -917,7 +929,7 @@ body.dark #rabat-overlay{--rb-accent:#0fa65a;--rb-accent2:#0c8c4c;--rb-bg:#17171
 @media (max-width:560px){
   #rabat-overlay{padding:0;background:var(--rb-bg)}
   #rabat-overlay .rb-box{margin:0;min-height:100%;border-radius:0;box-shadow:none}
-  #rabat-overlay .rb-inner,#rabat-overlay #rb-auth,#rabat-overlay #rb-user{padding-left:16px;padding-right:16px}
+  #rabat-overlay .rb-inner,#rabat-overlay #rb-auth,#rabat-overlay #rb-user,#rabat-overlay #rb-gate{padding-left:16px;padding-right:16px}
   #rabat-overlay .rb-head{padding-left:16px;padding-right:12px}
   #rabat-overlay .rb-codebox .rb-code{font-size:19px}
 }
@@ -1029,6 +1041,19 @@ body.dark #site-dish .sd-text{color:#bbb}
     </div>
 
     <div id="rb-loading"><span class="rb-spin"></span>Ładowanie…</div>
+    <div id="rb-gate" hidden>
+      <h2>Zanim zaczniesz 🎂</h2>
+      <p class="rb-meta" style="font-size:15px;margin:0 0 14px">Podaj dzień i miesiąc swoich urodzin. W tym dniu dodamy Ci rabat. Roku nie pytamy, a datę można zapisać tylko raz.</p>
+      <div class="rb-row">
+        <select id="rb-g-d" aria-label="Dzień"></select>
+        <select id="rb-g-m" aria-label="Miesiąc"></select>
+      </div>
+      <label class="rb-check"><input type="checkbox" id="rb-g-mkt"> <span>Chcę dostawać e-mailem życzenia, promocje i informacje o akcjach (zgoda dobrowolna, możesz ją wycofać w każdej chwili w zakładce Konto).</span></label>
+      <button type="button" class="rb-btn" id="rb-g-save">Zapisz i przejdź dalej</button>
+      <div class="rb-msg" id="rb-g-msg" role="status"></div>
+      <button type="button" class="rb-btn secondary small" id="rb-g-skip" hidden>Wejdź bez zapisywania (problem techniczny)</button>
+      <button type="button" class="rb-link" id="rb-g-out">Wyloguj</button>
+    </div>
 
     <!-- Logowanie / rejestracja -->
     <div id="rb-auth" hidden>
@@ -1097,6 +1122,22 @@ body.dark #site-dish .sd-text{color:#bbb}
           <a class="rb-btn" id="rb-sv-google" target="_blank" rel="noopener" hidden>Zostaw opinię w Google</a>
         </div>
       </div>
+      <div class="rb-campaign" id="rb-campaign" hidden></div>
+      <div class="rb-me" id="rb-me" hidden>
+        <h3>🎂 Urodziny i wiadomości</h3>
+        <div id="rb-bday-set" hidden>
+          <label>Kiedy masz urodziny? Dostaniesz wtedy od nas rabat. Rok ani wiek nie są potrzebne.</label>
+          <div class="rb-row">
+            <select id="rb-bday-d" aria-label="Dzień"></select>
+            <select id="rb-bday-m" aria-label="Miesiąc"></select>
+            <button type="button" class="rb-btn small" id="rb-bday-save" style="margin-bottom:10px">Zapisz</button>
+          </div>
+          <div class="rb-meta" style="margin:-4px 0 8px">Datę można ustawić tylko raz. Rabat urodzinowy przysługuje po 7 dniach od założenia konta.</div>
+        </div>
+        <div id="rb-bday-done" class="rb-meta" style="margin-bottom:8px" hidden></div>
+        <label class="rb-check"><input type="checkbox" id="rb-mkt"> <span>Chcę dostawać e-mailem życzenia, promocje i informacje o akcjach (zgoda dobrowolna, możesz ją wycofać w każdej chwili tutaj).</span></label>
+        <div class="rb-msg" id="rb-me-msg" role="status"></div>
+      </div>
       <div class="rb-sec"><h3>Twoje kody rabatowe</h3><span id="rb-count"></span></div>
       <div class="rb-promo" id="rb-promo">
         <label for="rb-promo-in">Masz kod promocyjny?</label>
@@ -1160,12 +1201,40 @@ body.dark #site-dish .sd-text{color:#bbb}
         <div class="rb-pane" data-pane="clients" hidden>
           <div id="rb-k-card"></div>
           <div class="rb-msg" id="rb-k-msg" role="status"></div>
+          <details class="rb-res rb-msgbox" id="rb-m-box">
+            <summary><b>✉ Wiadomość e-mail do klientów</b></summary>
+            <div class="rb-meta" style="margin:6px 0 8px">Strona nie wysyła e-maili sama. Wybierasz klientów, a program pocztowy otwiera się z gotową wiadomością, adresy są w UDW (klienci nie widzą nawzajem swoich adresów). Dostają ją tylko ci, którzy zaznaczyli zgodę w Koncie.</div>
+            <label for="rb-m-aud">Do kogo</label>
+            <select id="rb-m-aud">
+              <option value="all">Wszyscy ze zgodą na e-mail</option>
+              <option value="bday0">🎂 Mają dziś urodziny (ze zgodą)</option>
+              <option value="bday7">🎂 Urodziny w ciągu 7 dni (ze zgodą)</option>
+              <option value="inactive">😴 Nie byli od 30+ dni (ze zgodą)</option>
+            </select>
+            <label for="rb-m-tpl">Szablon</label>
+            <select id="rb-m-tpl">
+              <option value="bday">Życzenia urodzinowe</option>
+              <option value="miss">Tęsknimy za Tobą</option>
+              <option value="promo">Akcja / promocja</option>
+              <option value="custom">Własna wiadomość</option>
+            </select>
+            <label for="rb-m-subj">Temat</label>
+            <input id="rb-m-subj" type="text" maxlength="120">
+            <label for="rb-m-body">Treść (stopka z informacją o wypisaniu doda się sama)</label>
+            <textarea id="rb-m-body" rows="8" maxlength="1500"></textarea>
+            <div class="rb-meta" id="rb-m-count" style="margin-bottom:8px"></div>
+            <div id="rb-m-btns"></div>
+            <div class="rb-actions"><button type="button" class="rb-btn secondary small" id="rb-m-copymail">Kopiuj adresy</button><button type="button" class="rb-btn secondary small" id="rb-m-copytext">Kopiuj treść</button></div>
+            <div class="rb-msg" id="rb-m-msg" role="status"></div>
+          </details>
           <input id="rb-k-search" type="search" placeholder="Szukaj klienta: imię lub e-mail" autocomplete="off">
           <select id="rb-k-filter" aria-label="Filtr klientów">
             <option value="all">Wszyscy klienci</option>
             <option value="full">🍕 Pełna karta (pizza gratis czeka)</option>
             <option value="inactive">😴 Nieaktywni (dawno nie byli)</option>
             <option value="never">🆕 Jeszcze nie byli w lokalu</option>
+            <option value="bday">🎂 Urodziny w ciągu 7 dni</option>
+            <option value="mkt">✉ Zgoda na e-mail</option>
             <option value="dups">👥 Możliwe duplikaty kont</option>
           </select>
           <select id="rb-k-days" aria-label="Nieaktywni od" hidden>
@@ -1309,6 +1378,11 @@ body.dark #site-dish .sd-text{color:#bbb}
           <label for="rb-site-notice-until">Wyświetlaj do (puste = dopóki nie wyłączysz)</label>
           <input id="rb-site-notice-until" type="date">
           <label class="rb-check"><input id="rb-site-notice-on" type="checkbox"> Pokazuj komunikat na stronie</label>
+
+          <h4>Akcje i specjalne dni</h4>
+          <div class="rb-meta" style="margin:-4px 0 6px">Zaplanuj z wyprzedzeniem napis na górze strony i w Koncie klienta, np. happy hour albo świąteczną akcję. Pokaże się sam w ustawionych dniach (i godzinach, jeśli je podasz). Komunikat ręczny wyżej ma pierwszeństwo. Zapisz na dole.</div>
+          <div id="rb-camp-list"></div>
+          <button type="button" class="rb-btn secondary small" id="rb-camp-add">+ Dodaj akcję</button>
 
           <h4>Pizza dnia</h4>
           <select id="rb-site-dish"></select>
@@ -1639,6 +1713,7 @@ let allUsers = [];
 let allCoupons = [];
 let allTemplates = [];
 let allPromos = [];
+let myProfile = null, couponsReady = false, bdayTried = false;
 let selTpl = {};
 let lastCheck = "";
 
@@ -1646,12 +1721,13 @@ function cleanup() {
   stopScanner();
   unsubs.forEach((u) => { try { u(); } catch (_) {} });
   unsubs = [];
-  isAdmin = false; isStaff = false; allStaff = []; staffFound = []; myLoyal = null; custView = null; myCoupons = []; allUsers = []; allCoupons = []; allTemplates = []; lastCheck = ""; svVisit = 0; svRating = 0; svDoneFor = 0;
+  isAdmin = false; isStaff = false; allStaff = []; staffFound = []; myLoyal = null; custView = null; myCoupons = []; allUsers = []; allCoupons = []; allTemplates = []; lastCheck = ""; svVisit = 0; svRating = 0; svDoneFor = 0; myProfile = null; couponsReady = false; bdayTried = false;
   allLoyal = []; allPromos = []; dataAt = 0; welcomeMigrated = false; reportEvents = []; feedbackItems = []; kShown = KPAGE;
   if ($("rb-k-card")) $("rb-k-card").innerHTML = "";
 }
 function showOnly(which) {
   $("rb-loading").hidden = which !== "loading";
+  $("rb-gate").hidden = which !== "gate";
   $("rb-auth").hidden = which !== "auth";
   $("rb-user").hidden = which !== "user";
   if (which === "auth") initGoogleButton();
@@ -1714,11 +1790,37 @@ async function ensureLoyalty(user) {
   }));
 }
 
+/* Ekran „Zanim zaczniesz”: każdy klient (nowy i obecny) musi raz podać dzień i miesiąc urodzin. */
+let gateUser = null;
+$("rb-g-out").addEventListener("click", () => signOut(auth));
+$("rb-g-skip").addEventListener("click", () => showOnly("user"));
+$("rb-g-save").addEventListener("click", async () => {
+  const user = auth.currentUser;
+  const gm = $("rb-g-msg");
+  if (!user) return;
+  const d = Number($("rb-g-d").value), m = Number($("rb-g-m").value);
+  if (!d || !m) { setMsg(gm, "Wybierz dzień i miesiąc urodzin.", "err"); return; }
+  if (d > [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m - 1]) { setMsg(gm, "Taka data nie istnieje.", "err"); return; }
+  if (!confirm("Zapisać urodziny: " + d + " " + MONTHS_GEN[m - 1] + "? Datę można ustawić tylko raz.")) return;
+  const btn = $("rb-g-save");
+  btn.disabled = true;
+  try {
+    const data = { bMonth: m, bDay: d };
+    if ($("rb-g-mkt").checked) data.marketing = true;
+    await withTimeout(updateDoc(doc(db, "users", user.uid), data));
+    showOnly("user");
+  } catch (err) {
+    setMsg(gm, errText(err), "err");
+    $("rb-g-skip").hidden = false;
+  } finally { btn.disabled = false; }
+});
+
 async function handleUser(user) {
   cleanup();
   if (!user) { showOnly("auth"); return; }
   showOnly("loading");
   let gotWelcome = false;
+  let needBday = false;
   try {
     isAdmin = (await withTimeout(getDoc(doc(db, "admins", user.uid)))).exists();
     if (!isAdmin) {
@@ -1727,6 +1829,12 @@ async function handleUser(user) {
     }
     // konto obsługi nie jest klientem: bez profilu i bez kodu powitalnego
     if (!isStaff) gotWelcome = await ensureProfile(user);
+    if (!isStaff && !isAdmin) {
+      try {
+        const ps = await withTimeout(getDoc(doc(db, "users", user.uid)));
+        needBday = ps.exists() && !Number.isInteger((ps.data() || {}).bMonth);
+      } catch (e) { needBday = false; }
+    }
     if (!isStaff && !isAdmin) { try { await ensureLoyalty(user); } catch (e) { console.warn("Karta lojalnościowa nie została założona (opublikuj nowe reguły):", e && (e.code || e.message)); } }
   } catch (err) {
     console.error("Rabat:", err);
@@ -1753,7 +1861,10 @@ async function handleUser(user) {
   if (!isAdmin && isStaff) setAdminTab("check");
   else if (isAdmin) setAdminTab("today");
   $("rb-welcome").hidden = !gotWelcome;
-  showOnly("user");
+  gateUser = user;
+  setMsg($("rb-g-msg"), "");
+  $("rb-g-skip").hidden = true;
+  showOnly(needBday ? "gate" : "user");
 
   if (!isStaff && !isAdmin) {
     unsubs.push(onSnapshot(doc(db, "loyalty", user.uid),
@@ -1762,9 +1873,15 @@ async function handleUser(user) {
   }
   unsubs.push(onSnapshot(
     query(collection(db, "coupons"), where("uid", "==", user.uid)),
-    (s) => { myCoupons = s.docs.map((d) => ({ id: d.id, ...d.data() })); renderMy(); },
+    (s) => { myCoupons = s.docs.map((d) => ({ id: d.id, ...d.data() })); couponsReady = true; renderMy(); maybeBirthday(); },
     (err) => { console.error(err); $("rb-my-list").innerHTML = '<div class="rb-empty">Nie udało się wczytać kodów (' + esc(err.code || err.message) + ').</div>'; }
   ));
+
+  if (!isStaff && !isAdmin) {
+    unsubs.push(onSnapshot(doc(db, "users", user.uid),
+      (s) => { myProfile = s.exists() ? s.data() : null; renderMe(); maybeBirthday(); },
+      (err) => { console.warn("Profil niedostępny:", err && (err.code || err.message)); }));
+  }
 
   if (isAdmin) {
     unsubs.push(onSnapshot(collection(db, "users"), (s) => {
@@ -1944,6 +2061,89 @@ function expiryInfo(c) {
   if (days === 1) extra = " · zostaje 1 dzień";
   else if (days > 1 && days <= 14) extra = " · zostało " + days + " dni";
   return { text: "Ważny do: " + fmtDate(c.expiresAt) + extra, soon: days >= 0 && days <= 3 };
+}
+
+const MONTHS_GEN = ["stycznia", "lutego", "marca", "kwietnia", "maja", "czerwca", "lipca", "sierpnia", "września", "października", "listopada", "grudnia"];
+const BDAY_DESC = "Urodzinowy rabat -5 zł na zamówienie";
+const meMsg = $("rb-me-msg");
+(function fillBdaySelects() {
+  const dHtml = '<option value="">dzień</option>' + Array.from({ length: 31 }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join("");
+  const mHtml = '<option value="">miesiąc</option>' + MONTHS_GEN.map((m, i) => `<option value="${i + 1}">${m}</option>`).join("");
+  ["rb-bday-d", "rb-g-d"].forEach((id) => { $(id).innerHTML = dHtml; });
+  ["rb-bday-m", "rb-g-m"].forEach((id) => { $(id).innerHTML = mHtml; });
+})();
+function bdayText(u) {
+  return u && Number.isInteger(u.bMonth) && Number.isInteger(u.bDay) ? u.bDay + " " + MONTHS_GEN[u.bMonth - 1] : "urodziny: brak danych";
+}
+function bdayInDays(u) {
+  const m = u && u.bMonth, d = u && u.bDay;
+  if (!Number.isInteger(m) || !Number.isInteger(d)) return Infinity;
+  const t = new Date();
+  const t0 = new Date(t.getFullYear(), t.getMonth(), t.getDate());
+  let n = new Date(t.getFullYear(), m - 1, d);
+  if (n < t0) n = new Date(t.getFullYear() + 1, m - 1, d);
+  return Math.round((n - t0) / 86400000);
+}
+function renderMe() {
+  const box = $("rb-me");
+  if (!box) return;
+  const show = !!myProfile && !isAdmin && !isStaff;
+  box.hidden = !show;
+  if (!show) return;
+  const has = Number.isInteger(myProfile.bMonth) && Number.isInteger(myProfile.bDay);
+  $("rb-bday-set").hidden = has;
+  $("rb-bday-done").hidden = !has;
+  if (has) $("rb-bday-done").textContent = "🎂 Twoje urodziny: " + bdayText(myProfile) + ". W tym dniu wejdź w Konto, a dodamy Ci urodzinowy rabat.";
+  $("rb-mkt").checked = myProfile.marketing === true;
+}
+$("rb-bday-save").addEventListener("click", async () => {
+  const user = auth.currentUser;
+  if (!user) return;
+  const d = Number($("rb-bday-d").value), m = Number($("rb-bday-m").value);
+  if (!d || !m) { setMsg(meMsg, "Wybierz dzień i miesiąc.", "err"); return; }
+  if (d > [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m - 1]) { setMsg(meMsg, "Taka data nie istnieje.", "err"); return; }
+  if (!confirm("Zapisać urodziny: " + d + " " + MONTHS_GEN[m - 1] + "? Datę można ustawić tylko raz.")) return;
+  const btn = $("rb-bday-save");
+  btn.disabled = true;
+  try {
+    await withTimeout(updateDoc(doc(db, "users", user.uid), { bMonth: m, bDay: d }));
+    setMsg(meMsg, "Zapisane. Dziękujemy!", "ok");
+  } catch (err) { setMsg(meMsg, errText(err), "err"); }
+  finally { btn.disabled = false; }
+});
+$("rb-mkt").addEventListener("change", async () => {
+  const user = auth.currentUser;
+  const on = $("rb-mkt").checked;
+  if (!user) return;
+  try {
+    await withTimeout(updateDoc(doc(db, "users", user.uid), { marketing: on }));
+    setMsg(meMsg, on ? "Dziękujemy! Będziemy dawać znać o ciekawych akcjach." : "Zgoda wycofana. Nie wyślemy Ci więcej e-maili z promocjami.", "ok");
+  } catch (err) { $("rb-mkt").checked = !on; setMsg(meMsg, errText(err), "err"); }
+});
+/* Rabat urodzinowy: raz w roku, w dniu urodzin (wg UTC, tak jak sprawdzają reguły), dla konta starszego niż 7 dni. */
+async function maybeBirthday() {
+  const user = auth.currentUser;
+  if (!user || isAdmin || isStaff || bdayTried || !couponsReady || !myProfile) return;
+  const m = myProfile.bMonth, d = myProfile.bDay;
+  if (!Number.isInteger(m) || !Number.isInteger(d)) return;
+  const now = new Date();
+  if (now.getUTCMonth() + 1 !== m || now.getUTCDate() !== d) return;
+  const created = tsMs(myProfile.createdAt);
+  if (!created || Date.now() - created < 7 * DAY) return;
+  const year = now.getUTCFullYear();
+  const id = "bday_" + user.uid + "_" + year;
+  bdayTried = true;
+  if (myCoupons.some((c) => c.id === id)) return;
+  const exp = new Date(Date.now() + 7 * DAY);
+  exp.setHours(23, 59, 59, 0);
+  try {
+    await withTimeout(setDoc(doc(db, "coupons", id), {
+      uid: user.uid, userEmail: user.email || "",
+      code: "URODZINY" + String(year - 2000).padStart(2, "0") + "-" + user.uid.slice(0, 6).toUpperCase(),
+      description: BDAY_DESC, expiresAt: Timestamp.fromDate(exp), used: false, createdAt: serverTimestamp()
+    }));
+    setMsg(meMsg, "🎉 Wszystkiego najlepszego! Dodaliśmy Ci urodzinowy rabat. Znajdziesz go niżej w kodach.", "ok");
+  } catch (e) { console.warn("Rabat urodzinowy nie został utworzony:", e && (e.code || e.message)); }
 }
 
 function renderMy() {
@@ -2329,8 +2529,9 @@ function renderCustomer() {
     const next = last ? new Date(last.getTime() + STAMP_COOLDOWN_H * 3600000) : null;
     const cool = !isAdmin && next && next > new Date();
     const lastMs = Math.max(tsMs(L.lastStampAt), tsMs(L.lastRewardAt));
+    const uu = allUsers.find((x) => x.id === uid) || {};
     const adminInfo = isAdmin
-      ? `<div class="rb-meta">Konto od: ${L.createdAt ? new Date(tsMs(L.createdAt)).toLocaleDateString("pl-PL") : "—"} · ostatnia wizyta: ${lastMs ? new Date(lastMs).toLocaleDateString("pl-PL") + " (" + agoText(lastMs) + ")" : "jeszcze nie było"}</div>`
+      ? `<div class="rb-meta">🎂 ${bdayText(uu)} · ✉ zgoda na e-mail: ${uu.marketing === true ? "tak" : "nie"}</div><div class="rb-meta">Konto od: ${L.createdAt ? new Date(tsMs(L.createdAt)).toLocaleDateString("pl-PL") : "—"} · ostatnia wizyta: ${lastMs ? new Date(lastMs).toLocaleDateString("pl-PL") + " (" + agoText(lastMs) + ")" : "jeszcze nie było"}</div>`
       : "";
     head = `<div class="rb-big">👤 ${esc(L.name || L.email)}</div><div class="rb-meta">${esc(L.email)} · pieczątek łącznie: ${L.total || 0} · darmowe pizze: ${L.rewards || 0}</div>${adminInfo}
       <div class="rb-stamps">${stampDots(n)}</div>
@@ -2634,7 +2835,7 @@ const DELIVERY_DEFAULT = ["Głuponie", "Trzcianka", "Tomaszewo", "Michorzewo", "
   .map((name) => ({ name, fee: 10, min: null, freeFrom: null }));
 // Link do formularza opinii w Google (domyślny; admin może go zmienić lub wyczyścić w panelu: Strona → Opinie w Google).
 const GOOGLE_REVIEW_DEFAULT = "https://g.page/r/CUq2_T6CQcy5EAE/review";
-let siteCfg = { prices: {}, unavailable: {}, hidden: {}, products: [], notice: null, dish: null, delivery: { places: DELIVERY_DEFAULT }, googleReviewUrl: GOOGLE_REVIEW_DEFAULT };
+let siteCfg = { prices: {}, unavailable: {}, hidden: {}, products: [], campaigns: [], notice: null, dish: null, delivery: { places: DELIVERY_DEFAULT }, googleReviewUrl: GOOGLE_REVIEW_DEFAULT };
 const PROD_CATS = [["klasyczne", "Klasyczne"], ["miesne", "Mięsne"], ["vege", "Wege"], ["sosy", "Sosy"], ["makarony", "Makarony"], ["dodatki", "Dodatki"]];
 const MAX_PRODUCTS = 40;
 const menuEls = () => [...document.querySelectorAll("#menuGrid .menu-item")];
@@ -2648,7 +2849,8 @@ const tsMs = (t) => (t ? (t.toDate ? t.toDate().getTime() : (t.seconds ? t.secon
 
 function plainCfg(c) {
   const n = c.notice ? { ...c.notice, until: c.notice.until ? { seconds: Math.floor(tsMs(c.notice.until) / 1000) } : null } : null;
-  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, products: c.products || [], notice: n, dish: c.dish || null, delivery: c.delivery || null, googleReviewUrl: typeof c.googleReviewUrl === "string" ? c.googleReviewUrl : null };
+  const camps = (c.campaigns || []).map((x) => ({ ...x, from: x.from ? { seconds: Math.floor(tsMs(x.from) / 1000) } : null, until: x.until ? { seconds: Math.floor(tsMs(x.until) / 1000) } : null }));
+  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, products: c.products || [], campaigns: camps, notice: n, dish: c.dish || null, delivery: c.delivery || null, googleReviewUrl: typeof c.googleReviewUrl === "string" ? c.googleReviewUrl : null };
 }
 
 function renderDish() {
@@ -2668,13 +2870,39 @@ function renderDish() {
   box.style.display = "block";
 }
 
-function renderNotice() {
+/* Akcja z kalendarza (od-do, opcjonalnie godziny), która trwa właśnie teraz */
+function activeCampaign() {
+  const now = new Date();
+  const t = now.getTime();
+  const min = now.getHours() * 60 + now.getMinutes();
+  const hm = (v) => { const m = /^(\d{1,2}):(\d{2})$/.exec(v || ""); return m ? Number(m[1]) * 60 + Number(m[2]) : null; };
+  return (siteCfg.campaigns || []).find((c) => {
+    if (!c || !c.active || !c.text) return false;
+    const f = tsMs(c.from), u = tsMs(c.until);
+    if ((f && t < f) || (u && t > u)) return false;
+    const a = hm(c.hFrom), b = hm(c.hTo);
+    if (a !== null && b !== null) return a <= b ? (min >= a && min < b) : (min >= a || min < b);
+    return true;
+  }) || null;
+}
+function effectiveNotice() {
   const n = siteCfg.notice;
+  const until = n ? tsMs(n.until) : 0;
+  if (n && n.active && n.text && (!until || until > Date.now())) return n;
+  const c = activeCampaign();
+  return c ? { text: c.text, type: c.type, active: true } : null;
+}
+function renderNotice() {
+  const n = effectiveNotice();
   let bar = $("site-notice");
   let closed = "";
   try { closed = sessionStorage.getItem("wr_notice_closed") || ""; } catch (_) {}
-  const until = n ? tsMs(n.until) : 0;
-  const show = !!(n && n.active && n.text && (!until || until > Date.now()) && closed !== n.text);
+  const strip = $("rb-campaign");
+  if (strip) {
+    strip.hidden = !(n && n.text);
+    if (n && n.text) { strip.textContent = "📣 " + n.text; strip.className = "rb-campaign " + (["promo", "warn"].includes(n.type) ? n.type : ""); }
+  }
+  const show = !!(n && n.text && closed !== n.text);
   if (!show) { if (bar) bar.style.display = "none"; document.body.classList.remove("has-notice"); return; }
   if (!bar) {
     bar = document.createElement("div");
@@ -2684,7 +2912,7 @@ function renderNotice() {
     const hero = $("home");
     hero.parentNode.insertBefore(bar, hero);
     bar.querySelector("button").addEventListener("click", () => {
-      try { sessionStorage.setItem("wr_notice_closed", (siteCfg.notice && siteCfg.notice.text) || ""); } catch (_) {}
+      try { sessionStorage.setItem("wr_notice_closed", (effectiveNotice() || {}).text || ""); } catch (_) {}
       bar.style.display = "none";
       document.body.classList.remove("has-notice");
     });
@@ -2696,6 +2924,8 @@ function renderNotice() {
   bar.style.display = "block";
   document.body.classList.add("has-notice");
 }
+
+setInterval(() => { try { renderNotice(); } catch (_) {} }, 60000);
 
 function validProduct(p) {
   return !!(p && typeof p.name === "string" && p.name.trim() && typeof p.price === "string" && p.price.trim());
@@ -2723,7 +2953,7 @@ function renderProducts() {
 function applySite(cfg) {
   siteCfg = {
     prices: (cfg && cfg.prices) || {}, unavailable: (cfg && cfg.unavailable) || {}, hidden: (cfg && cfg.hidden) || {},
-    products: Array.isArray(cfg && cfg.products) ? cfg.products : [], notice: (cfg && cfg.notice) || null, dish: (cfg && cfg.dish) || null,
+    products: Array.isArray(cfg && cfg.products) ? cfg.products : [], campaigns: Array.isArray(cfg && cfg.campaigns) ? cfg.campaigns : [], notice: (cfg && cfg.notice) || null, dish: (cfg && cfg.dish) || null,
     delivery: { places: Array.isArray(cfg && cfg.delivery && cfg.delivery.places) ? cfg.delivery.places : DELIVERY_DEFAULT },
     googleReviewUrl: (cfg && typeof cfg.googleReviewUrl === "string") ? cfg.googleReviewUrl : GOOGLE_REVIEW_DEFAULT
   };
@@ -2854,7 +3084,56 @@ function delRowHtml(p) {
   </div>`;
 }
 
+const MAX_CAMPAIGNS = 10;
+function campRowHtml(c) {
+  c = c || {};
+  const id = c.id || (Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
+  const f = tsMs(c.from), u = tsMs(c.until);
+  const type = NOTICE_TYPES.includes(c.type) ? c.type : "promo";
+  return `<div class="rb-camp" data-id="${esc(id)}">
+    <input class="rb-camp-text" type="text" maxlength="200" placeholder="np. Happy hour: -5 zł na każdą pizzę!" value="${esc(c.text || "")}">
+    <select class="rb-camp-type" aria-label="Rodzaj">
+      <option value="info"${type === "info" ? " selected" : ""}>Informacja (zielony)</option>
+      <option value="promo"${type === "promo" ? " selected" : ""}>Promocja (złoty)</option>
+      <option value="warn"${type === "warn" ? " selected" : ""}>Uwaga (czerwony)</option>
+    </select>
+    <div class="rb-row">
+      <div style="flex:1"><label>Od dnia</label><input class="rb-camp-from" type="date" value="${f ? ymd(new Date(f)) : ""}"></div>
+      <div style="flex:1"><label>Do dnia</label><input class="rb-camp-until" type="date" value="${u ? ymd(new Date(u)) : ""}"></div>
+    </div>
+    <div class="rb-row">
+      <div style="flex:1"><label>Od godz. (opcjonalnie)</label><input class="rb-camp-hfrom" type="time" value="${esc(c.hFrom || "")}"></div>
+      <div style="flex:1"><label>Do godz.</label><input class="rb-camp-hto" type="time" value="${esc(c.hTo || "")}"></div>
+    </div>
+    <label class="rb-check"><input class="rb-camp-on" type="checkbox"${c.active === false ? "" : " checked"}> Włączona</label>
+    <button type="button" class="rb-btn secondary small rb-camp-del">Usuń akcję</button>
+  </div>`;
+}
+function collectCampaigns() {
+  const list = [];
+  let bad = "";
+  document.querySelectorAll("#rb-camp-list .rb-camp").forEach((row) => {
+    if (bad) return;
+    const q = (sel) => row.querySelector(sel);
+    const text = q(".rb-camp-text").value.replace(/\s+/g, " ").trim();
+    const from = q(".rb-camp-from").value, until = q(".rb-camp-until").value;
+    const hf = q(".rb-camp-hfrom").value, ht = q(".rb-camp-hto").value;
+    if (!text && !from && !until) return;
+    if (!text) { bad = "Wpisz treść każdej akcji."; return; }
+    if (from && until && until < from) { bad = "W akcji „" + text.slice(0, 30) + "” data „do” jest przed datą „od”."; return; }
+    if ((hf && !ht) || (!hf && ht)) { bad = "W akcji „" + text.slice(0, 30) + "” podaj obie godziny albo żadnej."; return; }
+    list.push({
+      id: row.dataset.id, text, type: q(".rb-camp-type").value, active: q(".rb-camp-on").checked,
+      from: from ? Timestamp.fromDate(new Date(from + "T00:00:00")) : null,
+      until: until ? Timestamp.fromDate(new Date(until + "T23:59:59")) : null,
+      hFrom: hf || "", hTo: ht || ""
+    });
+  });
+  if (!bad && list.length > MAX_CAMPAIGNS) bad = "Maksymalnie " + MAX_CAMPAIGNS + " akcji.";
+  return { list, bad };
+}
 function fillSiteForm() {
+  $("rb-camp-list").innerHTML = (siteCfg.campaigns || []).map(campRowHtml).join("");
   const dp = siteCfg.delivery.places.filter(validPlace);
   $("rb-del-list").innerHTML = dp.map(delRowHtml).join("");
   $("rb-site-google").value = siteCfg.googleReviewUrl || "";
@@ -2900,6 +3179,18 @@ $("rb-del-bulk").addEventListener("click", () => {
 $("rb-del-list").addEventListener("click", (e) => {
   const b = e.target.closest(".rb-del-rm");
   if (b) b.closest(".rb-del").remove();
+});
+$("rb-camp-add").addEventListener("click", () => {
+  const list = $("rb-camp-list");
+  if (list.querySelectorAll(".rb-camp").length >= MAX_CAMPAIGNS) { setMsg(siteMsg, "Maksymalnie " + MAX_CAMPAIGNS + " akcji.", "err"); return; }
+  list.insertAdjacentHTML("beforeend", campRowHtml());
+  const last = list.lastElementChild;
+  last.scrollIntoView({ behavior: "smooth", block: "center" });
+  last.querySelector(".rb-camp-text").focus();
+});
+$("rb-camp-list").addEventListener("click", (e) => {
+  const b = e.target.closest(".rb-camp-del");
+  if (b && confirm("Usunąć tę akcję? Zmiana wejdzie po kliknięciu „Zapisz i opublikuj”.")) b.closest(".rb-camp").remove();
 });
 $("rb-prod-add").addEventListener("click", () => {
   const list = $("rb-prod-list");
@@ -3000,13 +3291,16 @@ $("rb-site-save").addEventListener("click", async () => {
     active: $("rb-site-notice-on").checked && !!text,
     until: until ? Timestamp.fromDate(new Date(until + "T23:59:59")) : null
   };
+  const camp = collectCampaigns();
+  if (camp.bad) { setMsg(siteMsg, camp.bad, "err"); return; }
+  const campaigns = camp.list;
   const dishKey = $("rb-site-dish").value;
   const dish = { key: dishKey, text: $("rb-site-dish-text").value.trim(), active: $("rb-site-dish-on").checked && !!dishKey };
   const btn = $("rb-site-save");
   btn.disabled = true;
   try {
-    await setDoc(doc(db, "site", "config"), { prices, unavailable, hidden, products, notice, dish, delivery, googleReviewUrl, updatedAt: serverTimestamp() });
-    const cfg = { prices, unavailable, hidden, products, notice, dish, delivery, googleReviewUrl };
+    await setDoc(doc(db, "site", "config"), { prices, unavailable, hidden, products, campaigns, notice, dish, delivery, googleReviewUrl, updatedAt: serverTimestamp() });
+    const cfg = { prices, unavailable, hidden, products, campaigns, notice, dish, delivery, googleReviewUrl };
     applySite(cfg);
     fillSiteForm();
     try { localStorage.setItem(SITE_CACHE_KEY, JSON.stringify(plainCfg(cfg))); } catch (_) {}
@@ -3269,6 +3563,8 @@ function clientRows(opts) {
   if (f === "full") rows = rows.filter((r) => r.L && (r.L.stamps || 0) >= LOYAL_GOAL).sort((a, b) => b.last - a.last);
   else if (f === "inactive") rows = rows.filter((r) => r.u.id !== me && !staffIds.has(r.u.id) && r.last > 0 && now - r.last >= days * DAY).sort((a, b) => a.last - b.last);
   else if (f === "never") rows = rows.filter((r) => r.u.id !== me && !staffIds.has(r.u.id) && !(r.L && ((r.L.total || 0) > 0 || (r.L.rewards || 0) > 0)) && (!r.created || now - r.created >= 2 * DAY)).sort((a, b) => a.created - b.created);
+  else if (f === "bday") rows = rows.filter((r) => bdayInDays(r.u) <= 7).sort((a, b) => bdayInDays(a.u) - bdayInDays(b.u));
+  else if (f === "mkt") rows = rows.filter((r) => r.u.marketing === true).sort((a, b) => label(a).localeCompare(label(b)));
   else if (f === "dups") rows = rows.filter((r) => dups.info.has(r.u.id)).sort((a, b) => dups.info.get(a.u.id).key.localeCompare(dups.info.get(b.u.id).key) || label(a).localeCompare(label(b)));
   else rows = rows.sort((a, b) => label(a).localeCompare(label(b)));
   return { rows, dups };
@@ -3286,12 +3582,15 @@ const K_HINT = {
   full: "Mają komplet pieczątek. Pizza gratis czeka na wydanie.",
   inactive: "Byli w lokalu (mają pieczątkę), ale od dawna nie wrócili.",
   never: "Konto starsze niż 2 dni, ale jeszcze bez żadnej pieczątki.",
+  bday: "Klienci, którzy podali urodziny i mają je dziś lub w ciągu najbliższych 7 dni.",
+  mkt: "Klienci, którzy zaznaczyli zgodę na e-maile z promocjami.",
   dups: "Konta z tym samym adresem e-mail (kropki i „+coś” w Gmailu to ten sam adres) albo z tym samym imieniem i nazwiskiem. To tylko podejrzenie, więc sprawdź, zanim cokolwiek zrobisz."
 };
 function renderClients() {
   if (!isAdmin) return;
   const list = $("rb-k-list");
   if (!list) return;
+  renderMsgBox();
   const f = $("rb-k-filter").value;
   const needsLoyal = f === "full" || f === "inactive" || f === "never";
   if (needsLoyal && !loyalOk) {
@@ -3329,7 +3628,7 @@ function renderClients() {
       ? '<div class="rb-dup">⚠️ ' + (di.kind === "email" ? "Ten sam adres e-mail co: " : "To samo imię i nazwisko co: ") + di.others.map((o) => esc(o.email)).join(", ") + "</div>" : "";
     return `<div class="rb-kcl"><div><b>${esc(u.name || "(bez imienia)")}</b>${badges.join("")}</div>
       <div class="rb-meta">${esc(u.email || "")}</div>
-      ${stats ? `<div class="rb-meta">${stats}</div>` : ""}${dupLine}
+      ${stats ? `<div class="rb-meta">${stats}</div>` : ""}${Number.isInteger(u.bMonth) ? `<div class="rb-meta">🎂 ${bdayText(u)}${f === "bday" ? " (" + (bdayInDays(u) === 0 ? "dziś" : "za " + bdayInDays(u) + " dni") + ")" : ""}</div>` : ""}${dupLine}
       <div class="rb-actions"><button type="button" class="rb-btn small" data-kopen="${esc(u.id)}">Karta klienta</button>
       ${wb ? `<button type="button" class="rb-btn secondary small" data-kwb="${esc(u.id)}">🎟 Wyślij kod</button>` : ""}</div></div>`;
   }).join("");
@@ -3396,6 +3695,74 @@ $("rb-k-list").addEventListener("click", async (e) => {
 });
 syncKFilterUI();
 
+/* ---------- wiadomości e-mail do klientów (program pocztowy, adresy w UDW) ---------- */
+const MSG_FOOTER = "\n\n—\nWłoska Robota, Głuponie 103, 64-316 Kuślin, tel. 668 862 396, wloskarobota.eu\nDostajesz tę wiadomość, bo zaznaczyłeś zgodę w zakładce Konto. Możesz ją wycofać w każdej chwili w tej samej zakładce lub odpisać na tego maila.";
+const MSG_TPL = {
+  bday: { subject: "🎂 Wszystkiego najlepszego od Włoskiej Roboty!", body: "Cześć!\n\nZ okazji urodzin życzymy Ci wszystkiego najlepszego! 🎉\n\nW dniu urodzin wejdź na wloskarobota.eu w zakładkę Konto, a dodamy Ci urodzinowy rabat na pizzę.\n\nSmacznego!\nZespół Włoskiej Roboty" },
+  miss: { subject: "Tęsknimy za Tobą 🍕", body: "Cześć!\n\nDawno Cię nie było, a w piecu zawsze znajdzie się miejsce na Twoją ulubioną pizzę.\n\nZajrzyj do nas albo zadzwoń: 668 862 396. Aktualne menu i kody rabatowe znajdziesz na wloskarobota.eu w zakładce Konto.\n\nDo zobaczenia!\nZespół Włoskiej Roboty" },
+  promo: { subject: "Specjalna akcja we Włoskiej Robocie 🍕", body: "Cześć!\n\nMamy dla Ciebie coś specjalnego: [opisz akcję, termin i ewentualny kod promocyjny].\n\nWpisz kod w zakładce Konto na wloskarobota.eu albo po prostu zadzwoń: 668 862 396.\n\nZapraszamy!\nZespół Włoskiej Roboty" },
+  custom: { subject: "", body: "" }
+};
+const MAIL_BATCH = 25;
+const mMsg = $("rb-m-msg");
+function mailAudience() {
+  const aud = $("rb-m-aud").value;
+  const me = (auth.currentUser || {}).uid;
+  const staffIds = new Set(allStaff.map((x) => x.id));
+  let list = allUsers.filter((u) => u.id !== me && !staffIds.has(u.id) && u.marketing === true && /^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/.test(u.email || ""));
+  if (aud === "bday0") list = list.filter((u) => bdayInDays(u) === 0);
+  else if (aud === "bday7") list = list.filter((u) => bdayInDays(u) <= 7);
+  else if (aud === "inactive") {
+    const ok = new Set(clientRows({ filter: "inactive", days: 30, noSearch: true }).rows.map((r) => r.u.id));
+    list = list.filter((u) => ok.has(u.id));
+  }
+  return list;
+}
+function mailText() { return ($("rb-m-body").value.trim() + MSG_FOOTER).replace(/\r?\n/g, "\r\n"); }
+function renderMsgBox() {
+  if (!$("rb-m-box")) return;
+  const aud = $("rb-m-aud").value;
+  if (aud === "inactive" && !loyalOk) {
+    $("rb-m-count").textContent = "Wczytuję dane klientów…";
+    $("rb-m-btns").innerHTML = "";
+    if (!dataAt || Date.now() - dataAt > 5000) ensureData(false);
+    return;
+  }
+  const list = mailAudience();
+  const totalOk = allUsers.filter((u) => u.marketing === true).length;
+  $("rb-m-count").textContent = "Odbiorców: " + list.length + " (zgodę na e-mail ma " + totalOk + " z " + allUsers.length + " klientów).";
+  const subj = $("rb-m-subj").value.trim();
+  const body = mailText();
+  const parts = [];
+  for (let i = 0; i < list.length; i += MAIL_BATCH) parts.push(list.slice(i, i + MAIL_BATCH));
+  $("rb-m-btns").innerHTML = parts.map((part, i) => {
+    const bcc = part.map((u) => u.email.replace(/\+/g, "%2B")).join(",");
+    const href = "mailto:?bcc=" + bcc + "&subject=" + encodeURIComponent(subj) + "&body=" + encodeURIComponent(body);
+    const lbl = parts.length === 1 ? "✉ Otwórz w programie pocztowym (" + part.length + ")" : "✉ Część " + (i + 1) + " z " + parts.length + " (" + part.length + " adresów)";
+    return `<a class="rb-btn" href="${href}">${lbl}</a>`;
+  }).join("");
+}
+function applyMsgTpl() {
+  const t = MSG_TPL[$("rb-m-tpl").value] || MSG_TPL.custom;
+  $("rb-m-subj").value = t.subject;
+  $("rb-m-body").value = t.body;
+  renderMsgBox();
+}
+["rb-m-aud"].forEach((id) => $(id).addEventListener("change", renderMsgBox));
+$("rb-m-tpl").addEventListener("change", applyMsgTpl);
+["rb-m-subj", "rb-m-body"].forEach((id) => $(id).addEventListener("input", renderMsgBox));
+async function copyTxt(txt, ok) {
+  try { await navigator.clipboard.writeText(txt); setMsg(mMsg, ok, "ok"); }
+  catch (_) { setMsg(mMsg, "Nie udało się skopiować. Zaznacz i skopiuj ręcznie.", "err"); }
+}
+$("rb-m-copymail").addEventListener("click", () => {
+  const list = mailAudience();
+  if (!list.length) { setMsg(mMsg, "Brak odbiorców.", "err"); return; }
+  copyTxt(list.map((u) => u.email).join(", "), "Skopiowano " + list.length + " adresów. Wklej je w polu UDW.");
+});
+$("rb-m-copytext").addEventListener("click", () => copyTxt(($("rb-m-subj").value.trim() ? $("rb-m-subj").value.trim() + "\n\n" : "") + $("rb-m-body").value.trim() + MSG_FOOTER, "Skopiowano treść."));
+applyMsgTpl();
+
 function renderToday() {
   if (!isAdmin) return;
   const box = $("rb-td-stats");
@@ -3437,6 +3804,11 @@ function renderToday() {
     const inact = clientRows({ filter: "inactive", days: 30, noSearch: true }).rows.length;
     if (inact) alerts.push({ cls: "", text: "😴 " + inact + (inact === 1 ? " klient nie był" : " klientów nie było") + " w lokalu od 30+ dni", sub: "Możesz wysłać im kod „zapraszamy z powrotem”.", go: "clients", filter: "inactive", btn: "Pokaż" });
   }
+  const me0 = (auth.currentUser || {}).uid;
+  const bd = allUsers.filter((u) => u.id !== me0 && bdayInDays(u) <= 7).sort((a, b) => bdayInDays(a) - bdayInDays(b));
+  if (bd.length) alerts.push({ cls: "", text: "🎂 Urodziny klientów w ciągu 7 dni: " + bd.length,
+    sub: bd.slice(0, 3).map((u) => (u.name || u.email || "?") + " — " + (bdayInDays(u) === 0 ? "dziś" : bdayText(u))).join(" · ") + (bd.length > 3 ? " · …" : ""),
+    go: "clients", filter: "bday", btn: "Pokaż" });
   const dg = dupInfo();
   if (dg.groups) alerts.push({ cls: "bad", text: "👥 Możliwe duplikaty kont: " + dg.info.size + " kont w " + dg.groups + (dg.groups === 1 ? " grupie" : " grupach"), sub: "Ten sam adres e-mail (aliasy) lub to samo imię i nazwisko.", go: "clients", filter: "dups", btn: "Sprawdź" });
   $("rb-td-alerts").innerHTML = alerts.length
