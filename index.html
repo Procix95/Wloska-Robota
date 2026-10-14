@@ -164,6 +164,11 @@ body.dark .contact-card {background: var(--dark-bg);}
 body.dark .contact-card p, body.dark .contact-card a {color: #aaa;}
 .contact-card a:hover {color: var(--red);}
 .map-wrapper {margin-top: 3rem; position: relative;}
+.map-consent {background: var(--light); border-radius: 20px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.12);}
+body.dark .map-consent {background: var(--dark-bg);}
+.map-consent p {color: var(--gray); margin-bottom: 1rem; max-width: 520px; margin-left: auto; margin-right: auto;}
+body.dark .map-consent p {color: #aaa;}
+.map-consent .btn-primary {background: var(--red); color: #fff;}
 .map-wrapper iframe {width: 100%; height: 420px; border: 0; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.12); display: block;}
 .map-link {display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1rem; color: var(--red); font-weight: 600; text-decoration: none; transition: var(--transition);}
 .map-link:hover {color: var(--green); gap: 0.8rem;}
@@ -542,14 +547,11 @@ body.dark footer {background: #0a0a0a;}
         <p>i okolice (koszt dowozu niżej)</p>
       </div>
     </div>
-    <div class="map-wrapper fade-in">
-      <iframe
-        src="https://maps.google.com/maps?q=G%C5%82uponie+103,+Ku%C5%9Blin,+Wielkopolska&t=&z=15&ie=UTF8&iwloc=&output=embed"
-        allowfullscreen=""
-        loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"
-        title="Lokalizacja Włoska Robota - Głuponie 103">
-      </iframe>
+    <div class="map-wrapper fade-in" id="mapWrap">
+      <div class="map-consent" id="mapConsent">
+        <p><i class="fas fa-map-marked-alt"></i> Mapa Google nie wczytuje się automatycznie, bo Google może zapisać na Twoim urządzeniu pliki cookies i otrzymuje Twój adres IP. Kliknij, jeśli chcesz ją zobaczyć.</p>
+        <button type="button" class="btn btn-primary" id="mapLoad">Pokaż mapę</button>
+      </div>
       <a href="https://www.google.com/maps/search/G%C5%82uponie+103,+Ku%C5%9Blin,+Wielkopolska" target="_blank" rel="noopener" class="map-link">
         <i class="fas fa-external-link-alt"></i> Otwórz w Google Maps
       </a>
@@ -584,6 +586,7 @@ body.dark footer {background: #0a0a0a;}
     </div>
     <div class="footer-bottom">
       <p>&copy; <span id="currentYear">2026</span> Włoska Robota. Wszelkie prawa zastrzeżone.</p>
+      <p style="margin-top:.4rem;font-size:.85rem">RadTom – Radosław Jaskuła · NIP 7831857899 · Głuponie 103, 64-316 Kuślin · e-mail: <a href="mailto:radtom72@gmail.com" style="color:inherit;opacity:.8">radtom72@gmail.com</a> · tel. <a href="tel:668862396" style="color:inherit;opacity:.8">668 862 396</a></p>
       <p style="margin-top:.4rem;font-size:.85rem"><a href="polityka-prywatnosci.html" style="color:inherit;opacity:.8">Polityka prywatności</a> · <a href="regulamin.html" style="color:inherit;opacity:.8">Regulamin</a> · <a href="usun-konto.html" style="color:inherit;opacity:.8">Usuwanie konta</a></p>
     </div>
   </div>
@@ -726,6 +729,18 @@ function updateTimer() {
 updateTimer();
 setInterval(updateTimer, 60000);
  
+// Mapa Google: ładowana dopiero po kliknięciu (Google może zapisywać cookies)
+const mapLoadBtn = document.getElementById('mapLoad');
+if (mapLoadBtn) mapLoadBtn.addEventListener('click', () => {
+  const f = document.createElement('iframe');
+  f.src = 'https://maps.google.com/maps?q=G%C5%82uponie+103,+Ku%C5%9Blin,+Wielkopolska&t=&z=15&ie=UTF8&iwloc=&output=embed';
+  f.setAttribute('allowfullscreen', '');
+  f.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
+  f.title = 'Lokalizacja Włoska Robota - Głuponie 103';
+  const c = document.getElementById('mapConsent');
+  c.replaceWith(f);
+});
+
 // Fade in on scroll
 const fadeEls = document.querySelectorAll('.fade-in');
 const observer = new IntersectionObserver((entries) => {
@@ -1067,6 +1082,7 @@ body.dark #site-dish .sd-text{color:#bbb}
         <div class="rb-perk gift"><i>🎁</i><span><b>−5 zł na start</b><br>kod powitalny dla każdego nowego konta (ważny miesiąc)</span></div>
         <div class="rb-perk"><i>📱</i><span><b>Kody zawsze pod ręką</b><br>pokaż kod QR przy kasie</span></div>
       </div>
+      <div class="rb-meta" style="margin:0 0 12px;font-size:12.5px">Logując się lub zakładając konto, akceptujesz <a href="regulamin.html" target="_blank" rel="noopener">Regulamin</a> i potwierdzasz zapoznanie się z <a href="polityka-prywatnosci.html" target="_blank" rel="noopener">Polityką prywatności</a>. Konto mogą mieć tylko osoby pełnoletnie.</div>
       <button type="button" class="rb-btn rb-google" id="rb-google"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.4-4.1 7-10.1 7-17.6z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 010-9.4l-7.9-6.1a24 24 0 000 21.6l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg><span>Kontynuuj z Google</span></button>
       <div id="rb-gsi" hidden style="display:flex;justify-content:center;min-height:44px"></div>
       <div class="rb-or">lub e-mailem</div>
@@ -1382,7 +1398,7 @@ body.dark #site-dish .sd-text{color:#bbb}
           <label class="rb-check"><input id="rb-site-notice-on" type="checkbox"> Pokazuj komunikat na stronie</label>
 
           <h4>Akcje i specjalne dni</h4>
-          <div class="rb-meta" style="margin:-4px 0 6px">Zaplanuj z wyprzedzeniem napis na górze strony i w Koncie klienta, np. happy hour albo świąteczną akcję. Pokaże się sam w ustawionych dniach (i godzinach, jeśli je podasz). Komunikat ręczny wyżej ma pierwszeństwo. Zapisz na dole.</div>
+          <div class="rb-meta" style="margin:-4px 0 6px">Zaplanuj z wyprzedzeniem napis na górze strony i w Koncie klienta, np. happy hour albo świąteczną akcję. Pokaże się sam w ustawionych dniach (i godzinach, jeśli je podasz). Komunikat ręczny wyżej ma pierwszeństwo. Uwaga prawna: jeśli ogłaszasz obniżkę cen konkretnych produktów (np. „pizza Margherita -5 zł”), przepisy wymagają podania także najniższej ceny z ostatnich 30 dni. Zapisz na dole.</div>
           <div id="rb-camp-list"></div>
           <button type="button" class="rb-btn secondary small" id="rb-camp-add">+ Dodaj akcję</button>
 
@@ -1406,7 +1422,7 @@ body.dark #site-dish .sd-text{color:#bbb}
           <button type="button" class="rb-btn secondary small" id="rb-del-add">+ Dodaj miejscowość</button>
 
           <h4>Opinie w Google</h4>
-          <div class="rb-meta" style="margin:-4px 0 6px">Link, pod którym klient może zostawić opinię w Google (przycisk pokaże się po ocenie 4–5 ★). Pusty = przycisku nie będzie.</div>
+          <div class="rb-meta" style="margin:-4px 0 6px">Link, pod którym klient może zostawić opinię w Google (przycisk pokaże się każdemu klientowi po ocenie, niezależnie od liczby gwiazdek). Pusty = przycisku nie będzie.</div>
           <input id="rb-site-google" type="url" maxlength="300" placeholder="https://g.page/r/.../review">
 
           <h4>Własne produkty</h4>
@@ -1966,13 +1982,13 @@ function showSurveyDone(rating) {
   $("rb-sv-done").hidden = false;
   const g = $("rb-sv-google");
   const url = siteCfg.googleReviewUrl;
+  // przycisk Google dla każdej oceny (wybiórcze zachęcanie tylko zadowolonych jest niezgodne z zasadami Google i może wprowadzać w błąd)
   if (rating >= 4) {
-    $("rb-sv-done-text").textContent = "Dziękujemy za ocenę! 🙏 Cieszymy się, że smakowało." + (url ? " Jeśli masz chwilę, podziel się opinią także w Google — to dla nas bardzo ważne." : "");
-    if (url) { g.href = url; g.hidden = false; } else g.hidden = true;
+    $("rb-sv-done-text").textContent = "Dziękujemy za ocenę! 🙏 Cieszymy się, że smakowało." + (url ? " Jeśli chcesz, możesz zostawić opinię także publicznie w Google." : "");
   } else {
-    $("rb-sv-done-text").textContent = "Dziękujemy za szczerą opinię. Przekażemy ją właścicielowi i postaramy się to poprawić.";
-    g.hidden = true;
+    $("rb-sv-done-text").textContent = "Dziękujemy za szczerą opinię. Przekażemy ją właścicielowi i postaramy się to poprawić." + (url ? " Jeśli chcesz, możesz zostawić opinię także publicznie w Google." : "");
   }
+  if (url) { g.href = url; g.hidden = false; } else g.hidden = true;
 }
 async function renderSurvey(user) {
   const box = $("rb-survey");
@@ -2032,6 +2048,8 @@ async function purgeDeleted(uid) {
     for (const c of cs.docs) await deleteDoc(doc(db, "coupons", c.id));
     const fbs = await getDocs(query(collection(db, "feedback"), where("uid", "==", uid)));
     for (const f of fbs.docs) await deleteDoc(doc(db, "feedback", f.id));
+    const lgs = await getDocs(query(collection(db, "logs"), where("customerUid", "==", uid)));
+    for (const l of lgs.docs) await deleteDoc(doc(db, "logs", l.id));
     await deleteDoc(doc(db, "loyalty", uid));
     await deleteDoc(doc(db, "users", uid));
     await deleteDoc(doc(db, "deletionRequests", uid));
@@ -2095,6 +2113,7 @@ async function saveBirthday(pf, msgEl, extra) {
   const d = Number($(pf + "-d").value), m = Number($(pf + "-m").value), y = Number($(pf + "-y").value);
   if (!d || !m || !y) { setMsg(msgEl, "Wybierz dzień, miesiąc i rok urodzenia.", "err"); return false; }
   if (!dateExists(d, m, y) || y > new Date().getFullYear()) { setMsg(msgEl, "Taka data nie istnieje.", "err"); return false; }
+  if (ageOf({ bYear: y, bMonth: m, bDay: d }) < 18) { setMsg(msgEl, "Konto mogą mieć tylko osoby pełnoletnie (Regulamin, pkt 2). Jeśli nie masz jeszcze 18 lat, wyloguj się.", "err"); return false; }
   if (!confirm("Zapisać datę urodzenia: " + d + " " + MONTHS_GEN[m - 1] + " " + y + "? Datę można ustawić tylko raz.")) return false;
   const data = had ? { bYear: y } : { bMonth: m, bDay: d, bYear: y };
   Object.assign(data, extra || {});
