@@ -51,6 +51,10 @@
 <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Włoska Robota">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
@@ -588,6 +592,7 @@ body.dark footer {background: #0a0a0a;}
       <p>&copy; <span id="currentYear">2026</span> Włoska Robota. Wszelkie prawa zastrzeżone.</p>
       <p style="margin-top:.4rem;font-size:.85rem">RadTom – Radosław Jaskuła · NIP 7831857899 · Głuponie 103, 64-316 Kuślin · e-mail: <a href="mailto:radtom72@gmail.com" style="color:inherit;opacity:.8">radtom72@gmail.com</a> · tel. <a href="tel:668862396" style="color:inherit;opacity:.8">668 862 396</a></p>
       <p style="margin-top:.4rem;font-size:.85rem"><a href="polityka-prywatnosci.html" style="color:inherit;opacity:.8">Polityka prywatności</a> · <a href="regulamin.html" style="color:inherit;opacity:.8">Regulamin</a> · <a href="usun-konto.html" style="color:inherit;opacity:.8">Usuwanie konta</a></p>
+      <p style="margin-top:.6rem"><button type="button" class="pwa-btn" data-pwa hidden>📲 Dodaj stronę do ekranu głównego</button><span data-pwa-hint hidden style="display:block;margin-top:.4rem;font-size:.85rem;opacity:.85"></span></p>
     </div>
   </div>
 </footer>
@@ -771,6 +776,20 @@ body.dark #rabat-overlay{--rb-accent:#0fa65a;--rb-accent2:#0c8c4c;--rb-bg:#17171
 #rabat-overlay *{box-sizing:border-box}
 #rabat-overlay.open{display:block;animation:rbFade .18s ease}
 #rabat-overlay [hidden]{display:none!important}
+.pwa-btn{background:none;border:1px solid currentColor;color:inherit;opacity:.85;border-radius:20px;padding:.35rem .9rem;cursor:pointer;font:inherit;font-size:.85rem}
+.pwa-btn:hover{opacity:1}
+#rabat-overlay .rb-cols{display:flex;align-items:flex-end;gap:3px;margin:8px 0 2px}
+#rabat-overlay .rb-col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;min-width:0}
+#rabat-overlay .rb-col b{font-size:10px;line-height:1.2;color:var(--rb-muted);font-weight:600;min-height:12px}
+#rabat-overlay .rb-col i{display:block;width:100%;background:var(--rb-accent);border-radius:4px 4px 0 0;min-height:2px}
+#rabat-overlay .rb-col.top i{background:var(--rb-gold)}
+#rabat-overlay .rb-col-l{display:flex;gap:3px}
+#rabat-overlay .rb-col-l span{flex:1;text-align:center;font-size:10px;color:var(--rb-muted);overflow:hidden;white-space:nowrap}
+#rabat-overlay .rb-tbl{width:100%;border-collapse:collapse;font-size:13px}
+#rabat-overlay .rb-tbl th,#rabat-overlay .rb-tbl td{padding:5px 4px;border-bottom:1px solid var(--rb-border);text-align:right}
+#rabat-overlay .rb-tbl th:first-child,#rabat-overlay .rb-tbl td:first-child{text-align:left}
+#rabat-overlay .rb-tbl th{color:var(--rb-muted);font-weight:600}
+#rabat-overlay .rb-scanopts{margin:10px 0 4px}
 #rabat-overlay .rb-box{position:relative;max-width:640px;margin:24px auto;background:var(--rb-bg);color:var(--rb-text);
   border:1px solid var(--rb-border);border-radius:16px;padding:24px;line-height:1.45}
 #rabat-overlay h2{margin:0 0 16px;font-size:26px}
@@ -1110,6 +1129,7 @@ body.dark #site-dish .sd-text{color:#bbb}
         <div class="rb-who"><b id="rb-who"></b><small id="rb-mail"></small></div>
         <button type="button" class="rb-btn secondary small" id="rb-logout">Wyloguj</button>
       </div>
+      <div style="margin:0 0 12px"><button type="button" class="rb-btn secondary small" data-pwa hidden>📲 Dodaj do ekranu głównego telefonu</button><div class="rb-meta" data-pwa-hint hidden></div></div>
       <div class="rb-res ok" id="rb-welcome" hidden>🎉 Witaj! Na start dostajesz rabat <b>5 zł</b> na zamówienie, ważny <b>miesiąc</b> od założenia konta. Znajdziesz go poniżej, pokaż jego kod QR przy kasie.</div>
       <div class="rb-loyal" id="rb-loyal" hidden>
         <div class="rb-sec" style="margin-top:0"><h3>🍕 Karta lojalnościowa</h3><span id="rb-loyal-count"></span></div>
@@ -1228,12 +1248,14 @@ body.dark #site-dish .sd-text{color:#bbb}
               <option value="bday0">🎂 Mają dziś urodziny (ze zgodą)</option>
               <option value="bday7">🎂 Urodziny w ciągu 7 dni (ze zgodą)</option>
               <option value="inactive">😴 Nie byli od 30+ dni (ze zgodą)</option>
+              <option value="expiring">⏳ Mają kod, który wygasa w ciągu 3 dni (ze zgodą)</option>
             </select>
             <label for="rb-m-tpl">Szablon</label>
             <select id="rb-m-tpl">
               <option value="bday">Życzenia urodzinowe</option>
               <option value="miss">Tęsknimy za Tobą</option>
               <option value="promo">Akcja / promocja</option>
+              <option value="expire">Kod wkrótce wygaśnie</option>
               <option value="custom">Własna wiadomość</option>
             </select>
             <label for="rb-m-subj">Temat</label>
@@ -1286,8 +1308,14 @@ body.dark #site-dish .sd-text{color:#bbb}
             <video id="rb-s-video" playsinline muted></video>
             <div class="rb-actions" style="margin:0 0 8px"><button type="button" class="rb-btn secondary small" id="rb-s-stop">Zamknij aparat</button></div>
           </div>
+          <div class="rb-scanopts" id="rb-s-opts" hidden>
+            <label class="rb-check"><input type="checkbox" id="rb-s-auto"> <span>Po zatwierdzeniu sam wracaj do skanowania</span></label>
+            <label class="rb-check"><input type="checkbox" id="rb-s-quick"> <span>Tryb szybki: zeskanowanie klienta od razu dodaje pieczątkę (gdy karta nie jest pełna i minęły co najmniej 2 godziny od poprzedniej)</span></label>
+            <label class="rb-check"><input type="checkbox" id="rb-s-sound"> <span>Dźwięk po skanie</span></label>
+          </div>
           <div class="rb-msg" id="rb-s-msg" role="status"></div>
           <div id="rb-s-result"></div>
+          <div id="rb-s-hist"></div>
 
           <h4>Albo wpisz kod ręcznie</h4>
           <div class="rb-row">
@@ -1451,6 +1479,11 @@ body.dark #site-dish .sd-text{color:#bbb}
             <button type="button" class="rb-btn secondary small" id="rb-rp-refresh" style="margin-bottom:10px">Odśwież</button>
           </div>
           <div class="rb-stats" id="rb-rp-stats"></div>
+          <details class="rb-res" id="rb-st-box">
+            <summary><b>📈 Statystyki i wykresy</b></summary>
+            <div class="rb-meta" style="margin:6px 0 4px">Wizyty = pieczątki i wydane pizze gratis z dziennika (ostatnie 90 dni). Klienci i kody liczone są ze wszystkich kont.</div>
+            <div id="rb-st-body"><div class="rb-empty">Wczytuję…</div></div>
+          </details>
           <h4>Według pracownika</h4>
           <div id="rb-rp-staff"></div>
           <h4>Ostatnie zdarzenia</h4>
@@ -1472,6 +1505,15 @@ body.dark #site-dish .sd-text{color:#bbb}
           <div id="rb-fb-bars"></div>
           <label class="rb-check"><input type="checkbox" id="rb-fb-low"> Tylko niskie oceny (1–3 ★)</label>
           <div id="rb-fb-list" class="rb-fb"></div>
+
+          <h4>💾 Kopia zapasowa i eksport</h4>
+          <div class="rb-meta" style="margin-bottom:8px">Pliki zawierają dane osobowe klientów (e-mail, data urodzenia). Trzymaj je w bezpiecznym miejscu i nie wysyłaj dalej. Kopia nie zawiera haseł (te przechowuje Firebase).</div>
+          <div class="rb-actions">
+            <button type="button" class="rb-btn small" id="rb-bk-json">Pobierz kopię zapasową (JSON)</button>
+            <button type="button" class="rb-btn secondary small" id="rb-bk-mkt">Klienci ze zgodą na e-mail (CSV)</button>
+            <button type="button" class="rb-btn secondary small" id="rb-bk-all">Wszyscy klienci (CSV)</button>
+          </div>
+          <div class="rb-msg" id="rb-bk-msg" role="status"></div>
         </div>
 
         <!-- Zakładka: lista wszystkich kodów -->
@@ -1494,6 +1536,35 @@ body.dark #site-dish .sd-text{color:#bbb}
 </div>
 
 <!-- ===== RABAT: SKRYPT ===== -->
+<script>
+/* Aplikacja na ekran główny (PWA): rejestracja service workera i przycisk „Dodaj do ekranu głównego” */
+(function () {
+  try {
+    if ("serviceWorker" in navigator && /^https:|^http:\/\/localhost/.test(location.href))
+      window.addEventListener("load", function () { navigator.serviceWorker.register("/sw.js").catch(function () {}); });
+  } catch (_) {}
+  var standalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
+  if (standalone) return;
+  var btns = document.querySelectorAll("[data-pwa]"), hints = document.querySelectorAll("[data-pwa-hint]");
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  var deferred = null;
+  function setShown(on) { btns.forEach(function (b) { b.hidden = !on; }); if (!on) hints.forEach(function (h) { h.hidden = true; }); }
+  window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); deferred = e; setShown(true); });
+  window.addEventListener("appinstalled", function () { deferred = null; setShown(false); });
+  if (isIOS) setShown(true);
+  btns.forEach(function (b) {
+    b.addEventListener("click", async function () {
+      if (deferred) {
+        var d = deferred; deferred = null;
+        try { d.prompt(); await d.userChoice; } catch (_) {}
+        setShown(false);
+      } else if (isIOS) {
+        hints.forEach(function (h) { h.hidden = false; h.textContent = "Na iPhonie: stuknij ikonę Udostępnij (kwadrat ze strzałką), a potem „Do ekranu początkowego”."; });
+      }
+    });
+  });
+})();
+</script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {
@@ -1577,7 +1648,9 @@ $("rb-close").addEventListener("click", closeRabat);
 overlay.addEventListener("mousedown", (e) => { if (e.target === overlay) closeRabat(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && overlay.classList.contains("open")) closeRabat(); });
 window.addEventListener("hashchange", () => { if (location.hash === "#konto") openRabat(); });
-if (location.hash === "#konto") openRabat();
+const QS = new URLSearchParams(location.search);
+let wantScan = QS.has("skan");
+if (location.hash === "#konto" || QS.has("konto") || wantScan) openRabat();
 
 /* ---------- logowanie / rejestracja ---------- */
 let mode = "login";
@@ -1743,6 +1816,7 @@ function cleanup() {
   if ($("rb-bday-set")) delete $("rb-bday-set").dataset.filled;
   allLoyal = []; allPromos = []; dataAt = 0; welcomeMigrated = false; reportEvents = []; feedbackItems = []; kShown = KPAGE;
   if ($("rb-k-card")) $("rb-k-card").innerHTML = "";
+  scanHist = []; statsEvents = null; if ($("rb-s-hist")) $("rb-s-hist").innerHTML = "";
 }
 function showOnly(which) {
   $("rb-loading").hidden = which !== "loading";
@@ -1871,6 +1945,7 @@ async function handleUser(user) {
   $("rb-admin-title").textContent = isAdmin ? "🛠 Panel administratora" : "📷 Skanowanie rabatów";
   if (!isAdmin && isStaff) setAdminTab("check");
   else if (isAdmin) setAdminTab("today");
+  if (wantScan && (isAdmin || isStaff)) { wantScan = false; setAdminTab("check"); if (PHONE_CAM) setTimeout(() => { startScanner(); }, 300); }
   $("rb-welcome").hidden = !gotWelcome;
   gateUser = user;
   setMsg($("rb-g-msg"), "");
@@ -2603,6 +2678,7 @@ async function customerClick(e) {
   const b = e.target.closest('[data-act="stamp"],[data-act="reward"],[data-act="unstamp"],[data-act="grant"],[data-act="cuse"]');
   if (!b || !custView) return;
   const act = b.dataset.act;
+  let okAct = false;
   const msg = custView.target === $("rb-s-result") ? sMsg : custView.target === $("rb-k-card") ? $("rb-k-msg") : cMsg;
   setMsg(msg, "");
   if (act === "grant") {
@@ -2617,15 +2693,10 @@ async function customerClick(e) {
   b.disabled = true;
   try {
     if (act === "stamp") {
-      await runTransaction(db, async (tx) => {
-        const sn = await tx.get(ref);
-        if (!sn.exists()) throw new Error("Klient nie ma karty.");
-        const d = sn.data();
-        if ((d.stamps || 0) >= LOYAL_GOAL) throw new Error("Karta pełna — najpierw wydaj pizzę gratis.");
-        tx.update(ref, { stamps: (d.stamps || 0) + 1, total: (d.total || 0) + 1, lastStampAt: serverTimestamp() });
-        tx.set(newLogRef(), logData("stamp", { uid: custView.uid, name: d.name || d.email }, ((d.stamps || 0) + 1) + "/" + LOYAL_GOAL));
-      });
+      const r = await stampTx(custView.uid);
       buzz(150);
+      okAct = true;
+      scanHistPush(r.name, "➕ pieczątka " + r.n + "/" + LOYAL_GOAL);
     } else if (act === "reward") {
       await runTransaction(db, async (tx) => {
         const sn = await tx.get(ref);
@@ -2635,6 +2706,8 @@ async function customerClick(e) {
         tx.set(newLogRef(), logData("reward", { uid: custView.uid, name: d.name || d.email }, "pizza gratis nr " + ((d.rewards || 0) + 1)));
       });
       buzz([100, 50, 100]);
+      okAct = true;
+      scanHistPush(custName(), "🍕 pizza gratis");
     } else if (act === "unstamp") {
       if (!confirm("Cofnąć ostatnią pieczątkę?")) { b.disabled = false; return; }
       await runTransaction(db, async (tx) => {
@@ -2645,10 +2718,11 @@ async function customerClick(e) {
       });
     } else if (act === "cuse") {
       const r = await redeem(b.dataset.id);
-      if (!r.ok) setMsg(msg, r.reason, "err"); else buzz(200);
+      if (!r.ok) { setMsg(msg, r.reason, "err"); beep("err"); } else { buzz(200); okAct = true; scanHistPush(custName(), "🎟 rabat"); }
     }
   } catch (err) {
     console.error(err);
+    beep("err");
     setMsg(msg, err.code === "permission-denied"
       ? "Odmowa: za krótko od poprzedniej pieczątki (min. " + STAMP_COOLDOWN_H + " h) albo nowe reguły nie są opublikowane."
       : (err.code ? errText(err) : err.message), "err");
@@ -2659,6 +2733,7 @@ async function customerClick(e) {
     renderCustomer();
     syncLoyalCache(custView.uid, custView.data.loyal);
   } catch (_) {}
+  if (okAct && custView && custView.target === $("rb-s-result")) autoResume();
 }
 $("rb-s-result").addEventListener("click", customerClick);
 $("rb-c-result").addEventListener("click", customerClick);
@@ -2889,7 +2964,7 @@ const itemKey = (el) => ((el.querySelector(".menu-item-title") || {}).textConten
 const itemName = (el) => ((el.querySelector(".menu-item-title") || {}).textContent || "").trim();
 menuEls().forEach((el) => {
   const pEl = el.querySelector(".menu-item-price");
-  if (pEl && !el.dataset.origPrice) el.dataset.origPrice = pEl.textContent.replace(/ /g, " ").trim();
+  if (pEl && !el.dataset.origPrice) el.dataset.origPrice = pEl.textContent.replace(/\u00a0/g, " ").trim();
 });
 const tsMs = (t) => (t ? (t.toDate ? t.toDate().getTime() : (t.seconds ? t.seconds * 1000 : 0)) : 0);
 
@@ -3272,7 +3347,7 @@ $("rb-site-save").addEventListener("click", async () => {
     if (bad) return;
     const key = row.dataset.key;
     const el = menuEls().find((e) => itemKey(e) === key);
-    let v = row.querySelector(".rb-site-price").value.replace(/ /g, " ").trim().replace(/\s+/g, " ");
+    let v = row.querySelector(".rb-site-price").value.replace(/\u00a0/g, " ").trim().replace(/\s+/g, " ");
     if (/^\d+([.,]\d{1,2})?$/.test(v)) v += " zł";
     v = v.replace(/\s?zł$/i, " zł");
     if (!/^\d+([.,]\d{1,2})? zł$/.test(v)) { bad = itemName(el); return; }
@@ -3418,7 +3493,156 @@ function renderReport() {
 }
 $("rb-rp-range").addEventListener("change", renderReport);
 $("rb-rp-type").addEventListener("change", renderReport);
-$("rb-rp-refresh").addEventListener("click", () => { loadReport(); loadFeedback(); });
+$("rb-rp-refresh").addEventListener("click", () => { loadReport(); loadFeedback(); statsEvents = null; refreshStats(false); });
+
+/* ---------- statystyki i wykresy (bez zewnętrznych bibliotek) ---------- */
+let statsEvents = null;
+function barsHtml(items, h = 70) {
+  const max = Math.max(1, ...items.map((i) => i.v));
+  const top = Math.max(0, ...items.map((i) => i.v));
+  const bars = items.map((i) => `<div class="rb-col${top > 0 && i.v === top ? " top" : ""}" title="${esc(i.l)}: ${i.v}"><b>${i.v || ""}</b><i style="height:${Math.round(i.v / max * h)}px"></i></div>`).join("");
+  return `<div class="rb-cols">${bars}</div><div class="rb-col-l">${items.map((i) => `<span>${esc(i.l)}</span>`).join("")}</div>`;
+}
+function weekStart(ms) { const d = new Date(ms); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d.getTime(); }
+function lastWeeks(n) {
+  const out = [];
+  let w = weekStart(Date.now());
+  for (let i = 0; i < n; i++) { out.unshift(w); const d = new Date(w); d.setDate(d.getDate() - 7); w = d.getTime(); }
+  return out;
+}
+function codeGroup(c) {
+  const id = String(c.id || "");
+  if (id.startsWith("welcome_")) return "Powitalny −5 zł";
+  if (id.startsWith("bday_")) return "Urodzinowy";
+  if (id.startsWith("promo_") && c.promo) return "Promo " + c.promo;
+  const m = /^([A-Z0-9]{2,12})-/.exec(String(c.code || ""));
+  return m ? m[1] + "-…" : "Przyznane ręcznie";
+}
+function renderCharts() {
+  const body = $("rb-st-body");
+  if (!statsEvents) { body.innerHTML = '<div class="rb-empty">Wczytuję…</div>'; return; }
+  const me = (auth.currentUser || {}).uid;
+  const staffIds = new Set(allStaff.map((x) => x.id));
+  const visits = statsEvents.filter((e) => e.type === "stamp" || e.type === "reward");
+  const pl = (n) => String(n).padStart(2, "0");
+  const byWd = Array(7).fill(0);
+  visits.forEach((e) => { byWd[(new Date(tsMs(e.at)).getDay() + 6) % 7]++; });
+  const hrs = []; for (let h = 9; h <= 23; h++) hrs.push(h);
+  const byH = hrs.map(() => 0);
+  visits.forEach((e) => { const i = hrs.indexOf(new Date(tsMs(e.at)).getHours()); if (i >= 0) byH[i]++; });
+  const weeks = lastWeeks(12);
+  const wl = (w) => { const d = new Date(w); return pl(d.getDate()) + "." + pl(d.getMonth() + 1); };
+  const vW = weeks.map(() => 0);
+  visits.forEach((e) => { const i = weeks.indexOf(weekStart(tsMs(e.at))); if (i >= 0) vW[i]++; });
+  const nW = weeks.map(() => 0);
+  allUsers.filter((u) => u.id !== me && !staffIds.has(u.id)).forEach((u) => { const t = tsMs(u.createdAt); const i = t ? weeks.indexOf(weekStart(t)) : -1; if (i >= 0) nW[i]++; });
+  const cust = allLoyal.filter((l) => l.id !== me && !staffIds.has(l.id));
+  const bk = [0, 0, 0, 0, 0];
+  cust.forEach((l) => { const n = l.total || 0; bk[n === 0 ? 0 : n === 1 ? 1 : n <= 4 ? 2 : n <= 9 ? 3 : 4]++; });
+  const came = cust.filter((l) => (l.total || 0) >= 1).length, back = cust.filter((l) => (l.total || 0) >= 2).length;
+  const g = {};
+  allCoupons.forEach((c) => { const k = codeGroup(c); (g[k] ||= { n: 0, u: 0 }); g[k].n++; if (c.used) g[k].u++; });
+  const rows = Object.entries(g).sort((a, b) => b[1].n - a[1].n);
+  body.innerHTML =
+    (visits.length ? "" : '<div class="rb-empty">W dzienniku nie ma jeszcze wizyt z ostatnich 90 dni.</div>') +
+    "<h4>Wizyty według dnia tygodnia</h4>" + barsHtml(WD_LABELS.map((l, i) => ({ l, v: byWd[i] }))) +
+    "<h4>Wizyty według godziny</h4>" + barsHtml(hrs.map((h, i) => ({ l: String(h), v: byH[i] }))) +
+    "<h4>Wizyty tydzień po tygodniu</h4>" + barsHtml(weeks.map((w, i) => ({ l: wl(w), v: vW[i] }))) +
+    "<h4>Nowi klienci tydzień po tygodniu</h4>" + barsHtml(weeks.map((w, i) => ({ l: wl(w), v: nW[i] }))) +
+    "<h4>Klienci według liczby wizyt</h4>" + barsHtml([["0", 0], ["1", 1], ["2–4", 2], ["5–9", 3], ["10+", 4]].map(([l, i]) => ({ l, v: bk[i] }))) +
+    `<div class="rb-meta">${came ? "Wróciło " + back + " z " + came + " klientów, którzy byli choć raz (" + Math.round(back / came * 100) + "%)." : "Nikt jeszcze nie ma pieczątki."}</div>` +
+    "<h4>Kody: przyznane i wykorzystane</h4>" +
+    (rows.length
+      ? `<table class="rb-tbl"><tr><th>Rodzaj</th><th>Przyznane</th><th>Użyte</th><th>%</th></tr>` +
+        rows.map(([k, v]) => `<tr><td>${esc(k)}</td><td>${v.n}</td><td>${v.u}</td><td>${Math.round(v.u / v.n * 100)}%</td></tr>`).join("") + "</table>"
+      : '<div class="rb-empty">Brak kodów.</div>');
+}
+const WD_LABELS = ["Pn", "Wt", "Śr", "Cz", "Pt", "So", "Nd"];
+async function refreshStats(force) {
+  if (!isAdmin) return;
+  const box = $("rb-st-box");
+  if (!box.open) return;
+  if (!statsEvents || force) {
+    renderCharts();
+    try {
+      const since = new Date(); since.setHours(0, 0, 0, 0); since.setDate(since.getDate() - 89);
+      const snap = await getDocs(query(collection(db, "logs"), where("at", ">=", Timestamp.fromDate(since)), orderBy("at", "desc"), limit(5000)));
+      statsEvents = snap.docs.map((d) => d.data());
+      if (!loyalOk) await loadLoyaltyAll();
+    } catch (err) {
+      console.error(err);
+      $("rb-st-body").innerHTML = '<div class="rb-msg err">' + esc(errText(err)) + "</div>";
+      return;
+    }
+  }
+  renderCharts();
+}
+$("rb-st-box").addEventListener("toggle", () => refreshStats(false));
+
+/* ---------- kopia zapasowa i eksport klientów ---------- */
+const bkMsg = $("rb-bk-msg");
+const MAIL_RE = /^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/;
+function plainTs(v) {
+  if (v && typeof v.toDate === "function") { try { return v.toDate().toISOString(); } catch (_) { return null; } }
+  if (Array.isArray(v)) return v.map(plainTs);
+  if (v && typeof v === "object") { const o = {}; Object.keys(v).forEach((k) => { o[k] = plainTs(v[k]); }); return o; }
+  return v;
+}
+function saveFile(name, mime, text) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type: mime }));
+  a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+function csvText(rows) {
+  const cell = (c) => { let t = String(c == null ? "" : c); if (/^[=+\-@\t\r]/.test(t)) t = "'" + t; return '"' + t.replace(/"/g, '""') + '"'; };
+  return "\ufeff" + rows.map((r) => r.map(cell).join(";")).join("\r\n");
+}
+function exportableUsers() {
+  const me = (auth.currentUser || {}).uid;
+  const staffIds = new Set(allStaff.map((x) => x.id));
+  return allUsers.filter((u) => u.id !== me && !staffIds.has(u.id) && MAIL_RE.test(u.email || ""));
+}
+const bdayShort = (u) => (u.bDay && u.bMonth ? String(u.bDay).padStart(2, "0") + "." + String(u.bMonth).padStart(2, "0") : "");
+$("rb-bk-json").addEventListener("click", async () => {
+  if (!isAdmin) return;
+  const btn = $("rb-bk-json");
+  btn.disabled = true;
+  setMsg(bkMsg, "Pobieram dane…");
+  const names = ["users", "loyalty", "coupons", "templates", "promoCodes", "feedback", "staff", "site", "deletionRequests", "logs"];
+  const out = { meta: { app: "wloskarobota.eu", createdAt: new Date().toISOString(), counts: {}, errors: [] }, data: {} };
+  for (const name of names) {
+    try {
+      const snap = await getDocs(collection(db, name));
+      out.data[name] = {};
+      snap.docs.forEach((d) => { out.data[name][d.id] = plainTs(d.data()); });
+      out.meta.counts[name] = snap.docs.length;
+    } catch (err) { out.meta.errors.push(name + ": " + (err.code || err.message)); }
+  }
+  saveFile("kopia-wloska-robota-" + ymd(new Date()) + ".json", "application/json", JSON.stringify(out, null, 1));
+  const total = Object.values(out.meta.counts).reduce((a, b) => a + b, 0);
+  setMsg(bkMsg, "Pobrano kopię: " + total + " dokumentów." + (out.meta.errors.length ? " Nie udało się pobrać: " + out.meta.errors.join(", ") + "." : ""), out.meta.errors.length ? "err" : "ok");
+  btn.disabled = false;
+});
+$("rb-bk-mkt").addEventListener("click", () => {
+  if (!isAdmin) return;
+  const list = exportableUsers().filter((u) => u.marketing === true);
+  const rows = [["E-mail", "Imię", "Urodziny (dzień.miesiąc)"]].concat(list.map((u) => [u.email, u.name || "", bdayShort(u)]));
+  saveFile("klienci-ze-zgoda-" + ymd(new Date()) + ".csv", "text/csv;charset=utf-8", csvText(rows));
+  setMsg(bkMsg, "Pobrano listę: " + list.length + " klientów ze zgodą na e-mail.", "ok");
+});
+$("rb-bk-all").addEventListener("click", async () => {
+  if (!isAdmin) return;
+  if (!loyalOk) await loadLoyaltyAll();
+  const lm = new Map(allLoyal.map((l) => [l.id, l]));
+  const d0 = (ms) => (ms ? new Date(ms).toLocaleDateString("pl-PL") : "");
+  const list = exportableUsers();
+  const rows = [["E-mail", "Imię", "Konto od", "Pieczątek łącznie", "Pizz gratis", "Ostatnia wizyta", "Zgoda na e-mail", "Urodziny (dzień.miesiąc)"]]
+    .concat(list.map((u) => { const L = lm.get(u.id); return [u.email, u.name || "", d0(tsMs(u.createdAt)), L ? (L.total || 0) : 0, L ? (L.rewards || 0) : 0, L ? d0(lastVisitMs(L)) : "", u.marketing === true ? "tak" : "nie", bdayShort(u)]; }));
+  saveFile("klienci-" + ymd(new Date()) + ".csv", "text/csv;charset=utf-8", csvText(rows));
+  setMsg(bkMsg, "Pobrano listę: " + list.length + " klientów.", "ok");
+});
 
 let feedbackItems = [];
 const starStr = (n) => "★".repeat(n) + "☆".repeat(5 - n);
@@ -3747,6 +3971,7 @@ const MSG_TPL = {
   bday: { subject: "🎂 Wszystkiego najlepszego od Włoskiej Roboty!", body: "Cześć!\n\nZ okazji urodzin życzymy Ci wszystkiego najlepszego! 🎉\n\nW dniu urodzin wejdź na wloskarobota.eu w zakładkę Konto, a dodamy Ci urodzinowy rabat na pizzę.\n\nSmacznego!\nZespół Włoskiej Roboty" },
   miss: { subject: "Tęsknimy za Tobą 🍕", body: "Cześć!\n\nDawno Cię nie było, a w piecu zawsze znajdzie się miejsce na Twoją ulubioną pizzę.\n\nZajrzyj do nas albo zadzwoń: 668 862 396. Aktualne menu i kody rabatowe znajdziesz na wloskarobota.eu w zakładce Konto.\n\nDo zobaczenia!\nZespół Włoskiej Roboty" },
   promo: { subject: "Specjalna akcja we Włoskiej Robocie 🍕", body: "Cześć!\n\nMamy dla Ciebie coś specjalnego: [opisz akcję, termin i ewentualny kod promocyjny].\n\nWpisz kod w zakładce Konto na wloskarobota.eu albo po prostu zadzwoń: 668 862 396.\n\nZapraszamy!\nZespół Włoskiej Roboty" },
+  expire: { subject: "Twój rabat wkrótce wygaśnie ⏳", body: "Cześć!\n\nW zakładce Konto na wloskarobota.eu czeka na Ciebie rabat, który wkrótce wygaśnie ⏳\n\nWejdź, sprawdź kod i termin, a potem zadzwoń: 668 862 396 albo zajrzyj do nas.\n\nSmacznego!\nZespół Włoskiej Roboty" },
   custom: { subject: "", body: "" }
 };
 const MAIL_BATCH = 25;
@@ -3760,6 +3985,10 @@ function mailAudience() {
   else if (aud === "bday7") list = list.filter((u) => bdayInDays(u) <= 7);
   else if (aud === "inactive") {
     const ok = new Set(clientRows({ filter: "inactive", days: 30, noSearch: true }).rows.map((r) => r.u.id));
+    list = list.filter((u) => ok.has(u.id));
+  } else if (aud === "expiring") {
+    const t0 = Date.now(), t1 = t0 + 3 * 86400000;
+    const ok = new Set(allCoupons.filter((c) => !c.used && tsMs(c.expiresAt) > t0 && tsMs(c.expiresAt) <= t1).map((c) => c.uid));
     list = list.filter((u) => ok.has(u.id));
   }
   return list;
@@ -3794,7 +4023,14 @@ function applyMsgTpl() {
   $("rb-m-body").value = t.body;
   renderMsgBox();
 }
-["rb-m-aud"].forEach((id) => $(id).addEventListener("change", renderMsgBox));
+const AUD_TPL = { bday0: "bday", bday7: "bday", inactive: "miss", expiring: "expire" };
+$("rb-m-aud").addEventListener("change", () => {
+  // jeśli treść to nadal gotowy szablon (nic nie dopisywałeś), dobierz pasujący do grupy
+  const cur = Object.values(MSG_TPL).some((t) => t.subject === $("rb-m-subj").value && t.body === $("rb-m-body").value);
+  const want = AUD_TPL[$("rb-m-aud").value];
+  if (cur && want && $("rb-m-tpl").value !== want) { $("rb-m-tpl").value = want; applyMsgTpl(); return; }
+  renderMsgBox();
+});
 $("rb-m-tpl").addEventListener("change", applyMsgTpl);
 ["rb-m-subj", "rb-m-body"].forEach((id) => $(id).addEventListener("input", renderMsgBox));
 async function copyTxt(txt, ok) {
@@ -3913,7 +4149,29 @@ function parseCode(raw) {
   if (t.startsWith("WR:")) t = t.slice(3);
   return /^[A-Z0-9-]{3,40}$/.test(t) ? t : "";
 }
-function buzz(pattern) { try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (_) {} }
+function buzz(pattern) {
+  try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (_) {}
+  beep(Array.isArray(pattern) ? (pattern[0] === 120 ? "err" : "reward") : "ok");
+}
+let audioCtx = null;
+function prepAudio() {
+  try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === "suspended") audioCtx.resume(); } catch (_) {}
+}
+function beep(kind) {
+  const snd = $("rb-s-sound");
+  if (!snd || !snd.checked) return;
+  try {
+    prepAudio();
+    if (!audioCtx) return;
+    const notes = kind === "err" ? [[220, 0, 0.3]] : kind === "reward" ? [[660, 0, 0.1], [990, 0.13, 0.2]] : [[880, 0, 0.12]];
+    notes.forEach(([f, at, dur]) => {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = kind === "err" ? "square" : "sine"; o.frequency.value = f; g.gain.value = 0.12;
+      o.connect(g); g.connect(audioCtx.destination);
+      const t = audioCtx.currentTime + at; o.start(t); o.stop(t + dur);
+    });
+  } catch (_) {}
+}
 
 /* ---------- wykorzystanie kodu (transakcja: nie da się użyć dwa razy) ---------- */
 async function redeem(id) {
@@ -3966,6 +4224,16 @@ const IS_PHONE = matchMedia("(pointer: coarse)").matches || /Android|iPhone|iPad
 const HAS_CAM = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 const PHONE_CAM = IS_PHONE && HAS_CAM;
 $("rb-s-start").hidden = !PHONE_CAM;
+(function () {
+  const get = (k, d) => { try { const v = localStorage.getItem("wr_scan_" + k); return v === null ? d : v === "1"; } catch (_) { return d; } };
+  const set = (k, v) => { try { localStorage.setItem("wr_scan_" + k, v ? "1" : "0"); } catch (_) {} };
+  [["auto", true], ["quick", false], ["sound", true]].forEach(([k, d]) => {
+    const el = $("rb-s-" + k);
+    el.checked = get(k, d);
+    el.addEventListener("change", () => set(k, el.checked));
+  });
+  $("rb-s-opts").hidden = !PHONE_CAM;
+})();
 if (!PHONE_CAM) {
   const hint = $("rb-s-hint");
   hint.hidden = false;
@@ -3976,6 +4244,7 @@ if (!PHONE_CAM) {
 
 let stream = null, scanning = false, busy = false, scanTimer = 0;
 let detector = null, detectorBroken = false, jsQRfn = null, scanCanvas = null;
+let lastRaw = "", lastRawAt = 0;
 
 async function ensureReader() {
   if (detector || jsQRfn) return true;
@@ -3988,6 +4257,7 @@ async function ensureReader() {
 
 async function startScanner() {
   setMsg(sMsg, "");
+  prepAudio();
   if (stream) { resumeScan(); return; }
   try {
     stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
@@ -4033,6 +4303,75 @@ function resumeScan() {
   scanLoop();
 }
 
+function autoResume() {
+  const a = $("rb-s-auto");
+  if (!a || !a.checked || !stream) return;
+  setTimeout(() => {
+    const box = $("rb-s-box");
+    if (stream && !scanning && !busy && box && !box.hidden) resumeScan();
+  }, 1200);
+}
+let scanHist = [];
+function renderScanHist() {
+  const el = $("rb-s-hist");
+  if (!el) return;
+  el.innerHTML = scanHist.length
+    ? "<h4>Ostatnio w tej zmianie</h4>" + scanHist.map((h) => `<div class="rb-meta">${h.t.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" })} · ${esc(h.name)} · ${esc(h.what)}</div>`).join("")
+    : "";
+}
+function scanHistPush(name, what) {
+  scanHist.unshift({ t: new Date(), name: name || "", what });
+  scanHist = scanHist.slice(0, 6);
+  renderScanHist();
+}
+function custName() {
+  const L = custView && custView.data && custView.data.loyal;
+  return L ? (L.name || L.email || "") : "";
+}
+async function stampTx(uid) {
+  const ref = doc(db, "loyalty", uid);
+  let res = null;
+  await runTransaction(db, async (tx) => {
+    const sn = await tx.get(ref);
+    if (!sn.exists()) throw new Error("Klient nie ma karty.");
+    const d = sn.data();
+    if ((d.stamps || 0) >= LOYAL_GOAL) throw new Error("Karta pełna — najpierw wydaj pizzę gratis.");
+    tx.update(ref, { stamps: (d.stamps || 0) + 1, total: (d.total || 0) + 1, lastStampAt: serverTimestamp() });
+    tx.set(newLogRef(), logData("stamp", { uid, name: d.name || d.email }, ((d.stamps || 0) + 1) + "/" + LOYAL_GOAL));
+    res = { n: (d.stamps || 0) + 1, name: d.name || d.email || "" };
+  });
+  return res;
+}
+/* Tryb szybki: zeskanowanie klienta od razu dodaje pieczątkę (tylko gdy karta nie jest pełna i minęło 2 h od poprzedniej) */
+async function quickStamp(uid, out) {
+  custView = { uid, target: out, withNext: true, data: null };
+  try {
+    custView.data = await loadCustomer(uid);
+    const L = custView.data.loyal;
+    const last = L && L.lastStampAt && L.lastStampAt.toDate ? L.lastStampAt.toDate() : null;
+    const cool = !!(last && last.getTime() + STAMP_COOLDOWN_H * 3600000 > Date.now());
+    if (L && (L.stamps || 0) < LOYAL_GOAL && !cool) {
+      const r = await stampTx(uid);
+      custView.data = await loadCustomer(uid);
+      renderCustomer();
+      syncLoyalCache(uid, custView.data.loyal);
+      setMsg(sMsg, "✅ Dodano pieczątkę: " + r.name + " (" + r.n + "/" + LOYAL_GOAL + ")", "ok");
+      scanHistPush(r.name, "➕ pieczątka " + r.n + "/" + LOYAL_GOAL);
+      buzz(150);
+      autoResume();
+      return;
+    }
+    renderCustomer();
+    if (cool) { setMsg(sMsg, "Ten klient dostał pieczątkę niedawno (kolejna możliwa po " + STAMP_COOLDOWN_H + " h). Pokazuję kartę.", "err"); buzz([120, 60, 120]); }
+    else if (L) { setMsg(sMsg, "Karta jest pełna: wydaj pizzę gratis.", "ok"); buzz([100, 50, 100]); }
+    else buzz([120, 60, 120]);
+  } catch (err) {
+    console.error(err);
+    out.innerHTML = '<div class="rb-res bad">❌ ' + esc(errText(err)) + "</div>";
+    custView = null;
+    buzz([120, 60, 120]);
+  }
+}
 async function tick(video) {
   try {
     if (video.readyState < 2 || !video.videoWidth) return "";
@@ -4061,7 +4400,12 @@ function scanLoop() {
   if (!scanning) return;
   tick($("rb-s-video")).then((text) => {
     if (!scanning) return;
-    if (text) { handleScan(text); return; }
+    if (text) {
+      const now = Date.now();
+      if (text === lastRaw && now - lastRawAt < 5000) { lastRawAt = now; scanTimer = setTimeout(scanLoop, 200); return; }
+      lastRaw = text; lastRawAt = now;
+      handleScan(text); return;
+    }
     scanTimer = setTimeout(scanLoop, 120);
   });
 }
@@ -4091,6 +4435,7 @@ async function handleScan(raw) {
   try {
     const km = /^KL:([A-Za-z0-9]{10,40})$/.exec(String(raw).trim());
     if (km) {
+      if ($("rb-s-quick").checked) { await quickStamp(km[1], out); return; }
       await showCustomer(km[1], out, true);
       buzz(120);
       return;
@@ -4118,6 +4463,8 @@ async function handleScan(raw) {
     if (r.ok) {
       out.innerHTML = scanCard("ok", "✅ ZATWIERDZONE", c, "Kod został unieważniony. Nie da się go użyć ponownie.", true);
       buzz(200);
+      scanHistPush(ownerName(c), "🎟 " + c.code);
+      autoResume();
     } else {
       out.innerHTML = scanCard("bad", "❌ " + esc(r.reason), c, "");
       buzz([120, 60, 120]);
@@ -4134,6 +4481,7 @@ $("rb-s-result").addEventListener("click", async (e) => {
   const b = e.target.closest("[data-act]");
   if (!b) return;
   if (b.dataset.act === "next") {
+    lastRaw = "";
     if (custView && custView.target === $("rb-s-result")) custView = null;
     $("rb-s-result").innerHTML = "";
     resumeScan();

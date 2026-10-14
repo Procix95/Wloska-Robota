@@ -1,0 +1,20 @@
+{
+  "name": "Włoska Robota",
+  "short_name": "Włoska Robota",
+  "description": "Pizzeria Włoska Robota: konto, karta lojalnościowa i rabaty",
+  "lang": "pl",
+  "start_url": "/?pwa=1",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#CD212A",
+  "icons": [
+    { "src": "/favicon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Moje konto i karta", "short_name": "Konto", "url": "/?konto=1", "icons": [{ "src": "/favicon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Skaner dla obsługi", "short_name": "Skaner", "url": "/?skan=1", "icons": [{ "src": "/favicon-192.png", "sizes": "192x192", "type": "image/png" }] }
+  ]
+}
