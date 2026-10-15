@@ -1,11 +1,11 @@
 // Włoska Robota – prosty service worker: strona zawsze próbuje najpierw pobrać świeżą wersję z sieci,
 // a gdy zasięg jest słaby lub go nie ma, pokazuje ostatnią zapamiętaną. Firebase, Google i inne zewnętrzne adresy
 // nigdy nie są przechwytywane (logowanie i dane zawsze idą prosto do serwera).
-const CACHE = "wr-v1";
+const CACHE = "wr-v2";
 
 self.addEventListener("install", (e) => {
   self.skipWaiting();
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(["/favicon-192.png", "/icon-512.png", "/logo.jpg"])).catch(() => {}));
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(["/logo-mark.webp", "/logo-badge.webp", "/icon-512.png"])).catch(() => {}));
 });
 
 self.addEventListener("activate", (e) => {

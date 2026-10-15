@@ -10,11 +10,12 @@
   "background_color": "#ffffff",
   "theme_color": "#CD212A",
   "icons": [
-    { "src": "/favicon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+    { "src": "/favicon-192.png?v=2", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png?v=2", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png?v=2", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "Moje konto i karta", "short_name": "Konto", "url": "/?konto=1", "icons": [{ "src": "/favicon-192.png", "sizes": "192x192", "type": "image/png" }] },
-    { "name": "Skaner dla obsługi", "short_name": "Skaner", "url": "/?skan=1", "icons": [{ "src": "/favicon-192.png", "sizes": "192x192", "type": "image/png" }] }
+    { "name": "Moje konto i karta", "short_name": "Konto", "url": "/?konto=1", "icons": [{ "src": "/favicon-192.png?v=2", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Skaner dla obsługi", "short_name": "Skaner", "url": "/?skan=1", "icons": [{ "src": "/favicon-192.png?v=2", "sizes": "192x192", "type": "image/png" }] }
   ]
 }
