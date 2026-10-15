@@ -967,7 +967,8 @@ body.dark #pwaModal .box{background:#1e1e1e;color:#f3f3f3}
 #rabat-overlay .rb-sec{display:flex;align-items:baseline;justify-content:space-between;margin:6px 0 12px}
 #rabat-overlay .rb-sec h3{margin:0;font-size:18px}
 #rabat-overlay .rb-sec span{font-size:13px;color:var(--rb-muted)}
-#rabat-overlay #rb-user.adminview .rb-qrwrap,#rabat-overlay #rb-user.adminview .rb-qr{display:none!important}
+/* admin i obsługa widzą tylko czysty panel: bez kart, kodów, gier i ankiet klienta */
+#rabat-overlay #rb-user.adminview #rb-welcome,#rabat-overlay #rb-user.adminview #rb-loyal,#rabat-overlay #rb-user.adminview #rb-survey,#rabat-overlay #rb-user.adminview #rb-campaign,#rabat-overlay #rb-user.adminview #rb-me,#rabat-overlay #rb-user.adminview > .rb-sec,#rabat-overlay #rb-user.adminview #rb-promo,#rabat-overlay #rb-user.adminview #rb-my-list,#rabat-overlay #rb-user.adminview .rb-how,#rabat-overlay #rb-user.adminview .rb-qrwrap,#rabat-overlay #rb-user.adminview .rb-qr{display:none!important}
 #rabat-overlay .rb-games{background:var(--rb-card);border:1px solid var(--rb-border);border-radius:16px;padding:16px;margin:0 0 16px}
 #rabat-overlay .rb-pts-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
 #rabat-overlay .rb-pts-top b{font-size:28px;line-height:1}
@@ -1189,7 +1190,7 @@ body.dark #site-dish .sd-text{color:#bbb}
         <div class="rb-game-list" id="rb-game-list"></div>
         <div class="rb-stage" id="rb-game-stage" hidden></div>
         <button type="button" class="rb-btn" id="rb-pts-redeem" disabled>Wymień punkty na rabat −5 zł</button>
-        <button type="button" class="rb-btn secondary small" id="rb-pts-test" style="margin-top:8px" hidden>🛠 Tryb testowy (admin): +10 pkt</button>
+                <button type="button" class="rb-btn secondary small" id="rb-pts-test" style="margin-top:8px" hidden>🛠 Tryb testowy (admin): +10 pkt</button>
         <div class="rb-msg" id="rb-pts-msg" role="status"></div>
       </div>
       <div class="rb-survey" id="rb-survey" hidden>
@@ -2013,9 +2014,9 @@ function renderGames() {
   $("rb-pts-fill").style.width = Math.min(100, Math.round(p / PTS_COST * 100)) + "%";
   $("rb-pts-txt").textContent = (p >= PTS_COST ? "Masz dość punktów na rabat −5 zł!" : "Do rabatu −5 zł brakuje " + (PTS_COST - p) + " pkt.") +
     " Dziś zdobyto " + today + " z " + PTS_DAY_CAP + " pkt (dzienny limit).";
+  $("rb-pts-test").hidden = !isAdmin;
   $("rb-pts-redeem").disabled = p < PTS_COST;
   $("rb-pts-redeem").textContent = "Wymień " + PTS_COST + " pkt na rabat −5 zł";
-  $("rb-pts-test").hidden = !isAdmin;
   $("rb-game-list").innerHTML = GAMES.map((g) =>
     `<div class="rb-game${g.start ? "" : " soon"}"><span class="ic">${g.icon || "🎮"}</span><div class="tx"><b>${esc(g.name)}</b><small>${esc(g.desc || "")}</small></div>` +
     (g.start ? `<button type="button" class="rb-btn small" data-play="${esc(g.id)}">Graj</button>` : '<small>Wkrótce</small>') + "</div>").join("");
@@ -2061,6 +2062,15 @@ $("rb-game-list").addEventListener("click", (e) => {
   const close = () => { stage.hidden = true; stage.innerHTML = ""; };
   g.start(stage, { close, award: async (n) => { const r = await awardPoints(n, g.id); if (r.msg) setMsg($("rb-pts-msg"), r.msg, r.ok ? "ok" : "err"); return r; } });
 });
+$("rb-pts-test").addEventListener("click", async () => {
+  if (!isAdmin || !ptsUser) return;
+  try {
+    const ref = doc(db, "points", ptsUser.uid);
+    const d = (await getDoc(ref)).data() || {};
+    await updateDoc(ref, { points: (d.points || 0) + 10, total: (d.total || 0) + 10 });
+    setMsg($("rb-pts-msg"), "Dodano 10 pkt (tryb testowy).", "ok");
+  } catch (err) { setMsg($("rb-pts-msg"), errText(err), "err"); }
+});
 $("rb-pts-redeem").addEventListener("click", async () => {
   const msg = $("rb-pts-msg"), btn = $("rb-pts-redeem");
   if (!ptsUser || isStaff) return;
@@ -2075,25 +2085,17 @@ $("rb-pts-redeem").addEventListener("click", async () => {
     const exp = new Date(); exp.setDate(exp.getDate() + 14); exp.setHours(23, 59, 59, 0);
     const batch = writeBatch(db);
     batch.update(ref, { points: d.points - PTS_COST, redeemN: n });
+    const ptsCode = genCode("PUNKTY");
     batch.set(doc(db, "coupons", "pts_" + ptsUser.uid + "_" + n), {
-      uid: ptsUser.uid, userEmail: ptsUser.email || "", code: genCode("PUNKTY"), description: PTS_REWARD_DESC,
+      uid: ptsUser.uid, userEmail: ptsUser.email || "", code: ptsCode, description: PTS_REWARD_DESC,
       expiresAt: Timestamp.fromDate(exp), used: false, createdAt: serverTimestamp()
     });
     await withTimeout(batch.commit());
-    setMsg(msg, "Gotowe! Rabat −5 zł jest na liście Twoich kodów poniżej, ważny 14 dni.", "ok");
+    setMsg(msg, "Gotowe! Twój kod rabatowy −5 zł: " + ptsCode + " (ważny 14 dni, jest też na liście Twoich kodów).", "ok");
   } catch (err) {
     console.warn("Wymiana punktów:", err && (err.code || err.message));
     setMsg(msg, err && err.code === "permission-denied" ? "Nie udało się wymienić punktów (opublikuj nowe reguły)." : errText(err), "err");
   } finally { renderGames(); }
-});
-$("rb-pts-test").addEventListener("click", async () => {
-  if (!isAdmin || !ptsUser) return;
-  try {
-    const ref = doc(db, "points", ptsUser.uid);
-    const d = (await getDoc(ref)).data() || {};
-    await updateDoc(ref, { points: (d.points || 0) + 10, total: (d.total || 0) + 10 });
-    setMsg($("rb-pts-msg"), "Dodano 10 pkt (tryb testowy).", "ok");
-  } catch (err) { setMsg($("rb-pts-msg"), errText(err), "err"); }
 });
 
 async function ensureLoyalty(user) {
