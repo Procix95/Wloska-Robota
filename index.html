@@ -82,6 +82,16 @@ body.dark .logo {color: var(--light);}
 body.dark .nav-links a {color: var(--light);}
 .nav-links a::after {content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px; background: linear-gradient(90deg, var(--green), var(--red)); transition: var(--transition);}
 .nav-links a:hover::after {width: 100%;}
+.nav-links a, .logo {white-space: nowrap;}
+@media (min-width: 769px) and (max-width: 1240px) {
+  .nav-links {gap: 1.05rem; font-size: .93rem;}
+  .logo {font-size: 1.45rem; gap: .55rem;}
+  .logo-img, .logo-icon {width: 38px; height: 38px;}
+}
+@media (min-width: 769px) and (max-width: 940px) {
+  .nav-links {gap: .75rem; font-size: .88rem;}
+  .logo {font-size: 1.2rem;}
+}
 .theme-toggle {background: var(--dark); color: var(--light); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition);}
 body.dark .theme-toggle {background: var(--light); color: var(--dark);}
 .mobile-toggle {display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--dark);}
@@ -222,6 +232,7 @@ body.dark footer {background: #0a0a0a;}
         <li class="dowoz-link" hidden><a href="#dowoz">Dowóz</a></li>
         <li><a href="#gallery">Galeria</a></li>
         <li><a href="#contact">Kontakt</a></li>
+        <li><a href="#gry" class="nav-games">🎮 Gry</a></li>
         <li><a href="#konto">Konto</a></li>
         <li data-pwa-show hidden><button type="button" class="pwa-nav-btn" data-pwa hidden aria-label="Zainstaluj aplikację Włoska Robota"><i class="fas fa-download"></i> <span class="pwa-long">Zainstaluj aplikację</span><span class="pwa-short">Aplikacja</span></button></li>
         <li><button class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i></button></li>
@@ -969,6 +980,11 @@ body.dark #pwaModal .box{background:#1e1e1e;color:#f3f3f3}
 #rabat-overlay .rb-sec span{font-size:13px;color:var(--rb-muted)}
 /* admin i obsługa widzą tylko czysty panel: bez kart, kodów, gier i ankiet klienta */
 #rabat-overlay #rb-user.adminview #rb-welcome,#rabat-overlay #rb-user.adminview #rb-loyal,#rabat-overlay #rb-user.adminview #rb-survey,#rabat-overlay #rb-user.adminview #rb-campaign,#rabat-overlay #rb-user.adminview #rb-me,#rabat-overlay #rb-user.adminview > .rb-sec,#rabat-overlay #rb-user.adminview #rb-promo,#rabat-overlay #rb-user.adminview #rb-my-list,#rabat-overlay #rb-user.adminview .rb-how,#rabat-overlay #rb-user.adminview .rb-qrwrap,#rabat-overlay #rb-user.adminview .rb-qr{display:none!important}
+#rabat-overlay #rb-auth-games{display:none}
+#rabat-overlay[data-games="1"] #rb-auth-games{display:block}
+#rabat-overlay .rb-games.flash{animation:rbflash 1.4s ease-out}
+@keyframes rbflash{0%{box-shadow:0 0 0 0 rgba(212,175,55,.9)}70%{box-shadow:0 0 0 14px rgba(212,175,55,0)}100%{box-shadow:0 0 0 0 rgba(212,175,55,0)}}
+.nav-games{font-weight:700}
 #rabat-overlay .rb-games{background:var(--rb-card);border:1px solid var(--rb-border);border-radius:16px;padding:16px;margin:0 0 16px}
 #rabat-overlay .rb-pts-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
 #rabat-overlay .rb-pts-top b{font-size:28px;line-height:1}
@@ -1136,6 +1152,7 @@ body.dark #site-dish .sd-text{color:#bbb}
 
     <!-- Logowanie / rejestracja -->
     <div id="rb-auth" hidden>
+      <div class="rb-res ok" id="rb-auth-games" style="margin-bottom:12px">🎮 <b>Gry i punkty:</b> zaloguj się lub załóż konto, żeby grać i zbierać punkty na rabaty.</div>
       <div class="rb-hello">
         <img class="rb-logo" src="/favicon-192.png" width="84" height="84" alt="Włoska Robota" onerror="this.style.display='none'">
         <h3>Twoje konto w Włoskiej Robocie</h3>
@@ -1743,20 +1760,35 @@ function openRabat() {
 function closeRabat() {
   stopScanner();
   overlay.classList.remove("open");
+  delete overlay.dataset.games; wantGames = false;
   document.body.style.overflow = "";
   if (location.hash === "#konto") history.replaceState(null, "", location.pathname + location.search);
 }
 document.addEventListener("click", (e) => {
   const a = e.target.closest('a[href="#konto"], [data-open-rabat]');
   if (a) { e.preventDefault(); openRabat(); }
+  const g = e.target.closest('a[href="#gry"], [data-open-games]');
+  if (g) { e.preventDefault(); openGames(); }
 });
+/* „Gry” w menu: otwiera Konto i pokazuje kartę gier (po zalogowaniu przewija do niej, bez logowania prosi o konto) */
+let wantGames = false;
+function focusGames() {
+  const box = document.getElementById("rb-games");
+  if (box && !box.hidden && box.offsetParent !== null) {
+    box.scrollIntoView({ behavior: "smooth", block: "center" });
+    box.classList.remove("flash"); void box.offsetWidth; box.classList.add("flash");
+    wantGames = false;
+  }
+}
+function openGames() { wantGames = true; overlay.dataset.games = "1"; openRabat(); setTimeout(focusGames, 150); }
 $("rb-close").addEventListener("click", closeRabat);
 overlay.addEventListener("mousedown", (e) => { if (e.target === overlay) closeRabat(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && overlay.classList.contains("open")) closeRabat(); });
-window.addEventListener("hashchange", () => { if (location.hash === "#konto") openRabat(); });
+window.addEventListener("hashchange", () => { if (location.hash === "#konto") openRabat(); else if (location.hash === "#gry") openGames(); });
 const QS = new URLSearchParams(location.search);
 let wantScan = QS.has("skan");
 if (location.hash === "#konto" || QS.has("konto") || wantScan) openRabat();
+if (location.hash === "#gry" || QS.has("gry")) openGames();
 
 /* ---------- logowanie / rejestracja ---------- */
 let mode = "login";
@@ -2198,6 +2230,7 @@ async function handleUser(user) {
   setMsg($("rb-g-msg"), "");
   $("rb-g-skip").hidden = true;
   showOnly(needBday ? "gate" : "user");
+  if (wantGames && !needBday) setTimeout(focusGames, 400);
 
   if (!isStaff) {
     ptsUser = user;
