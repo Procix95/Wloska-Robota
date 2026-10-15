@@ -821,8 +821,8 @@ body.dark #pwaModal .box{background:#1e1e1e;color:#f3f3f3}
 #rabat-overlay h2{margin:0 0 16px;font-size:26px}
 #rabat-overlay h3{margin:24px 0 12px;font-size:18px}
 #rabat-overlay h4{margin:20px 0 10px;font-size:15px;color:var(--rb-muted)}
-#rabat-overlay h4.rb-sec{display:flex;align-items:center;justify-content:space-between;gap:10px}
-#rabat-overlay h4.rb-sec .rb-btn.small{min-height:36px;padding:6px 13px;flex:none;font-size:13px}
+#rabat-overlay h4.rb-hsec{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#rabat-overlay h4.rb-hsec .rb-btn.small{min-height:36px;padding:6px 13px;flex:none;font-size:13px}
 #rabat-overlay .rb-toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:10000;max-width:min(92vw,460px);padding:12px 18px;border-radius:12px;font-size:14px;font-weight:600;color:#fff;background:#007a3b;box-shadow:0 8px 28px rgba(0,0,0,.4);text-align:center}
 #rabat-overlay .rb-toast.err{background:#b3261e}
 #rabat-overlay .rb-close{position:absolute;top:10px;right:14px;background:none;border:0;color:var(--rb-muted);font-size:30px;line-height:1;cursor:pointer}
@@ -967,6 +967,19 @@ body.dark #pwaModal .box{background:#1e1e1e;color:#f3f3f3}
 #rabat-overlay .rb-sec{display:flex;align-items:baseline;justify-content:space-between;margin:6px 0 12px}
 #rabat-overlay .rb-sec h3{margin:0;font-size:18px}
 #rabat-overlay .rb-sec span{font-size:13px;color:var(--rb-muted)}
+#rabat-overlay #rb-user.adminview .rb-qrwrap,#rabat-overlay #rb-user.adminview .rb-qr{display:none!important}
+#rabat-overlay .rb-games{background:var(--rb-card);border:1px solid var(--rb-border);border-radius:16px;padding:16px;margin:0 0 16px}
+#rabat-overlay .rb-pts-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+#rabat-overlay .rb-pts-top b{font-size:28px;line-height:1}
+#rabat-overlay .rb-pts-bar{height:10px;border-radius:99px;background:var(--rb-input);overflow:hidden;margin:10px 0 6px}
+#rabat-overlay .rb-pts-bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--rb-accent),var(--rb-gold));transition:width .4s}
+#rabat-overlay .rb-game-list{display:grid;gap:8px;margin:12px 0}
+#rabat-overlay .rb-game{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--rb-border);border-radius:12px;background:var(--rb-bg)}
+#rabat-overlay .rb-game .ic{font-size:26px;flex:none}
+#rabat-overlay .rb-game .tx{flex:1;min-width:0}
+#rabat-overlay .rb-game .tx small{display:block;color:var(--rb-muted);font-size:12.5px}
+#rabat-overlay .rb-game.soon{opacity:.6}
+#rabat-overlay .rb-stage{margin:10px 0;padding:10px;border:1px dashed var(--rb-border);border-radius:12px}
 /* bilet-kupon */
 #rabat-overlay .rb-ticket{position:relative;background:var(--rb-card);border:1px solid var(--rb-border);border-left:6px solid var(--rb-accent);border-radius:16px;padding:16px;margin-bottom:14px}
 #rabat-overlay .rb-ticket.off{border-left-color:#9a9aa6;opacity:.6}
@@ -1168,6 +1181,16 @@ body.dark #site-dish .sd-text{color:#bbb}
         <div class="rb-loyal-txt" id="rb-loyal-txt"></div>
         <div class="rb-qrwrap"><div class="rb-qr" id="rb-card-qr"></div>
           <div class="rb-qrcap">Twój kod klienta<small>pokazuj go przy każdym zamówieniu — dostaniesz pieczątkę i rabaty</small></div></div>
+      </div>
+      <div class="rb-games" id="rb-games" hidden>
+        <div class="rb-pts-top"><h3 style="margin:0;font-size:18px">🎮 Gry i punkty</h3><b id="rb-pts-n">0</b></div>
+        <div class="rb-pts-bar" aria-hidden="true"><i id="rb-pts-fill"></i></div>
+        <div class="rb-meta" id="rb-pts-txt"></div>
+        <div class="rb-game-list" id="rb-game-list"></div>
+        <div class="rb-stage" id="rb-game-stage" hidden></div>
+        <button type="button" class="rb-btn" id="rb-pts-redeem" disabled>Wymień punkty na rabat −5 zł</button>
+        <button type="button" class="rb-btn secondary small" id="rb-pts-test" style="margin-top:8px" hidden>🛠 Tryb testowy (admin): +10 pkt</button>
+        <div class="rb-msg" id="rb-pts-msg" role="status"></div>
       </div>
       <div class="rb-survey" id="rb-survey" hidden>
         <div class="rb-sec" style="margin-top:0"><h3>⭐ Jak było?</h3></div>
@@ -1443,7 +1466,7 @@ body.dark #site-dish .sd-text{color:#bbb}
 
         <!-- Zakładka: Strona (ceny, dostępność, komunikat, pizza dnia) -->
         <div class="rb-pane" data-pane="site" hidden>
-          <h4 class="rb-sec"><span>Komunikat na górze strony</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
+          <h4 class="rb-hsec"><span>Komunikat na górze strony</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
           <textarea id="rb-site-notice-text" rows="2" maxlength="200" placeholder="np. Dziś zamykamy o 20:00. Zapraszamy jutro!"></textarea>
           <label for="rb-site-notice-type">Rodzaj</label>
           <select id="rb-site-notice-type">
@@ -1455,17 +1478,17 @@ body.dark #site-dish .sd-text{color:#bbb}
           <input id="rb-site-notice-until" type="date">
           <label class="rb-check"><input id="rb-site-notice-on" type="checkbox"> Pokazuj komunikat na stronie</label>
 
-          <h4 class="rb-sec"><span>Akcje i specjalne dni</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
-          <div class="rb-meta" style="margin:-4px 0 6px">Zaplanuj z wyprzedzeniem napis na górze strony i w Koncie klienta, np. happy hour albo świąteczną akcję. Pokaże się sam w ustawionych dniach (i godzinach, jeśli je podasz). Komunikat ręczny wyżej ma pierwszeństwo. Uwaga prawna: jeśli ogłaszasz obniżkę cen konkretnych produktów (np. „pizza Margherita -5 zł”), przepisy wymagają podania także najniższej ceny z ostatnich 30 dni. Zapisz na dole.</div>
+          <h4 class="rb-hsec"><span>Akcje i specjalne dni</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
+          <div class="rb-meta" style="margin:-4px 0 6px">Zaplanuj z wyprzedzeniem napis na górze strony i w Koncie klienta, np. happy hour albo świąteczną akcję. Pokaże się sam w ustawionych dniach (i godzinach, jeśli je podasz). Komunikat ręczny wyżej ma pierwszeństwo. Uwaga prawna: jeśli ogłaszasz obniżkę cen konkretnych produktów (np. „pizza Margherita -5 zł”), przepisy wymagają podania także najniższej ceny z ostatnich 30 dni..</div>
           <div id="rb-camp-list"></div>
           <button type="button" class="rb-btn secondary small" id="rb-camp-add">+ Dodaj akcję</button>
 
-          <h4 class="rb-sec"><span>Pizza dnia</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
+          <h4 class="rb-hsec"><span>Pizza dnia</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
           <select id="rb-site-dish"></select>
           <input id="rb-site-dish-text" type="text" maxlength="120" placeholder="Opis (opcjonalnie), np. Dziś z podwójną mozzarellą!">
           <label class="rb-check"><input id="rb-site-dish-on" type="checkbox"> Wyróżnij na stronie</label>
 
-          <h4 class="rb-sec"><span>Dowóz</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
+          <h4 class="rb-hsec"><span>Dowóz</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
           <div class="rb-meta" style="margin:-4px 0 6px">Miejscowości, do których dowozisz (na start: okolice do ok. 10 km, koszt 10 zł). Klient wpisuje swoją na stronie i od razu widzi koszt oraz minimalne zamówienie. Zmień kwoty przy każdej miejscowości, dodaj lub usuń miejscowości, a potem zapisz na dole. Puste pole kosztu lub minimum = informacja się nie pokazuje; koszt 0 = dowóz gratis.</div>
           <div class="rb-del">
             <div class="rb-meta" style="margin-bottom:6px"><b>Ustaw wszystkim naraz</b> (wypełnia pola we wszystkich wierszach poniżej; puste pole zostawia bez zmian)</div>
@@ -1479,16 +1502,16 @@ body.dark #site-dish .sd-text{color:#bbb}
           <div id="rb-del-list"></div>
           <button type="button" class="rb-btn secondary small" id="rb-del-add">+ Dodaj miejscowość</button>
 
-          <h4 class="rb-sec"><span>Opinie w Google</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
+          <h4 class="rb-hsec"><span>Opinie w Google</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
           <div class="rb-meta" style="margin:-4px 0 6px">Link, pod którym klient może zostawić opinię w Google (przycisk pokaże się każdemu klientowi po ocenie, niezależnie od liczby gwiazdek). Pusty = przycisku nie będzie.</div>
           <input id="rb-site-google" type="url" maxlength="300" placeholder="https://g.page/r/.../review">
 
-          <h4 class="rb-sec"><span>Własne produkty</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
+          <h4 class="rb-hsec"><span>Własne produkty</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
           <div class="rb-meta" style="margin:-4px 0 6px">Dodaj nową pozycję do menu (np. nową pizzę, napój, deser). Pojawi się na stronie w wybranej kategorii.</div>
           <div id="rb-prod-list"></div>
           <button type="button" class="rb-btn secondary small" id="rb-prod-add">+ Dodaj produkt</button>
 
-          <h4 class="rb-sec"><span>Ceny i dostępność pozycji ze strony</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
+          <h4 class="rb-hsec"><span>Ceny i dostępność pozycji ze strony</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
           <div class="rb-meta" style="margin:-4px 0 6px">Zmień cenę (np. 36 zł), zaznacz „niedostępne”, gdy czegoś zabrakło (pozycja się wyszarzy), albo „ukryj”, żeby zdjąć pozycję z menu.</div>
           <div id="rb-site-items"></div>
           <div class="rb-actions" style="margin-top:10px">
@@ -1898,7 +1921,7 @@ function cleanup() {
   if ($("rb-bday-set")) delete $("rb-bday-set").dataset.filled;
   allLoyal = []; allPromos = []; dataAt = 0; welcomeMigrated = false; reportEvents = []; feedbackItems = []; kShown = KPAGE;
   if ($("rb-k-card")) $("rb-k-card").innerHTML = "";
-  scanHist = []; statsEvents = null; visitDocs = null; if ($("rb-s-hist")) $("rb-s-hist").innerHTML = "";
+  scanHist = []; statsEvents = null; visitDocs = null; myPoints = null; ptsUser = null; if ($("rb-games")) $("rb-games").hidden = true; if ($("rb-s-hist")) $("rb-s-hist").innerHTML = "";
 }
 function showOnly(which) {
   $("rb-loading").hidden = which !== "loading";
@@ -1957,6 +1980,121 @@ async function ensureProfile(user) {
     return false;
   }
 }
+
+/* ---------- gry i punkty (szkielet; limity są też w firestore.rules) ---------- */
+const PTS_COST = 100;          // tyle punktów = rabat -5 zł
+const PTS_DAY_CAP = 15;        // maks. punktów na dobę (doba UTC)
+const PTS_MAX_AWARD = 10;      // maks. punktów za jedną nagrodę
+const PTS_COOLDOWN_MS = 20000; // odstęp między nagrodami
+const PTS_REWARD_DESC = "Rabat -5 zł na zamówienie (za punkty z gier)";
+let myPoints = null, ptsUser = null;
+const GAMES = [
+  { id: "memory", icon: "🃏", name: "Memory z pizzami", desc: "Znajdź pary i zbieraj punkty", soon: true },
+  { id: "quiz", icon: "❓", name: "Quiz o pizzy", desc: "Odpowiadaj i zbieraj punkty", soon: true }
+];
+const utcDay = (ms) => Math.floor(ms / 86400000);
+function ptsToday() {
+  if (!myPoints) return 0;
+  const t = tsMs(myPoints.lastAt);
+  return t && utcDay(t) === utcDay(Date.now()) ? (myPoints.dayPts || 0) : 0;
+}
+async function ensurePoints(user) {
+  const ref = doc(db, "points", user.uid);
+  const snap = await withTimeout(getDoc(ref));
+  if (snap.exists()) return;
+  await withTimeout(setDoc(ref, { points: 0, total: 0, dayPts: 0, redeemN: 0, lastAt: null, createdAt: serverTimestamp() }));
+}
+function renderGames() {
+  const box = $("rb-games");
+  if (!myPoints || isStaff) { box.hidden = true; return; }
+  box.hidden = false;
+  const p = myPoints.points || 0, today = ptsToday();
+  $("rb-pts-n").textContent = p + " pkt";
+  $("rb-pts-fill").style.width = Math.min(100, Math.round(p / PTS_COST * 100)) + "%";
+  $("rb-pts-txt").textContent = (p >= PTS_COST ? "Masz dość punktów na rabat −5 zł!" : "Do rabatu −5 zł brakuje " + (PTS_COST - p) + " pkt.") +
+    " Dziś zdobyto " + today + " z " + PTS_DAY_CAP + " pkt (dzienny limit).";
+  $("rb-pts-redeem").disabled = p < PTS_COST;
+  $("rb-pts-redeem").textContent = "Wymień " + PTS_COST + " pkt na rabat −5 zł";
+  $("rb-pts-test").hidden = !isAdmin;
+  $("rb-game-list").innerHTML = GAMES.map((g) =>
+    `<div class="rb-game${g.start ? "" : " soon"}"><span class="ic">${g.icon || "🎮"}</span><div class="tx"><b>${esc(g.name)}</b><small>${esc(g.desc || "")}</small></div>` +
+    (g.start ? `<button type="button" class="rb-btn small" data-play="${esc(g.id)}">Graj</button>` : '<small>Wkrótce</small>') + "</div>").join("");
+}
+async function awardPoints(n, gameId) {
+  if (!ptsUser || !myPoints || isStaff) return { ok: false, msg: "Zaloguj się, żeby zbierać punkty." };
+  n = Math.floor(Number(n));
+  if (!(n >= 1)) return { ok: false, msg: "Brak punktów do przyznania." };
+  n = Math.min(n, PTS_MAX_AWARD);
+  const ref = doc(db, "points", ptsUser.uid);
+  try {
+    return await runTransaction(db, async (tx) => {
+      const cur = await tx.get(ref);
+      if (!cur.exists()) return { ok: false, msg: "Konto punktów nie jest gotowe." };
+      const d = cur.data();
+      const last = tsMs(d.lastAt), now = Date.now();
+      if (last && now - last < PTS_COOLDOWN_MS) return { ok: false, msg: "Chwilę poczekaj przed kolejnymi punktami.", wait: true };
+      const sameDay = last && utcDay(last) === utcDay(now);
+      const todayPts = sameDay ? (d.dayPts || 0) : 0;
+      const give = Math.min(n, PTS_DAY_CAP - todayPts);
+      if (give <= 0) return { ok: false, msg: "Dzienny limit punktów wyczerpany. Wróć jutro!", cap: true };
+      tx.update(ref, { points: (d.points || 0) + give, total: (d.total || 0) + give, dayPts: todayPts + give, lastAt: serverTimestamp() });
+      return { ok: true, given: give, msg: "+" + give + " pkt" };
+    });
+  } catch (err) {
+    console.warn("Punkty:", err && (err.code || err.message));
+    return { ok: false, msg: err && err.code === "permission-denied" ? "Nie można teraz dodać punktów (limit lub reguły)." : "Nie udało się zapisać punktów." };
+  }
+}
+window.WRGames = {
+  /* Dodanie gry: WRGames.register({ id, name, desc, icon, start(stageEl, { award, close }) }) */
+  register(g) { if (!g || !g.id) return; const i = GAMES.findIndex((x) => x.id === g.id); if (i >= 0) GAMES[i] = { ...GAMES[i], ...g, soon: false }; else GAMES.push(g); renderGames(); },
+  award: awardPoints,
+  get points() { return myPoints ? myPoints.points || 0 : 0; }
+};
+$("rb-game-list").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-play]");
+  if (!b) return;
+  const g = GAMES.find((x) => x.id === b.dataset.play);
+  const stage = $("rb-game-stage");
+  if (!g || !g.start) return;
+  stage.hidden = false; stage.innerHTML = "";
+  const close = () => { stage.hidden = true; stage.innerHTML = ""; };
+  g.start(stage, { close, award: async (n) => { const r = await awardPoints(n, g.id); if (r.msg) setMsg($("rb-pts-msg"), r.msg, r.ok ? "ok" : "err"); return r; } });
+});
+$("rb-pts-redeem").addEventListener("click", async () => {
+  const msg = $("rb-pts-msg"), btn = $("rb-pts-redeem");
+  if (!ptsUser || isStaff) return;
+  btn.disabled = true;
+  setMsg(msg, "");
+  try {
+    const ref = doc(db, "points", ptsUser.uid);
+    const cur = await withTimeout(getDoc(ref));
+    const d = cur.exists() ? cur.data() : null;
+    if (!d || (d.points || 0) < PTS_COST) { setMsg(msg, "Za mało punktów.", "err"); return; }
+    const n = (d.redeemN || 0) + 1;
+    const exp = new Date(); exp.setDate(exp.getDate() + 14); exp.setHours(23, 59, 59, 0);
+    const batch = writeBatch(db);
+    batch.update(ref, { points: d.points - PTS_COST, redeemN: n });
+    batch.set(doc(db, "coupons", "pts_" + ptsUser.uid + "_" + n), {
+      uid: ptsUser.uid, userEmail: ptsUser.email || "", code: genCode("PUNKTY"), description: PTS_REWARD_DESC,
+      expiresAt: Timestamp.fromDate(exp), used: false, createdAt: serverTimestamp()
+    });
+    await withTimeout(batch.commit());
+    setMsg(msg, "Gotowe! Rabat −5 zł jest na liście Twoich kodów poniżej, ważny 14 dni.", "ok");
+  } catch (err) {
+    console.warn("Wymiana punktów:", err && (err.code || err.message));
+    setMsg(msg, err && err.code === "permission-denied" ? "Nie udało się wymienić punktów (opublikuj nowe reguły)." : errText(err), "err");
+  } finally { renderGames(); }
+});
+$("rb-pts-test").addEventListener("click", async () => {
+  if (!isAdmin || !ptsUser) return;
+  try {
+    const ref = doc(db, "points", ptsUser.uid);
+    const d = (await getDoc(ref)).data() || {};
+    await updateDoc(ref, { points: (d.points || 0) + 10, total: (d.total || 0) + 10 });
+    setMsg($("rb-pts-msg"), "Dodano 10 pkt (tryb testowy).", "ok");
+  } catch (err) { setMsg($("rb-pts-msg"), errText(err), "err"); }
+});
 
 async function ensureLoyalty(user) {
   const ref = doc(db, "loyalty", user.uid);
@@ -2025,6 +2163,7 @@ async function handleUser(user) {
         if (needBday) { myProfile = ps.data(); prefillBdayForm("rb-g", myProfile); }
       } catch (e) { needBday = false; }
     }
+    if (!isStaff) { try { await ensurePoints(user); } catch (e) { console.warn("Konto punktów nie zostało założone (opublikuj nowe reguły):", e && (e.code || e.message)); } }
     if (!isStaff && !isAdmin) { try { await ensureLoyalty(user); } catch (e) { console.warn("Karta lojalnościowa nie została założona (opublikuj nowe reguły):", e && (e.code || e.message)); } }
   } catch (err) {
     console.error("Rabat:", err);
@@ -2042,6 +2181,7 @@ async function handleUser(user) {
   $("rb-who").innerHTML = esc("Cześć, " + shownName.split(" ")[0] + "!") + (isAdmin ? '<span class="rb-adminpill">ADMIN</span>' : isStaff ? '<span class="rb-adminpill">OBSŁUGA</span>' : "");
   $("rb-mail").textContent = user.email || "";
   $("rb-avatar").textContent = (shownName.trim()[0] || "?").toUpperCase();
+  $("rb-user").classList.toggle("adminview", isAdmin || isStaff); // admin i obsługa nie pokazują własnych kodów QR
   $("rb-delete").hidden = isAdmin || isStaff;
   $("rb-admin").hidden = !(isAdmin || isStaff);
   // panel obsługi/admina od razu pod nagłówkiem, bez przewijania przez własną kartę i kody
@@ -2057,6 +2197,12 @@ async function handleUser(user) {
   $("rb-g-skip").hidden = true;
   showOnly(needBday ? "gate" : "user");
 
+  if (!isStaff) {
+    ptsUser = user;
+    unsubs.push(onSnapshot(doc(db, "points", user.uid),
+      (d) => { myPoints = d.exists() ? d.data() : null; renderGames(); },
+      (err) => { console.warn("Punkty niedostępne:", err && err.code); myPoints = null; renderGames(); }));
+  }
   if (!isStaff && !isAdmin) {
     unsubs.push(onSnapshot(doc(db, "loyalty", user.uid),
       (d) => { myLoyal = d.exists() ? d.data() : null; renderLoyal(user); },
@@ -2231,6 +2377,7 @@ async function purgeDeleted(uid) {
     const lgs = await getDocs(query(collection(db, "logs"), where("customerUid", "==", uid)));
     for (const l of lgs.docs) await deleteDoc(doc(db, "logs", l.id));
     await deleteDoc(doc(db, "loyalty", uid));
+    await deleteDoc(doc(db, "points", uid));
     await deleteDoc(doc(db, "users", uid));
     await deleteDoc(doc(db, "deletionRequests", uid));
   } catch (err) {
@@ -3772,7 +3919,7 @@ $("rb-bk-json").addEventListener("click", async () => {
   const btn = $("rb-bk-json");
   btn.disabled = true;
   setMsg(bkMsg, "Pobieram dane…");
-  const names = ["users", "loyalty", "coupons", "templates", "promoCodes", "feedback", "staff", "site", "deletionRequests", "logs"];
+  const names = ["users", "loyalty", "points", "coupons", "templates", "promoCodes", "feedback", "staff", "site", "deletionRequests", "logs"];
   const out = { meta: { app: "wloskarobota.eu", createdAt: new Date().toISOString(), counts: {}, errors: [] }, data: {} };
   for (const name of names) {
     try {
