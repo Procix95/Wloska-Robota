@@ -2073,7 +2073,7 @@ function gameRows() {
 let gamesScriptReq = false;
 function loadGamesScript() {
   if (gamesScriptReq) return; gamesScriptReq = true;
-  ["/gry.js?v=2", "/gry-pou.js?v=1"].forEach((src) => {
+  ["/gry.js?v=2", "/gry-pou.js?v=2", "/gry-kopalnia.js?v=1"].forEach((src) => {
     const sc = document.createElement("script"); sc.src = src; sc.async = true;
     document.head.appendChild(sc);
   });
