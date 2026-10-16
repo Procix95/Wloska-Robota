@@ -2073,9 +2073,10 @@ function gameRows() {
 let gamesScriptReq = false;
 function loadGamesScript() {
   if (gamesScriptReq) return; gamesScriptReq = true;
-  const sc = document.createElement("script"); sc.src = "/gry.js?v=2"; sc.async = true;
-  sc.onerror = () => { gamesScriptReq = false; };
-  document.head.appendChild(sc);
+  ["/gry.js?v=2", "/gry-pou.js?v=1"].forEach((src) => {
+    const sc = document.createElement("script"); sc.src = src; sc.async = true;
+    document.head.appendChild(sc);
+  });
 }
 async function awardPoints(n, gameId) {
   if (isStaff) return { ok: false, msg: "Tryb próbny obsługi — punkty nie są naliczane." };
