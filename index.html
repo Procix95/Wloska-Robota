@@ -2018,9 +2018,9 @@ async function ensureProfile(user) {
 
 /* ---------- gry i punkty (szkielet; limity są też w firestore.rules) ---------- */
 const PTS_COST = 100;          // tyle punktów = rabat -5 zł
-const PTS_DAY_CAP = 15;        // maks. punktów na dobę (doba UTC)
-const PTS_MAX_AWARD = 10;      // maks. punktów za jedną nagrodę
-const PTS_COOLDOWN_MS = 20000; // odstęp między nagrodami
+const PTS_DAY_CAP = 8;         // maks. punktów na dobę (doba UTC)
+const PTS_MAX_AWARD = 3;       // maks. punktów za jedną nagrodę
+const PTS_COOLDOWN_MS = 30000; // odstęp między nagrodami
 const PTS_REWARD_DESC = "Rabat -5 zł na zamówienie (za punkty z gier)";
 let myPoints = null, ptsUser = null;
 const GAMES = [
@@ -2041,8 +2041,20 @@ async function ensurePoints(user) {
 }
 function renderGames() {
   const box = $("rb-games");
-  if (!myPoints || isStaff) { box.hidden = true; return; }
+  /* Gry są na razie dostępne TYLKO dla administracji i obsługi (wersja testowa) */
+  if (!(isAdmin || isStaff)) { box.hidden = true; return; }
+  if (isAdmin && !myPoints) { box.hidden = true; return; }
   box.hidden = false;
+  loadGamesScript();
+  if (isStaff) {
+    $("rb-pts-n").textContent = "tryb próbny";
+    $("rb-pts-fill").style.width = "0%";
+    $("rb-pts-txt").textContent = "Gry są na razie dostępne tylko dla administracji i obsługi. Konto obsługi nie zbiera punktów — grasz próbnie.";
+    $("rb-pts-test").hidden = true; $("rb-pts-redeem").hidden = true;
+    $("rb-game-list").innerHTML = gameRows();
+    return;
+  }
+  $("rb-pts-redeem").hidden = false;
   const p = myPoints.points || 0, today = ptsToday();
   $("rb-pts-n").textContent = p + " pkt";
   $("rb-pts-fill").style.width = Math.min(100, Math.round(p / PTS_COST * 100)) + "%";
@@ -2051,12 +2063,23 @@ function renderGames() {
   $("rb-pts-test").hidden = !isAdmin;
   $("rb-pts-redeem").disabled = p < PTS_COST;
   $("rb-pts-redeem").textContent = "Wymień " + PTS_COST + " pkt na rabat −5 zł";
-  $("rb-game-list").innerHTML = GAMES.map((g) =>
+  $("rb-game-list").innerHTML = gameRows();
+}
+function gameRows() {
+  return GAMES.map((g) =>
     `<div class="rb-game${g.start ? "" : " soon"}"><span class="ic">${g.icon || "🎮"}</span><div class="tx"><b>${esc(g.name)}</b><small>${esc(g.desc || "")}</small></div>` +
     (g.start ? `<button type="button" class="rb-btn small" data-play="${esc(g.id)}">Graj</button>` : '<small>Wkrótce</small>') + "</div>").join("");
 }
+let gamesScriptReq = false;
+function loadGamesScript() {
+  if (gamesScriptReq) return; gamesScriptReq = true;
+  const sc = document.createElement("script"); sc.src = "/gry.js?v=1"; sc.async = true;
+  sc.onerror = () => { gamesScriptReq = false; };
+  document.head.appendChild(sc);
+}
 async function awardPoints(n, gameId) {
-  if (!ptsUser || !myPoints || isStaff) return { ok: false, msg: "Zaloguj się, żeby zbierać punkty." };
+  if (isStaff) return { ok: false, msg: "Tryb próbny obsługi — punkty nie są naliczane." };
+  if (!ptsUser || !myPoints || !isAdmin) return { ok: false, msg: "Zaloguj się, żeby zbierać punkty." };
   n = Math.floor(Number(n));
   if (!(n >= 1)) return { ok: false, msg: "Brak punktów do przyznania." };
   n = Math.min(n, PTS_MAX_AWARD);
@@ -2107,7 +2130,7 @@ $("rb-pts-test").addEventListener("click", async () => {
 });
 $("rb-pts-redeem").addEventListener("click", async () => {
   const msg = $("rb-pts-msg"), btn = $("rb-pts-redeem");
-  if (!ptsUser || isStaff) return;
+  if (!ptsUser || isStaff || !isAdmin) return;
   btn.disabled = true;
   setMsg(msg, "");
   try {
@@ -2239,7 +2262,7 @@ async function handleUser(user) {
     unsubs.push(onSnapshot(doc(db, "points", user.uid),
       (d) => { myPoints = d.exists() ? d.data() : null; renderGames(); },
       (err) => { console.warn("Punkty niedostępne:", err && err.code); myPoints = null; renderGames(); }));
-  }
+  } else renderGames();
   if (!isStaff && !isAdmin) {
     unsubs.push(onSnapshot(doc(db, "loyalty", user.uid),
       (d) => { myLoyal = d.exists() ? d.data() : null; renderLoyal(user); },
