@@ -380,13 +380,13 @@ const BACK = '<svg viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient 
 
 /* ---- poziomy ---- */
 const LV = [
-  { pairs: 6,  cols: 4, rows: 3, moves: 13, time: 45,  peek: 3200, wrong: 900 },
-  { pairs: 8,  cols: 4, rows: 4, moves: 16, time: 60,  peek: 3000, wrong: 850 },
-  { pairs: 10, cols: 5, rows: 4, moves: 19, time: 75,  peek: 2800, wrong: 800 },
-  { pairs: 12, cols: 6, rows: 4, moves: 22, time: 90,  peek: 2600, wrong: 750 },
-  { pairs: 15, cols: 6, rows: 5, moves: 27, time: 110, peek: 2400, wrong: 700 },
-  { pairs: 18, cols: 6, rows: 6, moves: 31, time: 130, peek: 2000, wrong: 650 },
-  { pairs: 18, cols: 6, rows: 6, moves: 28, time: 110, peek: 1300, wrong: 550 }
+  { pairs: 6,  cols: 4, rows: 3, moves: 12, time: 34,  peek: 2200, wrong: 700, swap: 0, pen: 0 },
+  { pairs: 8,  cols: 4, rows: 4, moves: 15, time: 44,  peek: 2100, wrong: 650, swap: 0, pen: 0 },
+  { pairs: 10, cols: 5, rows: 4, moves: 19, time: 54,  peek: 1900, wrong: 600, swap: 5, pen: 1 },
+  { pairs: 12, cols: 6, rows: 4, moves: 23, time: 64,  peek: 1800, wrong: 560, swap: 4, pen: 2 },
+  { pairs: 15, cols: 6, rows: 5, moves: 28, time: 80,  peek: 1600, wrong: 520, swap: 4, pen: 2 },
+  { pairs: 18, cols: 6, rows: 6, moves: 34, time: 98,  peek: 1400, wrong: 480, swap: 3, pen: 3 },
+  { pairs: 18, cols: 6, rows: 6, moves: 31, time: 86,  peek: 1000, wrong: 450, swap: 3, pen: 3 }
 ];
 const REWARD_AT = { 5: 1, 6: 1, 7: 1 };   // po ukończeniu poziomu: tyle punktów
 const REW_ROWS = [["Ukończ poziom 5 (30 kart)", "+1 pkt"], ["Ukończ poziom 6 (36 kart)", "+1 pkt"], ["Ukończ poziom 7 — Legenda (36 kart, 28 ruchów)", "+1 pkt"]];
@@ -406,6 +406,8 @@ const CSS = `
 .wrg-memory .wm-card.shake .wm-in{animation:wmshake .4s}
 @keyframes wmshake{0%,100%{translate:0}25%{translate:-3px}75%{translate:3px}}
 .wrg-memory .wm-card:not(.up):not(.done):hover .wm-in{transform:translateY(-2px)}
+.wrg-memory .wm-card.swapped{animation:wmswap .7s ease}
+@keyframes wmswap{0%{transform:scale(1) rotate(0)}30%{transform:scale(1.18) rotate(-6deg);filter:brightness(1.6)}100%{transform:scale(1) rotate(0)}}
 .wrg-memory .wm-peek{text-align:center;font-weight:700;color:#f1cf6a;margin:4px 0 2px;font-size:15px}
 .wrg-memory .wm-felt{background:radial-gradient(ellipse at 50% 30%,#14663a,#0a3d23 75%);border-radius:12px;padding:10px 8px 8px;box-shadow:inset 0 0 0 3px #5a3a1c,inset 0 0 22px rgba(0,0,0,.55)}
 .wrg-memory .wm-lvls{display:flex;gap:5px;justify-content:center;margin:8px 0 2px}
@@ -455,7 +457,7 @@ function start(stage, ctx) {
     const dots = h("div", { class: "wm-lvls" }, LV.map((_, k) => h("i", { class: (k < run.level ? "on " : "") + (k === run.level ? "cur " : "") + (REWARD_AT[k + 1] ? "pt" : "") })));
     b.append(hud, tbar, peekEl, h("div", { class: "wm-felt" }, grid), dots);
 
-    let phase = "peek", moves = 0, pairs = 0, left = L.time, open = [], lock = true, over = false;
+    let phase = "peek", moves = 0, pairs = 0, left = L.time, open = [], lock = true, over = false, misses = 0;
     cards.forEach((c) => c.el.classList.add("up"));
     let pk = L.peek / 1000;
     peekEl.textContent = "Zapamiętaj! " + Math.ceil(pk);
@@ -472,6 +474,15 @@ function start(stage, ctx) {
       }
     });
 
+    function swapTwo() {
+      const free = cards.filter((c) => c.state === "down");
+      if (free.length < 3) return;
+      const [x, y] = shuffle(free).slice(0, 2);
+      const ax = x.el, ay = y.el, mx = document.createComment(""), my = document.createComment("");
+      ax.replaceWith(mx); ay.replaceWith(my); mx.replaceWith(ay); my.replaceWith(ax);
+      [ax, ay].forEach((e) => { e.classList.add("swapped"); setTimeout(() => e.classList.remove("swapped"), 700); });
+      shell.toast("🔀 Dwie karty zamieniły się miejscami!", "", 2200);
+    }
     function end(win, why) {
       if (over) return; over = true; clearInterval(tick); lock = true;
       if (win) SFX.done(); else SFX.lose();
@@ -525,9 +536,11 @@ function start(stage, ctx) {
       } else {
         setTimeout(() => {
           a.el.classList.add("shake"); bb.el.classList.add("shake"); SFX.miss();
+          misses++; if (L.pen) { left -= L.pen; timeEl.textContent = fmtTime(Math.max(0, left)); }
           setTimeout(() => {
             a.state = bb.state = "down"; a.el.classList.remove("up", "shake"); bb.el.classList.remove("up", "shake");
-            if (moves >= L.moves) end(false, "Skończyły się ruchy!"); else lock = false;
+            if (moves >= L.moves) end(false, "Skończyły się ruchy!");
+            else { if (L.swap && misses % L.swap === 0) swapTwo(); lock = false; }
           }, L.wrong * 0.6);
         }, 380);
       }
@@ -657,8 +670,9 @@ const Q = [
   ["Ciekawostki", "Który z tych sosów NIE jest tradycyjnym sosem na pizzę?", "Majonez", ["Pomidorowy", "Bianca (oliwa i czosnek)", "Pesto"], "Majonez to dodatek znany z fast foodów, nie włoskiej tradycji."]
 ];
 
-const RUN_LEN = 20, LIVES = 4, QTIME = 12;
-const REW = [["Ukończ serię (max 3 błędy)", "+1 pkt"], ["Ukończ serię z max 1 błędem", "+2 pkt"], ["Seria bez żadnego błędu", "+3 pkt"]];
+const RUN_LEN = 25, LIVES = 3;
+const qTime = (i) => (i < 8 ? 9 : i < 16 ? 7 : 6);   // sekundy na pytanie — z czasem coraz mniej
+const REW = [["Ukończ serię (max 2 błędy)", "+1 pkt"], ["Ukończ serię z max 1 błędem", "+2 pkt"], ["Seria bez żadnego błędu", "+3 pkt"]];
 
 const CSS = `
 .wrg-quiz .wq-card{background:linear-gradient(180deg,#2a2418,#1e1a11);border:1px solid #6b5521;border-radius:14px;padding:14px 14px 12px;box-shadow:inset 0 0 0 3px rgba(212,175,55,.08),0 6px 18px rgba(0,0,0,.35)}
@@ -689,8 +703,8 @@ function start(stage, ctx) {
     shell.setTitle("Quiz Znawca");
     shell.screen({
       hero: "🎓", title: "Quiz Znawca",
-      html: "<p>Seria <b>" + RUN_LEN + " pytań</b> z puli ponad " + Q.length + " — o pizzie, Włoszech, składnikach i nauce o cieście. Masz <b>" + QTIME + " sekund</b> na odpowiedź i tylko <b>" + LIVES + " życia</b>.</p>" +
-        '<div class="wrg-rules"><b>Zasady</b><ul><li>Błąd lub brak odpowiedzi w czasie = utrata życia. Zero żyć — koniec serii.</li><li>Raz na serię możesz użyć 50:50.</li><li>Punkty dostajesz dopiero za ukończenie całej serii: im mniej błędów, tym więcej.</li><li>Pytania losują się z puli, a te, których jeszcze nie widziałeś, pojawiają się częściej.</li></ul></div>' +
+      html: "<p>Seria <b>" + RUN_LEN + " pytań</b> z puli ponad " + Q.length + " — o pizzie, Włoszech, składnikach i nauce o cieście. Czas na odpowiedź <b>maleje w trakcie serii</b>, a życia masz tylko <b>" + LIVES + "</b>.</p>" +
+        '<div class="wrg-rules"><b>Zasady</b><ul><li>Błąd lub brak odpowiedzi w czasie = utrata życia. Zero żyć — koniec serii.</li><li>Odpowiedź po czasie liczy się jak błąd.</li><li>Punkty dostajesz dopiero za ukończenie całej serii: im mniej błędów, tym więcej.</li><li>Pytania losują się z puli, a te, których jeszcze nie widziałeś, pojawiają się częściej.</li></ul></div>' +
         rewardsHtml(REW) + rankHtml() +
         '<p style="font-size:12.5px;color:#9a9aa8">Rekord: <b style="color:#f1cf6a">' + best("quiz", "correct") + "</b> poprawnych w jednej serii</p>" + dayLeftHtml("quiz"),
       buttons: [{ label: "▶ Zagraj", on: run }, { label: "Zamknij", cls: "ghost", on: () => shell.close() }]
@@ -705,7 +719,7 @@ function start(stage, ctx) {
 
   function run() {
     const qs = chooseQuestions();
-    let idx = 0, lives = LIVES, correct = 0, mistakes = 0, joker = true, streak = 0, bestStreak = 0;
+    let idx = 0, lives = LIVES, correct = 0, mistakes = 0, streak = 0, bestStreak = 0;
 
     function ask() {
       if (idx >= RUN_LEN) return finish(true);
@@ -716,24 +730,23 @@ function start(stage, ctx) {
       const hearts = h("span", { class: "wq-hearts" });
       const paintHearts = () => { hearts.textContent = "❤️".repeat(lives) + "🖤".repeat(LIVES - lives); };
       paintHearts();
-      const timeEl = h("b", null, QTIME + "s");
+      const QT = qTime(idx), timeEl = h("b", null, QT + "s");
       const tbar = h("div", { class: "wrg-bar2" }, h("i"));
       body.append(h("div", { class: "wrg-hud" }, h("span", { class: "wrg-pill" }, hearts), h("span", { class: "wrg-pill" }, "Poprawne: ", h("b", null, correct)), h("span", { class: "wrg-pill" }, "Seria: ", h("b", null, streak)), h("span", { class: "wrg-pill" }, "⏱ ", timeEl)), tbar);
       const ans = h("div", { class: "wq-ans" });
       const btns = order.map((t, k) => h("button", { class: "wq-a", type: "button", "data-t": t }, h("i", null, "ABCD"[k]), h("span", null, t)));
       ans.append(...btns);
       const card = h("div", { class: "wq-card", style: "margin-top:8px" }, h("div", { class: "wq-cat" }, q[0]), h("div", { class: "wq-q" }, q[1]), ans);
-      const jokerBtn = h("button", { class: "wrg-btn ghost wq-joker", type: "button", disabled: joker ? null : true }, "50:50" + (joker ? "" : " (użyte)"));
-      const tools = h("div", { class: "wq-tools" }, jokerBtn, h("span", { style: "font-size:12px;color:#8a8a98" }, "Klawisze 1–4"));
+      const tools = h("div", { class: "wq-tools" }, h("span", { style: "font-size:12px;color:#8a8a98" }, "Klawisze 1–4"));
       body.append(card, tools);
       S.seen[item.i] = (S.seen[item.i] || 0) + 1; save();
 
-      let left = QTIME, last = performance.now(), answered = false;
+      let left = QT, last = performance.now(), answered = false;
       const tmr = shell.every(100, () => {
         if (answered) return;
         const now = performance.now(), dt = Math.min(0.25, (now - last) / 1000); last = now;
         left -= dt; timeEl.textContent = Math.max(0, Math.ceil(left)) + "s";
-        const f = Math.max(0, left / QTIME); tbar.firstChild.style.width = f * 100 + "%"; tbar.classList.toggle("low", f < 0.34);
+        const f = Math.max(0, left / QT); tbar.firstChild.style.width = f * 100 + "%"; tbar.classList.toggle("low", f < 0.34);
         if (left <= 3 && Math.ceil(left) !== Math.ceil(left + dt)) SFX.tick();
         if (left <= 0) reveal(null);
       });
@@ -741,7 +754,6 @@ function start(stage, ctx) {
         if (answered) return; answered = true; clearInterval(tmr); document.removeEventListener("keydown", onKey);
         const right = choice === q[2];
         btns.forEach((b) => { b.disabled = true; if (b.dataset.t === q[2]) b.classList.add("ok"); else if (b.dataset.t === choice) b.classList.add("no"); });
-        jokerBtn.disabled = true;
         if (right) { correct++; streak++; bestStreak = Math.max(bestStreak, streak); SFX.ok(); }
         else { lives--; mistakes++; streak = 0; SFX.bad(); paintHearts(); }
         const exp = h("div", { class: "wq-exp", html: (right ? "<b>Dobrze!</b> " : choice == null ? "<b>Czas minął.</b> " : "<b>Niestety nie.</b> ") + esc(q[4]) });
@@ -754,24 +766,19 @@ function start(stage, ctx) {
       function onKey(e) { const k = "1234".indexOf(e.key); if (k >= 0 && btns[k] && !answered && shell.visible()) reveal(order[k]); }
       document.addEventListener("keydown", onKey); shell.onCleanup(() => document.removeEventListener("keydown", onKey));
       ans.addEventListener("click", (e) => { const b = e.target.closest(".wq-a"); if (b && !b.disabled) reveal(b.dataset.t); });
-      jokerBtn.addEventListener("click", () => {
-        if (!joker || answered) return; joker = false; jokerBtn.disabled = true; jokerBtn.textContent = "50:50 (użyte)";
-        const wrong = btns.filter((b) => b.dataset.t !== q[2]); shuffle(wrong).slice(0, 2).forEach((b) => { b.classList.add("gone"); b.disabled = true; });
-        SFX.flip();
-      });
     }
 
     async function finish(completed) {
       bumpBest("quiz", "correct", correct);
       let pts = 0;
-      if (completed && mistakes <= 3) pts = mistakes === 0 ? 3 : mistakes <= 1 ? 2 : 1;
+      if (completed && mistakes <= 2) pts = mistakes === 0 ? 3 : mistakes <= 1 ? 2 : 1;
       let msg = "";
       if (pts) { const r = await grant(ctx, "quiz", pts); msg = r && r.msg ? r.msg : ""; if (r && r.ok) SFX.win(); } else SFX.lose();
       const title = completed ? (mistakes === 0 ? "BEZBŁĘDNIE!" : "Seria ukończona!") : "Koniec żyć";
       shell.screen({
         hero: completed ? (mistakes === 0 ? "🏆" : "🎉") : "💔", title,
         html: "<p>Poprawnych odpowiedzi: <b>" + correct + "</b> z " + RUN_LEN + " · błędy: <b>" + mistakes + "</b> · najdłuższa seria: <b>" + bestStreak + "</b></p>" +
-          (pts ? '<p style="color:#f1cf6a"><b>Za serię: +' + pts + " pkt" + (msg && !/^\+/.test(msg) ? " — " + esc(msg) : "") + "</b></p>" : completed ? "<p>Za dużo błędów, żeby dostać punkty (maks. 3).</p>" : "<p>Punkty dostaje się za ukończenie całej serii.</p>") +
+          (pts ? '<p style="color:#f1cf6a"><b>Za serię: +' + pts + " pkt" + (msg && !/^\+/.test(msg) ? " — " + esc(msg) : "") + "</b></p>" : completed ? "<p>Za dużo błędów, żeby dostać punkty (maks. 2).</p>" : "<p>Punkty dostaje się za ukończenie całej serii.</p>") +
           rewardsHtml(REW, pts) + rankHtml(),
         buttons: [{ label: "↻ Nowa seria", on: run }, { label: "Zamknij", cls: "ghost", on: () => shell.close() }]
       });
@@ -792,9 +799,9 @@ window.__QUIZ_SIZE = Q.length;
 (function () {
 const { h, esc, rnd, rint, clamp, pick, shuffle, best, bumpBest, bumpRun, grant, SFX, createShell, rankHtml, rewardsHtml, dayLeftHtml } = LIB;
 
-const W = 360, H = 560, PEEL_Y = 478, PEEL_HW = 40;
-const REW = [["Ukończ zamówienie nr 8", "+1 pkt"], ["Ukończ zamówienie nr 12", "+1 pkt"], ["Ukończ zamówienie nr 16", "+1 pkt"]];
-const REWARD_AT = { 8: 1, 12: 1, 16: 1 };
+const W = 360, H = 560, PEEL_Y = 478, PEEL_HW = 31;
+const REW = [["Ukończ zamówienie nr 10", "+1 pkt"], ["Ukończ zamówienie nr 15", "+1 pkt"], ["Ukończ zamówienie nr 20", "+1 pkt"]];
+const REWARD_AT = { 10: 1, 15: 1, 20: 1 };
 const ING = {
   sos: { n: "sos", c: "#d3392b" }, ser: { n: "mozzarella", c: "#fbf2d6" }, baz: { n: "bazylia", c: "#3f9a3a" },
   pep: { n: "pepperoni", c: "#c92e28" }, pie: { n: "pieczarki", c: "#c7a47a" }, oli: { n: "oliwki", c: "#4b3d6e" },
@@ -806,10 +813,10 @@ const RECIPES = [
   ["Wegetariana", "sos ser pap pie oli pap baz"], ["Mięsna", "sos ser pep szy pep szy baz"], ["Włoska Robota", "sos ser pep pie oli szy pap baz"]
 ].map((r) => ({ name: r[0], steps: r[1].split(" ") }));
 function recipeFor(n) {
-  if (n <= RECIPES.length) return RECIPES[n - 1];
-  const pool = ["pep", "pie", "oli", "szy", "pap"], len = Math.min(10, 6 + Math.floor((n - 10) / 3));
+  if (n + 1 < RECIPES.length) return RECIPES[n + 1];
+  const pool = ["pep", "pie", "oli", "szy", "pap"], len = Math.min(12, 8 + Math.floor((n - 8) / 2));
   const mid = []; for (let i = 0; i < len - 3; i++) mid.push(pick(pool));
-  return { name: "Specjalność dnia #" + (n - 10), steps: ["sos", "ser"].concat(mid, ["baz"]) };
+  return { name: "Specjalność dnia #" + (n - 8), steps: ["sos", "ser"].concat(mid, ["baz"]) };
 }
 const CSS = `
 .wrg-arcade .wa-wrap{position:relative;width:100%;max-width:400px;margin:0 auto;aspect-ratio:${W}/${H};border-radius:12px;overflow:hidden;background:#1a0f0a;touch-action:none;box-shadow:0 8px 24px rgba(0,0,0,.5)}
@@ -886,7 +893,7 @@ function start(stage, ctx) {
     shell.screen({
       hero: "🔥", title: "Pizzer na gorąco",
       html: "<p>Zamówienia lecą jedno po drugim! Łap łopatą składniki spadające z góry — <b>dokładnie w kolejności z biletu</b>.</p>" +
-        '<div class="wrg-rules"><b>Zasady</b><ul><li>Przeciągnij palcem lub myszką (albo klawisze ← → / A D), żeby przesuwać łopatę.</li><li>Zły składnik, iskra z pieca i przypalony kawałek zabierają serce. Masz 3 serca.</li><li>Zamówienie bez żadnego błędu daje serce z powrotem (max 3).</li><li>Z każdym zamówieniem spada szybciej, a bilety są dłuższe.</li><li>Złota bazylia na chwilę zwalnia czas.</li></ul></div>' +
+        '<div class="wrg-rules"><b>Zasady</b><ul><li>Przeciągnij palcem lub myszką (albo klawisze ← → / A D), żeby przesuwać łopatę.</li><li>Zły składnik, iskra z pieca i przypalony kawałek zabierają serce. Masz 3 serca.</li><li>Serce wraca tylko za bezbłędne zamówienie co piąte.</li><li>Z każdym zamówieniem spada szybciej, a bilety są dłuższe.</li><li>Złota bazylia na chwilę zwalnia czas.</li></ul></div>' +
         rewardsHtml(REW) + rankHtml() +
         '<p style="font-size:12.5px;color:#9a9aa8">Rekord: zamówienie nr <b style="color:#f1cf6a">' + best("arcade", "order") + "</b> · wynik <b style=\"color:#f1cf6a\">" + best("arcade", "score") + "</b></p>" + dayLeftHtml("arcade"),
       buttons: [{ label: "▶ Do pieca!", on: play }, { label: "Zamknij", cls: "ghost", on: () => shell.close() }]
@@ -947,24 +954,24 @@ function start(stage, ctx) {
     document.addEventListener("keydown", kd); document.addEventListener("keyup", ku); shell.onCleanup(() => { document.removeEventListener("keydown", kd); document.removeEventListener("keyup", ku); });
 
     /* ---- pomocnicze ---- */
-    const speedBase = () => Math.min(250, 82 + st.order * 12.5);
-    const spawnGap = () => Math.max(0.46, 1.1 - st.order * 0.04);
+    const speedBase = () => Math.min(340, 105 + st.order * 17);
+    const spawnGap = () => Math.max(0.36, 0.92 - st.order * 0.035);
     const needed = () => st.recipe.steps[st.step];
     function burst(x, y, col, n, spd) { for (let i = 0; i < n; i++) { const a = rnd(0, 6.283), v = rnd(30, spd || 120); st.parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 30, life: rnd(.35, .8), t: 0, col, r: rnd(1.5, 3.4) }); } }
     function pop(text, x, y, col) { st.pops.push({ text, x, y, col: col || "#fff", t: 0 }); }
     function spawn() {
       const o = st.order, r = Math.random();
-      const pHaz = Math.min(0.34, 0.1 + o * 0.022);
+      const pHaz = Math.min(0.4, 0.15 + o * 0.025);
       let type;
-      const forceNeeded = st.sinceNeeded > 2.1 && !st.items.some((i) => i.type === needed() && i.y < H * .55);
+      const forceNeeded = st.sinceNeeded > 3.2 && !st.items.some((i) => i.type === needed() && i.y < H * .55);
       if (forceNeeded) type = needed();
       else if (r < pHaz) type = Math.random() < (o < 3 ? .3 : .55) ? "spark" : "burnt";
       else if (r < pHaz + 0.045 && o >= 3 && st.slow <= 0 && !st.items.some((i) => i.type === "gold")) type = "gold";
-      else if (Math.random() < 0.46) type = needed();
+      else if (Math.random() < 0.3) type = needed();
       else type = pick(Object.keys(ING));
       if (type === needed()) st.sinceNeeded = 0;
-      const x = rnd(34, W - 34), amp = o >= 4 ? Math.min(46, (o - 3) * 8) : 0;
-      st.items.push({ type, x, x0: x, y: -24, r: type === "gold" ? 14 : 13.5, rot: rnd(-.4, .4), vm: o >= 6 && Math.random() < .18 ? 1.38 : 1, amp: amp * rnd(.3, 1), ph: rnd(0, 6.28), fr: rnd(1.1, 2.1) });
+      const x = rnd(34, W - 34), amp = o >= 3 ? Math.min(60, (o - 2) * 10) : 0;
+      st.items.push({ type, x, x0: x, y: -24, r: type === "gold" ? 14 : 13.5, rot: rnd(-.4, .4), vm: o >= 3 && Math.random() < Math.min(.32, .1 + o * .02) ? 1.45 : 1, amp: amp * rnd(.4, 1), ph: rnd(0, 6.28), fr: rnd(1.1, 2.4) });
     }
     function loseHeart(why, x, y) {
       st.hearts--; st.orderMistakes++; st.combo = 0; st.shake = 0.35; st.flash = 0.35; SFX.hit(); burst(x, y, "#ff5a2a", 22, 160); pop(why, x, y - 20, "#ff8a7a");
@@ -977,7 +984,7 @@ function start(stage, ctx) {
       st.banner = { text: "Zamówienie #" + n + " gotowe!", sub: (perfect ? "Bez błędu +30 · " : "") + "+" + pts, t: 0 };
       st.flyPizza = { layers: st.layers.slice(), x: st.px, t: 0 };
       for (let i = 0; i < 40; i++) st.parts.push({ x: st.px, y: PEEL_Y - 20, vx: rnd(-160, 160), vy: rnd(-260, -80), life: rnd(.8, 1.5), t: 0, col: pick(["#d3392b", "#fbf2d6", "#3f9a3a", "#f1cf6a"]), r: rnd(2, 4), g: 380 });
-      if (perfect && st.hearts < 3) { st.hearts++; pop("+❤", st.px, PEEL_Y - 50, "#ff8a9a"); }
+      if (perfect && st.hearts < 3 && n % 5 === 0) { st.hearts++; pop("+❤", st.px, PEEL_Y - 50, "#ff8a9a"); }
       bumpBest("arcade", "order", n); bumpBest("arcade", "score", st.score);
       const gain = REWARD_AT[n];
       st.order++; st.step = 0; st.layers = []; st.orderMistakes = 0; st.recipe = recipeFor(st.order); addLayer("base");
@@ -999,7 +1006,7 @@ function start(stage, ctx) {
       shell.after(900, () => shell.screen({
         hero: "🔥", title: "Pizza przypaliła się…",
         html: "<p>Ukończone zamówienia: <b>" + (st.order - 1) + "</b> · wynik: <b>" + st.score + "</b></p>" +
-          (st.earned ? '<p style="color:#f1cf6a"><b>W tym podejściu zdobyto: +' + st.earned + " pkt</b></p>" : "<p>Punkty zaczynają się od zamówienia nr 8.</p>") +
+          (st.earned ? '<p style="color:#f1cf6a"><b>W tym podejściu zdobyto: +' + st.earned + " pkt</b></p>" : "<p>Punkty zaczynają się od zamówienia nr 10.</p>") +
           '<p style="font-size:12.5px;color:#9a9aa8">Rekord: zamówienie nr ' + best("arcade", "order") + " · wynik " + best("arcade", "score") + "</p>" + rewardsHtml(REW, st.earned) + rankHtml(),
         buttons: [{ label: "↻ Jeszcze raz", on: play }, { label: "Zamknij", cls: "ghost", on: () => shell.close() }]
       }));
@@ -1030,14 +1037,16 @@ function start(stage, ctx) {
     }
     function drawHud() {
       /* bilet z zamówieniem */
-      const rc = st.recipe, n = rc.steps.length, bw = Math.min(W - 16, 24 + n * 30 + 70), bx = (W - bw) / 2;
+      const rc = st.recipe, n = rc.steps.length, gap = Math.min(30, (W - 16 - 56) / n), bw = Math.min(W - 16, 40 + n * gap + 16), bx = (W - bw) / 2;
       c.save(); c.shadowColor = "rgba(0,0,0,.5)"; c.shadowBlur = 8; c.shadowOffsetY = 3;
       c.fillStyle = "#f6ecd2"; c.beginPath(); c.moveTo(bx, 8); for (let i = 0; i < 14; i++) c.lineTo(bx + (i + .5) * bw / 14, i % 2 ? 8 : 12); c.lineTo(bx + bw, 8); c.lineTo(bx + bw, 74); c.lineTo(bx, 74); c.closePath(); c.fill(); c.restore();
       c.fillStyle = "#3a2a16"; c.font = "700 12px Poppins,system-ui,sans-serif"; c.textAlign = "left"; c.fillText("#" + st.order + "  " + rc.name.toUpperCase(), bx + 10, 28);
       c.textAlign = "right"; c.fillStyle = "#8a6a2a"; c.fillText(st.step + "/" + n, bx + bw - 10, 28);
       const sx = bx + 14 + 12;
+      const vis = st.order >= 8 ? 2 : st.order >= 4 ? 3 : 99;
       for (let i = 0; i < n; i++) {
-        const x = sx + i * 30, y = 52, done = i < st.step, nxt = i === st.step;
+        const x = sx + i * gap, y = 52, done = i < st.step, nxt = i === st.step;
+        if (i >= st.step + vis) { c.fillStyle = "rgba(58,42,22,.12)"; c.beginPath(); c.arc(x, y, 10, 0, 7); c.fill(); c.fillStyle = "#8a6a2a"; c.font = "700 13px Poppins,system-ui,sans-serif"; c.textAlign = "center"; c.fillText("?", x, y + 5); continue; }
         c.save(); c.globalAlpha = done ? .35 : 1;
         if (nxt) { c.fillStyle = "rgba(212,175,55,.35)"; c.beginPath(); c.arc(x, y, 15 + Math.sin(st.t * 8) * 1.2, 0, 7); c.fill(); c.strokeStyle = "#d4af37"; c.lineWidth = 2; c.stroke(); }
         drawIng(c, rc.steps[i], x, y, nxt ? 11 : 9, st.t); c.restore();
@@ -1084,7 +1093,7 @@ function start(stage, ctx) {
       st.parts.forEach((p) => { p.t += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += (p.g || 260) * dt; }); st.parts = st.parts.filter((p) => p.t < p.life);
       st.pops.forEach((p) => (p.t += dt)); st.pops = st.pops.filter((p) => p.t < 1);
       const kx = (st.keys.r - st.keys.l); if (kx) st.tx = clamp(st.tx + kx * 330 * dt, 36, W - 36);
-      st.px += (st.tx - st.px) * Math.min(1, dt * 16);
+      st.px += (st.tx - st.px) * Math.min(1, dt * (st.order >= 6 ? 9 : st.order >= 3 ? 12 : 15));
       if (st.phase === "count") { st.count -= dt; if (st.count <= 0) { st.phase = "play"; addLayer("base"); } return; }
       if (st.over) return;
       if (st.slow > 0) st.slow -= dt;
@@ -1112,6 +1121,6 @@ function start(stage, ctx) {
   }
   intro();
 }
-window.WRGames.register({ id: "arcade", icon: "🔥", name: "Pizzer na gorąco", desc: "Łap składniki w kolejności z zamówienia — punkty od zamówienia nr 8", start });
+window.WRGames.register({ id: "arcade", icon: "🔥", name: "Pizzer na gorąco", desc: "Łap składniki w kolejności z zamówienia — punkty od zamówienia nr 10", start });
 })();
 })();
