@@ -787,7 +787,7 @@ function start(stage, ctx) {
   }
   intro();
 }
-window.WRGames.register({ id: "quiz", icon: "❓", name: "Quiz Znawca", desc: "20 trudnych pytań, 4 życia — punkty za ukończoną serię", start });
+window.WRGames.register({ id: "quiz", icon: "❓", name: "Quiz Znawca", desc: "25 pytań, 3 życia, czas na odpowiedź maleje — punkty za ukończoną serię", start });
 window.__QUIZ_SIZE = Q.length;
 })();
 /* =====================================================================
