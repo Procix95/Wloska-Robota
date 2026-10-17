@@ -1064,6 +1064,26 @@ body.has-notice .hero{margin-top:0}
 .unavail-badge{display:inline-block;margin-top:.6rem;padding:.15rem .7rem;border-radius:99px;background:var(--red);color:#fff;font-size:.8rem;font-weight:700}
 .menu-item.is-dish{outline:3px solid var(--gold);outline-offset:-3px}
 .menu-item.is-hidden{display:none!important}
+/* zdjęcia pizz w menu */
+.menu-photo{display:none;position:relative;aspect-ratio:4/3;background:#f1e9dd;overflow:hidden}
+body.dark .menu-photo{background:#2b2622}
+.menu-photo.has,.menu-photo.pending,.menu-photo.adm{display:block}
+.menu-photo .mp-img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
+.menu-photo .mp-skel{position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%),#e6dccd;background-size:200% 100%;animation:mpSkel 1.3s linear infinite}
+body.dark .menu-photo .mp-skel{background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.08) 50%,transparent 70%),#3a332d;background-size:200% 100%}
+@keyframes mpSkel{from{background-position:200% 0}to{background-position:-100% 0}}
+.menu-photo .mp-empty{position:absolute;inset:8px;border:2px dashed rgba(0,0,0,.3);border-radius:14px;background:transparent;color:#6b5c4d;font:700 .95rem/1.2 inherit;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;cursor:pointer}
+body.dark .menu-photo .mp-empty{border-color:rgba(255,255,255,.3);color:#cdbfae}
+.menu-photo .mp-empty span{font-size:1.8rem}
+.menu-photo .mp-empty:hover{background:rgba(212,175,55,.15)}
+.menu-photo .mp-tools{position:absolute;right:8px;bottom:8px;display:flex;gap:6px}
+.menu-photo .mp-btn{min-height:40px;padding:.35rem .8rem;border:0;border-radius:99px;background:rgba(0,0,0,.72);color:#fff;font:700 .85rem/1 inherit;font-family:inherit;cursor:pointer}
+.menu-photo .mp-btn.mp-del{background:rgba(190,30,30,.9)}
+.menu-photo.busy::after{content:"Zapisuję…";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);color:#fff;font-weight:800}
+.mp-lb{position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:16px;cursor:zoom-out}
+.mp-lb figure{margin:0;max-width:min(92vw,900px)}
+.mp-lb img{width:100%;max-height:80vh;object-fit:contain;border-radius:12px;display:block}
+.mp-lb figcaption{color:#fff;text-align:center;margin-top:.6rem;font-weight:700}
 .delivery-strip{padding:2.2rem 0;background:linear-gradient(135deg,var(--green),var(--red));scroll-margin-top:70px}
 .delivery-strip[hidden]{display:none}
 .dowoz-link[hidden]{display:none!important}
@@ -1952,7 +1972,7 @@ function cleanup() {
   stopScanner();
   unsubs.forEach((u) => { try { u(); } catch (_) {} });
   unsubs = [];
-  isAdmin = false; isStaff = false; allStaff = []; staffFound = []; myLoyal = null; custView = null; myCoupons = []; allUsers = []; allCoupons = []; allTemplates = []; lastCheck = ""; svVisit = 0; svRating = 0; svDoneFor = 0; myProfile = null; couponsReady = false; bdayTried = false;
+  isAdmin = false; try { applyPhotos(); } catch (_) {} isStaff = false; allStaff = []; staffFound = []; myLoyal = null; custView = null; myCoupons = []; allUsers = []; allCoupons = []; allTemplates = []; lastCheck = ""; svVisit = 0; svRating = 0; svDoneFor = 0; myProfile = null; couponsReady = false; bdayTried = false;
   if ($("rb-bday-set")) delete $("rb-bday-set").dataset.filled;
   allLoyal = []; allPromos = []; dataAt = 0; welcomeMigrated = false; reportEvents = []; feedbackItems = []; kShown = KPAGE;
   if ($("rb-k-card")) $("rb-k-card").innerHTML = "";
@@ -2210,6 +2230,7 @@ async function handleUser(user) {
   let needBday = false;
   try {
     isAdmin = (await withTimeout(getDoc(doc(db, "admins", user.uid)))).exists();
+    try { applyPhotos(); } catch (_) {}
     if (!isAdmin) {
       try { isStaff = (await withTimeout(getDoc(doc(db, "staff", user.uid)))).exists(); }
       catch (e) { console.warn("Sprawdzanie roli obsługi nie powiodło się (opublikuj nowe reguły):", e.code); isStaff = false; }
@@ -3414,6 +3435,7 @@ function applySite(cfg) {
   renderDish();
   renderNotice();
   renderDelivery();
+  try { applyPhotos(); } catch (_) {}
 }
 
 /* ---------- dowóz: sprawdzanie miejscowości ---------- */
@@ -3464,6 +3486,176 @@ function renderDeliveryResult() {
 }
 $("dc-input").addEventListener("input", renderDeliveryResult);
 
+/* ---------- zdjęcia pizz (jedno zdjęcie na pozycję menu; admin dodaje/usuwa wprost na karcie) ----------
+   Zdjęcie jest zmniejszane w przeglądarce (ok. 640×480, JPEG) i zapisywane w Firestore: site/ph_<nazwa>,
+   a spis wersji w site/photos. Klienci pobierają tylko te zdjęcia, które widzą na ekranie, i zapamiętują je w przeglądarce. */
+const PHOTO_CACHE_KEY = "wr_photos_v1";
+let photoIdx = {};
+let photoCache = {};
+try { photoCache = JSON.parse(localStorage.getItem(PHOTO_CACHE_KEY) || "{}") || {}; } catch (_) { photoCache = {}; }
+const photoInflight = {};
+let photoObs = null;
+const okImg = (d) => typeof d === "string" && d.length < 250000 && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(d);
+const photoSlug = (el) => normTxt(itemKey(el)).replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60);
+function savePhotoCache() {
+  try { localStorage.setItem(PHOTO_CACHE_KEY, JSON.stringify(photoCache)); }
+  catch (_) { /* brak miejsca: zdjęcia zostają tylko w pamięci strony */ }
+}
+function observePhoto(el) {
+  if (!("IntersectionObserver" in window)) { ensurePhoto(el.dataset.pslug); return; }
+  if (!photoObs) {
+    photoObs = new IntersectionObserver((es) => es.forEach((e) => {
+      if (e.isIntersecting) { photoObs.unobserve(e.target); ensurePhoto(e.target.dataset.pslug); }
+    }), { rootMargin: "400px" });
+  }
+  photoObs.observe(el);
+}
+async function ensurePhoto(slug) {
+  const ts = photoIdx[slug];
+  if (!slug || !ts) return;
+  const c = photoCache[slug];
+  if (c && c.t === ts && okImg(c.d)) return;
+  if (photoInflight[slug] === ts) return;
+  photoInflight[slug] = ts;
+  try {
+    const d = await withTimeout(getDoc(doc(db, "site", "ph_" + slug)), 12000);
+    const data = d.exists() ? d.data() : null;
+    if (data && okImg(data.d)) { photoCache[slug] = { t: ts, d: data.d }; savePhotoCache(); applyPhotos(); }
+  } catch (e) { console.warn("Zdjęcie niedostępne:", slug, e && (e.code || e.message)); }
+  finally { delete photoInflight[slug]; }
+}
+function applyPhotos() {
+  menuEls().forEach((el) => {
+    const slug = photoSlug(el);
+    el.dataset.pslug = slug;
+    let box = el.querySelector(":scope > .menu-photo");
+    if (!box) { box = document.createElement("div"); box.className = "menu-photo"; el.insertBefore(box, el.firstChild); }
+    const ts = slug ? (photoIdx[slug] || 0) : 0, c = photoCache[slug];
+    const has = !!(ts && c && c.t === ts && okImg(c.d));
+    const pending = !!ts && !has;
+    const adm = !!isAdmin;
+    box.classList.toggle("has", has); box.classList.toggle("pending", pending); box.classList.toggle("adm", adm);
+    const sig = (has ? ts : "-") + (pending ? "P" : "") + (adm ? "A" : "");
+    if (box.dataset.sig !== sig) {
+      box.dataset.sig = sig;
+      if (has) {
+        box.innerHTML = '<img class="mp-img" alt="' + esc(itemName(el)) + '" src="' + c.d + '" decoding="async">' +
+          (adm ? '<div class="mp-tools"><button type="button" class="mp-btn" data-a="add">📷 Zmień</button><button type="button" class="mp-btn mp-del" data-a="del">🗑 Usuń</button></div>' : "");
+      } else if (pending) box.innerHTML = '<div class="mp-skel"></div>';
+      else if (adm) box.innerHTML = '<button type="button" class="mp-empty" data-a="add"><span>📷</span>Dodaj zdjęcie</button>';
+      else box.innerHTML = "";
+    }
+    if (pending) observePhoto(el);
+  });
+}
+async function loadPhotos() {
+  try {
+    const d = await withTimeout(getDoc(doc(db, "site", "photos")), 8000);
+    const v = d.exists() && d.data() && typeof d.data().v === "object" && d.data().v ? d.data().v : {};
+    photoIdx = {};
+    Object.keys(v).forEach((k) => { if (typeof v[k] === "number" && v[k] > 0) photoIdx[k] = v[k]; });
+    Object.keys(photoCache).forEach((k) => { if (!photoIdx[k]) delete photoCache[k]; });
+    savePhotoCache();
+  } catch (e) { console.warn("Spis zdjęć niedostępny:", e && (e.code || e.message)); }
+  applyPhotos();
+}
+/* zmniejszenie zdjęcia do ok. 640×480 (kadr 4:3 ze środka) i JPEG poniżej ~100 KB */
+async function photoToJpeg(file) {
+  let src, w, h;
+  try { src = await createImageBitmap(file, { imageOrientation: "from-image" }); w = src.width; h = src.height; }
+  catch (_) {
+    src = await new Promise((ok, bad) => { const u = URL.createObjectURL(file); const im = new Image(); im.onload = () => { URL.revokeObjectURL(u); ok(im); }; im.onerror = () => { URL.revokeObjectURL(u); bad(new Error("bad")); }; im.src = u; });
+    w = src.naturalWidth; h = src.naturalHeight;
+  }
+  if (!w || !h) throw new Error("bad");
+  const TW = 640, TH = 480, ratio = TW / TH;
+  let sw = w, sh = h;
+  if (w / h > ratio) sw = h * ratio; else sh = w / ratio;
+  const cv = document.createElement("canvas"); cv.width = TW; cv.height = TH;
+  const cx = cv.getContext("2d");
+  cx.fillStyle = "#fff"; cx.fillRect(0, 0, TW, TH);
+  cx.imageSmoothingQuality = "high";
+  cx.drawImage(src, (w - sw) / 2, (h - sh) / 2, sw, sh, 0, 0, TW, TH);
+  let q = 0.82, out = cv.toDataURL("image/jpeg", q);
+  while (out.length > 135000 && q > 0.45) { q -= 0.08; out = cv.toDataURL("image/jpeg", q); }
+  if (!okImg(out) || out.length > 200000) throw new Error("big");
+  return out;
+}
+let photoFileEl = null, photoTarget = null, photoBusy = false;
+function pickPhoto(el) {
+  if (!isAdmin || photoBusy) return;
+  photoTarget = el;
+  if (!photoFileEl) {
+    photoFileEl = document.createElement("input");
+    photoFileEl.type = "file"; photoFileEl.accept = "image/*"; photoFileEl.hidden = true;
+    photoFileEl.addEventListener("change", async () => {
+      const f = photoFileEl.files && photoFileEl.files[0], el2 = photoTarget;
+      photoFileEl.value = "";
+      if (f && el2) await savePhoto(el2, f);
+    });
+    document.body.appendChild(photoFileEl);
+  }
+  photoFileEl.click();
+}
+async function savePhoto(el, file) {
+  const slug = photoSlug(el);
+  if (!slug || !isAdmin || photoBusy) return;
+  photoBusy = true;
+  const box = el.querySelector(":scope > .menu-photo");
+  if (box) box.classList.add("busy");
+  try {
+    if (!/^image\//.test(file.type) && !/\.(jpe?g|png|webp|heic|heif|gif|bmp)$/i.test(file.name || "")) throw new Error("type");
+    const data = await photoToJpeg(file);
+    const ts = Date.now();
+    await setDoc(doc(db, "site", "ph_" + slug), { d: data, t: ts, name: itemName(el).slice(0, 80) });
+    await setDoc(doc(db, "site", "photos"), { v: { [slug]: ts }, updatedAt: serverTimestamp() }, { merge: true });
+    photoIdx[slug] = ts; photoCache[slug] = { t: ts, d: data }; savePhotoCache();
+    siteToast("Zdjęcie zapisane: " + itemName(el), "ok");
+  } catch (err) {
+    console.error(err);
+    siteToast(err && err.message === "type" ? "To nie jest zdjęcie. Wybierz plik JPG lub PNG." : err && err.message === "big" ? "Zdjęcie jest zbyt duże, spróbuj innego." : errText(err), "err");
+  } finally { photoBusy = false; if (box) box.classList.remove("busy"); applyPhotos(); }
+}
+async function removePhoto(el) {
+  const slug = photoSlug(el);
+  if (!slug || !isAdmin || photoBusy) return;
+  if (!confirm("Usunąć zdjęcie: " + itemName(el) + "?")) return;
+  photoBusy = true;
+  try {
+    await setDoc(doc(db, "site", "photos"), { v: { [slug]: 0 }, updatedAt: serverTimestamp() }, { merge: true });
+    try { await deleteDoc(doc(db, "site", "ph_" + slug)); } catch (_) {}
+    delete photoIdx[slug]; delete photoCache[slug]; savePhotoCache();
+    siteToast("Zdjęcie usunięte.", "ok");
+  } catch (err) { console.error(err); siteToast(errText(err), "err"); }
+  finally { photoBusy = false; applyPhotos(); }
+}
+function showPhotoBig(src, title) {
+  const o = document.createElement("div");
+  o.className = "mp-lb"; o.setAttribute("role", "dialog");
+  o.innerHTML = '<figure><img alt="" src="' + src + '"><figcaption>' + esc(title) + '</figcaption></figure>';
+  const close = () => { o.remove(); document.removeEventListener("keydown", onKey); };
+  const onKey = (e) => { if (e.key === "Escape") close(); };
+  o.addEventListener("click", close);
+  document.addEventListener("keydown", onKey);
+  document.body.appendChild(o);
+}
+(function bindPhotoClicks() {
+  const grid = $("menuGrid");
+  if (!grid) return;
+  grid.addEventListener("click", (e) => {
+    const el = e.target.closest(".menu-item");
+    if (!el) return;
+    const btn = e.target.closest("[data-a]");
+    if (btn && el.contains(btn) && btn.closest(".menu-photo")) {
+      e.preventDefault(); e.stopPropagation();
+      if (btn.dataset.a === "del") removePhoto(el); else pickPhoto(el);
+      return;
+    }
+    const img = e.target.closest(".mp-img");
+    if (img) showPhotoBig(img.src, itemName(el));
+  });
+})();
+
 async function loadSite() {
   try {
     const c = localStorage.getItem(SITE_CACHE_KEY);
@@ -3481,6 +3673,7 @@ async function loadSite() {
       try { localStorage.removeItem(SITE_CACHE_KEY); } catch (_) {}
     }
   } catch (e) { console.warn("Ustawienia strony niedostępne:", e && (e.code || e.message)); }
+  loadPhotos();
 }
 
 /* ---------- panel admina: zakładka Strona ---------- */
