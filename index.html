@@ -1064,6 +1064,9 @@ body.has-notice .hero{margin-top:0}
 .unavail-badge{display:inline-block;margin-top:.6rem;padding:.15rem .7rem;border-radius:99px;background:var(--red);color:#fff;font-size:.8rem;font-weight:700}
 .menu-item.is-dish{outline:3px solid var(--gold);outline-offset:-3px}
 .menu-item.is-hidden{display:none!important}
+.menu-badges{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.6rem}
+.mbd{display:inline-flex;align-items:center;gap:.25rem;padding:.2rem .65rem;border-radius:99px;font-size:.78rem;font-weight:800;line-height:1.2;color:#fff;background:#b8860b}
+.mbd.hit{background:#d9381e}.mbd.ostra{background:#a4161a}.mbd.wege{background:#2f8f3e}.mbd.nowosc{background:#c8941a;color:#1c1500}.mbd.polecamy{background:#1e6b8c}
 /* zdjęcia pizz w menu */
 .menu-photo{display:none;position:relative;aspect-ratio:4/3;background:#f1e9dd;overflow:hidden}
 body.dark .menu-photo{background:#2b2622}
@@ -1118,6 +1121,8 @@ body.dark #site-dish .sd-text{color:#bbb}
 #rabat-overlay .rb-site-name{font-size:14px;font-weight:600}
 #rabat-overlay .rb-site-name small{display:block;font-weight:400;color:var(--rb-muted);font-size:12px}
 #rabat-overlay .rb-site-row input.rb-site-price{margin:0;padding:8px 10px;text-align:right}
+#rabat-overlay .rb-site-badges{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--rb-muted)}
+#rabat-overlay .rb-site-badges label{display:flex;align-items:center;gap:4px;cursor:pointer}
 #rabat-overlay .rb-site-un{grid-column:1 / -1;display:flex;align-items:center;font-size:13px;color:var(--rb-muted);cursor:pointer}
 #rabat-overlay .rb-prod{border:1px solid var(--rb-border);border-radius:14px;padding:12px;margin:10px 0;background:var(--rb-input)}
 #rabat-overlay .rb-prod .rb-prod-top{display:grid;grid-template-columns:1fr 92px;gap:8px}
@@ -3290,9 +3295,11 @@ const DELIVERY_DEFAULT = ["Głuponie", "Trzcianka", "Tomaszewo", "Michorzewo", "
   .map((name) => ({ name, fee: 10, min: null, freeFrom: null }));
 // Link do formularza opinii w Google (domyślny; admin może go zmienić lub wyczyścić w panelu: Strona → Opinie w Google).
 const GOOGLE_REVIEW_DEFAULT = "https://g.page/r/CUq2_T6CQcy5EAE/review";
-let siteCfg = { prices: {}, unavailable: {}, hidden: {}, products: [], campaigns: [], notice: null, dish: null, delivery: { places: DELIVERY_DEFAULT }, googleReviewUrl: GOOGLE_REVIEW_DEFAULT };
+let siteCfg = { prices: {}, unavailable: {}, hidden: {}, badges: {}, products: [], campaigns: [], notice: null, dish: null, delivery: { places: DELIVERY_DEFAULT }, googleReviewUrl: GOOGLE_REVIEW_DEFAULT };
 const PROD_CATS = [["klasyczne", "Klasyczne"], ["miesne", "Mięsne"], ["vege", "Wege"], ["sosy", "Sosy"], ["makarony", "Makarony"], ["dodatki", "Dodatki"]];
 const MAX_PRODUCTS = 40;
+const BADGES = [["hit", "🔥 Hit"], ["ostra", "🌶 Ostra"], ["wege", "🌱 Wege"], ["nowosc", "⭐ Nowość"], ["polecamy", "👍 Polecamy"]];
+const badgeIds = (v) => (Array.isArray(v) ? v : []).filter((b) => BADGES.some((x) => x[0] === b));
 const menuEls = () => [...document.querySelectorAll("#menuGrid .menu-item")];
 const itemKey = (el) => ((el.querySelector(".menu-item-title") || {}).textContent || "").replace(/^\s*\d+\.\s*/, "").trim().toLowerCase();
 const itemName = (el) => ((el.querySelector(".menu-item-title") || {}).textContent || "").trim();
@@ -3305,7 +3312,7 @@ const tsMs = (t) => (t ? (t.toDate ? t.toDate().getTime() : (t.seconds ? t.secon
 function plainCfg(c) {
   const n = c.notice ? { ...c.notice, until: c.notice.until ? { seconds: Math.floor(tsMs(c.notice.until) / 1000) } : null } : null;
   const camps = (c.campaigns || []).map((x) => ({ ...x, from: x.from ? { seconds: Math.floor(tsMs(x.from) / 1000) } : null, until: x.until ? { seconds: Math.floor(tsMs(x.until) / 1000) } : null }));
-  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, products: c.products || [], campaigns: camps, notice: n, dish: c.dish || null, delivery: c.delivery || null, googleReviewUrl: typeof c.googleReviewUrl === "string" ? c.googleReviewUrl : null };
+  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, badges: c.badges || {}, products: c.products || [], campaigns: camps, notice: n, dish: c.dish || null, delivery: c.delivery || null, googleReviewUrl: typeof c.googleReviewUrl === "string" ? c.googleReviewUrl : null };
 }
 
 function renderDish() {
@@ -3407,7 +3414,7 @@ function renderProducts() {
 
 function applySite(cfg) {
   siteCfg = {
-    prices: (cfg && cfg.prices) || {}, unavailable: (cfg && cfg.unavailable) || {}, hidden: (cfg && cfg.hidden) || {},
+    prices: (cfg && cfg.prices) || {}, unavailable: (cfg && cfg.unavailable) || {}, hidden: (cfg && cfg.hidden) || {}, badges: (cfg && cfg.badges) || {},
     products: Array.isArray(cfg && cfg.products) ? cfg.products : [], campaigns: Array.isArray(cfg && cfg.campaigns) ? cfg.campaigns : [], notice: (cfg && cfg.notice) || null, dish: (cfg && cfg.dish) || null,
     delivery: { places: Array.isArray(cfg && cfg.delivery && cfg.delivery.places) ? cfg.delivery.places : DELIVERY_DEFAULT },
     googleReviewUrl: (cfg && typeof cfg.googleReviewUrl === "string") ? cfg.googleReviewUrl : GOOGLE_REVIEW_DEFAULT
@@ -3430,6 +3437,13 @@ function applySite(cfg) {
     }
     if (!un && b) b.remove();
     el.classList.toggle("is-dish", !!(siteCfg.dish && siteCfg.dish.active && siteCfg.dish.key === key));
+    const bd = el.dataset.custom ? [] : badgeIds(siteCfg.badges[key]);
+    const cont = el.querySelector(".menu-item-content");
+    let row = el.querySelector(".menu-badges");
+    if (cont && bd.length) {
+      if (!row) { row = document.createElement("div"); row.className = "menu-badges"; cont.insertBefore(row, cont.firstChild); }
+      row.innerHTML = bd.map((id) => '<span class="mbd ' + id + '">' + esc(BADGES.find((x) => x[0] === id)[1]) + "</span>").join("");
+    } else if (row) row.remove();
   });
   if (window.applyMenuFilter) window.applyMenuFilter();
   renderDish();
@@ -3773,6 +3787,7 @@ function fillSiteForm() {
     return `<div class="rb-site-row" data-key="${esc(key)}">
       <div class="rb-site-name">${esc(itemName(el))}<small>w kodzie strony: ${esc(el.dataset.origPrice || "")}</small></div>
       <input type="text" class="rb-site-price" inputmode="decimal" maxlength="12" value="${esc(cur)}" aria-label="Cena: ${esc(itemName(el))}">
+      <div class="rb-site-badges">${BADGES.map((b) => `<label><input type="checkbox" class="rb-site-bd" data-b="${b[0]}"${badgeIds(siteCfg.badges[key]).includes(b[0]) ? " checked" : ""}> ${b[1]}</label>`).join("")}</div>
       <label class="rb-site-un"><input type="checkbox" class="rb-site-unav"${siteCfg.unavailable[key] ? " checked" : ""}> niedostępne dziś</label>
       <label class="rb-site-un"><input type="checkbox" class="rb-site-hide"${siteCfg.hidden[key] ? " checked" : ""}> ukryj na stronie</label>
     </div>`;
@@ -3856,7 +3871,7 @@ function siteToast(text, kind) {
 async function saveSite() {
   const say = (text, kind) => { setMsg(siteMsg, text, kind); if (text) siteToast(text, kind); };
   say("");
-  const prices = {}, unavailable = {}, hidden = {};
+  const prices = {}, unavailable = {}, hidden = {}, badges = {};
   let bad = "";
   document.querySelectorAll("#rb-site-items .rb-site-row").forEach((row) => {
     if (bad) return;
@@ -3869,6 +3884,8 @@ async function saveSite() {
     if (!el || v !== el.dataset.origPrice) prices[key] = v;
     if (row.querySelector(".rb-site-unav").checked) unavailable[key] = true;
     if (row.querySelector(".rb-site-hide").checked) hidden[key] = true;
+    const bl = [...row.querySelectorAll(".rb-site-bd:checked")].map((c) => c.dataset.b);
+    if (bl.length) badges[key] = bl;
   });
   if (bad) { say( "Popraw cenę przy: " + bad + " (np. 36 zł).", "err"); return; }
   const products = [];
@@ -3935,8 +3952,8 @@ async function saveSite() {
   const btns = [$("rb-site-save"), ...document.querySelectorAll(".rb-sec-save")];
   btns.forEach((b) => { b.disabled = true; });
   try {
-    await setDoc(doc(db, "site", "config"), { prices, unavailable, hidden, products, campaigns, notice, dish, delivery, googleReviewUrl, updatedAt: serverTimestamp() });
-    const cfg = { prices, unavailable, hidden, products, campaigns, notice, dish, delivery, googleReviewUrl };
+    await setDoc(doc(db, "site", "config"), { prices, unavailable, hidden, badges, products, campaigns, notice, dish, delivery, googleReviewUrl, updatedAt: serverTimestamp() });
+    const cfg = { prices, unavailable, hidden, badges, products, campaigns, notice, dish, delivery, googleReviewUrl };
     applySite(cfg);
     fillSiteForm();
     try { localStorage.setItem(SITE_CACHE_KEY, JSON.stringify(plainCfg(cfg))); } catch (_) {}
