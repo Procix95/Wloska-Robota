@@ -1523,6 +1523,7 @@ class Renderer {
     const pl = (i, sg) => { const a = m[3] + sg * m[i], b = m[7] + sg * m[i + 4], c = m[11] + sg * m[i + 8], d = m[15] + sg * m[i + 12], l = Math.hypot(a, b, c) || 1; return [a / l, b / l, c / l, d / l]; };
     return [pl(0, 1), pl(0, -1), pl(1, 1), pl(1, -1), pl(2, 1), pl(2, -1)];
   }
+  visBox(pl, x0, y0, z0, x1, y1, z1) { for (let i = 0; i < 6; i++) { const q = pl[i]; if (q[0] * (q[0] > 0 ? x1 : x0) + q[1] * (q[1] > 0 ? y1 : y0) + q[2] * (q[2] > 0 ? z1 : z0) + q[3] < 0) return false; } return true; }
   visible(pl, x, y, z, r) { for (let i = 0; i < 6; i++) { if (pl[i][0] * x + pl[i][1] * y + pl[i][2] * z + pl[i][3] < -r) return false; } return true; }
   /* st: { cam:[x,y,z], yaw, pitch, fov, tod, world, dayF, sunF, under, lava, fogFar, brightness } */
   draw(st, drawEntities) {
@@ -1555,7 +1556,7 @@ class Renderer {
     gl.uniform1f(U.u_flat, 0);
     const cam = st.cam, sx = cam[0], sy = cam[1], sz = cam[2], pcx = Math.floor(sx / 16), pcz = Math.floor(sz / 16);
     const list = []; const R = 17;
-    W.chunks.forEach((c) => { if (!c.mesh) return; const ox = c.cx * 16 - sx, oz = c.cz * 16 - sz; if (!this.visible(pl, ox + 8, 32 - sy, oz + 8, 24)) return; list.push(c); });
+    W.chunks.forEach((c) => { if (!c.mesh) return; const ox = c.cx * 16 - sx, oz = c.cz * 16 - sz; if (!this.visBox(pl, ox, -sy, oz, ox + 16, WH - sy, oz + 16)) return; list.push(c); });
     this.drawn = list.length;
     for (const c of list) { const m = c.mesh.s; if (!m) continue; gl.uniform3f(U.u_off, c.cx * 16 - sx, -sy, c.cz * 16 - sz); gl.bindVertexArray(m.vao); gl.drawElements(gl.TRIANGLES, m.n, gl.UNSIGNED_INT, 0); }
     gl.uniform3f(U.u_off, 0, 0, 0);
@@ -1800,10 +1801,10 @@ function killMob(m) {
   else if (k === "skeleton") { drop(ID.bone, 0, 2); drop(ID.arrow, 0, 2); }
   else if (k === "spider") drop(ID.string, 0, 2);
   sparks(m.x, m.y + m.h / 2, m.z, 0xdddddd, 14, 1);
-  if (G) G.kills = (G.kills || 0) + 1;
+  if (G) { G.kills = (G.kills || 0) + 1; Ach.bump("kills"); Ach.bump("k_" + k); }
 }
 function explode(x, y, z, r, byTnt) {
-  const W = WORLD; SFX.boom();
+  const W = WORLD; SFX.boom(); if (byTnt) Ach.bump("tnt");
   const R = Math.ceil(r), broken = [];
   for (let dx = -R; dx <= R; dx++) for (let dy = -R; dy <= R; dy++) for (let dz = -R; dz <= R; dz++) {
     const d = Math.hypot(dx, dy, dz); if (d > r) continue;
@@ -2411,7 +2412,7 @@ const DIFF_NAME = ["Pokojowy", "Łatwy", "Normalny", "Trudny"];
 async function showMainMenu(ctx) {
   const U = UI; G.state = "menu"; U.hud.style.display = "none"; U.cross.style.display = "none"; U.hand.style.display = "none";
   const wrap = document.createElement("div"); wrap.style.cssText = "width:min(460px,100%)";
-  wrap.innerHTML = '<h1 class="ktitle">KOPALNIA</h1><div class="ksub">Włoska Robota · tryb obsługi</div><div class="kcard"><div id="kmslots">Ładowanie…</div><button class="kbtn" data-a="help">Sterowanie i zasady</button><button class="kbtn red sm" data-a="quit" style="margin-top:10px">Zamknij grę</button></div>';
+  wrap.innerHTML = '<h1 class="ktitle">KOPALNIA</h1><div class="ksub">Włoska Robota</div><div class="kcard"><div id="kmslots">Ładowanie…</div><button class="kbtn" data-a="ach">🏆 Osiągnięcia</button><button class="kbtn" data-a="help">Sterowanie i zasady</button><button class="kbtn red sm" data-a="quit" style="margin-top:10px">Zamknij grę</button></div>';
   U.mkScreen(wrap, true);
   const list = wrap.querySelector("#kmslots");
   let metas = []; try { metas = await Save.allMeta(); } catch (e) { metas = []; }
@@ -2427,11 +2428,11 @@ async function showMainMenu(ctx) {
     const b = e.target.closest("[data-a]"); if (!b) return; const a = b.dataset.a, s = +b.dataset.s; SFX.click();
     if (a === "play") Game.startWorld(s); else if (a === "new") showNewWorld(s);
     else if (a === "del") { if (confirm("Usunąć ten świat bezpowrotnie?")) Game.deleteWorld(s).then(() => showMainMenu(ctx)); }
-    else if (a === "help") showHelp(); else if (a === "quit") Game.quit();
+    else if (a === "help") showHelp(); else if (a === "ach") showAch(() => showMainMenu(ctx)); else if (a === "quit") Game.quit();
   };
 }
 function showHelp() {
-  const c = screenCard('<h2>Sterowanie</h2><p><b>Komputer:</b> WASD ruch · Spacja skok · Shift skradanie · Ctrl lub podwójne W bieg · LPM kop/atak (przytrzymaj) · PPM użyj/postaw · E ekwipunek · Q wyrzuć · 1–9 lub kółko wybór · F3 informacje · Esc pauza. W trybie kreatywnym dwa razy Spacja włącza lot.</p><p><b>Telefon:</b> lewy drążek = ruch, przeciągnięcie po ekranie = rozglądanie, przyciski po prawej.</p><h3>Tryby</h3><p><b>Przetrwanie:</b> zbieraj surowce, craftuj, jedz, uważaj na noc. <b>Hardcore:</b> jedno życie na Trudnym. Śmierć kasuje świat. <b>Kreatywny:</b> nieskończone bloki, lot, brak obrażeń.</p><h3>Punkty (konto admina)</h3><p>Punkty dostaje się tylko w trybie <b>Hardcore</b>, za dni przetrwania: 5., 10. i 20. dzień jednego świata. Tryb próbny obsługi nie zbiera punktów.</p><button class="kbtn gold" data-a="back">Wróć</button>');
+  const c = screenCard('<h2>Sterowanie</h2><p><b>Komputer:</b> WASD ruch · Spacja skok · Shift skradanie · Ctrl lub podwójne W bieg · LPM kop/atak (przytrzymaj) · PPM użyj/postaw · E ekwipunek · Q wyrzuć · 1–9 lub kółko wybór · F3 informacje · Esc pauza. W trybie kreatywnym dwa razy Spacja włącza lot.</p><p><b>Telefon:</b> lewy drążek = ruch, przeciągnięcie po ekranie = rozglądanie, przyciski po prawej.</p><h3>Tryby</h3><p><b>Przetrwanie:</b> zbieraj surowce, craftuj, jedz, uważaj na noc. <b>Hardcore:</b> jedno życie na Trudnym. Śmierć kasuje świat. <b>Kreatywny:</b> nieskończone bloki, lot, brak obrażeń.</p><h3>Punkty (konto klienta)</h3><p>Punkty dostaje się <b>tylko w trybie Hardcore</b>: za osiągnięcia (każde jednorazowo, patrz 🏆 Osiągnięcia) oraz za 5., 10., 20., 30. i 50. dzień przetrwania jednego świata. Limit to 8 pkt na dobę, a 100 pkt = rabat −5 zł. Śmierć kasuje świat, ale zdobyte punkty zostają. Tryb próbny obsługi nie zbiera punktów.</p><button class="kbtn gold" data-a="back">Wróć</button>');
   UI.mkScreen(c, true); c.onclick = (e) => { if (e.target.closest("[data-a=back]")) showMainMenu(); };
 }
 function showNewWorld(slot) {
@@ -2439,7 +2440,7 @@ function showNewWorld(slot) {
   const c = screenCard('<h2>Nowy świat</h2><label class="kl">Nazwa</label><input type="text" id="kn" maxlength="24" placeholder="Mój świat"><label class="kl">Ziarno (puste = losowe)</label><input type="text" id="ks" maxlength="24" placeholder="np. pizza"><label class="kl">Tryb gry</label><div class="krow" id="km"></div><div id="kdw"><label class="kl">Poziom trudności</label><div class="krow" id="kd"></div></div><p id="kinfo"></p><button class="kbtn gold" data-a="go">Stwórz świat</button><button class="kbtn" data-a="back">Anuluj</button>');
   UI.mkScreen(c, true);
   const km = c.querySelector("#km"), kd = c.querySelector("#kd"), info = c.querySelector("#kinfo"), dw = c.querySelector("#kdw");
-  const INFO = { survival: "Standardowa rozgrywka. Po śmierci odradzasz się, ale tracisz ekwipunek.", hardcore: "Jedno życie, poziom Trudny. Śmierć = koniec świata. Tylko tu naliczają się punkty (dni przetrwania).", creative: "Nieskończone bloki, latanie, brak obrażeń. Bez punktów." };
+  const INFO = { survival: "Standardowa rozgrywka. Po śmierci odradzasz się, ale tracisz ekwipunek.", hardcore: "Jedno życie, poziom Trudny. Śmierć = koniec świata. Tylko tu naliczają się punkty (osiągnięcia i dni przetrwania).", creative: "Nieskończone bloki, latanie, brak obrażeń. Bez punktów." };
   const draw = () => {
     km.innerHTML = ["survival", "hardcore", "creative"].map((m) => '<button class="kbtn sm' + (mode === m ? " on" : "") + '" data-m="' + m + '">' + MODE_NAME[m] + "</button>").join("");
     kd.innerHTML = [0, 1, 2, 3].map((d) => '<button class="kbtn sm' + (diff === d ? " on" : "") + '" data-d="' + d + '">' + DIFF_NAME[d] + "</button>").join("");
@@ -2455,12 +2456,12 @@ function showNewWorld(slot) {
 }
 function showPause() {
   G.state = "pause"; unlockPointer();
-  const c = screenCard('<h2>Pauza</h2><button class="kbtn gold" data-a="res">Wróć do gry</button><button class="kbtn" data-a="opt">Ustawienia</button><button class="kbtn" data-a="mode" id="kmodebtn"></button><button class="kbtn" data-a="help">Sterowanie</button><button class="kbtn red" data-a="exit">Zapisz i wyjdź do menu</button>');
+  const c = screenCard('<h2>Pauza</h2><button class="kbtn gold" data-a="res">Wróć do gry</button><button class="kbtn" data-a="opt">Ustawienia</button><button class="kbtn" data-a="mode" id="kmodebtn"></button><button class="kbtn" data-a="ach">🏆 Osiągnięcia</button><button class="kbtn" data-a="help">Sterowanie</button><button class="kbtn red" data-a="exit">Zapisz i wyjdź do menu</button>');
   UI.mkScreen(c);
   const mb = c.querySelector("#kmodebtn"); if (G.mode === "hardcore") { mb.textContent = "Tryb: Hardcore (nie można zmienić)"; mb.disabled = true; } else mb.textContent = "Przełącz na: " + (G.mode === "creative" ? "Przetrwanie" : "Kreatywny");
   c.onclick = (e) => {
     const b = e.target.closest("[data-a]"); if (!b) return; SFX.click(); const a = b.dataset.a;
-    if (a === "res") Game.resume(); else if (a === "opt") showOptions(); else if (a === "mode") { Game.toggleMode(); showPause(); } else if (a === "exit") Game.exitToMenu(); else if (a === "help") { showHelp(); const back = UI.scr.querySelector("[data-a=back]"); if (back) back.onclick = (ev) => { ev.stopPropagation(); showPause(); }; }
+    if (a === "res") Game.resume(); else if (a === "opt") showOptions(); else if (a === "mode") { Game.toggleMode(); showPause(); } else if (a === "exit") Game.exitToMenu(); else if (a === "ach") showAch(showPause); else if (a === "help") { showHelp(); const back = UI.scr.querySelector("[data-a=back]"); if (back) back.onclick = (ev) => { ev.stopPropagation(); showPause(); }; }
   };
 }
 function showOptions() {
@@ -2502,7 +2503,7 @@ function slotRef(g, i) {
   return ref;
 }
 function craftUpdate() { const cr = INV.craft; if (!cr) return; const ids = cr.cells.map((s) => (s ? s.id : 0)); const r = matchRecipe(ids, cr.w, cr.h); cr.recipe = r; cr.out = r ? { id: r.out, n: r.n, d: 0 } : null; }
-function craftConsume() { const cr = INV.craft; for (let i = 0; i < cr.cells.length; i++) { const s = cr.cells[i]; if (s) { s.n--; if (s.n <= 0) cr.cells[i] = null; } } craftUpdate(); }
+function craftConsume() { const cr = INV.craft; if (cr.out) Ach.flag("c" + cr.out.id); for (let i = 0; i < cr.cells.length; i++) { const s = cr.cells[i]; if (s) { s.n--; if (s.n <= 0) cr.cells[i] = null; } } craftUpdate(); }
 function mergeInto(arr, from, to, s) { /* wstaw stos s do arr[from..to]; zwraca resztę */
   const mx = maxStack(s.id);
   if (mx > 1) for (let i = from; i <= to && s.n > 0; i++) { const t = arr[i]; if (t && t.id === s.id && t.n < mx) { const k = Math.min(mx - t.n, s.n); t.n += k; s.n -= k; } }
@@ -2694,11 +2695,11 @@ async function enterWorld(slot, data, opts) {
   W.hooks.freeMesh = (c) => RUN.ren.freeChunk(c);
   W.hooks.sfx = (k) => SFX.splash();
   W.hooks.tileLost = (x, y, z, t) => { if (t && t.slots) for (const s of t.slots) if (s) spawnItem(x + 0.5, y + 0.5, z + 0.5, s.id, s.n, s.d); };
-  G.ents = []; G.parts = []; G.inv = newInv(); G.cursor = null; G.p = newPlayer(); G.kills = 0; G.deathText = ""; G.awarded = [0, 0, 0]; G.dig = null;
+  G.ents = []; G.parts = []; G.inv = newInv(); G.cursor = null; G.p = newPlayer(); G.kills = 0; G.deathText = ""; G.awarded = [0, 0, 0, 0, 0]; G.dig = null;
   if (data) {
     const saved = await Save.chunks(slot);
     for (const [k, v] of saved) { const [cx, cz] = k.split(",").map(Number); W.saved.set(ckey(cx, cz), v); }
-    G.mode = data.mode; G.diff = data.diff; G.tod = data.tod; G.day = data.day; G.playSec = data.playSec || 0; G.name = data.name; G.created = data.created; G.seed = seed; G.awarded = data.awarded || [0, 0, 0]; G.kills = data.kills || 0; G.sel = data.sel | 0;
+    G.mode = data.mode; G.diff = data.diff; G.tod = data.tod; G.day = data.day; G.playSec = data.playSec || 0; G.name = data.name; G.created = data.created; G.seed = seed; G.awarded = data.awarded || [0, 0, 0, 0, 0]; G.kills = data.kills || 0; G.sel = data.sel | 0;
     Object.assign(G.p, data.p); G.p.dead = false; G.p.vx = G.p.vy = G.p.vz = 0; G.inv.slots = data.inv; G.inv.armor = data.armor; G.worldSpawn = data.worldSpawn;
     for (const [k, t] of data.tiles || []) W.tiles.set(k, t);
   } else {
@@ -2829,7 +2830,10 @@ function tick(dt) {
   W.processUpdates(300); W.tickFluids(dt);
   G.rtT = (G.rtT || 0) + dt; if (G.rtT > 0.25) { G.rtT = 0; W.randomTicks(Math.floor(p.x), Math.floor(p.z), Math.min(3, SET.rd)); }
   tickFurnaces(dt);
-  updatePlayer(dt);
+  const pxi = Math.floor(p.x), pzi = Math.floor(p.z);
+  if (!W.has(pxi, pzi)) W.loadChunk(pxi >> 4, pzi >> 4);
+  if (p.y < -2 && !p.dead) { p.y = W.topSolid(pxi, pzi) + 0.05; p.vy = 0; p.fallDist = 0; UI.toast("Wyciągnięto Cię spod świata"); }
+  updatePlayer(dt); Ach.tick(dt);
   if (G.state === "play") updateInteract(dt);
   updateEnts(dt); spawnTick(dt);
   G.saveT += dt; if (G.saveT > 25) { G.saveT = 0; saveWorld(); }
@@ -2837,20 +2841,18 @@ function tick(dt) {
   G.hudT -= dt; if (G.hudT <= 0 || G.invDirty) { G.hudT = 0.1; renderBars(); if (G.invDirty) { renderHotbar(); G.invDirty = false; } refreshFurnaceUI(); }
   if (G.debug) { G.dbgT = (G.dbgT || 0) - dt; if (G.dbgT <= 0) { G.dbgT = 0.25; const c = W.chunk(Math.floor(p.x) >> 4, Math.floor(p.z) >> 4); UI.dbg.textContent = "FPS " + G.fps + "\nXYZ " + p.x.toFixed(1) + " " + p.y.toFixed(1) + " " + p.z.toFixed(1) + "\nchunków " + W.chunks.size + " (rysowane " + (RUN.ren.drawn | 0) + ")\nświatło " + W.sky(Math.floor(p.x), Math.floor(p.y), Math.floor(p.z)) + "/" + W.blk(Math.floor(p.x), Math.floor(p.y), Math.floor(p.z)) + "\nbiom " + (c ? c.bio[((Math.floor(p.z) & 15) << 4) | (Math.floor(p.x) & 15)] : "-") + "\nstwory " + G.ents.filter((e) => e.type === "mob").length + "\ndzień " + (G.day + 1) + " tick " + (G.tod | 0) + "\ntryb " + G.mode; } }
 }
-/* nagrody punktowe: tylko hardcore, dni przetrwania */
-const REWARD_DAYS = [4, 9, 19];
+/* nagrody punktowe: tylko hardcore (osiągnięcia + dni przetrwania), patrz k6c-ach.js */
 async function checkAwards() {
   if (G.mode !== "hardcore" || G.p.dead || !CTX || !CTX.award || G.awarding) return;
-  const i = REWARD_DAYS.findIndex((d, k) => G.day >= d && !G.awarded[k]); if (i < 0) return;
+  const cl = Ach.nextClaim(); if (!cl) return;
   G.awarding = true;
   try {
-    const r = await CTX.award(1);
-    if (r && r.ok) { G.awarded[i] = 1; UI.toast("🏅 " + (REWARD_DAYS[i] + 1) + ". dzień przetrwania! " + (r.msg || "+1 pkt"), "gold"); SFX.lvl(); saveWorld(); }
-    else { G.rewardRetry = r && r.wait ? 35 : 150; if (r && r.msg && !G.rewardFail) { G.rewardFail = true; UI.toast(r.msg, "gold"); } }
+    const r = await CTX.award(cl.pts);
+    if (r && r.ok) { cl.ok(); UI.toast("🏅 " + cl.label + " " + (r.msg || "+" + cl.pts + " pkt"), "gold"); SFX.lvl(); saveWorld(); G.rewardRetry = 33; G.rewardFail = false; }
+    else { G.rewardRetry = r && r.wait ? 35 : r && r.cap ? 900 : 150; if (r && r.msg && !G.rewardFail) { G.rewardFail = true; UI.toast(r.msg, "gold"); } }
   } catch (e) { G.rewardRetry = 150; }
   G.awarding = false;
 }
-
 function render(dt) {
   const U = UI, ren = RUN.ren, p = G.p; if (!ren) return;
   U.tch.style.visibility = G.state === "play" ? "visible" : "hidden";
@@ -2939,6 +2941,7 @@ function breakBlock(b) {
   if (id === BID.door_upper) { if (!creative) drops = [[ID.door_item, 1]]; if (W.get(b.x, b.y - 1, b.z) === BID.door_lower) W.setBlock(b.x, b.y - 1, b.z, 0, 0, true); }
   else if (id === BID.door_lower && W.get(b.x, b.y + 1, b.z) === BID.door_upper) W.setBlock(b.x, b.y + 1, b.z, 0, 0, true);
   puff(b.x + 0.5, b.y + 0.5, b.z + 0.5, id, 12); SFX.brk(bl.snd);
+  if (!creative) { Ach.bump("mined"); if (id === BID.log_oak || id === BID.log_birch || id === BID.log_spruce) Ach.bump("logs"); if (id === BID.obsidian) Ach.flag("h" + id); }
   W.setBlock(b.x, b.y, b.z, 0, 0);
   spawnDrops(b.x, b.y, b.z, drops);
   if (!creative) { p.exh += 0.025; if (bl.hard > 0) toolWear(def && def.tool && def.tool.type === "sword" ? 2 : 1); }
@@ -3001,7 +3004,7 @@ function placeItem(tb, stack, def) {
     if (!W.supported(x, y, z, kind, meta)) return false;
     W.setBlock(x, y, z, kind, meta);
   }
-  SFX.put(nb.snd); if (G.mode !== "creative") slotUse(G.inv, G.sel); G.invDirty = true; swingHand();
+  SFX.put(nb.snd); if (G.mode !== "creative") { slotUse(G.inv, G.sel); Ach.bump("placed"); } G.invDirty = true; swingHand();
   return true;
 }
 function setStackTo(i, id) { const s = G.inv.slots[i]; if (G.mode === "creative") return; if (s.n <= 1) G.inv.slots[i] = { id, n: 1, d: 0 }; else { s.n--; const left = invAdd(G.inv, id, 1); if (left) spawnItem(G.p.x, G.p.y + 1, G.p.z, id, 1); } G.invDirty = true; }
@@ -3035,7 +3038,7 @@ function useBonemeal(tb) {
 }
 function sleepBed(b) {
   const p = G.p; p.spawn = [b.x + 0.5, b.y + 0.6, b.z + 0.5];
-  if (G.dayF < 0.4) { G.tod = 500; if (G.mode !== "hardcore") G.day++; for (const e of G.ents) if (e.type === "mob" && MOBS[e.kind].hostile) e.dead = true; UI.toast("Przespałeś noc. Punkt odrodzenia ustawiony."); }
+  if (G.dayF < 0.4) { Ach.bump("slept"); G.tod = 500; if (G.mode !== "hardcore") G.day++; for (const e of G.ents) if (e.type === "mob" && MOBS[e.kind].hostile) e.dead = true; UI.toast("Przespałeś noc. Punkt odrodzenia ustawiony."); }
   else UI.toast("Punkt odrodzenia ustawiony. Spać można tylko w nocy.");
   SFX.click();
 }
@@ -3253,12 +3256,128 @@ function launch(ctx) {
   showMainMenu(ctx);
   RUN.raf = requestAnimationFrame(loop);
 }
+/* ===================== OSIĄGNIĘCIA ===================== */
+/* Statystyki: "all" (przetrwanie + hardcore → trofea) i "hc" (tylko hardcore → punkty). Zapis lokalny w przeglądarce. */
+const ACH_KEY = "wr_kop_ach_v2";
+const REWARD_DAYS = [4, 9, 19, 29, 49];
+const REWARD_PTS = [1, 1, 2, 3, 3];
+const Ach = {
+  d: null, dirty: false, t: 0, acc: 0, lp: null, D: null,
+  load() {
+    if (this.d) return;
+    let d = null; try { d = JSON.parse(localStorage.getItem(ACH_KEY) || "null"); } catch (e) { d = null; }
+    if (!d || typeof d !== "object") d = {};
+    d.all = d.all || {}; d.hc = d.hc || {}; d.done = d.done || {}; d.paid = d.paid || {};
+    this.d = d;
+  },
+  save() { if (!this.dirty) return; this.dirty = false; try { localStorage.setItem(ACH_KEY, JSON.stringify(this.d)); } catch (e) {} },
+  on() { return !!(G && WORLD && G.loaded && G.p && !G.p.dead && (G.mode === "survival" || G.mode === "hardcore")); },
+  put(k, f) {
+    if (!this.on()) return; this.load();
+    const sc = G.mode === "hardcore" ? [this.d.all, this.d.hc] : [this.d.all];
+    for (const s of sc) { const o = s[k], v = f(o); if (v !== o) { s[k] = v; this.dirty = true; } }
+  },
+  bump(k, n) { this.put(k, (o) => (o || 0) + (n === undefined ? 1 : n)); },
+  flag(k) { this.put(k, () => 1); },
+  low(k, v) { this.put(k, (o) => (o === undefined || v < o ? v : o)); },
+  high(k, v) { this.put(k, (o) => (o === undefined || v > o ? v : o)); },
+  defs() {
+    if (this.D) return this.D;
+    const f = (k) => (s) => !!s[k], ge = (k, n) => (s) => (s[k] || 0) >= n;
+    const cr = (id) => f("c" + id), hv = (id) => f("h" + id);
+    const cooked = [ID.cooked_pork, ID.cooked_beef, ID.cooked_mutton, ID.cooked_chicken];
+    const full = (m) => (s) => ["helmet", "chest", "legs", "boots"].every((p) => s["e" + ID[m + "_" + p]]);
+    this.D = [
+      { id: "wood", n: "Drwal", d: "Zetnij 5 pni drzew.", p: 0, t: ge("logs", 5) },
+      { id: "table", n: "Stół rzemieślniczy", d: "Wytwórz stół rzemieślniczy.", p: 0, t: cr(BID.crafting) },
+      { id: "stonepick", n: "Epoka kamienia", d: "Wytwórz kamienny kilof.", p: 0, t: cr(ID.pick_stone) },
+      { id: "torch", n: "Niech się świeci", d: "Wytwórz pochodnię.", p: 0, t: cr(BID.torch) },
+      { id: "furnace", n: "Gorący piec", d: "Wytwórz piec.", p: 0, t: cr(BID.furnace) },
+      { id: "night", n: "Przetrwana noc", d: "Dożyj drugiego dnia.", p: 0, t: ge("day", 1) },
+      { id: "iron", n: "Czas na żelazo", d: "Przetop rudę na sztabkę żelaza.", p: 1, t: hv(ID.iron_ingot) },
+      { id: "zombie", n: "Łowca zombie", d: "Pokonaj 5 zombie.", p: 1, t: ge("k_zombie", 5) },
+      { id: "skeleton", n: "Szkielet w szafie", d: "Pokonaj 3 szkielety.", p: 1, t: ge("k_skeleton", 3) },
+      { id: "spider", n: "Pajęczyna", d: "Pokonaj 3 pająki.", p: 1, t: ge("k_spider", 3) },
+      { id: "bread", n: "Własny chleb", d: "Wytwórz chleb.", p: 1, t: cr(ID.bread) },
+      { id: "cook", n: "Kucharz", d: "Zdobądź pieczone mięso.", p: 1, t: (s) => cooked.some((i) => s["h" + i]) },
+      { id: "bed", n: "Dobranoc", d: "Prześpij noc w łóżku.", p: 1, t: ge("slept", 1) },
+      { id: "bucket", n: "Wiaderko", d: "Wytwórz wiadro.", p: 1, t: cr(ID.bucket) },
+      { id: "bow", n: "Łucznik", d: "Wytwórz łuk.", p: 1, t: cr(ID.bow) },
+      { id: "builder", n: "Budowniczy", d: "Postaw 300 bloków.", p: 1, t: ge("placed", 300) },
+      { id: "walker", n: "Wędrowiec", d: "Przejdź 10 000 m.", p: 1, t: ge("walked", 10000) },
+      { id: "ipick", n: "Żelazny kilof", d: "Wytwórz żelazny kilof.", p: 2, t: cr(ID.pick_iron) },
+      { id: "gold", n: "Złoto!", d: "Zdobądź sztabkę złota.", p: 2, t: hv(ID.gold_ingot) },
+      { id: "deep", n: "Głębinowiec", d: "Zejdź na wysokość 10 lub niżej.", p: 2, t: (s) => s.miny !== undefined && s.miny <= 10 },
+      { id: "miner", n: "Górnik", d: "Wykop 1500 bloków.", p: 2, t: ge("mined", 1500) },
+      { id: "hunter", n: "Pogromca", d: "Pokonaj 40 stworów.", p: 2, t: ge("kills", 40) },
+      { id: "tnt", n: "Wielki wybuch", d: "Wysadź 3 ładunki TNT.", p: 2, t: ge("tnt", 3) },
+      { id: "ironarm", n: "Żelazny rycerz", d: "Załóż komplet żelaznej zbroi.", p: 2, t: full("iron") },
+      { id: "diamond", n: "Diamenty!", d: "Zdobądź diament.", p: 3, t: hv(ID.diamond) },
+      { id: "dpick", n: "Diamentowy kilof", d: "Wytwórz diamentowy kilof.", p: 3, t: cr(ID.pick_diamond) },
+      { id: "obsidian", n: "Obsydian", d: "Wykop obsydian.", p: 3, t: hv(BID.obsidian) },
+      { id: "dblock", n: "Skarbiec", d: "Wytwórz blok diamentu.", p: 3, t: cr(BID.block_diamond) },
+      { id: "darmor", n: "Diamentowy rycerz", d: "Załóż komplet diamentowej zbroi.", p: 3, t: full("diamond") }
+    ];
+    return this.D;
+  },
+  scan() {
+    for (const s of G.inv.slots) if (s) this.flag("h" + s.id);
+    for (const s of G.inv.armor) if (s) { this.flag("h" + s.id); this.flag("e" + s.id); }
+  },
+  check() {
+    this.load(); const D = this.defs(), hc = G.mode === "hardcore";
+    for (const a of D) {
+      if (!this.d.done[a.id] && a.t(this.d.all)) {
+        this.d.done[a.id] = 1; this.dirty = true;
+        UI.toast("🏆 Osiągnięcie: " + a.n + (a.p && !hc ? " · punkty tylko w Hardcore" : ""), "gold"); SFX.lvl();
+      }
+    }
+    this.save();
+  },
+  tick(dt) {
+    if (!this.on()) { this.lp = null; return; }
+    const p = G.p;
+    if (this.lp) {
+      const d = Math.hypot(p.x - this.lp[0], p.z - this.lp[1]);
+      if (d < 2.5 && (p.onGround || p.inWater)) { this.acc += d; if (this.acc >= 5) { this.bump("walked", Math.round(this.acc)); this.acc = 0; } }
+    }
+    this.lp = [p.x, p.z];
+    this.t += dt;
+    if (this.t >= 1.5) {
+      this.t = 0; this.scan(); this.low("miny", Math.floor(p.y)); this.high("day", G.day); this.check();
+    }
+  },
+  /* następna nagroda do naliczenia (tylko hardcore) */
+  nextClaim() {
+    this.load(); const hc = this.d.hc;
+    for (const a of this.defs()) {
+      if (a.p > 0 && !this.d.paid[a.id] && a.t(hc)) return { pts: a.p, label: "Osiągnięcie: " + a.n, ok: () => { this.d.paid[a.id] = 1; this.dirty = true; this.save(); } };
+    }
+    for (let k = 0; k < REWARD_DAYS.length; k++) {
+      if (G.day >= REWARD_DAYS[k] && !G.awarded[k]) return { pts: REWARD_PTS[k], label: (REWARD_DAYS[k] + 1) + ". dzień przetrwania", ok: () => { G.awarded[k] = 1; } };
+    }
+    return null;
+  }
+};
+function showAch(back) {
+  Ach.load(); const D = Ach.defs(), d = Ach.d;
+  const got = D.filter((a) => d.done[a.id]).length;
+  const maxP = D.reduce((s, a) => s + a.p, 0), gotP = D.reduce((s, a) => s + (d.paid[a.id] ? a.p : 0), 0);
+  const rows = D.map((a) => {
+    const ok = d.done[a.id], pd = d.paid[a.id];
+    const tag = a.p ? (pd ? "✔ +" + a.p + " pkt" : "+" + a.p + " pkt") : "bez punktów";
+    return '<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid #3c322a;opacity:' + (ok ? 1 : 0.62) + '"><span style="font-size:20px">' + (ok ? "🏆" : "🔒") + '</span><div style="flex:1"><b style="font-size:13px">' + esc(a.n) + '</b><br><small style="color:#b8a98f">' + esc(a.d) + '</small></div><span style="font-size:12px;white-space:nowrap;color:' + (pd ? "#7bd88f" : a.p ? "#f6e08a" : "#8a7c68") + '">' + tag + "</span></div>";
+  }).join("");
+  const c = screenCard('<h2>Osiągnięcia</h2><p style="font-size:13px;margin:4px 0">Zdobyte: <b>' + got + "/" + D.length + "</b> · Punkty z osiągnięć: <b>" + gotP + "/" + maxP + '</b></p><p style="font-size:12px;color:#b8a98f;margin:0 0 6px">Punkty dostaniesz tylko za osiągnięcia zdobyte w trybie <b>Hardcore</b> (każde raz) oraz za kolejne dni przetrwania w świecie Hardcore (5., 10., 20., 30. i 50. dzień). Limit: 8 pkt na dobę.</p>' + rows + '<button class="kbtn gold" data-a="back" style="margin-top:10px">Wróć</button>');
+  UI.mkScreen(c, true);
+  c.onclick = (e) => { if (e.target.closest("[data-a=back]")) { SFX.click(); back(); } };
+}
 /* ===================== REJESTRACJA ===================== */
 function startCard(stage, ctx) {
   const card = h("div", { style: "text-align:center;padding:14px 10px" },
     h("div", { style: "font-size:40px" }, "⛏️"),
     h("h3", { style: "margin:6px 0" }, "Kopalnia"),
-    h("p", { style: "font-size:13px;opacity:.85;margin:4px 0 12px" }, "Sandbox 3D z blokami: przetrwanie, hardcore i kreatywny. Gra otwiera się na cały ekran. Punkty (konto admina) tylko za przetrwanie w trybie Hardcore."),
+    h("p", { style: "font-size:13px;opacity:.85;margin:4px 0 12px" }, "Sandbox 3D z blokami: przetrwanie, hardcore i kreatywny. Gra otwiera się na cały ekran. Punkty tylko w trybie Hardcore: za osiągnięcia i dni przetrwania (limit 8 pkt na dobę)."),
     h("button", { class: "rb-btn", style: "padding:10px 22px;font-weight:800;cursor:pointer" }, "Uruchom"),
     h("button", { class: "rb-btn", style: "padding:10px 16px;margin-left:8px;cursor:pointer" }, "Zamknij"));
   const b = card.querySelectorAll("button");
@@ -3267,5 +3386,5 @@ function startCard(stage, ctx) {
   stage.innerHTML = ""; stage.append(card);
 }
 window.WRGames.register({ id: "kopalnia", icon: "⛏️", name: "Kopalnia — sandbox 3D", desc: "Kop, buduj i przetrwaj. Tryby: przetrwanie, hardcore, kreatywny.", start: startCard });
-if (window.__KOP_DEBUG) window.__KOP = { get G() { return G; }, get W() { return WORLD; }, get UI() { return UI; }, get RUN() { return RUN; }, launch, Game, Save, spawnMob, explode, spawnItem, buildAtlas, iconURL, BLK, ITM, ID, BID, TIX, TILES, RECIPES, matchRecipe, itemDef, dropsFor, digTime, tick, SET };
+if (window.__KOP_DEBUG) window.__KOP = { get G() { return G; }, get W() { return WORLD; }, get UI() { return UI; }, get RUN() { return RUN; }, launch, Game, Save, Ach, INV, killMob, hurtMob, showAch, showPause, craftConsume, spawnMob, explode, spawnItem, buildAtlas, iconURL, BLK, ITM, ID, BID, TIX, TILES, RECIPES, matchRecipe, itemDef, dropsFor, digTime, tick, SET };
 })();

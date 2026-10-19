@@ -250,6 +250,7 @@ body.dark footer {background: #0a0a0a;}
   </video>
   <div class="container">
     <div class="hero-content">
+      <div class="theme-greet" id="theme-greet" hidden></div>
       <h1>Pizza z Sercem z Głupoń</h1>
       <p>Autentyczna włoska pizza 30cm prosto z pieca. Ciasto na 24h fermentacji.</p>
       <div class="hero-buttons">
@@ -377,6 +378,7 @@ body.dark footer {background: #0a0a0a;}
   <div class="container">
     <h2 class="section-title fade-in">Nasze <span>Menu</span></h2>
     <p class="section-subtitle fade-in">Wszystkie pizze 30cm. Wybierz swoją ulubioną!</p>
+    <div class="menu-print-row fade-in"><button type="button" class="menu-print-btn" id="menu-print-btn">🖨️ Menu do druku / PDF</button></div>
     <div class="menu-categories fade-in">
       <button class="category-btn active" data-category="all">Wszystkie</button>
       <button class="category-btn" data-category="klasyczne">Klasyczne</button>
@@ -1064,6 +1066,38 @@ body.has-notice .hero{margin-top:0}
 .unavail-badge{display:inline-block;margin-top:.6rem;padding:.15rem .7rem;border-radius:99px;background:var(--red);color:#fff;font-size:.8rem;font-weight:700}
 .menu-item.is-dish{outline:3px solid var(--gold);outline-offset:-3px}
 .menu-item.is-hidden{display:none!important}
+/* motyw sezonowy (włączany w panelu: Konto → Strona → Motyw sezonowy) */
+#theme-deco{position:fixed;inset:0;pointer-events:none;z-index:900;overflow:hidden}
+#theme-deco span{position:absolute;top:-8%;font-size:var(--s,18px);opacity:.85;animation:thfall var(--d,12s) linear var(--w,0s) infinite;will-change:transform}
+@keyframes thfall{0%{transform:translate3d(0,-10vh,0) rotate(0)}100%{transform:translate3d(var(--x,30px),115vh,0) rotate(360deg)}}
+#theme-bar{position:fixed;left:0;right:0;top:0;height:4px;z-index:1001;pointer-events:none;display:none}
+body[data-theme] #theme-bar{display:block}
+body[data-theme="halloween"] #theme-bar{background:linear-gradient(90deg,#ff7a00,#6b2fa0,#ff7a00,#6b2fa0)}
+body[data-theme="mikolaj"] #theme-bar{background:repeating-linear-gradient(90deg,#c8102e 0 24px,#fff 24px 36px,#1b8a3a 36px 60px,#fff 60px 72px)}
+body[data-theme="walentynki"] #theme-bar{background:linear-gradient(90deg,#ff4d79,#ff9ebb,#ff4d79)}
+.theme-greet{display:inline-block;margin:0 0 .8rem;padding:.35rem 1rem;border-radius:99px;background:rgba(255,255,255,.92);color:#222;font-weight:800;font-size:.95rem;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+body[data-theme="halloween"] .theme-greet{background:#ff7a00;color:#1a0a2a}
+body[data-theme="mikolaj"] .theme-greet{background:#c8102e;color:#fff}
+body[data-theme="walentynki"] .theme-greet{background:#ff4d79;color:#fff}
+@media (prefers-reduced-motion:reduce){#theme-deco span{animation:none;top:auto;opacity:.5}}
+/* menu do druku / PDF */
+.menu-print-row{text-align:center;margin:-.4rem 0 1.2rem}
+.menu-print-btn{display:inline-flex;align-items:center;gap:.4rem;border:2px solid var(--red);background:transparent;color:var(--red);padding:.45rem 1.1rem;border-radius:99px;font-weight:800;font-size:.9rem;cursor:pointer;font-family:inherit}
+.menu-print-btn:hover{background:var(--red);color:#fff}
+#print-menu{display:none}
+@media print{
+  body.printing-menu>*:not(#print-menu){display:none!important}
+  body.printing-menu #print-menu{display:block!important;color:#111;background:#fff;font-family:Georgia,"Times New Roman",serif;padding:0}
+  body.printing-menu{background:#fff!important}
+  #print-menu h1{font-size:30pt;margin:0;text-align:center;letter-spacing:1px;color:#b3141c}
+  #print-menu .pm-sub{text-align:center;font-size:10pt;color:#444;margin:2pt 0 10pt;font-style:italic}
+  #print-menu h2{font-size:14pt;margin:14pt 0 4pt;padding-bottom:2pt;border-bottom:2px solid #b3141c;color:#b3141c;text-transform:uppercase;letter-spacing:1px;break-after:avoid}
+  #print-menu .pm-row{display:flex;justify-content:space-between;gap:12pt;margin:5pt 0 0;break-inside:avoid;font-weight:700;font-size:11pt}
+  #print-menu .pm-row b{white-space:nowrap}
+  #print-menu .pm-desc{font-size:9pt;color:#444;margin:0 0 3pt;break-inside:avoid}
+  #print-menu .pm-foot{margin-top:14pt;border-top:1px solid #999;padding-top:6pt;text-align:center;font-size:9pt;color:#333}
+  @page{margin:14mm}
+}
 .menu-badges{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.6rem}
 .mbd{display:inline-flex;align-items:center;gap:.25rem;padding:.2rem .65rem;border-radius:99px;font-size:.78rem;font-weight:800;line-height:1.2;color:#fff;background:#b8860b}
 .mbd.hit{background:#d9381e}.mbd.ostra{background:#a4161a}.mbd.wege{background:#2f8f3e}.mbd.nowosc{background:#c8941a;color:#1c1500}.mbd.polecamy{background:#1e6b8c}
@@ -1546,6 +1580,15 @@ body.dark #site-dish .sd-text{color:#bbb}
           </div>
           <div id="rb-del-list"></div>
           <button type="button" class="rb-btn secondary small" id="rb-del-add">+ Dodaj miejscowość</button>
+
+          <h4 class="rb-hsec"><span>Motyw sezonowy</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
+          <div class="rb-meta" style="margin:-4px 0 6px">Małe ozdoby na stronie (pasek u góry, napis w nagłówku i spadające ikony). Domyślnie wyłączone — włącz na czas święta i wyłącz po nim.</div>
+          <select id="rb-site-theme">
+            <option value="">Wyłączony (zwykła strona)</option>
+            <option value="halloween">🎃 Halloween</option>
+            <option value="mikolaj">🎅 Mikołajki / Święta</option>
+            <option value="walentynki">💘 Walentynki</option>
+          </select>
 
           <h4 class="rb-hsec"><span>Opinie w Google</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
           <div class="rb-meta" style="margin:-4px 0 6px">Link, pod którym klient może zostawić opinię w Google (przycisk pokaże się każdemu klientowi po ocenie, niezależnie od liczby gwiazdek). Pusty = przycisku nie będzie.</div>
@@ -2066,15 +2109,15 @@ async function ensurePoints(user) {
 }
 function renderGames() {
   const box = $("rb-games");
-  /* Gry są na razie dostępne TYLKO dla administracji i obsługi (wersja testowa) */
-  if (!(isAdmin || isStaff)) { box.hidden = true; return; }
-  if (isAdmin && !myPoints) { box.hidden = true; return; }
+  /* Gry widzi każdy zalogowany (klient, obsługa, admin); obsługa gra próbnie, bez punktów */
+  if (!ptsUser && !isStaff) { box.hidden = true; return; }
+  if (!isStaff && !myPoints) { box.hidden = true; return; }
   box.hidden = false;
   loadGamesScript();
   if (isStaff) {
     $("rb-pts-n").textContent = "tryb próbny";
     $("rb-pts-fill").style.width = "0%";
-    $("rb-pts-txt").textContent = "Gry są na razie dostępne tylko dla administracji i obsługi. Konto obsługi nie zbiera punktów — grasz próbnie.";
+    $("rb-pts-txt").textContent = "Konto obsługi nie zbiera punktów — grasz próbnie.";
     $("rb-pts-test").hidden = true; $("rb-pts-redeem").hidden = true;
     $("rb-game-list").innerHTML = gameRows();
     return;
@@ -2098,14 +2141,14 @@ function gameRows() {
 let gamesScriptReq = false;
 function loadGamesScript() {
   if (gamesScriptReq) return; gamesScriptReq = true;
-  ["/gry.js?v=2", "/gry-pou.js?v=2", "/gry-kopalnia.js?v=1"].forEach((src) => {
+  ["/gry.js?v=2", "/gry-pou.js?v=2", "/gry-kopalnia.js?v=2"].forEach((src) => {
     const sc = document.createElement("script"); sc.src = src; sc.async = true;
     document.head.appendChild(sc);
   });
 }
 async function awardPoints(n, gameId) {
   if (isStaff) return { ok: false, msg: "Tryb próbny obsługi — punkty nie są naliczane." };
-  if (!ptsUser || !myPoints || !isAdmin) return { ok: false, msg: "Zaloguj się, żeby zbierać punkty." };
+  if (!ptsUser || !myPoints) return { ok: false, msg: "Zaloguj się, żeby zbierać punkty." };
   n = Math.floor(Number(n));
   if (!(n >= 1)) return { ok: false, msg: "Brak punktów do przyznania." };
   n = Math.min(n, PTS_MAX_AWARD);
@@ -2156,7 +2199,7 @@ $("rb-pts-test").addEventListener("click", async () => {
 });
 $("rb-pts-redeem").addEventListener("click", async () => {
   const msg = $("rb-pts-msg"), btn = $("rb-pts-redeem");
-  if (!ptsUser || isStaff || !isAdmin) return;
+  if (!ptsUser || isStaff) return;
   btn.disabled = true;
   setMsg(msg, "");
   try {
@@ -3295,7 +3338,7 @@ const DELIVERY_DEFAULT = ["Głuponie", "Trzcianka", "Tomaszewo", "Michorzewo", "
   .map((name) => ({ name, fee: 10, min: null, freeFrom: null }));
 // Link do formularza opinii w Google (domyślny; admin może go zmienić lub wyczyścić w panelu: Strona → Opinie w Google).
 const GOOGLE_REVIEW_DEFAULT = "https://g.page/r/CUq2_T6CQcy5EAE/review";
-let siteCfg = { prices: {}, unavailable: {}, hidden: {}, badges: {}, products: [], campaigns: [], notice: null, dish: null, delivery: { places: DELIVERY_DEFAULT }, googleReviewUrl: GOOGLE_REVIEW_DEFAULT };
+let siteCfg = { prices: {}, unavailable: {}, hidden: {}, badges: {}, products: [], campaigns: [], notice: null, dish: null, delivery: { places: DELIVERY_DEFAULT }, googleReviewUrl: GOOGLE_REVIEW_DEFAULT, theme: "" };
 const PROD_CATS = [["klasyczne", "Klasyczne"], ["miesne", "Mięsne"], ["vege", "Wege"], ["sosy", "Sosy"], ["makarony", "Makarony"], ["dodatki", "Dodatki"]];
 const MAX_PRODUCTS = 40;
 const BADGES = [["hit", "🔥 Hit"], ["ostra", "🌶 Ostra"], ["wege", "🌱 Wege"], ["nowosc", "⭐ Nowość"], ["polecamy", "👍 Polecamy"]];
@@ -3312,7 +3355,7 @@ const tsMs = (t) => (t ? (t.toDate ? t.toDate().getTime() : (t.seconds ? t.secon
 function plainCfg(c) {
   const n = c.notice ? { ...c.notice, until: c.notice.until ? { seconds: Math.floor(tsMs(c.notice.until) / 1000) } : null } : null;
   const camps = (c.campaigns || []).map((x) => ({ ...x, from: x.from ? { seconds: Math.floor(tsMs(x.from) / 1000) } : null, until: x.until ? { seconds: Math.floor(tsMs(x.until) / 1000) } : null }));
-  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, badges: c.badges || {}, products: c.products || [], campaigns: camps, notice: n, dish: c.dish || null, delivery: c.delivery || null, googleReviewUrl: typeof c.googleReviewUrl === "string" ? c.googleReviewUrl : null };
+  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, badges: c.badges || {}, products: c.products || [], campaigns: camps, notice: n, dish: c.dish || null, delivery: c.delivery || null, googleReviewUrl: typeof c.googleReviewUrl === "string" ? c.googleReviewUrl : null, theme: typeof c.theme === "string" ? c.theme : "" };
 }
 
 function renderDish() {
@@ -3412,13 +3455,73 @@ function renderProducts() {
   });
 }
 
+/* ---------- motyw sezonowy ---------- */
+const THEMES = {
+  halloween: { greet: "🎃 Happy Halloween!", icons: ["🎃", "🦇", "👻", "🕸️"] },
+  mikolaj: { greet: "🎅 Wesołych Świąt!", icons: ["❄️", "❄️", "🎄", "⭐"] },
+  walentynki: { greet: "💘 Walentynki w Włoskiej Robocie", icons: ["❤️", "💕", "💗", "🌹"] }
+};
+function applyTheme(name) {
+  const t = THEMES[name], b = document.body;
+  let deco = document.getElementById("theme-deco"), bar = document.getElementById("theme-bar");
+  const greet = document.getElementById("theme-greet");
+  if (!t) {
+    delete b.dataset.theme;
+    if (deco) deco.remove();
+    if (greet) greet.hidden = true;
+    return;
+  }
+  b.dataset.theme = name;
+  if (!bar) { bar = document.createElement("div"); bar.id = "theme-bar"; bar.setAttribute("aria-hidden", "true"); b.appendChild(bar); }
+  if (greet) { greet.textContent = t.greet; greet.hidden = false; }
+  if (deco && deco.dataset.t === name) return;
+  if (deco) deco.remove();
+  deco = document.createElement("div"); deco.id = "theme-deco"; deco.dataset.t = name; deco.setAttribute("aria-hidden", "true");
+  const n = innerWidth < 700 ? 9 : 16;
+  for (let i = 0; i < n; i++) {
+    const sp = document.createElement("span");
+    sp.textContent = t.icons[i % t.icons.length];
+    sp.style.cssText = "left:" + Math.round((i + Math.random() * 0.8) / n * 100) + "%;--s:" + (14 + Math.round(Math.random() * 14)) + "px;--d:" + (9 + Math.round(Math.random() * 9)) + "s;--w:-" + Math.round(Math.random() * 14) + "s;--x:" + (Math.round(Math.random() * 120) - 60) + "px";
+    deco.appendChild(sp);
+  }
+  b.appendChild(deco);
+}
+
+/* ---------- menu do druku / PDF (z aktualnymi cenami ze strony) ---------- */
+function printMenu() {
+  const cats = PROD_CATS.map((c) => ({ key: c[0], name: c[1], rows: [] }));
+  menuEls().forEach((el) => {
+    if (el.classList.contains("is-hidden")) return;
+    const first = (el.dataset.category || "").split(/\s+/).find((k) => cats.some((c) => c.key === k));
+    const cat = cats.find((c) => c.key === first);
+    if (!cat) return;
+    const price = ((el.querySelector(".menu-item-price") || {}).textContent || "").replace(/\u00a0/g, " ").trim();
+    const desc = ((el.querySelector(".menu-item-desc") || {}).textContent || "").trim();
+    cat.rows.push('<div class="pm-row"><span>' + esc(itemName(el)) + "</span><b>" + esc(price) + "</b></div>" + (desc ? '<div class="pm-desc">' + esc(desc) + "</div>" : ""));
+  });
+  const today = new Date().toLocaleDateString("pl-PL");
+  const html = '<h1>Włoska Robota</h1><div class="pm-sub">Pizza z pieca · Głuponie · pizze 30 cm, ciasto 24 h</div>' +
+    cats.filter((c) => c.rows.length).map((c) => "<h2>" + esc(c.name) + "</h2>" + c.rows.join("")).join("") +
+    '<div class="pm-foot">Zamówienia: 668 862 396 · wloskarobota.eu · ceny aktualne na dzień ' + esc(today) + "</div>";
+  let box = document.getElementById("print-menu");
+  if (!box) { box = document.createElement("div"); box.id = "print-menu"; document.body.appendChild(box); }
+  box.innerHTML = html;
+  const done = () => { document.body.classList.remove("printing-menu"); window.removeEventListener("afterprint", done); };
+  window.addEventListener("afterprint", done);
+  document.body.classList.add("printing-menu");
+  setTimeout(() => { try { window.print(); } catch (_) { done(); } }, 60);
+}
+document.getElementById("menu-print-btn").addEventListener("click", printMenu);
+
 function applySite(cfg) {
   siteCfg = {
     prices: (cfg && cfg.prices) || {}, unavailable: (cfg && cfg.unavailable) || {}, hidden: (cfg && cfg.hidden) || {}, badges: (cfg && cfg.badges) || {},
     products: Array.isArray(cfg && cfg.products) ? cfg.products : [], campaigns: Array.isArray(cfg && cfg.campaigns) ? cfg.campaigns : [], notice: (cfg && cfg.notice) || null, dish: (cfg && cfg.dish) || null,
     delivery: { places: Array.isArray(cfg && cfg.delivery && cfg.delivery.places) ? cfg.delivery.places : DELIVERY_DEFAULT },
-    googleReviewUrl: (cfg && typeof cfg.googleReviewUrl === "string") ? cfg.googleReviewUrl : GOOGLE_REVIEW_DEFAULT
+    googleReviewUrl: (cfg && typeof cfg.googleReviewUrl === "string") ? cfg.googleReviewUrl : GOOGLE_REVIEW_DEFAULT,
+    theme: (cfg && typeof cfg.theme === "string") ? cfg.theme : ""
   };
+  applyTheme(siteCfg.theme);
   renderProducts();
   menuEls().forEach((el) => {
     const key = itemKey(el);
@@ -3779,6 +3882,7 @@ function fillSiteForm() {
   const dp = siteCfg.delivery.places.filter(validPlace);
   $("rb-del-list").innerHTML = dp.map(delRowHtml).join("");
   $("rb-site-google").value = siteCfg.googleReviewUrl || "";
+  $("rb-site-theme").value = THEMES[siteCfg.theme] ? siteCfg.theme : "";
   $("rb-prod-list").innerHTML = siteCfg.products.filter(validProduct).map(prodRowHtml).join("");
   const items = menuEls().filter((el) => !el.dataset.custom);
   $("rb-site-items").innerHTML = items.map((el) => {
@@ -3933,6 +4037,7 @@ async function saveSite() {
     places.push({ name, fee, min, freeFrom });
   });
   if (delBad) { say( delBad, "err"); return; }
+  const theme = THEMES[$("rb-site-theme").value] ? $("rb-site-theme").value : "";
   const googleReviewUrl = $("rb-site-google").value.trim();
   if (googleReviewUrl && !/^https:\/\/\S+$/.test(googleReviewUrl)) { say( "Link do opinii w Google musi zaczynać się od https://", "err"); return; }
   const delivery = { places };
@@ -3952,8 +4057,8 @@ async function saveSite() {
   const btns = [$("rb-site-save"), ...document.querySelectorAll(".rb-sec-save")];
   btns.forEach((b) => { b.disabled = true; });
   try {
-    await setDoc(doc(db, "site", "config"), { prices, unavailable, hidden, badges, products, campaigns, notice, dish, delivery, googleReviewUrl, updatedAt: serverTimestamp() });
-    const cfg = { prices, unavailable, hidden, badges, products, campaigns, notice, dish, delivery, googleReviewUrl };
+    await setDoc(doc(db, "site", "config"), { prices, unavailable, hidden, badges, products, campaigns, notice, dish, delivery, googleReviewUrl, theme, updatedAt: serverTimestamp() });
+    const cfg = { prices, unavailable, hidden, badges, products, campaigns, notice, dish, delivery, googleReviewUrl, theme };
     applySite(cfg);
     fillSiteForm();
     try { localStorage.setItem(SITE_CACHE_KEY, JSON.stringify(plainCfg(cfg))); } catch (_) {}
