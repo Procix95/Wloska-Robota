@@ -523,7 +523,7 @@ body.dark footer {background: #0a0a0a;}
   <div class="container">
     <h2 class="section-title fade-in">Nasza <span>Galeria</span></h2>
     <p class="section-subtitle fade-in">Zobacz jak powstaje magia.</p>
-    <div class="gallery-grid">
+    <div class="gallery-grid" id="galleryGrid">
       <div class="gallery-item fade-in"><img src="images/DSC01389.JPG" alt="Pizzaiolo Włoska Robota" loading="lazy"></div>
       <div class="gallery-item fade-in"><img src="images/DSC01412.JPG" alt="Próba pizzy" loading="lazy"></div>
       <div class="gallery-item fade-in"><img src="images/DSC01437.JPG" alt="Pizza Quattro Formaggi" loading="lazy"></div>
@@ -1095,6 +1095,19 @@ body[data-theme="halloween"] .theme-greet{background:#ff7a00;color:#1a0a2a}
 body[data-theme="mikolaj"] .theme-greet{background:#c8102e;color:#fff}
 body[data-theme="walentynki"] .theme-greet{background:#ff4d79;color:#fff}
 @media (prefers-reduced-motion:reduce){#theme-deco span{animation:none;top:auto;opacity:.5}}
+/* galeria */
+.gal-skel{width:100%;height:100%;background:linear-gradient(90deg,#2a2a2a,#3a3a3a,#2a2a2a);background-size:200% 100%;animation:galsk 1.2s linear infinite}
+@keyframes galsk{to{background-position:-200% 0}}
+#rabat-overlay .rb-gal-row{display:flex;gap:10px;align-items:flex-start;background:var(--rb-card);border:1px solid var(--rb-border);border-radius:14px;padding:10px;margin-bottom:8px}
+#rabat-overlay .rb-gal-th{width:72px;height:72px;flex:none;border-radius:10px;object-fit:cover;background:#222}
+#rabat-overlay .rb-gal-th.skel{display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--rb-muted)}
+#rabat-overlay .rb-gal-main{flex:1;min-width:0}
+#rabat-overlay .rb-gal-main input{margin:0 0 6px;padding:8px 10px;font-size:14px}
+#rabat-overlay .rb-gal-btns{display:flex;gap:6px;flex-wrap:wrap}
+#rabat-overlay .rb-gal-btns button{min-width:42px;min-height:38px;padding:0 10px;border:1px solid var(--rb-border);border-radius:10px;background:var(--rb-input);color:var(--rb-text);font-size:16px;cursor:pointer;font-family:inherit}
+#rabat-overlay .rb-gal-btns button:disabled{opacity:.35}
+#rabat-overlay .rb-gal-btns .del{margin-left:auto;border-color:var(--rb-red)}
+#rabat-overlay .rb-gal-n{font-size:11px;color:var(--rb-muted);margin-bottom:3px}
 /* menu do druku / PDF */
 #rabat-overlay .rb-subnav{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:0 0 16px}
 #rabat-overlay .rb-subtab{border:1px solid var(--rb-border);background:var(--rb-card);color:inherit;padding:8px 13px;border-radius:99px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;min-height:38px}
@@ -1617,6 +1630,13 @@ body.dark #site-dish .sd-text{color:#bbb}
             <option value="walentynki">💘 Walentynki</option>
           </select>
           <div class="rb-meta" id="rb-theme-now" style="margin-top:6px"></div>
+
+          <h4 class="rb-hsec"><span>Galeria zdjęć</span></h4>
+          <div class="rb-meta" style="margin:-4px 0 10px">Zmiany zapisują się od razu. Strzałki zmieniają kolejność (⤒ = na początek), 🗑 usuwa zdjęcie ze strony, a pole pod zdjęciem to opcjonalny podpis. Zdjęcia, które były w kodzie strony, też można usunąć i potem przywrócić.</div>
+          <button type="button" class="rb-btn" id="rb-gal-add">📷 Dodaj zdjęcia</button>
+          <div class="rb-meta" id="rb-gal-count" style="margin:10px 0 4px"></div>
+          <div id="rb-gal-list"></div>
+          <button type="button" class="rb-btn secondary small" id="rb-gal-reset" style="margin-top:8px">Przywróć usunięte i domyślną kolejność</button>
 
           <h4 class="rb-hsec"><span>Opinie w Google</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
           <div class="rb-meta" style="margin:-4px 0 6px">Link, pod którym klient może zostawić opinię w Google (przycisk pokaże się każdemu klientowi po ocenie, niezależnie od liczby gwiazdek). Pusty = przycisku nie będzie.</div>
@@ -3814,6 +3834,235 @@ function showPhotoBig(src, title) {
   });
 })();
 
+/* ---------- galeria: kolejność, dodawanie i usuwanie zdjęć z panelu ----------
+   Spis i kolejność: site/gallery {order, removed, caps, v}; zdjęcia dodane przez admina: site/gal_<id> (JPEG ok. 1000 px).
+   Zdjęcia z kodu strony (images/…) też można ukryć. Dopóki admin niczego nie zmieni, galeria wygląda jak w kodzie strony. */
+const GAL_CACHE_KEY = "wr_gal_v1", GAL_CFG_KEY = "wr_gal_cfg_v1", GAL_MAX_UP = 30;
+const galGrid = $("galleryGrid");
+const GAL_STATIC = galGrid ? [...galGrid.querySelectorAll(".gallery-item img")].map((im) => {
+  const src = im.getAttribute("src") || "";
+  return { key: "s_" + src.split("/").pop().replace(/\.[^.]*$/, "").replace(/[^A-Za-z0-9]+/g, "_").slice(0, 50), src, alt: im.alt || "" };
+}) : [];
+let galCfg = { order: [], removed: [], caps: {}, v: {} }, galActive = false, galBusy = false;
+let galCache = {};
+try { galCache = JSON.parse(localStorage.getItem(GAL_CACHE_KEY) || "{}") || {}; } catch (_) { galCache = {}; }
+const galTiles = new Map(), galInflight = {};
+let galObs = null;
+function galClean(d) {
+  const o = { order: [], removed: [], caps: {}, v: {} };
+  if (!d || typeof d !== "object") return o;
+  const okKey = (k) => typeof k === "string" && /^[su]_[A-Za-z0-9_]{1,60}$/.test(k);
+  if (Array.isArray(d.order)) o.order = d.order.filter(okKey).slice(0, 100);
+  if (Array.isArray(d.removed)) o.removed = d.removed.filter(okKey).slice(0, 100);
+  if (d.caps && typeof d.caps === "object") Object.keys(d.caps).forEach((k) => { if (okKey(k) && typeof d.caps[k] === "string") o.caps[k] = d.caps[k].slice(0, 80); });
+  if (d.v && typeof d.v === "object") Object.keys(d.v).forEach((k) => { if (/^[a-z0-9]{4,20}$/.test(k) && typeof d.v[k] === "number" && d.v[k] > 0) o.v[k] = d.v[k]; });
+  return o;
+}
+function galItems() {
+  const map = new Map(GAL_STATIC.map((x) => [x.key, x])), out = [], seen = new Set();
+  const add = (k) => {
+    if (seen.has(k)) return; seen.add(k);
+    if (k.startsWith("s_")) { const st = map.get(k); if (st && !galCfg.removed.includes(k)) out.push({ key: k, src: st.src, alt: galCfg.caps[k] || st.alt, base: st.alt, stat: true }); }
+    else if (k.startsWith("u_")) { const id = k.slice(2); if (galCfg.v[id]) out.push({ key: k, id, alt: galCfg.caps[k] || "", base: "" }); }
+  };
+  galCfg.order.forEach(add); GAL_STATIC.forEach((x) => add(x.key));
+  return out;
+}
+const galSrc = (it) => { if (it.stat) return it.src; const c = galCache[it.id]; return c && c.t === galCfg.v[it.id] && okImg(c.d) ? c.d : ""; };
+function galSave() { try { localStorage.setItem(GAL_CACHE_KEY, JSON.stringify(galCache)); } catch (_) { /* brak miejsca: zostają w pamięci strony */ } }
+function renderGallery() {
+  if (!galGrid || !galActive) return;
+  const items = galItems(), keep = new Set(items.map((i) => i.key));
+  galGrid.querySelectorAll(".gallery-item:not([data-gkey])").forEach((e) => e.remove());
+  galTiles.forEach((el, k) => { if (!keep.has(k)) { el.remove(); galTiles.delete(k); } });
+  items.forEach((it) => {
+    let el = galTiles.get(it.key);
+    if (!el) { el = document.createElement("div"); el.className = "gallery-item"; el.dataset.gkey = it.key; galTiles.set(it.key, el); }
+    const src = galSrc(it);
+    const sig = src ? "i|" + (it.stat ? it.src : galCfg.v[it.id]) + "|" + it.alt : "p";
+    if (el.dataset.sig !== sig) {
+      el.dataset.sig = sig;
+      el.innerHTML = src ? '<img src="' + esc(src) + '" alt="' + esc(it.alt) + '" loading="lazy" decoding="async">' : '<div class="gal-skel"></div>';
+    }
+    galGrid.appendChild(el);
+    if (!src && it.id) galObserve(el, it.id);
+  });
+}
+function galObserve(el, id) {
+  if (!("IntersectionObserver" in window)) { galEnsure(id); return; }
+  if (!galObs) {
+    galObs = new IntersectionObserver((es) => es.forEach((e) => {
+      if (e.isIntersecting) { galObs.unobserve(e.target); galEnsure(e.target.dataset.gkey.slice(2)); }
+    }), { rootMargin: "400px" });
+  }
+  galObs.observe(el);
+}
+async function galEnsure(id) {
+  const t = galCfg.v[id];
+  if (!t) return;
+  const c = galCache[id];
+  if (c && c.t === t && okImg(c.d)) return;
+  if (galInflight[id] === t) return;
+  galInflight[id] = t;
+  try {
+    const d = await withTimeout(getDoc(doc(db, "site", "gal_" + id)), 15000);
+    const data = d.exists() ? d.data() : null;
+    if (data && okImg(data.d)) { galCache[id] = { t, d: data.d }; galSave(); renderGallery(); galAdminRender(); }
+  } catch (e) { console.warn("Zdjęcie galerii niedostępne:", id, e && (e.code || e.message)); }
+  finally { delete galInflight[id]; }
+}
+async function loadGallery() {
+  try {
+    const d = await withTimeout(getDoc(doc(db, "site", "gallery")), 8000);
+    if (d.exists()) {
+      galCfg = galClean(d.data()); galActive = true;
+      try { localStorage.setItem(GAL_CFG_KEY, JSON.stringify(galCfg)); } catch (_) {}
+    } else { try { localStorage.removeItem(GAL_CFG_KEY); } catch (_) {} }
+    Object.keys(galCache).forEach((id) => { if (!galCfg.v[id]) delete galCache[id]; });
+    galSave();
+  } catch (e) { console.warn("Galeria niedostępna:", e && (e.code || e.message)); }
+  renderGallery(); galAdminRender();
+}
+try { const c = localStorage.getItem(GAL_CFG_KEY); if (c) { galCfg = galClean(JSON.parse(c)); galActive = true; renderGallery(); } } catch (_) {}
+if (galGrid) galGrid.addEventListener("click", (e) => {
+  const im = e.target.closest(".gallery-item img");
+  if (im) showPhotoBig(im.currentSrc || im.src, im.alt || "");
+});
+
+/* --- panel admina --- */
+function galAdminRender() {
+  const list = $("rb-gal-list");
+  if (!list) return;
+  const items = galItems();
+  $("rb-gal-count").textContent = "Zdjęć na stronie: " + items.length + (galCfg.removed.length ? " · ukrytych z kodu strony: " + galCfg.removed.length : "");
+  list.innerHTML = items.map((it, i) => {
+    const src = galSrc(it);
+    if (!src && it.id) galEnsure(it.id);
+    return `<div class="rb-gal-row" data-k="${esc(it.key)}">
+      ${src ? `<img class="rb-gal-th" src="${esc(src)}" alt="">` : '<div class="rb-gal-th skel">wczytuję…</div>'}
+      <div class="rb-gal-main">
+        <div class="rb-gal-n">${i + 1}. ${it.stat ? "z kodu strony" : "dodane"}</div>
+        <input type="text" class="rb-gal-cap" maxlength="80" placeholder="${esc(it.base || "Podpis (opcjonalnie)")}" value="${esc(galCfg.caps[it.key] || "")}" aria-label="Podpis zdjęcia ${i + 1}">
+        <div class="rb-gal-btns">
+          <button type="button" data-a="top" aria-label="Na początek"${i === 0 ? " disabled" : ""}>⤒</button>
+          <button type="button" data-a="up" aria-label="Wyżej"${i === 0 ? " disabled" : ""}>↑</button>
+          <button type="button" data-a="down" aria-label="Niżej"${i === items.length - 1 ? " disabled" : ""}>↓</button>
+          <button type="button" data-a="del" class="del" aria-label="Usuń">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join("") || '<div class="rb-meta">Galeria jest pusta — dodaj zdjęcia albo przywróć domyślne.</div>';
+}
+async function galPersist(next) {
+  const prev = galCfg;
+  galCfg = galClean(next);
+  try {
+    await setDoc(doc(db, "site", "gallery"), { order: galCfg.order, removed: galCfg.removed, caps: galCfg.caps, v: galCfg.v, updatedAt: serverTimestamp() });
+    galActive = true;
+    try { localStorage.setItem(GAL_CFG_KEY, JSON.stringify(galCfg)); } catch (_) {}
+  } catch (err) { galCfg = prev; throw err; }
+  renderGallery(); galAdminRender();
+}
+async function galRun(fn) {
+  if (!isAdmin || galBusy) return;
+  galBusy = true;
+  try { await fn(); } catch (err) { console.error(err); siteToast(errText(err), "err"); }
+  finally { galBusy = false; }
+}
+const galCopy = () => ({ order: galItems().map((i) => i.key), removed: [...galCfg.removed], caps: { ...galCfg.caps }, v: { ...galCfg.v } });
+function galMove(key, how) {
+  return galRun(async () => {
+    const c = galCopy(), i = c.order.indexOf(key);
+    if (i < 0) return;
+    c.order.splice(i, 1);
+    c.order.splice(how === "top" ? 0 : how === "up" ? Math.max(0, i - 1) : Math.min(c.order.length, i + 1), 0, key);
+    await galPersist(c);
+  });
+}
+function galDelete(key) {
+  if (!confirm("Usunąć to zdjęcie z galerii na stronie?")) return;
+  return galRun(async () => {
+    const c = galCopy(); c.order = c.order.filter((k) => k !== key); delete c.caps[key];
+    let delId = null;
+    if (key.startsWith("s_")) { if (!c.removed.includes(key)) c.removed.push(key); }
+    else { delId = key.slice(2); delete c.v[delId]; }
+    await galPersist(c);
+    if (delId) { try { await deleteDoc(doc(db, "site", "gal_" + delId)); } catch (_) {} delete galCache[delId]; galSave(); }
+    siteToast("Zdjęcie usunięte z galerii.", "ok");
+  });
+}
+function galCaption(key, text) {
+  const t = text.trim().slice(0, 80);
+  if ((galCfg.caps[key] || "") === t) return;
+  return galRun(async () => { const c = galCopy(); if (t) c.caps[key] = t; else delete c.caps[key]; await galPersist(c); siteToast("Podpis zapisany.", "ok"); });
+}
+async function galToJpeg(file) {
+  let src, w, h;
+  try { src = await createImageBitmap(file, { imageOrientation: "from-image" }); w = src.width; h = src.height; }
+  catch (_) {
+    src = await new Promise((ok, bad) => { const u = URL.createObjectURL(file); const im = new Image(); im.onload = () => { URL.revokeObjectURL(u); ok(im); }; im.onerror = () => { URL.revokeObjectURL(u); bad(new Error("bad")); }; im.src = u; });
+    w = src.naturalWidth; h = src.naturalHeight;
+  }
+  if (!w || !h) throw new Error("bad");
+  let scale = Math.min(1, 1000 / Math.max(w, h)), out = "";
+  for (let tries = 0; tries < 6; tries++) {
+    const cv = document.createElement("canvas"); cv.width = Math.max(1, Math.round(w * scale)); cv.height = Math.max(1, Math.round(h * scale));
+    const cx = cv.getContext("2d"); cx.fillStyle = "#fff"; cx.fillRect(0, 0, cv.width, cv.height); cx.imageSmoothingQuality = "high";
+    cx.drawImage(src, 0, 0, cv.width, cv.height);
+    let q = 0.82; out = cv.toDataURL("image/jpeg", q);
+    while (out.length > 140000 && q > 0.5) { q -= 0.08; out = cv.toDataURL("image/jpeg", q); }
+    if (out.length <= 160000) break;
+    scale *= 0.85;
+  }
+  if (!okImg(out) || out.length > 220000) throw new Error("big");
+  return out;
+}
+function galAdd(files) {
+  return galRun(async () => {
+    const list = [...files].filter((f) => /^image\//.test(f.type) || /\.(jpe?g|png|webp|heic|heif|gif|bmp)$/i.test(f.name || ""));
+    if (!list.length) { siteToast("To nie są zdjęcia. Wybierz pliki JPG lub PNG.", "err"); return; }
+    let done = 0;
+    for (const f of list) {
+      if (Object.keys(galCfg.v).length >= GAL_MAX_UP) { siteToast("Limit " + GAL_MAX_UP + " dodanych zdjęć. Usuń któreś, żeby dodać nowe.", "err"); break; }
+      siteToast("Dodaję zdjęcie " + (done + 1) + " z " + list.length + "…", "ok");
+      const data = await galToJpeg(f);
+      const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 5), ts = Date.now();
+      await setDoc(doc(db, "site", "gal_" + id), { d: data, t: ts });
+      const c = galCopy(); c.v[id] = ts; c.order.push("u_" + id);
+      galCache[id] = { t: ts, d: data };
+      await galPersist(c);
+      galSave(); done++;
+    }
+    if (done) siteToast("Dodano zdjęć: " + done + ".", "ok");
+  });
+}
+(function bindGalAdmin() {
+  const list = $("rb-gal-list"), add = $("rb-gal-add"), reset = $("rb-gal-reset");
+  if (!list || !add) return;
+  const fe = document.createElement("input"); fe.type = "file"; fe.accept = "image/*"; fe.multiple = true; fe.hidden = true;
+  fe.addEventListener("change", () => { const fs = [...fe.files]; fe.value = ""; if (fs.length) galAdd(fs); });
+  document.body.appendChild(fe);
+  add.addEventListener("click", () => { if (isAdmin && !galBusy) fe.click(); });
+  list.addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-a]"), row = e.target.closest(".rb-gal-row");
+    if (!b || !row) return;
+    const key = row.dataset.k;
+    if (b.dataset.a === "del") galDelete(key); else galMove(key, b.dataset.a);
+  });
+  list.addEventListener("change", (e) => {
+    const inp = e.target.closest(".rb-gal-cap"), row = e.target.closest(".rb-gal-row");
+    if (inp && row) galCaption(row.dataset.k, inp.value);
+  });
+  reset.addEventListener("click", () => {
+    if (!confirm("Przywrócić wszystkie zdjęcia z kodu strony i ich domyślną kolejność? Dodane przez Ciebie zostaną na końcu.")) return;
+    galRun(async () => {
+      const up = galItems().filter((i) => !i.stat).map((i) => i.key);
+      await galPersist({ order: [...GAL_STATIC.map((x) => x.key), ...up], removed: [], caps: {}, v: { ...galCfg.v } });
+      siteToast("Przywrócono domyślną galerię.", "ok");
+    });
+  });
+})();
+
 async function loadSite() {
   try {
     const c = localStorage.getItem(SITE_CACHE_KEY);
@@ -3832,6 +4081,7 @@ async function loadSite() {
     }
   } catch (e) { console.warn("Ustawienia strony niedostępne:", e && (e.code || e.message)); }
   loadPhotos();
+  loadGallery();
 }
 
 /* ---------- panel admina: zakładka Strona ---------- */
@@ -4880,7 +5130,7 @@ $("rb-site-theme").addEventListener("change", showThemeNow);
   const pane = document.querySelector('#rb-admin .rb-pane[data-pane="site"]');
   if (!pane) return;
   const heads = [...pane.querySelectorAll(":scope > h4.rb-hsec")];
-  const LABELS = { "Komunikat na górze strony": "📢 Komunikat", "Akcje i specjalne dni": "🎯 Akcje", "Pizza dnia": "🍕 Pizza dnia", "Dowóz": "🚚 Dowóz", "Motyw sezonowy": "🎨 Motyw", "Opinie w Google": "⭐ Opinie", "Własne produkty": "➕ Produkty", "Ceny i dostępność pozycji ze strony": "💲 Ceny" };
+  const LABELS = { "Komunikat na górze strony": "📢 Komunikat", "Akcje i specjalne dni": "🎯 Akcje", "Pizza dnia": "🍕 Pizza dnia", "Dowóz": "🚚 Dowóz", "Motyw sezonowy": "🎨 Motyw", "Galeria zdjęć": "🖼️ Galeria", "Opinie w Google": "⭐ Opinie", "Własne produkty": "➕ Produkty", "Ceny i dostępność pozycji ze strony": "💲 Ceny" };
   const groups = heads.map((h) => {
     const g = document.createElement("div"); g.className = "rb-sub"; g.hidden = true;
     const label = LABELS[(h.querySelector("span") || h).textContent.trim()] || h.textContent.trim();
@@ -4892,6 +5142,7 @@ $("rb-site-theme").addEventListener("change", showThemeNow);
   const order = [...groups]; const pi = order.findIndex((x) => x.label.includes("Ceny")); if (pi > 0) order.unshift(order.splice(pi, 1)[0]);
   const show = (i) => { order.forEach((x, k) => { x.g.hidden = k !== i; x.b.classList.toggle("active", k === i); x.b.setAttribute("aria-selected", k === i ? "true" : "false"); }); };
   order.forEach((x, i) => { const b = document.createElement("button"); b.type = "button"; b.className = "rb-subtab"; b.textContent = x.label; b.setAttribute("role", "tab"); b.addEventListener("click", () => show(i)); x.b = b; nav.appendChild(b); });
+  ["rb-site-msg", "rb-site-toast"].forEach((id) => { const e = document.getElementById(id); if (e) pane.appendChild(e); });
   pane.prepend(nav);
   show(0);
 })();
