@@ -1081,6 +1081,9 @@ body[data-theme="mikolaj"] .theme-greet{background:#c8102e;color:#fff}
 body[data-theme="walentynki"] .theme-greet{background:#ff4d79;color:#fff}
 @media (prefers-reduced-motion:reduce){#theme-deco span{animation:none;top:auto;opacity:.5}}
 /* menu do druku / PDF */
+#rabat-overlay .rb-subnav{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:0 0 16px}
+#rabat-overlay .rb-subtab{border:1px solid var(--rb-border);background:var(--rb-card);color:inherit;padding:8px 13px;border-radius:99px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;min-height:38px}
+#rabat-overlay .rb-subtab.active{background:var(--green);border-color:var(--green);color:#fff}
 .menu-print-row{text-align:center;margin:-.4rem 0 1.2rem}
 .menu-print-btn{display:inline-flex;align-items:center;gap:.4rem;border:2px solid var(--red);background:transparent;color:var(--red);padding:.45rem 1.1rem;border-radius:99px;font-weight:800;font-size:.9rem;cursor:pointer;font-family:inherit}
 .menu-print-btn:hover{background:var(--red);color:#fff}
@@ -1582,13 +1585,15 @@ body.dark #site-dish .sd-text{color:#bbb}
           <button type="button" class="rb-btn secondary small" id="rb-del-add">+ Dodaj miejscowość</button>
 
           <h4 class="rb-hsec"><span>Motyw sezonowy</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
-          <div class="rb-meta" style="margin:-4px 0 6px">Małe ozdoby na stronie (pasek u góry, napis w nagłówku i spadające ikony). Domyślnie wyłączone — włącz na czas święta i wyłącz po nim.</div>
+          <div class="rb-meta" style="margin:-4px 0 6px">Małe ozdoby na stronie (pasek u góry, napis w nagłówku i spadające ikony). „Automatycznie” sam włącza motyw w czasie świąt: Halloween 24.10–1.11, Mikołajki i Święta 1.12–6.01, Walentynki 7–14.02; poza tym strona jest zwykła. Możesz też wymusić jeden motyw albo go wyłączyć.</div>
           <select id="rb-site-theme">
+            <option value="auto">🗓 Automatycznie według daty (zalecane)</option>
             <option value="">Wyłączony (zwykła strona)</option>
             <option value="halloween">🎃 Halloween</option>
             <option value="mikolaj">🎅 Mikołajki / Święta</option>
             <option value="walentynki">💘 Walentynki</option>
           </select>
+          <div class="rb-meta" id="rb-theme-now" style="margin-top:6px"></div>
 
           <h4 class="rb-hsec"><span>Opinie w Google</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
           <div class="rb-meta" style="margin:-4px 0 6px">Link, pod którym klient może zostawić opinię w Google (przycisk pokaże się każdemu klientowi po ocenie, niezależnie od liczby gwiazdek). Pusty = przycisku nie będzie.</div>
@@ -3338,7 +3343,7 @@ const DELIVERY_DEFAULT = ["Głuponie", "Trzcianka", "Tomaszewo", "Michorzewo", "
   .map((name) => ({ name, fee: 10, min: null, freeFrom: null }));
 // Link do formularza opinii w Google (domyślny; admin może go zmienić lub wyczyścić w panelu: Strona → Opinie w Google).
 const GOOGLE_REVIEW_DEFAULT = "https://g.page/r/CUq2_T6CQcy5EAE/review";
-let siteCfg = { prices: {}, unavailable: {}, hidden: {}, badges: {}, products: [], campaigns: [], notice: null, dish: null, delivery: { places: DELIVERY_DEFAULT }, googleReviewUrl: GOOGLE_REVIEW_DEFAULT, theme: "" };
+let siteCfg = { prices: {}, unavailable: {}, hidden: {}, badges: {}, products: [], campaigns: [], notice: null, dish: null, delivery: { places: DELIVERY_DEFAULT }, googleReviewUrl: GOOGLE_REVIEW_DEFAULT, theme: "auto" };
 const PROD_CATS = [["klasyczne", "Klasyczne"], ["miesne", "Mięsne"], ["vege", "Wege"], ["sosy", "Sosy"], ["makarony", "Makarony"], ["dodatki", "Dodatki"]];
 const MAX_PRODUCTS = 40;
 const BADGES = [["hit", "🔥 Hit"], ["ostra", "🌶 Ostra"], ["wege", "🌱 Wege"], ["nowosc", "⭐ Nowość"], ["polecamy", "👍 Polecamy"]];
@@ -3355,7 +3360,7 @@ const tsMs = (t) => (t ? (t.toDate ? t.toDate().getTime() : (t.seconds ? t.secon
 function plainCfg(c) {
   const n = c.notice ? { ...c.notice, until: c.notice.until ? { seconds: Math.floor(tsMs(c.notice.until) / 1000) } : null } : null;
   const camps = (c.campaigns || []).map((x) => ({ ...x, from: x.from ? { seconds: Math.floor(tsMs(x.from) / 1000) } : null, until: x.until ? { seconds: Math.floor(tsMs(x.until) / 1000) } : null }));
-  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, badges: c.badges || {}, products: c.products || [], campaigns: camps, notice: n, dish: c.dish || null, delivery: c.delivery || null, googleReviewUrl: typeof c.googleReviewUrl === "string" ? c.googleReviewUrl : null, theme: typeof c.theme === "string" ? c.theme : "" };
+  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, badges: c.badges || {}, products: c.products || [], campaigns: camps, notice: n, dish: c.dish || null, delivery: c.delivery || null, googleReviewUrl: typeof c.googleReviewUrl === "string" ? c.googleReviewUrl : null, theme: typeof c.theme === "string" ? c.theme : "auto" };
 }
 
 function renderDish() {
@@ -3461,8 +3466,20 @@ const THEMES = {
   mikolaj: { greet: "🎅 Wesołych Świąt!", icons: ["❄️", "❄️", "🎄", "⭐"] },
   walentynki: { greet: "💘 Walentynki w Włoskiej Robocie", icons: ["❤️", "💕", "💗", "🌹"] }
 };
-function applyTheme(name) {
-  const t = THEMES[name], b = document.body;
+/* motyw „automatycznie”: święta według daty (czas warszawski) */
+function autoTheme() {
+  const p = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Warsaw" }).format(new Date()).split("-");
+  const m = +p[1], d = +p[2];
+  if ((m === 10 && d >= 24) || (m === 11 && d === 1)) return { name: "halloween" };
+  if (m === 12) return { name: "mikolaj", greet: d <= 6 ? "🎅 Mikołajki we Włoskiej Robocie" : d <= 26 ? "🎄 Wesołych Świąt!" : "🎆 Szczęśliwego Nowego Roku!" };
+  if (m === 1 && d <= 6) return { name: "mikolaj", greet: "🎆 Szczęśliwego Nowego Roku!" };
+  if (m === 2 && d >= 7 && d <= 14) return { name: "walentynki" };
+  return null;
+}
+const themeLabel = (r) => (r ? { halloween: "🎃 Halloween", mikolaj: "🎅 Mikołajki / Święta", walentynki: "💘 Walentynki" }[r.name] : "żaden (zwykła strona)");
+function applyTheme(setting) {
+  const res = setting === "auto" ? autoTheme() : (THEMES[setting] ? { name: setting } : null);
+  const t = res && THEMES[res.name], name = res && res.name, b = document.body;
   let deco = document.getElementById("theme-deco"), bar = document.getElementById("theme-bar");
   const greet = document.getElementById("theme-greet");
   if (!t) {
@@ -3473,7 +3490,7 @@ function applyTheme(name) {
   }
   b.dataset.theme = name;
   if (!bar) { bar = document.createElement("div"); bar.id = "theme-bar"; bar.setAttribute("aria-hidden", "true"); b.appendChild(bar); }
-  if (greet) { greet.textContent = t.greet; greet.hidden = false; }
+  if (greet) { greet.textContent = res.greet || t.greet; greet.hidden = false; }
   if (deco && deco.dataset.t === name) return;
   if (deco) deco.remove();
   deco = document.createElement("div"); deco.id = "theme-deco"; deco.dataset.t = name; deco.setAttribute("aria-hidden", "true");
@@ -3519,7 +3536,7 @@ function applySite(cfg) {
     products: Array.isArray(cfg && cfg.products) ? cfg.products : [], campaigns: Array.isArray(cfg && cfg.campaigns) ? cfg.campaigns : [], notice: (cfg && cfg.notice) || null, dish: (cfg && cfg.dish) || null,
     delivery: { places: Array.isArray(cfg && cfg.delivery && cfg.delivery.places) ? cfg.delivery.places : DELIVERY_DEFAULT },
     googleReviewUrl: (cfg && typeof cfg.googleReviewUrl === "string") ? cfg.googleReviewUrl : GOOGLE_REVIEW_DEFAULT,
-    theme: (cfg && typeof cfg.theme === "string") ? cfg.theme : ""
+    theme: (cfg && typeof cfg.theme === "string") ? cfg.theme : "auto"
   };
   applyTheme(siteCfg.theme);
   renderProducts();
@@ -3882,7 +3899,8 @@ function fillSiteForm() {
   const dp = siteCfg.delivery.places.filter(validPlace);
   $("rb-del-list").innerHTML = dp.map(delRowHtml).join("");
   $("rb-site-google").value = siteCfg.googleReviewUrl || "";
-  $("rb-site-theme").value = THEMES[siteCfg.theme] ? siteCfg.theme : "";
+  $("rb-site-theme").value = siteCfg.theme === "auto" || THEMES[siteCfg.theme] ? siteCfg.theme : "";
+  showThemeNow();
   $("rb-prod-list").innerHTML = siteCfg.products.filter(validProduct).map(prodRowHtml).join("");
   const items = menuEls().filter((el) => !el.dataset.custom);
   $("rb-site-items").innerHTML = items.map((el) => {
@@ -4037,7 +4055,7 @@ async function saveSite() {
     places.push({ name, fee, min, freeFrom });
   });
   if (delBad) { say( delBad, "err"); return; }
-  const theme = THEMES[$("rb-site-theme").value] ? $("rb-site-theme").value : "";
+  const tv = $("rb-site-theme").value, theme = tv === "auto" || THEMES[tv] ? tv : "";
   const googleReviewUrl = $("rb-site-google").value.trim();
   if (googleReviewUrl && !/^https:\/\/\S+$/.test(googleReviewUrl)) { say( "Link do opinii w Google musi zaczynać się od https://", "err"); return; }
   const delivery = { places };
@@ -4819,6 +4837,35 @@ function setAdminTab(name) {
   if (name === "clients") renderClients();
 }
 document.querySelectorAll("#rb-admin .rb-atab").forEach((b) => b.addEventListener("click", () => setAdminTab(b.dataset.pane)));
+
+function showThemeNow() {
+  const el = $("rb-theme-now"), v = $("rb-site-theme").value;
+  if (!el) return;
+  const r = v === "auto" ? autoTheme() : (THEMES[v] ? { name: v } : null);
+  el.textContent = "Dziś na stronie: " + themeLabel(r);
+}
+$("rb-site-theme").addEventListener("change", showThemeNow);
+
+/* ---------- Strona: podmenu (jedna sekcja naraz, wyśrodkowane pod górnymi zakładkami) ---------- */
+(function () {
+  const pane = document.querySelector('#rb-admin .rb-pane[data-pane="site"]');
+  if (!pane) return;
+  const heads = [...pane.querySelectorAll(":scope > h4.rb-hsec")];
+  const LABELS = { "Komunikat na górze strony": "📢 Komunikat", "Akcje i specjalne dni": "🎯 Akcje", "Pizza dnia": "🍕 Pizza dnia", "Dowóz": "🚚 Dowóz", "Motyw sezonowy": "🎨 Motyw", "Opinie w Google": "⭐ Opinie", "Własne produkty": "➕ Produkty", "Ceny i dostępność pozycji ze strony": "💲 Ceny" };
+  const groups = heads.map((h) => {
+    const g = document.createElement("div"); g.className = "rb-sub"; g.hidden = true;
+    const label = LABELS[(h.querySelector("span") || h).textContent.trim()] || h.textContent.trim();
+    h.before(g);
+    let n = h; while (n) { const nx = n.nextSibling; g.appendChild(n); n = nx && !(nx.nodeType === 1 && nx.matches && nx.matches("h4.rb-hsec")) ? nx : null; }
+    return { g, label };
+  });
+  const nav = document.createElement("div"); nav.className = "rb-subnav"; nav.setAttribute("role", "tablist");
+  const order = [...groups]; const pi = order.findIndex((x) => x.label.includes("Ceny")); if (pi > 0) order.unshift(order.splice(pi, 1)[0]);
+  const show = (i) => { order.forEach((x, k) => { x.g.hidden = k !== i; x.b.classList.toggle("active", k === i); x.b.setAttribute("aria-selected", k === i ? "true" : "false"); }); };
+  order.forEach((x, i) => { const b = document.createElement("button"); b.type = "button"; b.className = "rb-subtab"; b.textContent = x.label; b.setAttribute("role", "tab"); b.addEventListener("click", () => show(i)); x.b = b; nav.appendChild(b); });
+  pane.prepend(nav);
+  show(0);
+})();
 
 /* ---------- pomocnicze ---------- */
 function fmtDateTime(ts) {
