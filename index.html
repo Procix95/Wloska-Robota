@@ -1033,6 +1033,21 @@ body.dark #pwaModal .box{background:#1e1e1e;color:#f3f3f3}
 }
 #rabat-overlay #rb-admin.staffonly .rb-tabs,#rabat-overlay #rb-admin.staffonly .rb-stats,#rabat-overlay #rb-admin.staffonly .rb-pane:not([data-pane="check"]){display:none!important}
 #rabat-overlay #rb-admin.staffonly{margin-top:8px}
+/* ===== panel admina: przyklejony pasek zakładek z ikonami ===== */
+@supports (overflow:clip){#rabat-overlay .rb-box{overflow:clip}}
+#rabat-overlay #rb-admin:not(.staffonly)>h3{display:none}
+#rabat-overlay #rb-admin>.rb-tabs{position:sticky;top:0;z-index:30;display:flex;flex-wrap:nowrap;gap:2px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin:0 0 14px;padding:6px 4px;background:var(--rb-bg);border-radius:0;border-bottom:1px solid var(--rb-border);box-shadow:0 6px 10px -8px rgba(0,0,0,.55)}
+#rabat-overlay #rb-admin>.rb-tabs::-webkit-scrollbar{display:none}
+#rabat-overlay #rb-admin .rb-atab{flex:0 0 auto;min-width:60px;min-height:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 5px 6px;border:0;border-radius:12px;background:transparent;color:var(--rb-muted);font-size:11.5px;font-weight:600;line-height:1.1}
+#rabat-overlay #rb-admin .rb-atab i{font-style:normal;font-size:21px;line-height:1}
+#rabat-overlay #rb-admin .rb-atab.active{background:var(--rb-accent);color:#fff}
+#rabat-overlay #rb-admin:not([data-tab="list"]):not([data-tab="clients"]) #rb-stats{display:none}
+#rabat-overlay[data-atab]:not([data-atab="today"]) #rb-games,#rabat-overlay[data-atab]:not([data-atab="today"]) #rb-user>div:has(>[data-pwa]){display:none}
+#rabat-overlay #rb-admin .rb-pane{animation:rbUp .18s ease}
+#rabat-overlay #rb-admin .rb-pane>h4:first-child,#rabat-overlay #rb-admin .rb-sub>h4:first-child{margin-top:6px}
+#rabat-overlay #rb-admin .rb-pane h4{font-size:12.5px;text-transform:uppercase;letter-spacing:.7px;margin:24px 0 10px}
+#rabat-overlay #rb-admin .rb-pane h4.rb-hsec{font-size:14px;text-transform:none;letter-spacing:0;color:var(--rb-text)}
+#rabat-overlay #rb-admin .rb-pane .rb-btn:not(.small):not(.secondary){box-shadow:0 2px 8px rgba(0,146,70,.25)}
 
 /* ===== karta lojalnościowa ===== */
 #rabat-overlay .rb-loyal{background:var(--rb-card);border:1px solid var(--rb-border);border-radius:16px;padding:16px;margin-bottom:18px}
@@ -1161,6 +1176,14 @@ body.dark #site-dish .sd-text{color:#bbb}
 #rabat-overlay .rb-site-badges{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--rb-muted)}
 #rabat-overlay .rb-site-badges label{display:flex;align-items:center;gap:4px;cursor:pointer}
 #rabat-overlay .rb-site-un{grid-column:1 / -1;display:flex;align-items:center;font-size:13px;color:var(--rb-muted);cursor:pointer}
+/* wiersze cen: karta z „pigułkami” zamiast długiej listy checkboxów */
+#rabat-overlay .rb-site-row{background:var(--rb-card);border:1px solid var(--rb-border);border-radius:14px;padding:12px;margin-bottom:8px}
+#rabat-overlay .rb-site-badges{gap:6px}
+#rabat-overlay .rb-site-badges label,#rabat-overlay .rb-site-badges .rb-site-un{display:inline-flex;align-items:center;gap:5px;grid-column:auto;margin:0;padding:4px 9px;border:1px solid var(--rb-border);border-radius:99px;background:var(--rb-input);font-size:12px;color:var(--rb-text);cursor:pointer;line-height:1.2}
+#rabat-overlay .rb-site-badges input[type=checkbox]{width:14px;height:14px;margin:0;padding:0;flex:none}
+#rabat-overlay .rb-site-badges label:has(input:checked){background:rgba(0,146,70,.22);border-color:var(--rb-accent)}
+#rabat-overlay .rb-site-badges label:has(.rb-site-unav:checked){background:rgba(212,150,0,.24);border-color:var(--rb-gold)}
+#rabat-overlay .rb-site-badges label:has(.rb-site-hide:checked){background:rgba(205,33,42,.24);border-color:var(--rb-red)}
 #rabat-overlay .rb-prod{border:1px solid var(--rb-border);border-radius:14px;padding:12px;margin:10px 0;background:var(--rb-input)}
 #rabat-overlay .rb-prod .rb-prod-top{display:grid;grid-template-columns:1fr 92px;gap:8px}
 #rabat-overlay .rb-prod input,#rabat-overlay .rb-prod select,#rabat-overlay .rb-prod textarea{margin-bottom:8px}
@@ -1334,16 +1357,16 @@ body.dark #site-dish .sd-text{color:#bbb}
       <div class="rb-admin" id="rb-admin" hidden>
         <h3 id="rb-admin-title">🛠 Panel administratora</h3>
         <div class="rb-stats" id="rb-stats"></div>
-        <div class="rb-tabs">
-          <button type="button" class="rb-atab active" data-pane="today">Dziś</button>
-          <button type="button" class="rb-atab" data-pane="check">Sprawdź kod</button>
-          <button type="button" class="rb-atab" data-pane="clients">Klienci</button>
-          <button type="button" class="rb-atab" data-pane="grant">Przyznaj</button>
-          <button type="button" class="rb-atab" data-pane="builder">Rabaty</button>
-          <button type="button" class="rb-atab" data-pane="list">Kody</button>
-          <button type="button" class="rb-atab" data-pane="staff">Obsługa</button>
-          <button type="button" class="rb-atab" data-pane="site">Strona</button>
-          <button type="button" class="rb-atab" data-pane="report">Raport</button>
+        <div class="rb-tabs" role="tablist" aria-label="Panel administratora">
+          <button type="button" class="rb-atab active" data-pane="today" role="tab"><i>🏠</i><span>Dziś</span></button>
+          <button type="button" class="rb-atab" data-pane="check" role="tab"><i>📷</i><span>Skanuj</span></button>
+          <button type="button" class="rb-atab" data-pane="clients" role="tab"><i>👥</i><span>Klienci</span></button>
+          <button type="button" class="rb-atab" data-pane="grant" role="tab"><i>🎁</i><span>Przyznaj</span></button>
+          <button type="button" class="rb-atab" data-pane="builder" role="tab"><i>🏷️</i><span>Rabaty</span></button>
+          <button type="button" class="rb-atab" data-pane="list" role="tab"><i>🎟️</i><span>Kody</span></button>
+          <button type="button" class="rb-atab" data-pane="staff" role="tab"><i>🧑‍🍳</i><span>Obsługa</span></button>
+          <button type="button" class="rb-atab" data-pane="site" role="tab"><i>🛠️</i><span>Strona</span></button>
+          <button type="button" class="rb-atab" data-pane="report" role="tab"><i>📊</i><span>Raport</span></button>
         </div>
 
         <!-- Zakładka: Dziś (pulpit admina) -->
@@ -2318,6 +2341,7 @@ async function handleUser(user) {
   $("rb-user").classList.toggle("adminview", isAdmin || isStaff); // admin i obsługa nie pokazują własnych kodów QR
   $("rb-delete").hidden = isAdmin || isStaff;
   $("rb-admin").hidden = !(isAdmin || isStaff);
+  if (!(isAdmin || isStaff)) delete overlay.dataset.atab;
   // panel obsługi/admina od razu pod nagłówkiem, bez przewijania przez własną kartę i kody
   if (isAdmin || isStaff) { const top = document.querySelector("#rb-user .rb-top"); if (top) top.after($("rb-admin")); }
   $("rb-admin").classList.toggle("staffonly", !isAdmin && isStaff);
@@ -3909,9 +3933,9 @@ function fillSiteForm() {
     return `<div class="rb-site-row" data-key="${esc(key)}">
       <div class="rb-site-name">${esc(itemName(el))}<small>w kodzie strony: ${esc(el.dataset.origPrice || "")}</small></div>
       <input type="text" class="rb-site-price" inputmode="decimal" maxlength="12" value="${esc(cur)}" aria-label="Cena: ${esc(itemName(el))}">
-      <div class="rb-site-badges">${BADGES.map((b) => `<label><input type="checkbox" class="rb-site-bd" data-b="${b[0]}"${badgeIds(siteCfg.badges[key]).includes(b[0]) ? " checked" : ""}> ${b[1]}</label>`).join("")}</div>
-      <label class="rb-site-un"><input type="checkbox" class="rb-site-unav"${siteCfg.unavailable[key] ? " checked" : ""}> niedostępne dziś</label>
-      <label class="rb-site-un"><input type="checkbox" class="rb-site-hide"${siteCfg.hidden[key] ? " checked" : ""}> ukryj na stronie</label>
+      <div class="rb-site-badges">${BADGES.map((b) => `<label><input type="checkbox" class="rb-site-bd" data-b="${b[0]}"${badgeIds(siteCfg.badges[key]).includes(b[0]) ? " checked" : ""}> ${b[1]}</label>`).join("")}
+        <label class="rb-site-un"><input type="checkbox" class="rb-site-unav"${siteCfg.unavailable[key] ? " checked" : ""}> ⛔ niedostępne dziś</label>
+        <label class="rb-site-un"><input type="checkbox" class="rb-site-hide"${siteCfg.hidden[key] ? " checked" : ""}> 🙈 ukryj</label></div>
     </div>`;
   }).join("");
   $("rb-site-dish").innerHTML = '<option value="">— brak —</option>' + menuEls().map((el) => `<option value="${esc(itemKey(el))}">${esc(itemName(el))}</option>`).join("");
@@ -4828,8 +4852,13 @@ document.querySelector('#rb-admin .rb-pane[data-pane="today"]').addEventListener
 const cMsg = $("rb-c-msg");
 const sMsg = $("rb-s-msg");
 function setAdminTab(name) {
+  const adm = $("rb-admin"); if (adm) adm.dataset.tab = name;
+  overlay.dataset.atab = name;
   document.querySelectorAll("#rb-admin .rb-atab").forEach((b) => b.classList.toggle("active", b.dataset.pane === name));
   document.querySelectorAll("#rb-admin .rb-pane").forEach((p) => { p.hidden = p.dataset.pane !== name; });
+  const bar = document.querySelector("#rb-admin > .rb-tabs"), act = bar && bar.querySelector(".rb-atab.active");
+  if (bar && bar.getBoundingClientRect().top <= 2) bar.scrollIntoView({ block: "start" });
+  if (act && act.scrollIntoView) act.scrollIntoView({ inline: "center", block: "nearest" });
   if (name !== "check") stopScanner();
   if (name === "site") loadSite().then(fillSiteForm);
   if (name === "report") { loadReport(); loadFeedback(); }
