@@ -107,6 +107,18 @@ const SFX = (function () {
     close() { try { if (ac) ac.close(); } catch (e) {} ac = null; }
   };
 })();
+
+/* --- Straż: podpis zapisu (wykrywa ręczne edytowanie danych w przeglądarce) i zgłaszanie zdarzeń --- */
+const KOP_SALT = "wr-kop|straz|1";
+function kopSig(str) {
+  let h1 = 0xdeadbeef ^ 0x51, h2 = 0x41c6ce57 ^ 0x51;
+  const t = KOP_SALT + str;
+  for (let i = 0; i < t.length; i++) { const c = t.charCodeAt(i); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+}
+function kopReport(kind, detail) { try { if (window.WRStraz) window.WRStraz.report(kind, detail); } catch (e) { /* bez Straży też działa */ } }
 /* ===================== BLOKI ===================== */
 const BLK = [], BID = {};
 function DB(key, name, o) {
@@ -3075,11 +3087,15 @@ async function enterWorld(slot, data, opts) {
   if (data) {
     const saved = await Save.chunks(slot);
     for (const [k, v] of saved) { const [cx, cz] = k.split(",").map(Number); W.saved.set(ckey(cx, cz), v); }
+    G.tainted = false;
+    if (data.sig !== undefined && data.sig !== kopSig([data.mode, data.day, data.playSec, data.created, data.seed, (data.awarded || []).join(",")].join("|"))) {
+      G.tainted = true; kopReport("save_tamper", "podpis zapisu świata się nie zgadza");
+    }
     G.mode = data.mode; G.diff = data.diff; G.tod = data.tod; G.day = data.day; G.playSec = data.playSec || 0; G.name = data.name; G.created = data.created; G.seed = seed; G.awarded = data.awarded || [0, 0, 0, 0, 0]; G.kills = data.kills || 0; G.sel = data.sel | 0;
     Object.assign(G.p, data.p); G.p.dead = false; G.p.vx = G.p.vy = G.p.vz = 0; G.inv.slots = data.inv; G.inv.armor = data.armor; G.worldSpawn = data.worldSpawn;
     for (const [k, t] of data.tiles || []) W.tiles.set(k, t);
   } else {
-    G.mode = opts.mode; G.diff = opts.diff; G.tod = 1000; G.day = 0; G.playSec = 0; G.name = opts.name; G.created = Date.now(); G.seed = seed; G.sel = 0;
+    G.tainted = false; G.mode = opts.mode; G.diff = opts.diff; G.tod = 1000; G.day = 0; G.playSec = 0; G.name = opts.name; G.created = Date.now(); G.seed = seed; G.sel = 0;
     const sp = findSpawn(W); const cx = Math.floor(sp[0]) >> 4, cz = Math.floor(sp[1]) >> 4;
     W.loadChunk(cx, cz); const y = W.topSolid(Math.floor(sp[0]), Math.floor(sp[1]));
     G.p.x = sp[0]; G.p.z = sp[1]; G.p.y = y + 0.05; G.worldSpawn = [sp[0], y + 0.05, sp[1]]; G.p.spawn = null;
@@ -3138,6 +3154,7 @@ async function saveWorld(force) {
   if (!WORLD || !G.loaded || (G.p.dead && G.mode === "hardcore")) return;
   const W = WORLD, entries = [], p = G.p;
   const meta = { name: G.name, mode: G.mode, diff: G.diff, day: G.day, playSec: Math.round(G.playSec), created: G.created };
+  meta.sig = kopSig([meta.mode, meta.day, meta.playSec, meta.created, G.seed, (G.awarded || []).join(",")].join("|"));
   const keep = (s) => (s ? { id: s.id, n: s.n, d: s.d || 0 } : null);
   const data = Object.assign({ seed: G.seed, tod: G.tod, awarded: G.awarded, kills: G.kills, sel: G.sel, worldSpawn: G.worldSpawn, inv: G.inv.slots.map(keep), armor: G.inv.armor.map(keep), tiles: Array.from(W.tiles.entries()).map(([k, t]) => [k, t]), p: { x: p.x, y: p.y, z: p.z, yaw: p.yaw, pitch: p.pitch, hp: p.hp, food: p.food, sat: p.sat, exh: p.exh, air: p.air, fly: p.fly, spawn: p.spawn } }, meta);
   entries.push(["w" + G.slot, data], ["m" + G.slot, meta]);
@@ -3656,10 +3673,16 @@ const Ach = {
     let d = null; try { d = JSON.parse(localStorage.getItem(ACH_KEY) || "null"); } catch (e) { d = null; }
     if (!d || typeof d !== "object") d = {};
     d.all = d.all || {}; d.hc = d.hc || {}; d.done = d.done || {}; d.paid = d.paid || {};
+    /* podpis: jeśli ktoś ręcznie edytował osiągnięcia w przeglądarce, podpis się nie zgadza (starsze zapisy bez podpisu przyjmujemy raz) */
+    if (d.s !== undefined && d.s !== this.sig(d)) {
+      kopReport("ach_tamper", "podpis osiągnięć się nie zgadza");
+      d = { all: {}, hc: {}, done: {}, paid: {} }; this.dirty = true;
+    } else if (d.s === undefined) this.dirty = true;
     this.d = d;
   },
-  save() { if (!this.dirty) return; this.dirty = false; try { localStorage.setItem(ACH_KEY, JSON.stringify(this.d)); } catch (e) {} },
-  on() { return !!(G && WORLD && G.loaded && G.p && !G.p.dead && (G.mode === "survival" || G.mode === "hardcore")); },
+  sig(d) { return kopSig(JSON.stringify([d.all, d.hc, d.done, d.paid])); },
+  save() { if (!this.dirty) return; this.dirty = false; try { this.d.s = this.sig(this.d); localStorage.setItem(ACH_KEY, JSON.stringify(this.d)); } catch (e) {} },
+  on() { return !!(G && WORLD && G.loaded && !G.tainted && G.p && !G.p.dead && (G.mode === "survival" || G.mode === "hardcore")); },
   put(k, f) {
     if (!this.on()) return; this.load();
     const sc = G.mode === "hardcore" ? [this.d.all, this.d.hc] : [this.d.all];
@@ -3737,7 +3760,7 @@ const Ach = {
     this.lp = [p.x, p.z];
     this.t += dt;
     if (this.t >= 1.5) {
-      this.t = 0; this.scan(); this.low("miny", Math.floor(p.y)); this.high("day", G.day); this.check(); try { updateGoal(); } catch (e) {}
+      this.t = 0; this.scan(); this.low("miny", Math.floor(p.y)); if (G.mode === "hardcore" && G.playSec > 0 && G.day > G.playSec / 1100 + 1.5) { kopReport("bad_stats", "dzień " + G.day + " przy czasie gry " + Math.round(G.playSec) + " s"); G.tainted = true; return; } this.high("day", G.day); this.check(); try { updateGoal(); } catch (e) {}
     }
   },
   /* następna nagroda do naliczenia (tylko hardcore) */

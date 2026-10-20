@@ -164,7 +164,7 @@ async function grant(ctx, id, wanted) {
     setTimeout(async () => {
       const r2 = await ctx.award(n);
       if (r2 && r2.ok) { addPerGame(id, r2.given || n); SFX.pts(); }
-    }, 31000);
+    }, Math.max(31000, (r.waitMs || 0) + 1500));
     return { ok: true, pending: true, given: n, msg: "Punkty (+" + n + ") zostaną dopisane za chwilę." };
   }
   return r || { ok: false, msg: "Nie udało się dopisać punktów." };
@@ -249,7 +249,7 @@ function rewardsHtml(rows, got) {
 }
 function dayLeftHtml(id) {
   const left = Math.max(0, GAME_DAY_CAP - perGameToday(id));
-  return '<p style="font-size:12.5px;color:#9a9aa8">Z tej gry możesz dziś jeszcze zdobyć: <b style="color:#f1cf6a">' + left + " pkt</b> (limit " + GAME_DAY_CAP + " na dobę). Wszystkie gry razem: 8 pkt na dobę.</p>";
+  return '<p style="font-size:12.5px;color:#9a9aa8">Z tej gry możesz dziś jeszcze zdobyć: <b style="color:#f1cf6a">' + left + " pkt</b> (limit " + GAME_DAY_CAP + " na dobę). Wszystkie gry razem: " + ((window.WRGames && window.WRGames.dayCap) || 8) + " pkt na dobę.</p>";
 }
 
 const LIB = { rnd, rint, clamp, pick, shuffle, h, esc, fmtTime, S, save, best, bumpBest, bumpRun, perGameToday, grant, SFX, createShell, rankHtml, rewardsHtml, dayLeftHtml, rankInfo, utcDay };

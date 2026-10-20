@@ -881,6 +881,9 @@ body.dark #pwaModal .box{background:#1e1e1e;color:#f3f3f3}
 #rabat-overlay .rb-res.big.bad{background:var(--rb-badbg)}
 #rabat-overlay .rb-big{font-size:24px;font-weight:800;margin-bottom:6px}
 #rabat-overlay .rb-res.big .rb-actions{justify-content:center}
+#rabat-overlay .rb-atab[hidden]{display:none!important}
+#rabat-overlay .rb-atab{position:relative}
+#rabat-overlay .rb-atab em{position:absolute;top:1px;right:3px;background:#d8453a;color:#fff;border-radius:99px;font-style:normal;font-size:10px;font-weight:700;min-width:16px;padding:1px 4px;line-height:1.3;text-align:center}
 #rabat-overlay .rb-atab{flex:1;padding:9px 6px;border:1px solid var(--rb-border);background:transparent;color:var(--rb-text);border-radius:10px;cursor:pointer;font-size:14px;font-family:inherit}
 #rabat-overlay .rb-atab.active{background:var(--rb-accent);border-color:var(--rb-accent)}
 #rabat-overlay #rb-s-box video{width:100%;max-height:55vh;border-radius:12px;background:#000;object-fit:cover;display:block;margin-bottom:8px}
@@ -1416,6 +1419,7 @@ body.dark #site-dish .sd-text{color:#bbb}
           <button type="button" class="rb-atab" data-pane="staff" role="tab"><i>🧑‍🍳</i><span>Obsługa</span></button>
           <button type="button" class="rb-atab" data-pane="site" role="tab"><i>🛠️</i><span>Strona</span></button>
           <button type="button" class="rb-atab" data-pane="report" role="tab"><i>📊</i><span>Raport</span></button>
+          <button type="button" class="rb-atab" data-pane="straz" id="rb-straz-tab" role="tab" hidden><i>🛡️</i><span>Straż</span><em id="rb-straz-badge" hidden></em></button>
         </div>
 
         <!-- Zakładka: Dziś (pulpit admina) -->
@@ -1703,6 +1707,13 @@ body.dark #site-dish .sd-text{color:#bbb}
         </div>
 
         <!-- Zakładka: Raport (dziennik skanów) -->
+        <!-- Zakładka: Straż (anty-nadużycia; logika w /straz.js) -->
+        <div class="rb-pane" data-pane="straz" hidden>
+          <div class="rb-meta" style="margin-bottom:8px">Pilnuje fałszywych punktów, wielu kont, podejrzanych pieczątek i prób oszustw w grach.</div>
+          <div class="rb-row" style="margin-bottom:6px"><button type="button" class="rb-btn secondary small" id="rb-straz-refresh" style="flex:none">Odśwież</button></div>
+          <div id="rb-straz"></div>
+        </div>
+
         <div class="rb-pane" data-pane="report" hidden>
           <div class="rb-row">
             <select id="rb-rp-range">
@@ -2180,9 +2191,24 @@ async function ensureProfile(user) {
 
 /* ---------- gry i punkty (szkielet; limity są też w firestore.rules) ---------- */
 const PTS_COST = 100;          // tyle punktów = rabat -5 zł
-const PTS_DAY_CAP = 8;         // maks. punktów na dobę (doba UTC)
+let PTS_DAY_CAP = 8;           // maks. punktów na dobę (doba UTC) — nadpisywane przez site/guard (panel Straż)
 const PTS_MAX_AWARD = 3;       // maks. punktów za jedną nagrodę
-const PTS_COOLDOWN_MS = 30000; // odstęp między nagrodami
+let PTS_COOLDOWN_MS = 30000;   // odstęp między nagrodami — nadpisywane przez site/guard
+let PTS_NEED_STAMP = false;    // true = punkty tylko dla klientów z min. 1 pieczątką (site/guard)
+let ptsGuardAt = 0;
+const MIN_PLAY_S = { memory: 45, quiz: 60, arcade: 45 }; // najkrótszy sensowny czas od startu gry do pierwszej nagrody
+const gameStartAt = {};
+async function loadGuard(force) {
+  if (!force && Date.now() - ptsGuardAt < 300000) return;
+  ptsGuardAt = Date.now();
+  try {
+    const s = await withTimeout(getDoc(doc(db, "site", "guard")));
+    const g = s.exists() ? s.data() : {};
+    PTS_DAY_CAP = Math.min(8, Math.max(1, Math.floor(Number(g.ptsDayMax) || 8)));
+    PTS_COOLDOWN_MS = Math.min(3600, Math.max(30, Math.floor(Number(g.ptsGapSec) || 30))) * 1000;
+    PTS_NEED_STAMP = !!g.needStamp;
+  } catch (e) { /* zostają wartości domyślne */ }
+}
 const PTS_REWARD_DESC = "Rabat -5 zł na zamówienie (za punkty z gier)";
 let myPoints = null, ptsUser = null;
 const GAMES = [
@@ -2196,6 +2222,7 @@ function ptsToday() {
   return t && utcDay(t) === utcDay(Date.now()) ? (myPoints.dayPts || 0) : 0;
 }
 async function ensurePoints(user) {
+  await loadGuard(true);
   const ref = doc(db, "points", user.uid);
   const snap = await withTimeout(getDoc(ref));
   if (snap.exists()) return;
@@ -2221,7 +2248,8 @@ function renderGames() {
   $("rb-pts-n").textContent = p + " pkt";
   $("rb-pts-fill").style.width = Math.min(100, Math.round(p / PTS_COST * 100)) + "%";
   $("rb-pts-txt").textContent = (p >= PTS_COST ? "Masz dość punktów na rabat −5 zł!" : "Do rabatu −5 zł brakuje " + (PTS_COST - p) + " pkt.") +
-    " Dziś zdobyto " + today + " z " + PTS_DAY_CAP + " pkt (dzienny limit).";
+    " Dziś zdobyto " + today + " z " + PTS_DAY_CAP + " pkt (dzienny limit)." +
+    (PTS_NEED_STAMP && !(myLoyal && (myLoyal.total || 0) >= 1) ? " Punkty zaczniesz zbierać po pierwszej pieczątce na karcie lojalnościowej." : "");
   $("rb-pts-test").hidden = !isAdmin;
   $("rb-pts-redeem").disabled = p < PTS_COST;
   $("rb-pts-redeem").textContent = "Wymień " + PTS_COST + " pkt na rabat −5 zł";
@@ -2235,7 +2263,7 @@ function gameRows() {
 let gamesScriptReq = false;
 function loadGamesScript() {
   if (gamesScriptReq) return; gamesScriptReq = true;
-  ["/gry.js?v=2", "/gry-pou.js?v=2", "/gry-kopalnia.js?v=5"].forEach((src) => {
+  ["/gry.js?v=3", "/gry-pou.js?v=2", "/gry-kopalnia.js?v=6"].forEach((src) => {
     const sc = document.createElement("script"); sc.src = src; sc.async = true;
     document.head.appendChild(sc);
   });
@@ -2246,6 +2274,14 @@ async function awardPoints(n, gameId) {
   n = Math.floor(Number(n));
   if (!(n >= 1)) return { ok: false, msg: "Brak punktów do przyznania." };
   n = Math.min(n, PTS_MAX_AWARD);
+  if (window.WRStraz && await window.WRStraz.isBlocked()) return { ok: false, msg: "To konto ma wyłączone zdobywanie punktów. W razie pytań skontaktuj się z pizzerią." };
+  await loadGuard(false);
+  if (PTS_NEED_STAMP && !(myLoyal && (myLoyal.total || 0) >= 1)) return { ok: false, msg: "Punkty z gier są dla klientów, którzy odebrali już pizzę. Poproś o pierwszą pieczątkę na karcie lojalnościowej!" };
+  const minS = MIN_PLAY_S[gameId];
+  if (minS && gameStartAt[gameId] && performance.now() - gameStartAt[gameId] < minS * 1000) {
+    if (window.WRStraz) window.WRStraz.report("award_fast", gameId + ": nagroda po " + Math.round((performance.now() - gameStartAt[gameId]) / 1000) + " s od startu");
+    return { ok: false, msg: "Za wcześnie na punkty — pograj jeszcze chwilę." };
+  }
   const ref = doc(db, "points", ptsUser.uid);
   try {
     return await runTransaction(db, async (tx) => {
@@ -2253,7 +2289,10 @@ async function awardPoints(n, gameId) {
       if (!cur.exists()) return { ok: false, msg: "Konto punktów nie jest gotowe." };
       const d = cur.data();
       const last = tsMs(d.lastAt), now = Date.now();
-      if (last && now - last < PTS_COOLDOWN_MS) return { ok: false, msg: "Chwilę poczekaj przed kolejnymi punktami.", wait: true };
+      if (last && now - last < PTS_COOLDOWN_MS) {
+        const w = PTS_COOLDOWN_MS - (now - last);
+        return { ok: false, msg: w > 90000 ? "Kolejne punkty będą dostępne za ok. " + Math.ceil(w / 60000) + " min." : "Chwilę poczekaj przed kolejnymi punktami.", wait: w <= 90000, waitMs: w };
+      }
       const sameDay = last && utcDay(last) === utcDay(now);
       const todayPts = sameDay ? (d.dayPts || 0) : 0;
       const give = Math.min(n, PTS_DAY_CAP - todayPts);
@@ -2263,15 +2302,36 @@ async function awardPoints(n, gameId) {
     });
   } catch (err) {
     console.warn("Punkty:", err && (err.code || err.message));
+    if (err && err.code === "permission-denied" && window.WRStraz) window.WRStraz.report("award_denied", String(gameId || "?") + ": serwer odrzucił zapis punktów");
     return { ok: false, msg: err && err.code === "permission-denied" ? "Nie można teraz dodać punktów (limit lub reguły)." : "Nie udało się zapisać punktów." };
   }
 }
-window.WRGames = {
+/* Rejestrować gry mogą tylko skrypty gier z tej strony (gry*.js). Wołanie z konsoli = flaga dla admina.
+   Publiczne WRGames.award nie przyznaje punktów (to pułapka); punkty idą wyłącznie przez ctx.award przekazane grze w start(). */
+const GAME_SCRIPT_RE = /\/gry(-[a-z0-9]+)?\.js$/;
+function fromGameScript() {
+  try {
+    const cs = document.currentScript;
+    if (!cs || !cs.src) return false;
+    const u = new URL(cs.src, location.href);
+    return u.origin === location.origin && GAME_SCRIPT_RE.test(u.pathname);
+  } catch (e) { return false; }
+}
+const WRG = {
   /* Dodanie gry: WRGames.register({ id, name, desc, icon, start(stageEl, { award, close }) }) */
-  register(g) { if (!g || !g.id) return; const i = GAMES.findIndex((x) => x.id === g.id); if (i >= 0) GAMES[i] = { ...GAMES[i], ...g, soon: false }; else GAMES.push(g); renderGames(); },
-  award: awardPoints,
-  get points() { return myPoints ? myPoints.points || 0 : 0; }
+  register(g) {
+    if (!fromGameScript()) { if (window.WRStraz) window.WRStraz.report("console_register", "register() poza skryptem gry"); return; }
+    if (!g || !g.id) return; const i = GAMES.findIndex((x) => x.id === g.id); if (i >= 0) GAMES[i] = { ...GAMES[i], ...g, soon: false }; else GAMES.push(g); renderGames();
+  },
+  get points() { return myPoints ? myPoints.points || 0 : 0; },
+  get dayCap() { return PTS_DAY_CAP; }
 };
+Object.defineProperty(WRG, "award", { enumerable: false, configurable: false, writable: false, value() {
+  if (window.WRStraz) window.WRStraz.report("console_award", "WRGames.award wywołane poza grą");
+  return Promise.resolve({ ok: false, msg: "Punkty przyznaje wyłącznie gra." });
+} });
+Object.defineProperty(WRG, "register", { configurable: false, writable: false });
+Object.defineProperty(window, "WRGames", { value: WRG, writable: false, configurable: false });
 $("rb-game-list").addEventListener("click", (e) => {
   const b = e.target.closest("[data-play]");
   if (!b) return;
@@ -2279,6 +2339,7 @@ $("rb-game-list").addEventListener("click", (e) => {
   const stage = $("rb-game-stage");
   if (!g || !g.start) return;
   stage.hidden = false; stage.innerHTML = "";
+  gameStartAt[g.id] = performance.now();
   const close = () => { stage.hidden = true; stage.innerHTML = ""; };
   g.start(stage, { close, award: async (n) => { const r = await awardPoints(n, g.id); if (r.msg) setMsg($("rb-pts-msg"), r.msg, r.ok ? "ok" : "err"); return r; } });
 });
@@ -2820,6 +2881,9 @@ async function purgeDeleted(uid) {
     for (const l of lgs.docs) await deleteDoc(doc(db, "logs", l.id));
     await deleteDoc(doc(db, "loyalty", uid));
     await deleteDoc(doc(db, "points", uid));
+    try { await deleteDoc(doc(db, "devices", uid)); } catch (_) {}
+    try { await deleteDoc(doc(db, "blocked", uid)); } catch (_) {}
+    try { const fl = await getDocs(query(collection(db, "flags"), where("uid", "==", uid))); for (const f of fl.docs) await deleteDoc(doc(db, "flags", f.id)); } catch (_) {}
     try { const us = await getDoc(doc(db, "users", uid)); const rc = us.exists() && us.data().refCode; if (rc) await deleteDoc(doc(db, "refs", rc)); } catch (_) {}
     await deleteDoc(doc(db, "users", uid));
     await deleteDoc(doc(db, "deletionRequests", uid));
@@ -5402,10 +5466,12 @@ function setAdminTab(name) {
   if (name !== "check") stopScanner();
   if (name === "site") loadSite().then(fillSiteForm);
   if (name === "report") { loadReport(); loadFeedback(); }
+  if (name === "straz" && window.WRStraz) window.WRStraz.open();
   if (name === "today" || name === "clients") ensureData(false);
   if (name === "clients") renderClients();
 }
 document.querySelectorAll("#rb-admin .rb-atab").forEach((b) => b.addEventListener("click", () => setAdminTab(b.dataset.pane)));
+const szRef = $("rb-straz-refresh"); if (szRef) szRef.addEventListener("click", () => { if (window.WRStraz) window.WRStraz.open(); });
 
 function showThemeNow() {
   const el = $("rb-theme-now"), v = $("rb-site-theme").value;
@@ -5803,6 +5869,7 @@ $("rb-s-result").addEventListener("click", async (e) => {
 });
 loadSite();
 </script>
+<script type="module" src="/straz.js?v=1"></script>
 <!-- ===== RABAT: KONIEC ===== -->
 
 </body>
