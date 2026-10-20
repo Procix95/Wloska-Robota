@@ -129,10 +129,12 @@ async function fetchAll() {
   let guard = {};
   try { const g = await getDoc(doc(db, "site", "guard")); if (g.exists()) guard = g.data() || {}; } catch (e) { /* brak = domyślne */ }
   /* konto admina (to, na którym jesteś zalogowany) pomijamy — jego własne testy i pieczątki nie są „nadużyciem” */
-  const notMe = (uid) => !(me && uid === me.uid);
+  const mine = new Set(me ? [me.uid] : []), myMail = me && me.email ? String(me.email).toLowerCase() : "", myName = me && me.displayName ? me.displayName : "";
+  (users || []).forEach((u) => { if (myMail && u.email && String(u.email).toLowerCase() === myMail) mine.add(u.id); });
+  const notMe = (uid) => !mine.has(uid);
   return {
     users: new Map((users || []).map((u) => [u.id, u])), flags: (flags || []).filter((f) => notMe(f.uid)), blocked: blocked || [],
-    devices: (devices || []).filter((d) => notMe(d.id)), points: (points || []).filter((p) => notMe(p.id)), logs: (logs || []).filter((l) => notMe(l.byUid)), guard, ok: { users: !!users, flags: !!flags, devices: !!devices, points: !!points, logs: !!logs, blocked: !!blocked }
+    devices: (devices || []).filter((d) => notMe(d.id)), points: (points || []).filter((p) => notMe(p.id)), logs: (logs || []).filter((l) => notMe(l.byUid) && !(myName && l.byName === myName)), guard, ok: { users: !!users, flags: !!flags, devices: !!devices, points: !!points, logs: !!logs, blocked: !!blocked }
   };
 }
 
@@ -235,7 +237,7 @@ function render() {
      <label class="sz-ck"><input type="checkbox" id="sz-needstamp"${g.needStamp ? " checked" : ""}><span>Punkty tylko dla klientów, którzy mają już co najmniej 1 pieczątkę (blokuje farmienie punktów na fałszywych kontach)</span></label>
      <div class="rb-actions"><button type="button" class="rb-btn small" data-sz="saveguard">Zapisz limity</button></div><div class="rb-msg" id="sz-msg" role="status"></div>`);
   root.innerHTML = h;
-  root.insertAdjacentHTML("beforeend", '<p class="sz-why" style="margin-top:14px">🛡️ Ochrona przed botami (App Check): <b>jeszcze niewdrożona</b>. Wymaga darmowego klucza reCAPTCHA z konsoli Firebase — to najlepsza obrona przed skryptami, które spamują bazę. Daj znać, to ją podepnę.</p>');
+  root.insertAdjacentHTML("beforeend", '<p class="sz-why" style="margin-top:14px">🛡️ Ochrona przed botami (App Check): <b>jeszcze niewdrożona</b>. Wymaga darmowego klucza reCAPTCHA z konsoli Firebase — to najlepsza obrona przed skryptami, które spamują bazę. Daj znać, to ją podepnę.</p><p class="sz-why">Straż v3 · konta admina (' + esc(me ? me.email || me.uid : "") + ') są pomijane w analizie.</p>');
   const badge = document.getElementById("rb-straz-badge");
   if (badge) { const n = D.flags.length + A.staffAlerts.length; badge.textContent = n > 9 ? "9+" : String(n); badge.hidden = !n; }
 }
@@ -295,7 +297,7 @@ async function onUser(user) {
   if (admin) {
     if (tab) tab.hidden = false;
     mountPane();
-    try { const f = await getDocs(query(collection(db, "flags"), orderBy("at", "desc"), limit(50))); const n = f.docs.filter((x) => (x.data() || {}).uid !== user.uid).length, b = document.getElementById("rb-straz-badge"); if (b) { b.textContent = n > 9 ? "9+" : String(n); b.hidden = !n; } } catch (e) { /* reguły jeszcze niewgrane */ }
+    try { const f = await getDocs(query(collection(db, "flags"), orderBy("at", "desc"), limit(50))); const n = f.docs.filter((x) => (x.data() || {}).uid !== user.uid).length, /* dokładne filtrowanie po mailu robi pełny widok */ b = document.getElementById("rb-straz-badge"); if (b) { b.textContent = n > 9 ? "9+" : String(n); b.hidden = !n; } } catch (e) { /* reguły jeszcze niewgrane */ }
   }
 }
 
@@ -311,6 +313,6 @@ const API = {
   report,
   open() { mountPane(); D = null; load(); },
   async isBlocked() { for (let i = 0; i < 20 && !blockedChecked; i++) await new Promise((r) => setTimeout(r, 100)); return blockedNow; },
-  version: 2
+  version: 3
 };
 Object.defineProperty(window, "WRStraz", { value: Object.freeze(API), writable: false, configurable: false });
