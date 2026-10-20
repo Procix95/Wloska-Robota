@@ -95,6 +95,7 @@ const SFX = (function () {
     hit() { noise(0.1, 900, 1, 0.35); },
     eat() { noise(0.06, 1100, 2, 0.35); setTimeout(() => noise(0.06, 900, 2, 0.35), 110); },
     pop() { tone(500, 900, 0.06, 0.12, "sine"); },
+    note(m) { const f = 185 * Math.pow(2, m / 12); tone(f, f * 0.995, 0.5, 0.28, "triangle"); tone(f * 2, f * 1.99, 0.3, 0.07, "sine"); },
     click() { tone(800, 600, 0.04, 0.08, "square"); },
     splash() { noise(0.3, 1400, 0.6, 0.4, "highpass"); },
     boom() { noise(0.9, 160, 0.5, 1.0, "lowpass"); tone(90, 30, 0.7, 0.35, "sawtooth"); },
@@ -112,7 +113,7 @@ function DB(key, name, o) {
   const b = Object.assign({ key, name, solid: 1, opq: 1, lop: 15, hard: 1, tool: "", req: 0, tier: 0, light: 0, snd: "stone", shape: 0, tex: key, fluid: 0, rep: 0, sel: 1, fuel: 0 }, o || {});
   b.id = BLK.length; BLK.push(b); BID[key] = b.id; return b;
 }
-/* shape: 0 sześcian, 1 krzyż, 2 pochodnia, 3 płyta, 4 schody, 5 drzwi, 6 drabina, 7 płyn, 8 uprawa, 9 grządka, 10 kaktus, 11 łóżko, -1 nic */
+/* shape: 13 płot, 0 sześcian, 1 krzyż, 2 pochodnia, 3 płyta, 4 schody, 5 drzwi, 6 drabina, 7 płyn, 8 uprawa, 9 grządka, 10 kaktus, 11 łóżko, -1 nic */
 DB("air", "Powietrze", { solid: 0, opq: 0, lop: 0, rep: 1, sel: 0, hard: 0, shape: -1 });
 DB("stone", "Kamień", { hard: 1.5, tool: "pick", req: 1, drop: "cobble" });
 DB("grass", "Blok trawy", { hard: 0.6, tool: "shovel", snd: "grass", drop: "dirt", tex: { t: "grass_top", b: "dirt", s: "grass_side" }, tint: "gt" });
@@ -181,6 +182,30 @@ DB("block_coal", "Blok węgla", { hard: 5, tool: "pick", req: 1, fuel: 800 });
 DB("lamp", "Lampa", { hard: 0.3, snd: "glass", light: 15 });
 DB("bed", "Łóżko", { hard: 0.2, snd: "cloth", shape: 11, opq: 0, lop: 0, tex: { t: "bed_top", b: "planks_oak", s: "bed_side" } });
 DB("tnt_lit", "Dynamit (zapalony)", { hard: 0, tex: "tnt", drop: "none" });
+/* --- Pakiet 1 (Beta 1.7.3): nowe bloki dopisywane na końcu, by nie ruszać zapisanych światów --- */
+DB("ore_lapis", "Ruda lazurytu", { hard: 3, tool: "pick", req: 1, tier: 1, drop: "lapis_drop" });
+DB("ore_redstone", "Ruda czerwonego kamienia", { hard: 3, tool: "pick", req: 1, tier: 2, drop: "redstone_drop" });
+DB("block_lapis", "Blok lazurytu", { hard: 3, tool: "pick", req: 1, tier: 1 });
+DB("mossy_cobble", "Omszały bruk", { hard: 2, tool: "pick", req: 1 });
+DB("sponge", "Gąbka", { hard: 0.6, snd: "cloth" });
+DB("bookshelf", "Regał z książkami", { hard: 1.5, tool: "axe", snd: "wood", tex: { t: "planks_oak", b: "planks_oak", s: "bookshelf" }, drop: "book3", fuel: 15 });
+DB("pumpkin", "Dynia", { hard: 1, tool: "axe", snd: "wood", tex: { t: "pumpkin_top", b: "pumpkin_top", s: "pumpkin_side", f: "pumpkin_front" } });
+DB("jack_o_lantern", "Latarnia z dyni", { hard: 1, tool: "axe", snd: "wood", light: 15, tex: { t: "pumpkin_top", b: "pumpkin_top", s: "pumpkin_side", f: "jack_front" } });
+DB("mushroom_brown", "Brązowy grzyb", { solid: 0, opq: 0, lop: 0, hard: 0, snd: "grass", shape: 1, tex: "mushroom_brown", cut: 1, supp: "mush" });
+DB("mushroom_red", "Czerwony grzyb", { solid: 0, opq: 0, lop: 0, hard: 0, snd: "grass", shape: 1, tex: "mushroom_red", cut: 1, supp: "mush" });
+DB("fern", "Paproć", { solid: 0, opq: 0, lop: 0, hard: 0, snd: "grass", shape: 1, tex: "fern", cut: 1, rep: 1, tint: "gc", supp: "soil", drop: "seed_drop" });
+DB("sugar_cane", "Trzcina cukrowa", { solid: 0, opq: 0, lop: 0, hard: 0, snd: "grass", shape: 1, tex: "sugar_cane", cut: 1, supp: "cane" });
+DB("netherrack", "Netherrack", { hard: 0.4, tool: "pick", req: 1, fuel: 0 });
+DB("soul_sand", "Piasek dusz", { hard: 0.5, tool: "shovel", snd: "sand" });
+DB("glowstone", "Kamień światła", { hard: 0.3, snd: "glass", light: 15, drop: "glow_drop" });
+DB("mob_spawner", "Spawner potworów", { hard: 5, tool: "pick", req: 1, snd: "metal", drop: "none" });
+DB("jukebox", "Szafa grająca", { hard: 2, tool: "axe", snd: "wood", tex: { t: "jukebox_top", b: "planks_oak", s: "jukebox_side" } });
+DB("note_block", "Blok nutowy", { hard: 0.8, tool: "axe", snd: "wood" });
+DB("dispenser", "Dozownik", { hard: 3.5, tool: "pick", req: 1, tex: { t: "furnace_top", b: "furnace_top", s: "furnace_side", f: "dispenser_front" } });
+DB("slab_stone", "Płyta kamienna", { opq: 0, lop: 0, hard: 2, tool: "pick", req: 1, shape: 3, tex: "slab_stone" });
+DB("fence", "Płot", { opq: 0, lop: 0, hard: 2, tool: "axe", snd: "wood", shape: 13, tex: "planks_oak", fuel: 15 });
+const WOOLS = [["orange", "Pomarańczowa", "Pomarańczowy", 0xf29a52], ["magenta", "Magenta", "Magenta", 0xd666da], ["light_blue", "Jasnoniebieska", "Jasnoniebieski", 0x7fa8ee], ["yellow", "Żółta", "Żółty", 0xe6d233], ["lime", "Limonkowa", "Limonkowy", 0x58d048], ["pink", "Różowa", "Różowy", 0xf0a0b8], ["gray", "Szara", "Szary", 0x5a5a5a], ["light_gray", "Jasnoszara", "Jasnoszary", 0xb4bcbc], ["cyan", "Turkusowa", "Turkusowy", 0x3a90b0], ["purple", "Fioletowa", "Fioletowy", 0x9650d4], ["blue", "Niebieska", "Niebieski", 0x3f4cc0], ["brown", "Brązowa", "Brązowy", 0x7a4e30], ["green", "Zielona", "Zielony", 0x4c7a26], ["red", "Czerwona", "Czerwony", 0xc43c36], ["black", "Czarna", "Czarny", 0x2a2626]];
+WOOLS.forEach((w) => DB("wool_" + w[0], w[1] + " wełna", { hard: 0.8, snd: "cloth", tool: "shears", tex: "wool", tint: w[3] }));
 
 const NB = BLK.length;
 const isFluid = (id) => BLK[id].fluid > 0;
@@ -252,6 +277,15 @@ ARMS.forEach((a) => {
     DI(a[0] + "_" + s[0], nm, { max: 1, dur: s[2] * a[3], armor: { slot: si, pts: a[4][si] } });
   });
 });
+
+/* Pakiet 1: nowe materiały i barwniki (dopisane na końcu, żeby nie zmieniać numerów starych przedmiotów) */
+DI("lapis", "Lazuryt");
+DI("redstone", "Pył czerwonego kamienia");
+DI("glowstone_dust", "Pył kamienia światła");
+DI("sugar", "Cukier");
+DI("paper", "Papier");
+DI("book", "Książka");
+WOOLS.forEach((w) => DI("dye_" + w[0], w[2] + " barwnik", { dye: w[3] }));
 
 /* przedmioty-bloki */
 const BITEM = {};
@@ -331,6 +365,37 @@ ARMS.forEach((a) => {
   shaped(a[0] + "_boots", 1, ["X X", "X X"], { X });
 });
 
+/* Pakiet 1: receptury */
+shaped("slab_stone", 6, ["XXX"], { X: "stone" });
+shaped("fence", 2, ["SSS", "SSS"], { S: "stick" });
+shaped("jack_o_lantern", 1, ["P", "T"], { P: "pumpkin", T: "torch" });
+shaped("paper", 3, ["CCC"], { C: "sugar_cane" });
+shapeless("sugar", 1, ["sugar_cane"]);
+shapeless("book", 1, ["paper", "paper", "paper"]);
+shaped("bookshelf", 1, ["PPP", "BBB", "PPP"], { P: "#planks", B: "book" });
+shaped("jukebox", 1, ["PPP", "PDP", "PPP"], { P: "#planks", D: "diamond" });
+shaped("note_block", 1, ["PPP", "PRP", "PPP"], { P: "#planks", R: "redstone" });
+shaped("dispenser", 1, ["CCC", "CBC", "CRC"], { C: "cobble", B: "bow", R: "redstone" });
+shaped("glowstone", 1, ["GG", "GG"], { G: "glowstone_dust" });
+shaped("block_lapis", 1, ["XXX", "XXX", "XXX"], { X: "lapis" });
+shapeless("lapis", 9, ["block_lapis"]);
+shapeless("mossy_cobble", 1, ["cobble", "fern"]);
+shapeless("dye_red", 1, ["flower_red"]);
+shapeless("dye_yellow", 1, ["flower_yellow"]);
+shapeless("dye_blue", 1, ["lapis"]);
+shapeless("dye_black", 1, ["charcoal"]);
+shapeless("dye_orange", 2, ["dye_red", "dye_yellow"]);
+shapeless("dye_purple", 2, ["dye_red", "dye_blue"]);
+shapeless("dye_cyan", 2, ["dye_green", "dye_blue"]);
+shapeless("dye_brown", 2, ["dye_red", "dye_green"]);
+shapeless("dye_pink", 2, ["dye_red", "bonemeal"]);
+shapeless("dye_lime", 2, ["dye_green", "bonemeal"]);
+shapeless("dye_light_blue", 2, ["dye_blue", "bonemeal"]);
+shapeless("dye_gray", 2, ["dye_black", "bonemeal"]);
+shapeless("dye_light_gray", 2, ["dye_gray", "bonemeal"]);
+shapeless("dye_magenta", 2, ["dye_purple", "dye_pink"]);
+WOOLS.forEach((w) => shapeless("wool_" + w[0], 1, ["wool", "dye_" + w[0]]));
+
 /* dopasowanie: cells = tablica id (0 = puste), w × hh */
 function matchRecipe(cells, w, hh) {
   let minx = 99, miny = 99, maxx = -1, maxy = -1, cnt = 0;
@@ -365,7 +430,7 @@ const SMELT = {};
 function smelt(a, b) { SMELT[ID[a]] = ID[b]; }
 smelt("cobble", "stone"); smelt("sand", "glass"); smelt("ore_iron", "iron_ingot"); smelt("ore_gold", "gold_ingot"); smelt("clay_ball", "brick");
 smelt("log_oak", "charcoal"); smelt("log_birch", "charcoal"); smelt("log_spruce", "charcoal"); smelt("ore_coal", "coal");
-smelt("raw_pork", "cooked_pork"); smelt("raw_beef", "cooked_beef"); smelt("raw_mutton", "cooked_mutton"); smelt("raw_chicken", "cooked_chicken");
+smelt("cactus", "dye_green"); smelt("raw_pork", "cooked_pork"); smelt("raw_beef", "cooked_beef"); smelt("raw_mutton", "cooked_mutton"); smelt("raw_chicken", "cooked_chicken");
 const fuelOf = (id) => { const d = itemDef(id); return d.fuel || 0; };
 
 /* bloki podpierane z góry/boku/dołu — pomocniki fizyczne */
@@ -412,6 +477,10 @@ function dropsFor(bid, meta, tool) {
       if (meta >= 7) { out.push([ID.wheat_item, 1]); out.push([ID.seeds, ri(1, 3)]); } else out.push([ID.seeds, 1]);
       return out;
     case "door_item": out.push([ID.door_item, 1]); return out;
+    case "lapis_drop": out.push([ID.lapis, ri(4, 8)]); return out;
+    case "redstone_drop": out.push([ID.redstone, ri(4, 5)]); return out;
+    case "glow_drop": out.push([ID.glowstone_dust, ri(2, 4)]); return out;
+    case "book3": out.push([ID.book, 3]); return out;
     default:
       if (typeof d === "string") out.push([ID[d], 1]); else out.push([bid === BID.furnace_on ? ID.furnace : bid, 1]);
   }
@@ -425,47 +494,66 @@ const P = (hex, f, a) => { f = f == null ? 1 : f; return [clamp(((hex >> 16) & 2
 const NA = [0, 0, 0, 0];
 const nz = (hex, amt) => (x, y, rn) => P(hex, 1 + (rn(x, y) - 0.5) * amt);
 
-tile("stone", (x, y, rn) => P(0x808080, 0.97 + (rn(x, y) - 0.5) * 0.2 - (rn(x >> 1, y >> 1, 3) > 0.8 ? 0.1 : 0)));
-tile("dirt", (x, y, rn) => { let f = 1 + (rn(x, y) - 0.5) * 0.3; if (rn(x, y, 4) > 0.93) f *= 0.72; else if (rn(x, y, 5) > 0.95) f *= 1.2; return P(0x87593a, f); });
-tile("grass_top", (x, y, rn) => P(0xcccccc, 0.95 + (rn(x, y) - 0.5) * 0.22));
+function stoneF(x, y, rn) {
+  let f = 0.97 + (rn(x, y) - 0.5) * 0.13 + (rn(x >> 2, y >> 2, 3) - 0.5) * 0.12;
+  if (rn(x, y, 5) > 0.93) f -= 0.17; else if (rn(x, y, 6) > 0.95) f += 0.13;
+  if (rn(x >> 3, y >> 3, 8) > 0.5 && (x * 2 + y * 3 + (x >> 3) * 5) % 13 === 0) f -= 0.2;
+  return f;
+}
+tile("stone", (x, y, rn) => P(0x808080, stoneF(x, y, rn)));
+function dirtF(x, y, rn) {
+  let f = 1 + (rn(x, y) - 0.5) * 0.26 + (rn(x >> 1, y >> 1, 3) - 0.5) * 0.12;
+  if (rn(x, y, 4) > 0.93) f *= 0.7; else if (rn(x, y, 5) > 0.95) f *= 1.22; else if (rn(x, y, 6) > 0.97) f *= 1.4;
+  return f;
+}
+tile("dirt", (x, y, rn) => P(0x87593a, dirtF(x, y, rn)));
+tile("grass_top", (x, y, rn) => {
+  let f = 0.96 + (rn(x, y) - 0.5) * 0.18 + (rn(x >> 1, y >> 1, 3) - 0.5) * 0.1;
+  if (rn(x, y, 3) > 0.86) f *= 0.86; else if (rn(x, y, 4) > 0.9) f *= 1.08;
+  if (rn(x, 0, 2) > 0.65) f *= 0.97;
+  return P(0xcccccc, f);
+});
 tile("grass_side", (x, y, rn) => {
   const d = 2 + (rn(x, 0, 6) > 0.5 ? 1 : 0) + (rn(x, 0, 7) > 0.85 ? 1 : 0);
-  if (y < d) return P(0x6aa84a, 0.9 + (rn(x, y) - 0.5) * 0.25);
-  let f = 1 + (rn(x, y) - 0.5) * 0.3; if (rn(x, y, 4) > 0.93) f *= 0.72; return P(0x87593a, f);
+  if (y < d) return P(0x6aa84a, 0.9 + (rn(x, y) - 0.5) * 0.25 - (y === d - 1 ? 0.1 : 0));
+  if (y === d && rn(x, 0, 8) > 0.45) return P(0x4a7f33, 0.9 + rn(x, y) * 0.1);
+  return P(0x87593a, dirtF(x, y, rn) * (y === d ? 0.85 : 1));
 });
-tile("cobble", (x, y, rn) => {
-  const row = y >> 2, off = row * 3 + (rn(row, 0, 1) > 0.5 ? 2 : 0), cell = (x + off) >> 2;
-  const edge = (y & 3) === 0 || ((x + off) & 3) === 0;
-  return P(0x8a8a8a, edge ? 0.6 : 0.78 + rn(cell, row, 2) * 0.32 + (rn(x, y) - 0.5) * 0.08);
-});
+const cobbleF = (x, y, rn) => {
+  const row = y >> 2, off = row * 3 + (rn(row, 0, 1) > 0.5 ? 2 : 0), xx = x + off, cell = xx >> 2, ex = xx & 3, ey = y & 3;
+  if (ey === 0 || ex === 0) return P(0x8a8a8a, 0.5 + rn(x, y, 3) * 0.1);
+  let f = 0.78 + rn(cell, row, 2) * 0.32 + (rn(x, y) - 0.5) * 0.08;
+  if (ey === 1 || ex === 1) f *= 1.12; if (ey === 3 || ex === 3) f *= 0.88;
+  return P(0x8a8a8a, f);
+};
+tile("cobble", cobbleF);
 function planksTile(name, hex) {
   tile(name, (x, y, rn) => {
     const r = y >> 2, edge = (y & 3) === 3, seam = ((x + r * 5) & 15) === 7 && (y & 3) !== 3;
-    let f = 0.92 + rn(r, 0, 1) * 0.16 + (rn(x, y) - 0.5) * 0.07; if (edge) f *= 0.72; if (seam) f *= 0.8;
+    let f = 0.92 + rn(r, 0, 1) * 0.16 + (rn(x, y) - 0.5) * 0.07; if (rn(x >> 2, y, 5) > 0.82) f *= 0.94; if ((y & 3) === 0) f *= 1.07; if (edge) f *= 0.7; if (seam) f *= 0.78;
     return P(hex, f);
   });
 }
 planksTile("planks_oak", 0xb28b52); planksTile("planks_birch", 0xd6c88f); planksTile("planks_spruce", 0x7c5c33);
 tile("bedrock", (x, y, rn) => P(0x2f2f2f, 0.55 + rn(x >> 1, y >> 1) * 0.9 + (rn(x, y) - 0.5) * 0.3));
-tile("sand", (x, y, rn) => P(0xdad2a0, 1 + (rn(x, y) - 0.5) * 0.1 + (rn(x, y, 3) > 0.9 ? -0.08 : 0)));
-tile("gravel", (x, y, rn) => P(0x857f7c, 0.7 + rn(x >> 1, y >> 1) * 0.6 + (rn(x, y) - 0.5) * 0.18));
+tile("sand", (x, y, rn) => P(0xdad2a0, 1 + (rn(x, y) - 0.5) * 0.1 + (rn(x, y, 3) > 0.9 ? -0.08 : 0) + ((x + (y >> 2) * 3) % 7 === 0 && rn(x, y, 4) > 0.4 ? -0.05 : 0)));
+tile("gravel", (x, y, rn) => P(0x857f7c, (0.7 + rn(x >> 1, y >> 1) * 0.6 + (rn(x, y) - 0.5) * 0.14) * ((x & 1) && (y & 1) ? 1.07 : (x & 1) === 0 && (y & 1) === 0 ? 0.88 : 1)));
 tile("water", (x, y, rn) => P(0x2d5fd0, 1 + Math.sin((x + y * 0.7) * 0.9) * 0.05 + (rn(x, y) - 0.5) * 0.1, 170));
 tile("lava", (x, y, rn) => { const v = rn(x >> 1, y >> 1) * 0.5 + rn(x, y, 2) * 0.5; return v > 0.78 ? P(0xffd23a, 1) : P(0xe65a12, 0.8 + v * 0.45); });
 const ORE_B = [[2, 2], [9, 1], [12, 6], [4, 8], [9, 11], [1, 13], [13, 13]];
 function oreTile(name, spot, hi) {
   tile(name, (x, y, rn) => {
-    let c = P(0x808080, 0.97 + (rn(x, y) - 0.5) * 0.2 - (rn(x >> 1, y >> 1, 3) > 0.8 ? 0.1 : 0));
-    for (let i = 0; i < ORE_B.length; i++) {
-      const bx = ORE_B[i][0], by = ORE_B[i][1];
-      if ((x >= bx && x <= bx + 1 && y >= by && y <= by + 1) || (x === bx + 2 && y === by + 1 && i % 2 === 0) || (x === bx - 1 && y === by && i % 3 === 0)) return P(rn(x, y, 8) > 0.6 ? hi : spot, 0.88 + rn(x, y, 9) * 0.3);
-    }
-    return c;
+    const isOre = (px, py) => { for (let i = 0; i < ORE_B.length; i++) { const bx = ORE_B[i][0], by = ORE_B[i][1]; if ((px >= bx && px <= bx + 1 && py >= by && py <= by + 1) || (px === bx + 2 && py === by + 1 && i % 2 === 0) || (px === bx - 1 && py === by && i % 3 === 0)) return true; } return false; };
+    if (isOre(x, y)) return P(rn(x, y, 8) > 0.6 ? hi : spot, 0.88 + rn(x, y, 9) * 0.3 + (isOre(x - 1, y - 1) ? 0 : 0.12));
+    const sh = isOre(x - 1, y) || isOre(x, y - 1) || isOre(x - 1, y - 1) ? 0.78 : 1;
+    return P(0x808080, stoneF(x, y, rn) * sh);
   });
 }
 oreTile("ore_coal", 0x252525, 0x3a3a3a); oreTile("ore_iron", 0xd8af93, 0xeacbb2); oreTile("ore_gold", 0xf8df3b, 0xfff17a); oreTile("ore_diamond", 0x4fe5ee, 0xc4fbff);
 function logSide(name, hex, birch) {
   tile(name, (x, y, rn) => {
-    let f = 0.78 + rn(x, 0, 1) * 0.42 + (rn(x, y) - 0.5) * 0.12;
+    let f = 0.78 + rn(x, 0, 1) * 0.42 + (rn(x, y) - 0.5) * 0.12 + (rn(x, y >> 2, 3) - 0.5) * 0.1;
+    if (rn(x, y >> 1, 5) > 0.9) f *= 0.78;
     if (birch && rn(x >> 1, y >> 2, 7) > 0.82) return P(0x2c2c2c, 0.7 + rn(x, y) * 0.5);
     return P(hex, f);
   });
@@ -480,7 +568,7 @@ function logTop(name, bark, wood) {
 }
 logTop("log_oak_top", 0x6d5433, 0xb28b52); logTop("log_spruce_top", 0x3c2a17, 0x7c5c33); logTop("log_birch_top", 0xd5d5c5, 0xd6c88f);
 function leavesTile(name, hex, gray) {
-  tile(name, (x, y, rn) => { if (rn(x, y, 2) > 0.82) return NA; return P(hex, 0.62 + rn(x, y) * 0.55); });
+  tile(name, (x, y, rn) => { if (rn(x, y, 2) > 0.82) return NA; return P(hex, 0.62 + rn(x, y) * 0.55 - (rn(x >> 1, y >> 1, 3) > 0.72 ? 0.17 : 0) + (rn(x, y, 4) > 0.93 ? 0.15 : 0)); });
 }
 leavesTile("leaves_oak", 0xd0d0d0); leavesTile("leaves_birch", 0xd0d0d0); leavesTile("leaves_spruce", 0xd0d0d0);
 tile("glass", (x, y, rn) => {
@@ -615,15 +703,111 @@ tile("block_coal", (x, y, rn) => P(0x1d1d1d, 0.7 + rn(x >> 1, y >> 1) * 0.8 + (r
 tile("lamp", (x, y, rn) => { const b = x === 0 || y === 0 || x === 15 || y === 15; return P(0xffe9a0, (b ? 0.75 : 1) * (0.9 + rn(x >> 1, y >> 1) * 0.2)); });
 tile("bed_top", (x, y, rn) => (y < 5 ? P(0xf1f1f1, 0.95 + rn(x, y) * 0.06) : P(0xb83232, 0.9 + rn(x, y) * 0.15)));
 tile("bed_side", (x, y, rn) => (y < 8 ? P(0xb83232, 0.85 + rn(x, y) * 0.15) : P(0x9a7a45, 0.9 + rn(x, y) * 0.15)));
-/* pęknięcia (10 etapów) */
+
+/* ===== Pakiet 1 (Beta 1.7.3): nowe tekstury ===== */
+oreTile("ore_lapis", 0x1f4fb8, 0x4a78e8); oreTile("ore_redstone", 0xc81818, 0xff5a4a);
+tile("block_lapis", (x, y, rn) => { const sp = rn(x >> 1, y >> 1, 3) > 0.7; return P(sp ? 0x3a6ad8 : 0x1f4fb0, 0.9 + rn(x, y) * 0.22 + ((x + y * 2) % 7 === 0 ? 0.1 : 0)); });
+tile("mossy_cobble", (x, y, rn) => {
+  const c = cobbleF(x, y, rn), m = rn(x >> 1, y >> 1, 11) * 0.6 + rn(x, y, 12) * 0.4;
+  if (m > 0.55) { const g = P(0x4f8a35, 0.7 + rn(x, y, 13) * 0.5); return [(c[0] * 0.35 + g[0] * 0.65) | 0, (c[1] * 0.35 + g[1] * 0.65) | 0, (c[2] * 0.35 + g[2] * 0.65) | 0, 255]; }
+  return c;
+});
+tile("sponge", (x, y, rn) => {
+  const hole = rn(x >> 1, y >> 1, 4) > 0.72 && (x + y) % 2 === 0;
+  return hole ? P(0x8f8a2a, 0.7) : P(0xd6cf55, 0.92 + rn(x, y) * 0.16 + (rn(x >> 2, y >> 2, 6) > 0.7 ? 0.08 : 0));
+});
+tile("bookshelf", (x, y, rn) => {
+  const shelf = y <= 1 || (y >= 7 && y <= 8) || y >= 14;
+  if (shelf) return P(0xb28b52, (y === 1 || y === 8 || y === 15 ? 0.7 : 0.95) * (0.94 + rn(x, y) * 0.1));
+  const cols = [0x8a2f2f, 0x2f5b8a, 0x3d7a3a, 0x7a5a2a, 0x6a3a7a, 0xb59a3a];
+  const k = (x >> 1) + (y < 7 ? 0 : 5), w = (k * 7 + (y < 7 ? 1 : 3)) % cols.length;
+  const dark = (x & 1) === 1 ? 0.78 : 1; const top = (y === 2 || y === 9) ? 0.85 : 1;
+  return rn(k, 0, 9) > 0.86 ? P(0x2a1c10, 1) : P(cols[w], dark * top * (0.9 + rn(k, y >> 2, 3) * 0.2));
+});
+tile("pumpkin_top", (x, y, rn) => { const r = Math.hypot(x - 7.5, y - 7.5); if (r < 1.8) return P(0x4a6a22, 0.9 + rn(x, y) * 0.2); return P(0xd9801a, (x % 4 === 0 ? 0.88 : 1) * (0.92 + rn(x, y) * 0.14) * (r > 6.5 ? 0.82 : 1)); });
+tile("pumpkin_side", (x, y, rn) => P(0xd9801a, ((x % 4) === 0 ? 0.82 : (x % 4) === 1 ? 1.08 : 0.97) * (0.93 + rn(x, y) * 0.12) * (y < 1 || y > 14 ? 0.85 : 1)));
+function pumpFace(name, lit) {
+  tile(name, (x, y, rn) => {
+    const eye = (y >= 4 && y <= 6 && ((x >= 3 && x <= 5) || (x >= 10 && x <= 12)));
+    const nose = (y === 7 && (x === 7 || x === 8));
+    const mouth = (y >= 9 && y <= 11 && x >= 3 && x <= 12 && !(y === 9 && (x === 3 || x === 12)) && !(y === 11 && x >= 6 && x <= 9 && (x + y) % 2 === 0));
+    if (eye || nose || mouth) return lit ? P(rn(x, y) > 0.5 ? 0xffd23a : 0xffb21c, 1) : P(0x3a2208, 0.8 + rn(x, y) * 0.3);
+    return P(0xd9801a, ((x % 4) === 0 ? 0.82 : (x % 4) === 1 ? 1.08 : 0.97) * (0.93 + rn(x, y) * 0.12));
+  });
+}
+pumpFace("pumpkin_front", false); pumpFace("jack_front", true);
+function mushTile(name, cap, spot) {
+  tile(name, (x, y, rn) => {
+    if (x >= 7 && x <= 8 && y >= 9 && y <= 14) return P(0xe9e2d0, x === 7 ? 1 : 0.82);
+    const dy = (y - 7) / 3.2, dx = (x - 7.5) / 5;
+    if (y <= 9 && y >= 4 && dx * dx + dy * dy <= 1.05) return spot && (x + y * 3) % 5 === 0 ? P(0xf2f2f2, 1) : P(cap, (y < 6 ? 1.12 : 0.9) * (0.92 + rn(x, y) * 0.16));
+    return NA;
+  });
+}
+mushTile("mushroom_brown", 0x8a6a4a, false); mushTile("mushroom_red", 0xd22a2a, true);
+tile("fern", (x, y, rn) => {
+  const lean = (k) => (k - 1) * 0.12;
+  for (let i = 0; i < 3; i++) {
+    const bx = 4 + i * 4, h = 8 + rn(i, 0, 4) * 7, t = 15 - y;
+    if (t >= 0 && t <= h) {
+      const cx = bx + lean(i) * t * 1.2;
+      if (Math.abs(x - cx) < 0.55) return P(0xb8b8b8, 0.7 + rn(x, y) * 0.3);
+      if (t > 3 && t % 2 === 0 && Math.abs(Math.abs(x - cx) - (h - t) * 0.22 - 1) < 0.8 && Math.abs(x - cx) < 4.2) return P(0xd0d0d0, 0.75 + rn(x, y, 2) * 0.4);
+    }
+  }
+  return NA;
+});
+tile("sugar_cane", (x, y, rn) => {
+  for (const sx of [3, 8, 12]) {
+    if (x === sx || x === sx + 1) {
+      const nodeRow = (y + sx) % 5 === 0; if (y > 14 - (sx % 3)) continue;
+      return nodeRow ? P(0x6a9a40, 0.8) : P(0x93c85a, (x === sx ? 1.05 : 0.82) * (0.92 + rn(x, y) * 0.16));
+    }
+  }
+  return NA;
+});
+tile("netherrack", (x, y, rn) => { let f = 0.82 + rn(x, y) * 0.34 + (rn(x >> 1, y >> 1, 3) - 0.5) * 0.25; if (rn(x, y, 5) > 0.93) f *= 1.3; return P(0x7a3030, f); });
+tile("soul_sand", (x, y, rn) => { let f = 0.85 + rn(x, y) * 0.3; const hole = rn(x >> 1, y >> 1, 7) > 0.8; if (hole && (x + y) % 3 !== 0) f *= 0.55; return P(0x5b4a3c, f); });
+tile("glowstone", (x, y, rn) => { const k = rn(x >> 2, y >> 2, 3), f = 0.85 + k * 0.3 + (rn(x, y) - 0.5) * 0.18; return rn(x, y, 4) > 0.9 ? P(0xfff2b0, 1) : P(0xdcae4a, f); });
+tile("spawner", (x, y, rn) => {
+  const bar = x % 5 === 0 || y % 5 === 0 || x === 15 || y === 15;
+  if (bar) return P(0x6a7898, 0.9 + rn(x, y) * 0.25 - (x % 5 === 0 ? 0.12 : 0));
+  return P(0x1c2236, 0.8 + rn(x, y) * 0.6);
+});
+tile("jukebox_top", (x, y, rn) => { const r = Math.hypot(x - 7.5, y - 7.5); if (r < 2) return P(0x0a0a0a, 1); return P(0x8b5a34, (r > 6.7 ? 0.7 : 1) * (0.92 + rn(x, y) * 0.14)); });
+tile("jukebox_side", (x, y, rn) => { const r = Math.hypot(x - 7.5, y - 7.5); if (r < 2.4) return P(0x0a0a0a, 1); if (r < 3.4) return P(0x4a2e18, 1); return P(0x8b5a34, (y === 0 || y === 15 ? 0.75 : 1) * (0.92 + rn(x, y) * 0.14)); });
+tile("note_block", (x, y, rn) => {
+  const note = (x >= 5 && x <= 6 && y >= 9 && y <= 11) || (x === 7 && y >= 4 && y <= 10) || (x === 8 && y >= 4 && y <= 5) || (x === 9 && y >= 5 && y <= 6);
+  if (note) return P(0x1a0f08, 1);
+  const edge = x === 0 || y === 0 || x === 15 || y === 15;
+  return P(0x9a6a3a, (edge ? 0.7 : 1) * (0.92 + rn(x, y) * 0.14));
+});
+tile("dispenser_front", (x, y, rn) => {
+  if (x >= 5 && x <= 10 && y >= 5 && y <= 10) return P(0x0c0c0c, x === 5 || y === 5 ? 1.2 : 0.8);
+  return cobbleF(x, y, rn);
+});
+tile("slab_stone", (x, y, rn) => { const e = x === 0 || x === 15 || y === 0 || y === 15; return P(0xa6a6a6, (e ? 0.8 : 1) * (0.95 + rn(x, y) * 0.08)); });
+/* pęknięcia (10 etapów): rozgałęzione rysy od środka, ciemny rdzeń i jasna krawędź */
 (function () {
   const rg = mulberry32(777), pts = [];
-  for (let k = 0; k < 5; k++) { let x = 7 + (rg() * 4 - 2) | 0, y = 7 + (rg() * 4 - 2) | 0, dx = rg() * 2 - 1, dy = rg() * 2 - 1; for (let s = 0; s < 22; s++) { pts.push([Math.round(x), Math.round(y), s + k * 22]); x += dx + (rg() - 0.5) * 1.1; y += dy + (rg() - 0.5) * 1.1; } }
+  for (let k = 0; k < 6; k++) {
+    let x = 7.5 + (rg() - 0.5) * 2, y = 7.5 + (rg() - 0.5) * 2, ang = k / 6 * Math.PI * 2 + rg() * 0.6;
+    for (let st = 0; st < 14; st++) {
+      ang += (rg() - 0.5) * 0.9; x += Math.cos(ang) * 1.15; y += Math.sin(ang) * 1.15;
+      pts.push([Math.round(x), Math.round(y), st + rg() * 1.5]);
+      if (st > 3 && rg() > 0.72) { let bx = x, by = y, ba = ang + (rg() > 0.5 ? 1 : -1) * (0.9 + rg() * 0.5); const L = 4 + ((rg() * 4) | 0); for (let t = 0; t < L; t++) { ba += (rg() - 0.5) * 0.8; bx += Math.cos(ba) * 1.1; by += Math.sin(ba) * 1.1; pts.push([Math.round(bx), Math.round(by), st + t + 2 + rg()]); } }
+    }
+  }
   pts.sort((a, b) => a[2] - b[2]);
   for (let st = 0; st < 10; st++) {
-    const lim = Math.floor(pts.length * (st + 1) / 10), set = new Set();
+    const lim = Math.max(3, Math.floor(pts.length * Math.pow((st + 1) / 10, 1.5))), set = new Set();
     for (let i = 0; i < lim; i++) set.add(pts[i][0] + "," + pts[i][1]);
-    tile("crack" + st, (x, y) => (set.has(x + "," + y) ? [0, 0, 0, 175] : NA));
+    tile("crack" + st, (x, y) => {
+      if (set.has(x + "," + y)) return [8, 5, 3, 215];
+      if (set.has((x - 1) + "," + (y - 1))) return [255, 255, 255, 34];
+      if (st >= 4 && (x * 7 + y * 13) % 5 === 0 && (set.has((x + 1) + "," + y) || set.has(x + "," + (y + 1)) || set.has((x - 1) + "," + y))) return [0, 0, 0, 70];
+      return NA;
+    });
   }
 })();
 
@@ -705,9 +889,17 @@ icon("bread", (g) => { g.ell(8, 9, 6, 3.7, (x, y) => [0xc58a3d, y < 8 ? 1.15 : 0
 icon("apple", (g) => { g.ell(8, 9, 4.8, 4.6, (x, y) => [0xd22b2b, x < 7 && y < 9 ? 1.18 : 0.88]); g.line(8, 4, 9, 2, 0x6d5433, 1); g.rect(9, 3, 11, 4, 0x4f9d2f, 1); g.set(6, 7, 0xffd0d0); });
 function meat(name, raw, kind) {
   icon(name, (g) => {
-    const main = raw ? (kind === "chicken" ? 0xe8b4a0 : kind === "mutton" ? 0xc9504a : 0xe08a8a) : (kind === "chicken" ? 0xb97a3a : 0x7a4222), dark = raw ? 0xa04040 : 0x4a2412;
-    if (kind === "chicken") { g.ell(7, 7.5, 4.4, 3.6, (x, y) => [main, y < 7 ? 1.12 : 0.85]); g.line(9, 10, 13, 14, 0xeee9d6, 1); g.rect(12, 13, 14, 14, 0xeee9d6, 1); }
-    else { g.poly([[2.5, 8], [5, 4], [11, 4], [13.5, 8], [11, 12.5], [5, 12.5]], (x, y) => [main, y < 7 ? 1.12 : 0.84]); g.rect(4, 8, 11, 8, dark, 0.9); if (raw) g.set(9, 6, 0xffe0e0); }
+    const C = { pork: [0xe9908f, 0xc9885a], beef: [0xb83a3a, 0x7a4222], mutton: [0xd0646c, 0x9a5a3a], chicken: [0xf0c4b0, 0xc8883a] }[kind];
+    const main = raw ? C[0] : C[1], dark = raw ? 0x8a2e2e : 0x3f1f10;
+    if (kind === "chicken") {
+      g.ell(7, 7.5, 4.6, 3.8, (x, y) => [main, y < 7 ? 1.14 : 0.84]);
+      if (raw) { g.set(5, 6, 0xfff0e6); g.set(8, 5, 0xfff0e6); g.set(9, 8, 0xe8a89a); } else { g.set(5, 6, 0xf0b860); g.set(8, 5, 0xf0b860); g.line(5, 9, 10, 6, 0x8a5a1f, 1); }
+      g.line(9, 10, 13, 14, 0xeee9d6, 1); g.rect(12, 13, 14, 14, 0xf6f1e0, 1); g.set(11, 12, 0xcfc8b0);
+    } else {
+      g.poly([[2.5, 8], [5, 4], [11, 4], [13.5, 8], [11, 12.5], [5, 12.5]], (x, y) => [main, y < 7 ? 1.14 : 0.84]);
+      if (raw) { g.rect(4, 5, 11, 5, 0xf8e4e4, 1); for (const p of [[6, 8], [8, 9], [10, 7], [7, 10]]) g.set(p[0], p[1], 0xf8e4e4); }
+      else { g.line(5, 6, 9, 10, dark, 1); g.line(7, 5, 11, 9, dark, 1); g.line(4, 8, 7, 11, dark, 1); g.set(10, 6, 0xe0a878); }
+    }
   });
 }
 meat("raw_pork", 1, "pork"); meat("cooked_pork", 0, "pork"); meat("raw_beef", 1, "beef"); meat("cooked_beef", 0, "beef"); meat("raw_mutton", 1, "mutton"); meat("cooked_mutton", 0, "mutton"); meat("raw_chicken", 1, "chicken"); meat("cooked_chicken", 0, "chicken");
@@ -719,6 +911,17 @@ icon("flint_steel", (g) => { g.rect(3, 8, 10, 12, 0x9a9a9a, 1); g.rect(4, 9, 9, 
 icon("shears", (g) => { g.line(3, 13, 12, 3, 0xdedede, 1); g.line(12, 13, 3, 3, 0xbdbdbd, 1); g.rect(2, 12, 4, 14, 0xb83232, 1); g.rect(11, 12, 13, 14, 0xb83232, 1); });
 icon("bow", (g) => { for (let i = 0; i <= 12; i++) { const t = i / 12, x = 4 + Math.sin(t * Math.PI) * 6, y = 2 + t * 12; g.set(x, y, 0x8b6a3a, 1); g.set(x + 1, y, 0x6b5530, 1); } g.line(4, 2, 4, 14, 0xeeeeee, 1); });
 icon("arrow", (g) => { g.line(3, 13, 12, 4, HANDLE, 1); g.poly([[10, 6], [14, 2], [13, 7], [14, 2], [9, 3]], () => [0x9a9a9a, 1]); g.line(2, 12, 4, 14, 0xf0f0f0, 1); g.line(3, 11, 5, 13, 0xf0f0f0, 1); });
+
+/* Pakiet 1: ikony */
+function gem(name, a, b, hi) { icon(name, (g) => { g.poly([[4, 10], [7, 4], [11, 5], [12, 10], [8, 13]], (x, y) => [x < 8 ? a : b, y < 8 ? 1.12 : 0.88]); g.set(7, 6, hi); g.set(8, 6, hi); g.set(9, 8, hi, 0.9); }); }
+gem("lapis", 0x2f58c8, 0x1c3f98, 0x9ab8ff);
+icon("redstone", (g) => { for (const p of [[5, 8], [6, 7], [7, 8], [8, 7], [9, 8], [10, 7], [6, 9], [8, 9], [7, 6], [9, 6], [5, 9], [10, 9], [7, 10], [9, 10]]) g.set(p[0], p[1], p[0] % 2 ? 0xd21a1a : 0xa00e0e, 1); g.set(8, 8, 0xff5a4a); g.set(6, 8, 0xff5a4a, 0.9); });
+icon("glowstone_dust", (g) => { for (const p of [[5, 9], [7, 7], [9, 9], [6, 11], [8, 11], [10, 11], [8, 9], [7, 9], [9, 7], [11, 9]]) g.set(p[0], p[1], p[0] % 2 ? 0xf2c850 : 0xd09a28, 1); g.set(8, 8, 0xfff2b0); });
+icon("sugar", (g) => { for (const p of [[5, 9], [7, 8], [9, 9], [6, 11], [8, 11], [10, 11], [8, 9], [7, 10], [9, 8], [11, 10]]) g.set(p[0], p[1], 0xf4f4f4, p[0] % 2 ? 1 : 0.84); });
+icon("paper", (g) => { g.poly([[3, 3], [11, 2], [13, 12], [5, 13]], (x, y) => [0xf2f2ea, x + y < 14 ? 1.04 : 0.88]); g.line(5, 5, 10, 4, 0xaaaaa0, 1); g.line(5, 7, 11, 6, 0xaaaaa0, 1); g.line(6, 9, 11, 8, 0xaaaaa0, 1); });
+icon("book", (g) => { g.rect(3, 3, 12, 12, 0x7a3a1c, 1); g.rect(4, 3, 12, 11, 0x9a4a22, 1); g.rect(4, 4, 11, 4, 0xe8dcc0, 1); g.rect(4, 11, 11, 11, 0xe8dcc0, 1); g.rect(3, 3, 4, 12, 0x5a2a12, 1); g.rect(6, 6, 9, 8, 0xd8b84a, 1); });
+WOOLS.forEach((w) => icon("dye_" + w[0], (g) => { g.ell(8, 9, 4.6, 4.2, (x, y) => [w[3], x < 7 && y < 9 ? 1.2 : y > 10 ? 0.75 : 0.95]); g.rect(6, 4, 9, 5, 0x4a3a2a, 1); g.rect(6, 3, 9, 3, 0x6a5a4a, 1); g.set(6, 8, 0xffffff, 0.55); }));
+icon("fence", (g) => { g.rect(2, 3, 4, 14, 0xb28b52, 1); g.rect(11, 3, 13, 14, 0xb28b52, 1); g.rect(2, 3, 2, 14, 0xd0a868, 1); g.rect(11, 3, 11, 14, 0xd0a868, 1); g.rect(4, 5, 11, 6, 0x9a7440, 1); g.rect(4, 10, 11, 11, 0x9a7440, 1); g.rect(4, 5, 11, 5, 0xb28b52, 1); g.rect(4, 10, 11, 10, 0xb28b52, 1); });
 
 /* ===================== ATLAS ===================== */
 const ATLAS_N = 16, ATLAS_PX = ATLAS_N * 16;
@@ -779,9 +982,9 @@ function iconURL(id) {
     c.drawImage(tileCanvas(t), 0, 0, 16, 16, 0, 0, S, S);
   } else {
     const b = BLK[id], sh = b.shape;
-    const flat = sh === 1 || sh === 2 || sh === 6 || sh === 8 || sh === 5;
+    const flat = sh === 1 || sh === 2 || sh === 6 || sh === 8 || sh === 5 || sh === 13;
     if (flat) {
-      const nm = sh === 5 ? "i_door_item" : sh === 8 ? "i_seeds" : faceTileName(b, 4);
+      const nm = sh === 13 ? "i_fence" : sh === 5 ? "i_door_item" : sh === 8 ? "i_seeds" : faceTileName(b, 4);
       const tn = TIX[nm]; const tint = b.tint ? (typeof b.tint === "number" ? b.tint : TINTC[b.tint]) : 0;
       c.drawImage(tileCanvas(tn, tint), 0, 0, 16, 16, 0, 0, S, S);
     } else {
@@ -834,7 +1037,7 @@ function lqPush(ch, x, y, z) { const q = LQ[ch]; if (q.t + 3 > q.a.length) retur
 class World {
   constructor(seed) {
     this.seed = seed | 0; this.chunks = new Map(); this.saved = new Map(); this.pending = new Map(); this.updates = []; this.updSet = new Set();
-    this.fl = [new Set(), new Set()]; this.tiles = new Map(); this.hooks = {}; this.spawnPending = [];
+    this.fl = [new Set(), new Set()]; this.tiles = new Map(); this.spawners = new Set(); this.spT = new Map(); this.hooks = {}; this.spawnPending = [];
     this.fluidT = [0, 0]; this.rtT = 0; this.genCount = 0;
   }
   chunk(cx, cz) { return this.chunks.get(ckey(cx, cz)); }
@@ -944,6 +1147,7 @@ class World {
     c.b[i] = id; c.m[i] = meta || 0; c.sdirty = true;
     const hi = ((z & 15) << 4) | (x & 15);
     if (LOP[id] > 0 && y >= c.hm[hi]) c.hm[hi] = y + 1; else if (LOP[id] === 0 && y === c.hm[hi] - 1) { let yy = y; while (yy >= 0 && LOP[c.b[(yy << 8) | hi]] === 0) yy--; c.hm[hi] = yy + 1; }
+    if (old !== id) { if (id === BID.mob_spawner) this.spawners.add(pkey(x, y, z)); else if (old === BID.mob_spawner) { this.spawners.delete(pkey(x, y, z)); this.spT.delete(pkey(x, y, z)); } }
     this.touch(c, x, z);
     if (c.lit) this.lightUpdate(x, y, z, old, id);
     if (!silent) this.queueUpdate(x, y, z);
@@ -966,6 +1170,13 @@ class World {
       if (b.supp === "farm") return below === BID.farmland;
       if (b.supp === "sand") return below === BID.sand || below === BID.dirt || below === BID.sandstone || (id === BID.cactus && below === BID.cactus);
       if (b.supp === "torch") { if (meta === 0) return OPQ[below] === 1 || below === BID.glass || BLK[below].shape === 3 || BLK[below].shape === 4; const s = TORCH_SUP[meta]; return !!s && OPQ[this.get(x + s[0], y, z + s[2])] === 1; }
+      if (b.supp === "mush") return OPQ[below] === 1 && SOLID[below] === 1;
+      if (b.supp === "cane") {
+        if (below === BID.sugar_cane) return true;
+        if (below !== BID.sand && below !== BID.dirt && below !== BID.grass) return false;
+        for (let d = 0; d < 4; d++) { const nb = this.get(x + (d === 0) - (d === 1), y - 1, z + (d === 2) - (d === 3)); if (BLK[nb].fluid === 1) return true; }
+        return false;
+      }
       if (b.supp === "wall") { const s = TORCH_SUP[meta]; return !!s && OPQ[this.get(x + s[0], y, z + s[2])] === 1; }
     }
     if (id === BID.door_lower) return SOLID[this.get(x, y - 1, z)] === 1 && this.get(x, y + 1, z) === BID.door_upper;
@@ -1173,6 +1384,68 @@ class World {
         if (r < 0.012) { const hh = 1 + ((rg() * 3) | 0); for (let k = 1; k <= hh; k++) b[IX(x, h + k, z)] = BID.cactus; } else if (r < 0.03) b[IX(x, h + 1, z)] = BID.deadbush;
       }
     }
+    /* Pakiet 1: dodatki generowane osobnym generatorem losowym, by nie zmieniać reszty świata */
+    {
+      const r2 = mulberry32((hash2(cx, cz, s + 777) * 4294967296) | 0);
+      const vein2 = (id, count, size, y0, y1) => {
+        for (let n = 0; n < count; n++) {
+          let x = (r2() * 16) | 0, y = y0 + ((r2() * (y1 - y0 + 1)) | 0), z = (r2() * 16) | 0;
+          for (let j = 0; j < size; j++) {
+            if (x >= 0 && x < 16 && z >= 0 && z < 16 && y > 1 && y < WH) { const i = IX(x, y, z); if (b[i] === BID.stone) b[i] = id; }
+            const r = (r2() * 6) | 0; if (r === 0) x++; else if (r === 1) x--; else if (r === 2) y++; else if (r === 3) y--; else if (r === 4) z++; else z--;
+          }
+        }
+      };
+      vein2(BID.ore_redstone, 4, 5, 2, 14); vein2(BID.ore_lapis, 1, 5, 3, 17);
+      for (let z = 0; z < CS; z++) for (let x = 0; x < CS; x++) {
+        const h = hts[(z << 4) | x], bio = c.bio[(z << 4) | x], q = r2(), q2 = r2();
+        /* grzyby w jaskiniach: podłoga z kamienia, powietrze nad nią */
+        for (let y = 3; y < Math.min(h - 3, 44); y++) {
+          const i = IX(x, y, z);
+          if (b[i] === 0 && b[IX(x, y - 1, z)] === BID.stone && r2() < 0.012) b[i] = r2() < 0.5 ? BID.mushroom_brown : BID.mushroom_red;
+        }
+        if (h <= SEA || h >= WH - 10) continue;
+        const top = b[IX(x, h, z)], above = b[IX(x, h + 1, z)];
+        if (top === BID.grass && (above === 0 || above === BID.tallgrass)) {
+          if (bio === BIO.FOREST) { if (q < 0.03) b[IX(x, h + 1, z)] = BID.fern; else if (q < 0.036) b[IX(x, h + 1, z)] = q2 < 0.5 ? BID.mushroom_brown : BID.mushroom_red; }
+          else if (bio !== BIO.MOUNT && q < 0.0016) { b[IX(x, h + 1, z)] = BID.pumpkin; c.m[IX(x, h + 1, z)] = (q2 * 4) | 0; }
+        }
+      }
+      /* trzcina cukrowa przy wodzie */
+      for (let z = 1; z < CS - 1; z++) for (let x = 1; x < CS - 1; x++) {
+        const h = hts[(z << 4) | x]; if (h !== SEA) continue;
+        const top = b[IX(x, h, z)]; if (top !== BID.sand && top !== BID.dirt && top !== BID.grass) continue;
+        if (b[IX(x, h + 1, z)] !== 0) continue;
+        const wet = hts[(z << 4) | (x + 1)] < SEA || hts[(z << 4) | (x - 1)] < SEA || hts[((z + 1) << 4) | x] < SEA || hts[((z - 1) << 4) | x] < SEA;
+        if (wet && r2() < 0.5) { const hh = 1 + ((r2() * 3) | 0); for (let k = 1; k <= hh; k++) b[IX(x, h + k, z)] = BID.sugar_cane; }
+      }
+    }
+    /* loch: pokój z omszałego bruku, spawner potworów i skrzynie ze łupem (rzadko) */
+    {
+      const r3 = mulberry32((hash2(cx, cz, s + 888) * 4294967296) | 0);
+      if (r3() < 0.07) {
+        const ox = 1 + ((r3() * 8) | 0), oz = 1 + ((r3() * 8) | 0), fy = 9 + ((r3() * 20) | 0);
+        let ok = true;
+        for (let dz = 0; dz < 7 && ok; dz++) for (let dx = 0; dx < 7 && ok; dx++) {
+          if (hts[((oz + dz) << 4) | (ox + dx)] < fy + 8) { ok = false; break; }
+          for (let y = fy; y <= fy + 5; y++) { const id0 = b[IX(ox + dx, y, oz + dz)]; if (id0 === BID.water || id0 === BID.lava || id0 === BID.bedrock) { ok = false; break; } }
+        }
+        if (ok) {
+          for (let dz = 0; dz < 7; dz++) for (let dx = 0; dx < 7; dx++) for (let y = fy; y <= fy + 5; y++) {
+            const edge = dx === 0 || dz === 0 || dx === 6 || dz === 6 || y === fy || y === fy + 5, i = IX(ox + dx, y, oz + dz);
+            b[i] = edge ? (r3() < (y === fy ? 0.6 : 0.4) ? BID.mossy_cobble : BID.cobble) : 0; c.m[i] = 0;
+          }
+          const sp = IX(ox + 3, fy + 1, oz + 3); b[sp] = BID.mob_spawner; c.m[sp] = (r3() * 3) | 0;
+          c.chests = [];
+          const nch = 1 + ((r3() * 2) | 0);
+          for (let k = 0; k < nch; k++) {
+            const cxl = k === 0 ? ox + 1 : ox + 5, czl = oz + 1 + ((r3() * 5) | 0), i = IX(cxl, fy + 1, czl);
+            b[i] = BID.chest; c.m[i] = k === 0 ? 1 : 3;
+            c.chests.push([wx0 + cxl, fy + 1, wz0 + czl, r3() * 1e9]);
+          }
+        }
+      }
+    }
     /* zapamiętane bloki z drzew sąsiadów */
     const pend = this.pending.get(ckey(cx, cz));
     if (pend) { for (let i = 0; i < pend.length; i += 6) this.genPut(c, pend[i], pend[i + 1], pend[i + 2], pend[i + 3], pend[i + 4], pend[i + 5]); this.pending.delete(ckey(cx, cz)); }
@@ -1182,13 +1455,18 @@ class World {
     const k = ckey(cx, cz); let c = this.chunks.get(k); if (c) return c;
     const sv = this.saved.get(k);
     if (sv) { c = new Chunk(cx, cz); decodeChunk(c, sv); c.sdirty = false; for (let i = 0; i < CSQ; i++) c.bio[i] = 0;  for (let z = 0; z < 16; z++) for (let x = 0; x < 16; x++) c.bio[(z << 4) | x] = this.biomeAt(cx * 16 + x, cz * 16 + z).bio; }
-    else { c = this.generate(cx, cz); this.spawnPending.push([cx, cz]); }
+    else {
+      c = this.generate(cx, cz); this.spawnPending.push([cx, cz]);
+      if (c.chests) for (const q of c.chests) if (typeof newChest === "function") { const ch = newChest(); lootChest(ch, q[3]); this.tiles.set(pkey(q[0], q[1], q[2]), ch); }
+    }
+    for (let i = 0, n = c.b.length; i < n; i++) if (c.b[i] === BID.mob_spawner) this.spawners.add(pkey(cx * 16 + (i & 15), i >> 8, cz * 16 + ((i >> 4) & 15)));
     this.chunks.set(k, c); this.genCount++;
     this.initLight(c);
     for (let dz = -1; dz <= 1; dz++) for (let dx = -1; dx <= 1; dx++) { const n = this.chunks.get(ckey(cx + dx, cz + dz)); if (n) n.dirty = true; }
     return c;
   }
   unloadChunk(c, store) {
+    if (this.spawners.size) for (const k of Array.from(this.spawners)) { const q = unpk(k); if ((q[0] >> 4) === c.cx && (q[2] >> 4) === c.cz) { this.spawners.delete(k); this.spT.delete(k); } }
     if (c.mesh && this.hooks.freeMesh) this.hooks.freeMesh(c);
     if (c.sdirty && store) store(c);
     this.chunks.delete(ckey(c.cx, c.cz));
@@ -1200,6 +1478,17 @@ class World {
   }
   /* czy blok jest na świeżym powietrzu (światło nieba) */
   skyExposed(x, y, z) { return this.sky(x, y, z) >= 15; }
+}
+
+
+/* łup w skrzyniach lochów */
+function lootChest(ch, seedv) {
+  const rg = mulberry32(seedv | 0), pool = [["bread", 1, 3, 3], ["seeds", 2, 6, 3], ["iron_ingot", 1, 4, 3], ["gold_ingot", 1, 3, 2], ["coal", 2, 6, 3], ["redstone", 2, 6, 3], ["lapis", 1, 4, 2], ["string", 1, 4, 3], ["bone", 1, 4, 3], ["arrow", 3, 8, 3], ["book", 1, 2, 2], ["bucket", 1, 1, 1], ["diamond", 1, 2, 1], ["wheat_item", 1, 3, 2], ["apple", 1, 2, 2]];
+  const tot = pool.reduce((a, q) => a + q[3], 0);
+  for (let n = 0; n < 7; n++) {
+    let r = rg() * tot, q = pool[0]; for (const e of pool) { r -= e[3]; if (r <= 0) { q = e; break; } }
+    const slot = (rg() * 27) | 0; if (!ch.slots[slot]) ch.slots[slot] = { id: ID[q[0]], n: q[1] + ((rg() * (q[2] - q[1] + 1)) | 0), d: 0 };
+  }
 }
 
 /* ---- drzewa ---- */
@@ -1356,10 +1645,25 @@ function boxesOf(id, meta) {
     case 10: return B_CACT;
     case 11: return B_BED;
     case 12: return B_CHEST;
+    case 13: return [[0.375, 0, 0.375, 0.625, 1.5, 0.625]];
     case 2: return [torchBox(meta)];
     case 1: case 8: return B_PLANT;
   }
   return B_FULL;
+}
+
+/* płot: słupek + poprzeczki do sąsiednich płotów i pełnych bloków; h = wysokość kolizji (1.5 do chodzenia, 1 do rysowania) */
+const FENCE_D = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+const fenceJoins = (nid) => nid === BID.fence || (nid > 0 && BLK[nid].shape === 0 && OPQ[nid] === 1 && SOLID[nid] === 1);
+function fenceBoxes(getAt, h, vis) {
+  const out = [[0.375, 0, 0.375, 0.625, h, 0.625]];
+  for (let i = 0; i < 4; i++) {
+    if (!fenceJoins(getAt(FENCE_D[i][0], FENCE_D[i][1]))) continue;
+    const dx = FENCE_D[i][0], dz = FENCE_D[i][1];
+    const x0 = dx > 0 ? 0.625 : dx < 0 ? 0 : 0.4375, x1 = dx > 0 ? 1 : dx < 0 ? 0.375 : 0.5625, z0 = dz > 0 ? 0.625 : dz < 0 ? 0 : 0.4375, z1 = dz > 0 ? 1 : dz < 0 ? 0.375 : 0.5625;
+    if (vis) { out.push([x0, 0.375, z0, x1, 0.5625, z1]); out.push([x0, 0.6875, z0, x1, 0.875, z1]); } else out.push([x0, 0, z0, x1, h, z1]);
+  }
+  return out;
 }
 const TORCH_BASE = [0.4375, 0, 0.4375, 0.5625, 0.625, 0.5625];
 const B_FULL = [[0, 0, 0, 1, 1, 1]], B_SLAB = [[0, 0, 0, 1, 0.5, 1]], B_FARM = [[0, 0, 0, 1, 0.9375, 1]], B_CACT = [[0.0625, 0, 0.0625, 0.9375, 1, 0.9375]], B_BED = [[0, 0, 0, 1, 0.5625, 1]], B_CHEST = [[0.0625, 0, 0.0625, 0.9375, 0.875, 0.9375]], B_PLANT = [[0.15, 0, 0.15, 0.85, 0.8, 0.85]];
@@ -1409,7 +1713,8 @@ function meshChunk(W, c) {
     }
     const mb = b.transl ? mbW : mbS;
     let boxes, toff = null;
-    if (sh === 2) { boxes = [TORCH_BASE]; const s2 = TORCH_SUP[meta]; if (s2) toff = [-s2[0] * 0.3, 0.2, -s2[2] * 0.3]; } else boxes = boxesOf(id, meta);
+    if (sh === 13) boxes = fenceBoxes((a, b2) => PB[pi(x + a, y, z + b2)], 1, true);
+    else if (sh === 2) { boxes = [TORCH_BASE]; const s2 = TORCH_SUP[meta]; if (s2) toff = [-s2[0] * 0.3, 0.2, -s2[2] * 0.3]; } else boxes = boxesOf(id, meta);
     const leafy = b.key.startsWith("leaves");
     for (let bk = 0; bk < boxes.length; bk++) {
       const bo = boxes[bk];
@@ -1577,10 +1882,10 @@ let WORLD = null; /* aktywny świat */
 const _bx = [];
 function gatherBoxes(x0, y0, z0, x1, y1, z1) {
   _bx.length = 0; const W = WORLD;
-  const ax = Math.floor(x0), bx = Math.floor(x1), ay = Math.max(0, Math.floor(y0)), by = Math.min(WH - 1, Math.floor(y1)), az = Math.floor(z0), bz = Math.floor(z1);
+  const ax = Math.floor(x0), bx = Math.floor(x1), ay = Math.max(0, Math.floor(y0) - 1), by = Math.min(WH - 1, Math.floor(y1)), az = Math.floor(z0), bz = Math.floor(z1);
   for (let y = ay; y <= by; y++) for (let z = az; z <= bz; z++) for (let x = ax; x <= bx; x++) {
     const id = W.get(x, y, z); if (!SOLID[id]) continue;
-    const bs = boxesOf(id, W.getM(x, y, z));
+    const bs = id === BID.fence ? fenceBoxes((a, b2) => W.get(x + a, y, z + b2), 1.5, false) : boxesOf(id, W.getM(x, y, z));
     for (let i = 0; i < bs.length; i++) { const b = bs[i]; _bx.push(x + b[0], y + b[1], z + b[2], x + b[3], y + b[4], z + b[5]); }
   }
   return _bx;
@@ -1651,8 +1956,9 @@ function rayBox(ox, oy, oz, dx, dy, dz, b, maxT) {
   }
   return face < 0 && tmin === 0 ? { t: 0, f: -1 } : { t: tmin, f: face };
 }
-function selBoxes(id, meta) {
+function selBoxes(id, meta, x, y, z) {
   const b = BLK[id];
+  if (b.shape === 13 && x !== undefined) { const W = WORLD; return fenceBoxes((a, b2) => W.get(x + a, y, z + b2), 1, false); }
   if (b.shape === 2) return [torchBox(meta)];
   if (b.shape === 7) return B_FULL;
   return boxesOf(id, meta);
@@ -1666,7 +1972,7 @@ function raycastBlocks(ox, oy, oz, dx, dy, dz, maxD, liquids) {
     if (y >= 0 && y < WH) {
       const id = W.get(x, y, z);
       if (id !== 0 && (BLK[id].sel || (liquids && BLK[id].fluid))) {
-        const m = W.getM(x, y, z), bs = selBoxes(id, m); let best = null;
+        const m = W.getM(x, y, z), bs = selBoxes(id, m, x, y, z); let best = null;
         for (const bo of bs) { const r = rayBox(ox - x, oy - y, oz - z, dx, dy, dz, bo, maxD); if (r && (!best || r.t < best.t)) best = r; }
         if (best && best.t <= maxD) return { x, y, z, id, meta: m, f: best.f, t: best.t };
       }
@@ -1973,7 +2279,28 @@ function findFloor(x, z, yMin, yMax) {
   }
   return -1;
 }
+/* spawnery potworów (lochy): co kilka sekund wypuszczają potwora, gdy gracz jest blisko */
+function spawnerTick(dt) {
+  const W = WORLD, p = G.p; if (!W.spawners.size) return;
+  for (const k of W.spawners) {
+    const q = unpk(k), dx = q[0] + 0.5 - p.x, dy = q[1] - p.y, dz = q[2] + 0.5 - p.z, d2 = dx * dx + dy * dy + dz * dz;
+    if (d2 > 18 * 18) continue;
+    if (Math.random() < dt * 3) sparks(q[0] + rand(0.2, 0.8), q[1] + rand(0.6, 1.0), q[2] + rand(0.2, 0.8), 0xffa030, 1, 1.2);
+    if (G.diff <= 0 || d2 > 16 * 16) continue;
+    let t = W.spT.get(k); if (t == null) t = rand(1, 3); t -= dt;
+    if (t > 0) { W.spT.set(k, t); continue; }
+    W.spT.set(k, rand(4, 9));
+    let near = 0; for (const e of G.ents) if (e.type === "mob" && MOBS[e.kind].hostile && Math.abs(e.x - q[0]) < 8 && Math.abs(e.z - q[2]) < 8 && Math.abs(e.y - q[1]) < 5) near++;
+    if (near >= 4) continue;
+    const kind = ["zombie", "skeleton", "spider"][W.getM(q[0], q[1], q[2]) % 3];
+    for (let tr = 0; tr < 8; tr++) {
+      const x = q[0] + ri(-3, 3), y = q[1] + ri(-1, 1), z = q[2] + ri(-3, 3);
+      if (W.get(x, y, z) === 0 && W.get(x, y + 1, z) === 0 && SOLID[W.get(x, y - 1, z)]) { spawnMob(kind, x + 0.5, y, z + 0.5); sparks(x + 0.5, y + 0.8, z + 0.5, 0xffa030, 8, 1); break; }
+    }
+  }
+}
 function spawnTick(dt) {
+  spawnerTick(dt);
   G.spawnT -= dt; if (G.spawnT > 0) return; G.spawnT = 1.2;
   const p = G.p, cnt = spawnCounts(), W = WORLD;
   if (G.diff > 0 && cnt[0] < 14 + G.diff * 2) {
@@ -2292,6 +2619,12 @@ const KCSS = `
 .kop .ktoast div.gold{border-color:#d4af37;color:#f6e08a}
 @keyframes ktin{from{opacity:0;transform:translateY(-6px)}}
 .kop .kgoal{position:absolute;left:8px;max-width:min(420px,60vw);font-size:12px;line-height:1.3;background:rgba(20,16,12,.7);border:1px solid #5a4a3a;color:#f6e08a;padding:5px 9px;border-radius:6px;cursor:pointer;z-index:3;text-shadow:0 1px 0 #000}
+.kop .kfood{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:2px}
+.kop .kfd{position:relative;display:flex;align-items:center;gap:6px;padding:3px 10px 3px 3px;background:#1a1511;border:2px solid #3f342a;color:#fff;cursor:pointer;overflow:hidden;font:inherit;font-size:12px;line-height:1.25;text-align:left}
+.kop .kfd:hover{border-color:#8a7656}.kop .kfd.on{border-color:#e8b25c}
+.kop .kfd img{width:32px;height:32px;image-rendering:pixelated;flex:none}
+.kop .kfd small{color:#b8a98f}
+.kop .kfd .kfp{position:absolute;left:0;bottom:0;height:4px;background:#e8b25c}
 .kop .kdbg{position:absolute;left:6px;top:6px;font:11px/1.35 ui-monospace,Menlo,Consolas,monospace;background:rgba(0,0,0,.5);padding:4px 6px;white-space:pre;pointer-events:none;display:none}
 .kop .kbreath{position:absolute;left:0;right:0;bottom:calc(var(--s)*1.9 + 6px);display:flex;justify-content:center;pointer-events:none}
 .kop .kbreath .kic9{flex-direction:row-reverse;width:calc(var(--s)*9);justify-content:flex-start}
@@ -2434,7 +2767,7 @@ async function showMainMenu(ctx) {
   };
 }
 function showHelp() {
-  const c = screenCard('<h2>Sterowanie</h2><p><b>Komputer:</b> WASD ruch · Spacja skok · Shift skradanie · Ctrl lub podwójne W bieg · LPM kop/atak (przytrzymaj) · PPM użyj/postaw · E ekwipunek · J cele Hardcore · Q wyrzuć · 1–9 lub kółko wybór · F3 informacje · Esc pauza. W trybie kreatywnym dwa razy Spacja włącza lot.</p><p><b>Telefon:</b> lewy drążek = ruch, przeciągnięcie po ekranie = rozglądanie, przyciski po prawej.</p><h3>Tryby</h3><p><b>Przetrwanie:</b> zbieraj surowce, craftuj, jedz, uważaj na noc. <b>Hardcore:</b> jedno życie na Trudnym. Śmierć kasuje świat. <b>Kreatywny:</b> nieskończone bloki, lot, brak obrażeń.</p><h3>Punkty (konto klienta)</h3><p>Punkty dostaje się <b>tylko w trybie Hardcore</b>: za osiągnięcia (każde jednorazowo, patrz 🎯 Cele (klawisz J w grze)) oraz za 10., 20., 30., 50. i 100. dzień przetrwania jednego świata (jeden dzień w grze to ok. 20 minut). Limit to 8 pkt na dobę, a 100 pkt = rabat −5 zł. Śmierć kasuje świat, ale zdobyte punkty zostają. Tryb próbny obsługi nie zbiera punktów.</p><button class="kbtn gold" data-a="back">Wróć</button>');
+  const c = screenCard('<h2>Sterowanie</h2><p><b>Komputer:</b> WASD ruch · Spacja skok · Shift skradanie · Ctrl lub podwójne W bieg · LPM kop/atak (przytrzymaj) · PPM użyj/postaw (z jedzeniem w ręku przytrzymaj, żeby zjeść) · E ekwipunek (w nim sekcja Jedzenie: kliknij jedzenie, żeby zjeść; Esc zamyka okno) · J cele Hardcore · Q wyrzuć · 1–9 lub kółko wybór · F3 informacje · Esc pauza. W trybie kreatywnym dwa razy Spacja włącza lot.</p><p><b>Telefon:</b> lewy drążek = ruch, przeciągnięcie po ekranie = rozglądanie, przyciski po prawej.</p><h3>Tryby</h3><p><b>Przetrwanie:</b> zbieraj surowce, craftuj, jedz, uważaj na noc. <b>Hardcore:</b> jedno życie na Trudnym. Śmierć kasuje świat. <b>Kreatywny:</b> nieskończone bloki, lot, brak obrażeń.</p><h3>Punkty (konto klienta)</h3><p>Punkty dostaje się <b>tylko w trybie Hardcore</b>: za osiągnięcia (każde jednorazowo, patrz 🎯 Cele (klawisz J w grze)) oraz za 10., 20., 30., 50. i 100. dzień przetrwania jednego świata (jeden dzień w grze to ok. 20 minut). Limit to 8 pkt na dobę, a 100 pkt = rabat −5 zł. Śmierć kasuje świat, ale zdobyte punkty zostają. Tryb próbny obsługi nie zbiera punktów.</p><button class="kbtn gold" data-a="back">Wróć</button>');
   UI.mkScreen(c, true); c.onclick = (e) => { if (e.target.closest("[data-a=back]")) showMainMenu(); };
 }
 function showNewWorld(slot) {
@@ -2553,12 +2886,18 @@ function openInventory(kind, pos) {
   if (G.mode === "creative") INV.kind = kind = (kind === "inv" ? "creative" : kind);
   G.cursor = null; renderInventory();
 }
-function closeInventory() {
-  if (!INV.open) return; INV.open = false;
+function closeInventory(viaEsc) {
+  if (!INV.open) return; INV.open = false; INV.eat = null;
   if (INV.craft) { for (const s of INV.craft.cells) if (s) { const left = invAdd(G.inv, s.id, s.n, s.d); if (left > 0) spawnItem(G.p.x, G.p.y + 1, G.p.z, s.id, left, s.d); } INV.craft = null; }
   if (G.cursor) { const s = G.cursor, left = invAdd(G.inv, s.id, s.n, s.d); if (left > 0) spawnItem(G.p.x - Math.sin(G.p.yaw) * 0.5, G.p.y + 1.3, G.p.z - Math.cos(G.p.yaw) * 0.5, s.id, left, s.d, -Math.sin(G.p.yaw) * 3, 2, -Math.cos(G.p.yaw) * 3, 1.5); G.cursor = null; }
   UI.hideScreen(); UI.cur.style.display = "none"; UI.tip.style.display = "none"; INV.tile = null;
-  if (G.state === "inv") { G.state = "play"; lockPointer(); }
+  if (G.state === "inv") {
+    G.state = "play";
+    if (viaEsc) { /* Esc zamyka tylko okno: nie włączamy pauzy, kursor wraca po chwili */
+      setTimeout(() => { if (G && G.state === "play") lockPointer(); }, 150);
+      setTimeout(() => { if (G && G.state === "play" && !IS_TOUCH && document.pointerLockElement !== UI.cv) UI.toast("Kliknij ekran, aby wrócić do sterowania myszą"); }, 450);
+    } else lockPointer();
+  }
   G.invDirty = true;
 }
 function renderInventory() {
@@ -2587,9 +2926,43 @@ function renderInventory() {
   if (kind !== "creative") h += '<h4 style="margin-top:6px">Ekwipunek</h4>' + grid("inv", 9, 35, 9) + '<div class="ksep"></div>';
   h += grid("inv", 0, 8, 9);
   if (kind === "creative") h += '<div class="krow" style="margin-top:6px"><div class="kslot" data-g="trash" style="font-size:20px" title="Kosz">🗑</div><div style="flex:1"></div>' + '</div>';
-  h += '<button class="kbtn gold" data-a="close" style="margin-top:8px">Zamknij (E)</button></div>';
+  if (kind !== "creative" && G.mode !== "creative") h += foodRowHtml();
+  h += '<button class="kbtn gold" data-a="close" style="margin-top:8px">Zamknij (E · Esc)</button></div>';
   U.scr.className = "kscreen"; U.scr.style.display = "flex"; U.scr.style.background = "rgba(0,0,0,.55)"; U.scr.innerHTML = h;
   renderCursor();
+}
+const FOOD_RAW = { raw_pork: 0.15, raw_beef: 0.1, raw_mutton: 0.1, raw_chicken: 0.3 };
+const EAT_TIME = 1.6;
+function foodList() {
+  const m = new Map();
+  for (let i = 0; i < 36; i++) { const s = G.inv.slots[i]; if (s && itemDef(s.id).food) m.set(s.id, (m.get(s.id) || 0) + s.n); }
+  return Array.from(m.entries());
+}
+function foodRowHtml() {
+  const list = foodList(), p = G.p;
+  let h = '<h4 style="margin-top:6px">Jedzenie <span style="color:#e8b25c">🍗 ' + Math.ceil(p.food) + "/20</span></h4>";
+  if (!list.length) return h + '<div class="kfood"><small style="color:#8a7c68">Brak jedzenia w ekwipunku (surowe lub upieczone mięso, chleb, jabłka)</small></div>';
+  return h + '<div class="kfood">' + list.map(([id, n]) => {
+    const d = itemDef(id), raw = d.key && d.key.indexOf("raw_") === 0, ea = INV.eat && INV.eat.id === id;
+    return '<button type="button" class="kfd' + (ea ? " on" : "") + '" data-eat="' + id + '"><img alt="" src="' + iconURL(id) + '"><span><b>' + esc(d.name) + "</b><br><small>×" + n + " · +" + d.food[0] + " 🍗" + (raw ? " · surowe" : d.bad ? " · zepsute" : "") + '</small></span><i class="kfp" style="width:' + (ea ? Math.round(Math.min(1, INV.eat.t / EAT_TIME) * 100) : 0) + '%"></i></button>';
+  }).join("") + "</div>";
+}
+function startInvEat(id) {
+  if (!INV.open || G.mode === "creative") return;
+  if (INV.eat && INV.eat.id === id) { INV.eat = null; renderInventory(); return; }
+  if (G.p.food >= 20) { UI.toast("Nie jesteś głodny"); return; }
+  INV.eat = { id, t: 0, snd: 0 }; SFX.click(); renderInventory();
+}
+function eatInvTick(dt) {
+  const e = INV.eat; if (!e) return;
+  if (!INV.open || G.state !== "inv" || G.p.dead || G.p.food >= 20) { INV.eat = null; if (INV.open) renderInventory(); return; }
+  e.t += dt; e.snd -= dt; if (e.snd <= 0) { e.snd = 0.28; SFX.eat(); }
+  const bar = UI.scr.querySelector('[data-eat="' + e.id + '"] .kfp'); if (bar) bar.style.width = Math.round(Math.min(1, e.t / EAT_TIME) * 100) + "%";
+  if (e.t >= EAT_TIME) {
+    INV.eat = null; let done = false;
+    for (let i = 0; i < 36 && !done; i++) { const s = G.inv.slots[i]; if (s && s.id === e.id) { slotUse(G.inv, i); done = true; } }
+    if (done) applyFood(itemDef(e.id)); G.invDirty = true; renderInventory();
+  }
 }
 function renderCursor() {
   const c = G.cursor, U = UI;
@@ -2603,6 +2976,7 @@ function bindInvEvents(root) {
   const act = (target, btn, shift) => {
     const cat = target.closest("[data-cat]"); if (cat) { INV.cat = cat.dataset.cat; renderInventory(); return; }
     if (target.closest("[data-a=close]")) { closeInventory(); return; }
+    const eb = target.closest("[data-eat]"); if (eb) { startInvEat(+eb.dataset.eat); return; }
     const sl = target.closest(".kslot"); if (!sl) { if (!target.closest(".kinv") && G.cursor) { dropCursor(btn === 2); renderInventory(); } return; }
     const g = sl.dataset.g; if (!g) return;
     if (g === "trash") { G.cursor = null; renderInventory(); return; }
@@ -2840,6 +3214,7 @@ function tick(dt) {
   updateEnts(dt); spawnTick(dt);
   G.saveT += dt; if (G.saveT > 25) { G.saveT = 0; saveWorld(); }
   G.rewardRetry -= dt; if (G.rewardRetry <= 0) { G.rewardRetry = 5; checkAwards(); }
+  eatInvTick(dt);
   G.hudT -= dt; if (G.hudT <= 0 || G.invDirty) { G.hudT = 0.1; renderBars(); if (G.invDirty) { renderHotbar(); G.invDirty = false; } refreshFurnaceUI(); }
   if (G.debug) { G.dbgT = (G.dbgT || 0) - dt; if (G.dbgT <= 0) { G.dbgT = 0.25; const c = W.chunk(Math.floor(p.x) >> 4, Math.floor(p.z) >> 4); UI.dbg.textContent = "FPS " + G.fps + "\nXYZ " + p.x.toFixed(1) + " " + p.y.toFixed(1) + " " + p.z.toFixed(1) + "\nchunków " + W.chunks.size + " (rysowane " + (RUN.ren.drawn | 0) + ")\nświatło " + W.sky(Math.floor(p.x), Math.floor(p.y), Math.floor(p.z)) + "/" + W.blk(Math.floor(p.x), Math.floor(p.y), Math.floor(p.z)) + "\nbiom " + (c ? c.bio[((Math.floor(p.z) & 15) << 4) | (Math.floor(p.x) & 15)] : "-") + "\nstwory " + G.ents.filter((e) => e.type === "mob").length + "\ndzień " + (G.day + 1) + " tick " + (G.tod | 0) + "\ntryb " + G.mode; } }
 }
@@ -2880,7 +3255,7 @@ function render(dt) {
 }
 function drawOverlay(R, gl, U, sx, sy, sz) {
   const T = G.target; if (!T || !T.block || G.state === "menu") return;
-  const b = T.block, bs = selBoxes(b.id, b.meta), d = R.lines; d.reset();
+  const b = T.block, bs = selBoxes(b.id, b.meta, b.x, b.y, b.z), d = R.lines; d.reset();
   const mb = d.mb; const E = 0.003, wt = TIX.white, wu = (wt % ATLAS_N) / ATLAS_N + 0.01, wv = Math.floor(wt / ATLAS_N) / ATLAS_N + 0.01;
   for (const bo of bs) {
     const base = mb.nv;
@@ -2955,7 +3330,7 @@ function digBlock(dt, b) {
   const t = digTime(b.id, def, creative); if (t === Infinity) return;
   if (creative || t <= 0) { breakBlock(b); G.dig = null; G.breakCd = creative ? 0.18 : 0.25; swingHand(); return; }
   dg.prog += dt / t; dg.snd -= dt;
-  if (dg.snd <= 0) { dg.snd = 0.23; SFX.dig(bl.snd); swingHand(); }
+  if (dg.snd <= 0) { dg.snd = 0.23; SFX.dig(bl.snd); swingHand(); puff(b.x + 0.5, b.y + 0.5, b.z + 0.5, b.id, 3); }
   if (dg.prog >= 1) { breakBlock(b); G.dig = null; G.breakCd = 0.25; }
 }
 function attackMob(m) {
@@ -2966,11 +3341,16 @@ function attackMob(m) {
   G.atkCd = def && def.tool && def.tool.type === "sword" ? 0.5 : 0.35; swingHand();
   if (G.mode !== "creative") { p.exh += 0.1; if (def && def.tool) toolWear(def.tool.type === "sword" ? 1 : 2); }
 }
-function eatDone(def) {
-  const p = G.p, s = G.inv.slots[G.sel];
+function applyFood(def) {
+  const p = G.p;
   p.food = Math.min(20, p.food + def.food[0]); p.sat = Math.min(p.food, p.sat + def.food[1]);
   if (def.bad) { p.hungerFx = 25; UI.toast("Fuj! Zgniłe mięso…"); }
-  if (G.mode !== "creative") slotUse(G.inv, G.sel); G.invDirty = true; SFX.pop();
+  else if (def.key && FOOD_RAW[def.key] && Math.random() < FOOD_RAW[def.key]) { p.hungerFx = 15; UI.toast("Surowe mięso… nie najlepiej się po nim czujesz."); }
+  SFX.pop();
+}
+function eatDone(def) {
+  applyFood(def);
+  if (G.mode !== "creative") slotUse(G.inv, G.sel); G.invDirty = true;
   G.eating = 0;
 }
 function canPlaceAt(x, y, z, nb) {
@@ -2995,7 +3375,7 @@ function placeItem(tb, stack, def) {
     if (tb.f === 3) return false;
     meta = tb.f === 2 ? 0 : [1, 2, 0, 0, 3, 4][tb.f]; if (nb.shape === 6 && meta === 0) return false;
   } else if (nb.shape === 4) meta = li;
-  else if (nb.shape === 12 || kind === BID.furnace || kind === BID.furnace_on) meta = (li + 2) & 3;
+  else if (nb.shape === 12 || kind === BID.furnace || kind === BID.furnace_on || kind === BID.pumpkin || kind === BID.jack_o_lantern || kind === BID.dispenser) meta = (li + 2) & 3;
   else if (nb.shape === 5) meta = [0, 3, 2, 1][li];
   else if (kind === BID.leaves_oak || kind === BID.leaves_birch || kind === BID.leaves_spruce) meta = 1;
   if (!canPlaceAt(x, y, z, nb)) return false;
@@ -3067,6 +3447,11 @@ function useOnBlock(tb, stack, def, edge) {
       W.setM(tb.x, ly, tb.z, m); W.setM(tb.x, ly + 1, tb.z, m); W.touch(W.chunks.get(ckey(tb.x >> 4, tb.z >> 4)), tb.x, tb.z); SFX.put("wood"); swingHand(); return true;
     }
     if (id === BID.bed) { sleepBed(tb); return true; }
+    if (id === BID.note_block) {
+      const m = (W.getM(tb.x, tb.y, tb.z) + 1) % 25; W.setM(tb.x, tb.y, tb.z, m); SFX.note(m); swingHand();
+      if (G.p) { const NN = ["F#", "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#", "E", "F"]; UI.toast("♪ " + NN[m % 12] + (m >= 12 ? " (wysoko)" : "")); }
+      return true;
+    }
   }
   if (!def) return false;
   if (def.key === "flint_steel" && edge) {
@@ -3143,7 +3528,7 @@ function bindInput() {
   on(window, "keydown", (e) => {
     if (!G || !RUN) return; if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
     const c = e.code;
-    if (G.state === "inv") { if (c === "KeyE" || c === "Escape") { e.preventDefault(); e.stopPropagation(); closeInventory(); } return; }
+    if (G.state === "inv") { if (c === "KeyE" || c === "Escape") { e.preventDefault(); e.stopPropagation(); if (c === "Escape") G.escGuard = performance.now(); closeInventory(c === "Escape"); } return; }
     if (G.state === "play") {
       if (KEYS[c]) { if (!I[KEYS[c]] && c === "KeyW") { const now = performance.now(); if (now - lastW < 300) I.sprintTap = true; lastW = now; } I[KEYS[c]] = 1; }
       else if (c === "Space") { I.jump = 1; if (!e.repeat && G.mode === "creative") { const now = performance.now(); if (now - lastSpace < 320) { G.p.fly = !G.p.fly; G.p.vy = 0; } lastSpace = now; } }
@@ -3169,7 +3554,7 @@ function bindInput() {
   on(window, "pagehide", () => { try { if (G && WORLD && G.loaded) saveWorld(true); } catch (e) {} });
   on(document, "pointerlockchange", () => {
     if (!G) return;
-    if (document.pointerLockElement !== U.cv && G.state === "play" && !IS_TOUCH) showPause();
+    if (document.pointerLockElement !== U.cv && G.state === "play" && !IS_TOUCH) { if (performance.now() - (G.escGuard || 0) < 900) return; showPause(); }
   });
   on(document, "mousemove", (e) => {
     if (!G || G.state !== "play" || document.pointerLockElement !== U.cv) return;
@@ -3438,5 +3823,5 @@ function startCard(stage, ctx) {
   stage.innerHTML = ""; stage.append(card);
 }
 window.WRGames.register({ id: "kopalnia", icon: "⛏️", name: "Kopalnia — sandbox 3D", desc: "Kop, buduj i przetrwaj. Tryby: przetrwanie, hardcore, kreatywny.", start: startCard });
-if (window.__KOP_DEBUG) window.__KOP = { get G() { return G; }, get W() { return WORLD; }, get UI() { return UI; }, get RUN() { return RUN; }, launch, Game, Save, Ach, INV, killMob, hurtMob, showAch, showPause, craftConsume, spawnMob, explode, spawnItem, buildAtlas, iconURL, BLK, ITM, ID, BID, TIX, TILES, RECIPES, matchRecipe, itemDef, dropsFor, digTime, tick, SET };
+if (window.__KOP_DEBUG) window.__KOP = { get G() { return G; }, get W() { return WORLD; }, get UI() { return UI; }, get RUN() { return RUN; }, launch, Game, Save, Ach, INV, killMob, hurtMob, showAch, showPause, craftConsume, spawnMob, explode, spawnItem, openInventory, closeInventory, useOnBlock, placeItem, lookIdx, buildAtlas, iconURL, BLK, ITM, ID, BID, TIX, TILES, RECIPES, matchRecipe, itemDef, dropsFor, digTime, tick, SET };
 })();
