@@ -2291,6 +2291,7 @@ const KCSS = `
 .kop .ktoast div{background:rgba(20,16,12,.88);border:2px solid #5a4a3a;padding:6px 12px;border-radius:4px;font-size:13px;text-align:center;animation:ktin .2s}
 .kop .ktoast div.gold{border-color:#d4af37;color:#f6e08a}
 @keyframes ktin{from{opacity:0;transform:translateY(-6px)}}
+.kop .kgoal{position:absolute;left:8px;max-width:min(420px,60vw);font-size:12px;line-height:1.3;background:rgba(20,16,12,.7);border:1px solid #5a4a3a;color:#f6e08a;padding:5px 9px;border-radius:6px;cursor:pointer;z-index:3;text-shadow:0 1px 0 #000}
 .kop .kdbg{position:absolute;left:6px;top:6px;font:11px/1.35 ui-monospace,Menlo,Consolas,monospace;background:rgba(0,0,0,.5);padding:4px 6px;white-space:pre;pointer-events:none;display:none}
 .kop .kbreath{position:absolute;left:0;right:0;bottom:calc(var(--s)*1.9 + 6px);display:flex;justify-content:center;pointer-events:none}
 .kop .kbreath .kic9{flex-direction:row-reverse;width:calc(var(--s)*9);justify-content:flex-start}
@@ -2355,6 +2356,7 @@ function buildUI(root, touch) {
   U.hotbar = el("khotbar"); U.hud.append(U.hotbar); root.append(U.hud);
   U.toastBox = el("ktoast"); root.append(U.toastBox);
   U.dbg = el("kdbg"); root.append(U.dbg);
+  U.goal = el("kgoal"); U.goal.style.display = "none"; U.goal.style.top = touch ? "52px" : "8px"; U.goal.onclick = () => { if (typeof openGoals === "function") openGoals(); }; root.append(U.goal);
   U.scr = el("kscreen"); U.scr.style.display = "none"; root.append(U.scr);
   U.cur = el("kcur"); root.append(U.cur); U.tip = el("ktip"); root.append(U.tip);
   /* dotyk */
@@ -2410,9 +2412,9 @@ function fmtTime(sec) { const m = Math.floor(sec / 60), h2 = Math.floor(m / 60);
 const MODE_NAME = { survival: "Przetrwanie", hardcore: "Hardcore", creative: "Kreatywny" };
 const DIFF_NAME = ["Pokojowy", "Łatwy", "Normalny", "Trudny"];
 async function showMainMenu(ctx) {
-  const U = UI; G.state = "menu"; U.hud.style.display = "none"; U.cross.style.display = "none"; U.hand.style.display = "none";
+  const U = UI; G.state = "menu"; U.hud.style.display = "none"; U.cross.style.display = "none"; U.hand.style.display = "none"; if (U.goal) U.goal.style.display = "none";
   const wrap = document.createElement("div"); wrap.style.cssText = "width:min(460px,100%)";
-  wrap.innerHTML = '<h1 class="ktitle">KOPALNIA</h1><div class="ksub">Włoska Robota</div><div class="kcard"><div id="kmslots">Ładowanie…</div><button class="kbtn" data-a="ach">🏆 Osiągnięcia</button><button class="kbtn" data-a="help">Sterowanie i zasady</button><button class="kbtn red sm" data-a="quit" style="margin-top:10px">Zamknij grę</button></div>';
+  wrap.innerHTML = '<h1 class="ktitle">KOPALNIA</h1><div class="ksub">Włoska Robota</div><div class="kcard"><div id="kmslots">Ładowanie…</div><button class="kbtn" data-a="ach">🎯 Cele i osiągnięcia</button><button class="kbtn" data-a="help">Sterowanie i zasady</button><button class="kbtn red sm" data-a="quit" style="margin-top:10px">Zamknij grę</button></div>';
   U.mkScreen(wrap, true);
   const list = wrap.querySelector("#kmslots");
   let metas = []; try { metas = await Save.allMeta(); } catch (e) { metas = []; }
@@ -2432,7 +2434,7 @@ async function showMainMenu(ctx) {
   };
 }
 function showHelp() {
-  const c = screenCard('<h2>Sterowanie</h2><p><b>Komputer:</b> WASD ruch · Spacja skok · Shift skradanie · Ctrl lub podwójne W bieg · LPM kop/atak (przytrzymaj) · PPM użyj/postaw · E ekwipunek · Q wyrzuć · 1–9 lub kółko wybór · F3 informacje · Esc pauza. W trybie kreatywnym dwa razy Spacja włącza lot.</p><p><b>Telefon:</b> lewy drążek = ruch, przeciągnięcie po ekranie = rozglądanie, przyciski po prawej.</p><h3>Tryby</h3><p><b>Przetrwanie:</b> zbieraj surowce, craftuj, jedz, uważaj na noc. <b>Hardcore:</b> jedno życie na Trudnym. Śmierć kasuje świat. <b>Kreatywny:</b> nieskończone bloki, lot, brak obrażeń.</p><h3>Punkty (konto klienta)</h3><p>Punkty dostaje się <b>tylko w trybie Hardcore</b>: za osiągnięcia (każde jednorazowo, patrz 🏆 Osiągnięcia) oraz za 5., 10., 20., 30. i 50. dzień przetrwania jednego świata. Limit to 8 pkt na dobę, a 100 pkt = rabat −5 zł. Śmierć kasuje świat, ale zdobyte punkty zostają. Tryb próbny obsługi nie zbiera punktów.</p><button class="kbtn gold" data-a="back">Wróć</button>');
+  const c = screenCard('<h2>Sterowanie</h2><p><b>Komputer:</b> WASD ruch · Spacja skok · Shift skradanie · Ctrl lub podwójne W bieg · LPM kop/atak (przytrzymaj) · PPM użyj/postaw · E ekwipunek · J cele Hardcore · Q wyrzuć · 1–9 lub kółko wybór · F3 informacje · Esc pauza. W trybie kreatywnym dwa razy Spacja włącza lot.</p><p><b>Telefon:</b> lewy drążek = ruch, przeciągnięcie po ekranie = rozglądanie, przyciski po prawej.</p><h3>Tryby</h3><p><b>Przetrwanie:</b> zbieraj surowce, craftuj, jedz, uważaj na noc. <b>Hardcore:</b> jedno życie na Trudnym. Śmierć kasuje świat. <b>Kreatywny:</b> nieskończone bloki, lot, brak obrażeń.</p><h3>Punkty (konto klienta)</h3><p>Punkty dostaje się <b>tylko w trybie Hardcore</b>: za osiągnięcia (każde jednorazowo, patrz 🎯 Cele (klawisz J w grze)) oraz za 10., 20., 30., 50. i 100. dzień przetrwania jednego świata (jeden dzień w grze to ok. 20 minut). Limit to 8 pkt na dobę, a 100 pkt = rabat −5 zł. Śmierć kasuje świat, ale zdobyte punkty zostają. Tryb próbny obsługi nie zbiera punktów.</p><button class="kbtn gold" data-a="back">Wróć</button>');
   UI.mkScreen(c, true); c.onclick = (e) => { if (e.target.closest("[data-a=back]")) showMainMenu(); };
 }
 function showNewWorld(slot) {
@@ -2455,8 +2457,8 @@ function showNewWorld(slot) {
   };
 }
 function showPause() {
-  G.state = "pause"; unlockPointer();
-  const c = screenCard('<h2>Pauza</h2><button class="kbtn gold" data-a="res">Wróć do gry</button><button class="kbtn" data-a="opt">Ustawienia</button><button class="kbtn" data-a="mode" id="kmodebtn"></button><button class="kbtn" data-a="ach">🏆 Osiągnięcia</button><button class="kbtn" data-a="help">Sterowanie</button><button class="kbtn red" data-a="exit">Zapisz i wyjdź do menu</button>');
+  G.state = "pause"; unlockPointer(); if (UI.goal) UI.goal.style.display = "none";
+  const c = screenCard('<h2>Pauza</h2><button class="kbtn gold" data-a="res">Wróć do gry</button><button class="kbtn" data-a="opt">Ustawienia</button><button class="kbtn" data-a="mode" id="kmodebtn"></button><button class="kbtn" data-a="ach">🎯 Cele i osiągnięcia</button><button class="kbtn" data-a="help">Sterowanie</button><button class="kbtn red" data-a="exit">Zapisz i wyjdź do menu</button>');
   UI.mkScreen(c);
   const mb = c.querySelector("#kmodebtn"); if (G.mode === "hardcore") { mb.textContent = "Tryb: Hardcore (nie można zmienić)"; mb.disabled = true; } else mb.textContent = "Przełącz na: " + (G.mode === "creative" ? "Przetrwanie" : "Kreatywny");
   c.onclick = (e) => {
@@ -3148,6 +3150,7 @@ function bindInput() {
       else if (c === "ShiftLeft" || c === "ShiftRight") I.sneak = 1;
       else if (c === "ControlLeft" || c === "ControlRight") I.sprint = 1;
       else if (c === "KeyE") { openInventory("inv"); }
+      else if (c === "KeyJ") openGoals();
       else if (c === "KeyQ") dropHeld(e.ctrlKey);
       else if (c === "F3") { G.debug = !G.debug; U.dbg.style.display = G.debug ? "block" : "none"; }
       else if (/^Digit[1-9]$/.test(c)) selectSlot(+c.slice(5) - 1);
@@ -3259,7 +3262,7 @@ function launch(ctx) {
 /* ===================== OSIĄGNIĘCIA ===================== */
 /* Statystyki: "all" (przetrwanie + hardcore → trofea) i "hc" (tylko hardcore → punkty). Zapis lokalny w przeglądarce. */
 const ACH_KEY = "wr_kop_ach_v2";
-const REWARD_DAYS = [4, 9, 19, 29, 49];
+const REWARD_DAYS = [9, 19, 29, 49, 99];
 const REWARD_PTS = [1, 1, 2, 3, 3];
 const Ach = {
   d: null, dirty: false, t: 0, acc: 0, lp: null, D: null,
@@ -3288,35 +3291,40 @@ const Ach = {
     const cooked = [ID.cooked_pork, ID.cooked_beef, ID.cooked_mutton, ID.cooked_chicken];
     const full = (m) => (s) => ["helmet", "chest", "legs", "boots"].every((p) => s["e" + ID[m + "_" + p]]);
     this.D = [
+      /* trofea (0 pkt): łatwe cele na dobry start */
       { id: "wood", n: "Drwal", d: "Zetnij 5 pni drzew.", p: 0, t: ge("logs", 5) },
       { id: "table", n: "Stół rzemieślniczy", d: "Wytwórz stół rzemieślniczy.", p: 0, t: cr(BID.crafting) },
       { id: "stonepick", n: "Epoka kamienia", d: "Wytwórz kamienny kilof.", p: 0, t: cr(ID.pick_stone) },
       { id: "torch", n: "Niech się świeci", d: "Wytwórz pochodnię.", p: 0, t: cr(BID.torch) },
       { id: "furnace", n: "Gorący piec", d: "Wytwórz piec.", p: 0, t: cr(BID.furnace) },
       { id: "night", n: "Przetrwana noc", d: "Dożyj drugiego dnia.", p: 0, t: ge("day", 1) },
-      { id: "iron", n: "Czas na żelazo", d: "Przetop rudę na sztabkę żelaza.", p: 1, t: hv(ID.iron_ingot) },
-      { id: "zombie", n: "Łowca zombie", d: "Pokonaj 5 zombie.", p: 1, t: ge("k_zombie", 5) },
-      { id: "skeleton", n: "Szkielet w szafie", d: "Pokonaj 3 szkielety.", p: 1, t: ge("k_skeleton", 3) },
-      { id: "spider", n: "Pajęczyna", d: "Pokonaj 3 pająki.", p: 1, t: ge("k_spider", 3) },
-      { id: "bread", n: "Własny chleb", d: "Wytwórz chleb.", p: 1, t: cr(ID.bread) },
-      { id: "cook", n: "Kucharz", d: "Zdobądź pieczone mięso.", p: 1, t: (s) => cooked.some((i) => s["h" + i]) },
-      { id: "bed", n: "Dobranoc", d: "Prześpij noc w łóżku.", p: 1, t: ge("slept", 1) },
-      { id: "bucket", n: "Wiaderko", d: "Wytwórz wiadro.", p: 1, t: cr(ID.bucket) },
-      { id: "bow", n: "Łucznik", d: "Wytwórz łuk.", p: 1, t: cr(ID.bow) },
-      { id: "builder", n: "Budowniczy", d: "Postaw 300 bloków.", p: 1, t: ge("placed", 300) },
-      { id: "walker", n: "Wędrowiec", d: "Przejdź 10 000 m.", p: 1, t: ge("walked", 10000) },
-      { id: "ipick", n: "Żelazny kilof", d: "Wytwórz żelazny kilof.", p: 2, t: cr(ID.pick_iron) },
-      { id: "gold", n: "Złoto!", d: "Zdobądź sztabkę złota.", p: 2, t: hv(ID.gold_ingot) },
-      { id: "deep", n: "Głębinowiec", d: "Zejdź na wysokość 10 lub niżej.", p: 2, t: (s) => s.miny !== undefined && s.miny <= 10 },
-      { id: "miner", n: "Górnik", d: "Wykop 1500 bloków.", p: 2, t: ge("mined", 1500) },
-      { id: "hunter", n: "Pogromca", d: "Pokonaj 40 stworów.", p: 2, t: ge("kills", 40) },
-      { id: "tnt", n: "Wielki wybuch", d: "Wysadź 3 ładunki TNT.", p: 2, t: ge("tnt", 3) },
-      { id: "ironarm", n: "Żelazny rycerz", d: "Załóż komplet żelaznej zbroi.", p: 2, t: full("iron") },
-      { id: "diamond", n: "Diamenty!", d: "Zdobądź diament.", p: 3, t: hv(ID.diamond) },
-      { id: "dpick", n: "Diamentowy kilof", d: "Wytwórz diamentowy kilof.", p: 3, t: cr(ID.pick_diamond) },
-      { id: "obsidian", n: "Obsydian", d: "Wykop obsydian.", p: 3, t: hv(BID.obsidian) },
+      { id: "iron", n: "Czas na żelazo", d: "Przetop rudę na sztabkę żelaza.", p: 0, t: hv(ID.iron_ingot) },
+      { id: "zombie", n: "Łowca zombie", d: "Pokonaj 5 zombie.", p: 0, t: ge("k_zombie", 5) },
+      { id: "skeleton", n: "Szkielet w szafie", d: "Pokonaj 3 szkielety.", p: 0, t: ge("k_skeleton", 3) },
+      { id: "spider", n: "Pajęczyna", d: "Pokonaj 3 pająki.", p: 0, t: ge("k_spider", 3) },
+      { id: "bread", n: "Własny chleb", d: "Wytwórz chleb.", p: 0, t: cr(ID.bread) },
+      { id: "cook", n: "Kucharz", d: "Zdobądź pieczone mięso.", p: 0, t: (s) => cooked.some((i) => s["h" + i]) },
+      { id: "bed", n: "Dobranoc", d: "Prześpij noc w łóżku.", p: 0, t: ge("slept", 1) },
+      { id: "bucket", n: "Wiaderko", d: "Wytwórz wiadro.", p: 0, t: cr(ID.bucket) },
+      { id: "bow", n: "Łucznik", d: "Wytwórz łuk.", p: 0, t: cr(ID.bow) },
+      { id: "builder", n: "Budowniczy", d: "Postaw 300 bloków.", p: 0, t: ge("placed", 300) },
+      { id: "walker", n: "Wędrowiec", d: "Przejdź 10 000 m.", p: 0, t: ge("walked", 10000) },
+      { id: "ipick", n: "Żelazny kilof", d: "Wytwórz żelazny kilof.", p: 0, t: cr(ID.pick_iron) },
+      { id: "gold", n: "Złoto!", d: "Zdobądź sztabkę złota.", p: 0, t: hv(ID.gold_ingot) },
+      /* punkty: bardzo trudne cele, tylko Hardcore */
+      { id: "ironarm", n: "Żelazny rycerz", d: "Załóż komplet żelaznej zbroi.", p: 1, t: full("iron") },
+      { id: "deep", n: "Głębinowiec", d: "Zejdź na wysokość 8 lub niżej.", p: 1, t: (s) => s.miny !== undefined && s.miny <= 8 },
+      { id: "miner", n: "Górnik", d: "Wykop 3000 bloków.", p: 1, t: ge("mined", 3000) },
+      { id: "builder2", n: "Wielki budowniczy", d: "Postaw 3000 bloków.", p: 1, t: ge("placed", 3000) },
+      { id: "walker2", n: "Maratończyk", d: "Przejdź 30 000 m.", p: 1, t: ge("walked", 30000) },
+      { id: "diamond", n: "Diamenty!", d: "Zdobądź diament.", p: 2, t: hv(ID.diamond) },
+      { id: "dpick", n: "Diamentowy kilof", d: "Wytwórz diamentowy kilof.", p: 2, t: cr(ID.pick_diamond) },
+      { id: "obsidian", n: "Obsydian", d: "Wykop obsydian.", p: 2, t: hv(BID.obsidian) },
+      { id: "hunter", n: "Pogromca", d: "Pokonaj 150 stworów.", p: 2, t: ge("kills", 150) },
+      { id: "tnt", n: "Wielki wybuch", d: "Wysadź 10 ładunków TNT.", p: 2, t: ge("tnt", 10) },
       { id: "dblock", n: "Skarbiec", d: "Wytwórz blok diamentu.", p: 3, t: cr(BID.block_diamond) },
-      { id: "darmor", n: "Diamentowy rycerz", d: "Załóż komplet diamentowej zbroi.", p: 3, t: full("diamond") }
+      { id: "darmor", n: "Diamentowy rycerz", d: "Załóż komplet diamentowej zbroi.", p: 3, t: full("diamond") },
+      { id: "hunter2", n: "Postrach nocy", d: "Pokonaj 400 stworów.", p: 3, t: ge("kills", 400) }
     ];
     return this.D;
   },
@@ -3335,7 +3343,7 @@ const Ach = {
     this.save();
   },
   tick(dt) {
-    if (!this.on()) { this.lp = null; return; }
+    if (!this.on()) { this.lp = null; try { updateGoal(); } catch (e) {} return; }
     const p = G.p;
     if (this.lp) {
       const d = Math.hypot(p.x - this.lp[0], p.z - this.lp[1]);
@@ -3344,7 +3352,7 @@ const Ach = {
     this.lp = [p.x, p.z];
     this.t += dt;
     if (this.t >= 1.5) {
-      this.t = 0; this.scan(); this.low("miny", Math.floor(p.y)); this.high("day", G.day); this.check();
+      this.t = 0; this.scan(); this.low("miny", Math.floor(p.y)); this.high("day", G.day); this.check(); try { updateGoal(); } catch (e) {}
     }
   },
   /* następna nagroda do naliczenia (tylko hardcore) */
@@ -3359,16 +3367,60 @@ const Ach = {
     return null;
   }
 };
+/* ===== lista celów (Hardcore) ===== */
+const ACH_G = { wood: ["logs", 5], zombie: ["k_zombie", 5], skeleton: ["k_skeleton", 3], spider: ["k_spider", 3], bed: ["slept", 1], builder: ["placed", 300], builder2: ["placed", 3000], walker: ["walked", 10000, " m"], walker2: ["walked", 30000, " m"], miner: ["mined", 3000], hunter: ["kills", 150], hunter2: ["kills", 400], tnt: ["tnt", 10] };
+function achProg(a, d) {
+  const s = a.p ? d.hc : d.all, g = ACH_G[a.id];
+  if (g) return Math.min(g[1], s[g[0]] || 0) + "/" + g[1] + (g[2] || "");
+  if (a.id === "deep") return s.miny === undefined ? "cel: wysokość 8" : "najniżej: " + s.miny + " (cel: 8)";
+  if (a.id === "night") return "dzień " + (Math.min(1, s.day || 0) + 1) + "/2";
+  return "";
+}
+function hcPending() { Ach.load(); return Ach.defs().filter((a) => a.p > 0 && !Ach.d.paid[a.id]).sort((x, y) => x.p - y.p); }
+function nextGoalText() {
+  Ach.load(); const d = Ach.d, hc = d.hc;
+  const pend = hcPending(), todo = pend.find((a) => !a.t(hc));
+  if (todo) { const pr = achProg(todo, d); return "🎯 " + todo.d + (pr ? " (" + pr + ")" : "") + " · +" + todo.p + " pkt"; }
+  if (pend.length) return "🏅 Cel zaliczony — punkty zaraz zostaną naliczone";
+  for (let k = 0; k < REWARD_DAYS.length; k++) if (!G.awarded[k]) return "🎯 Przetrwaj do " + (REWARD_DAYS[k] + 1) + ". dnia (jesteś na " + (G.day + 1) + ".) · +" + REWARD_PTS[k] + " pkt";
+  return "🏅 Wszystkie cele Hardcore zaliczone!";
+}
+function updateGoal() {
+  const U = UI; if (!U || !U.goal) return;
+  const show = !!(G && G.loaded && G.p && !G.p.dead && G.mode === "hardcore" && G.state === "play");
+  if (!show) { U.goal.style.display = "none"; return; }
+  U.goal.style.display = "block"; U.goal.textContent = nextGoalText() + "  ·  lista: J";
+}
+function openGoals() {
+  if (!G || G.state !== "play") return;
+  G.state = "pause"; unlockPointer(); if (UI.goal) UI.goal.style.display = "none"; showAch(() => Game.resume());
+}
 function showAch(back) {
   Ach.load(); const D = Ach.defs(), d = Ach.d;
-  const got = D.filter((a) => d.done[a.id]).length;
+  const inHc = !!(G && G.loaded && G.mode === "hardcore");
   const maxP = D.reduce((s, a) => s + a.p, 0), gotP = D.reduce((s, a) => s + (d.paid[a.id] ? a.p : 0), 0);
-  const rows = D.map((a) => {
-    const ok = d.done[a.id], pd = d.paid[a.id];
-    const tag = a.p ? (pd ? "✔ +" + a.p + " pkt" : "+" + a.p + " pkt") : "bez punktów";
-    return '<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid #3c322a;opacity:' + (ok ? 1 : 0.62) + '"><span style="font-size:20px">' + (ok ? "🏆" : "🔒") + '</span><div style="flex:1"><b style="font-size:13px">' + esc(a.n) + '</b><br><small style="color:#b8a98f">' + esc(a.d) + '</small></div><span style="font-size:12px;white-space:nowrap;color:' + (pd ? "#7bd88f" : a.p ? "#f6e08a" : "#8a7c68") + '">' + tag + "</span></div>";
+  const row = (a, st) => {
+    const pr = achProg(a, d), pd = d.paid[a.id], ok = st === "done";
+    const tag = a.p ? (pd ? "✔ +" + a.p + " pkt" : "+" + a.p + " pkt") : "trofeum";
+    return '<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid #3c322a"><span style="font-size:20px">' + (ok ? "🏆" : "🎯") + '</span><div style="flex:1"><b style="font-size:13px">' + esc(a.n) + '</b><br><small style="color:#b8a98f">' + esc(a.d) + (pr && !ok ? ' · <span style="color:#f6e08a">' + esc(pr) + "</span>" : "") + '</small></div><span style="font-size:12px;white-space:nowrap;color:' + (pd ? "#7bd88f" : a.p ? "#f6e08a" : "#8a7c68") + '">' + tag + "</span></div>";
+  };
+  const todo = D.filter((a) => a.p > 0 && !d.paid[a.id]).sort((x, y) => x.p - y.p);
+  const done = D.filter((a) => a.p > 0 && d.paid[a.id]);
+  const troph = D.filter((a) => a.p === 0);
+  const days = REWARD_DAYS.map((dd, k) => {
+    const got = inHc && G.awarded[k], cur = inHc ? G.day + 1 : null;
+    return '<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid #3c322a"><span style="font-size:20px">' + (got ? "✔" : "🌅") + '</span><div style="flex:1"><b style="font-size:13px">' + (dd + 1) + '. dzień przetrwania</b><br><small style="color:#b8a98f">w jednym świecie Hardcore' + (cur && !got ? ' · <span style="color:#f6e08a">teraz: ' + cur + ".</span>" : "") + '</small></div><span style="font-size:12px;color:' + (got ? "#7bd88f" : "#f6e08a") + '">' + (got ? "✔ " : "") + "+" + REWARD_PTS[k] + " pkt</span></div>";
   }).join("");
-  const c = screenCard('<h2>Osiągnięcia</h2><p style="font-size:13px;margin:4px 0">Zdobyte: <b>' + got + "/" + D.length + "</b> · Punkty z osiągnięć: <b>" + gotP + "/" + maxP + '</b></p><p style="font-size:12px;color:#b8a98f;margin:0 0 6px">Punkty dostaniesz tylko za osiągnięcia zdobyte w trybie <b>Hardcore</b> (każde raz) oraz za kolejne dni przetrwania w świecie Hardcore (5., 10., 20., 30. i 50. dzień). Limit: 8 pkt na dobę.</p>' + rows + '<button class="kbtn gold" data-a="back" style="margin-top:10px">Wróć</button>');
+  const sec = (t, n) => '<h3 style="margin:12px 0 2px;font-size:14px">' + t + (n !== undefined ? ' <small style="color:#b8a98f">(' + n + ")</small>" : "") + "</h3>";
+  const html = '<h2>🎯 Cele Hardcore</h2>'
+    + '<p style="font-size:13px;margin:4px 0">Zdobyte punkty z osiągnięć: <b>' + gotP + "/" + maxP + '</b></p>'
+    + '<p style="font-size:12px;color:#b8a98f;margin:0 0 4px">Punkty dostajesz <b>tylko w świecie Hardcore</b> i tylko po zalogowaniu na koncie. Każde osiągnięcie liczy się <b>raz</b>. Limit to <b>8 pkt na dobę</b>, a 100 punktów wymienisz na rabat −5 zł. Postęp pokazuje to, co zrobiłeś w Hardcore.</p>'
+    + sec("Do zdobycia", todo.length) + (todo.length ? todo.map((a) => row(a, "todo")).join("") : '<p style="font-size:13px;color:#7bd88f">Wszystkie osiągnięcia z punktami zdobyte! 🎉</p>')
+    + sec("Dni przetrwania", REWARD_DAYS.length) + days
+    + (done.length ? sec("Już zaliczone", done.length) + done.map((a) => row(a, "done")).join("") : "")
+    + sec("Trofea (bez punktów)", troph.filter((a) => d.done[a.id]).length + "/" + troph.length) + troph.map((a) => row(a, d.done[a.id] ? "done" : "todo")).join("")
+    + '<button class="kbtn gold" data-a="back" style="margin-top:10px">Wróć</button>';
+  const c = screenCard(html);
   UI.mkScreen(c, true);
   c.onclick = (e) => { if (e.target.closest("[data-a=back]")) { SFX.click(); back(); } };
 }
