@@ -237,7 +237,7 @@ function render() {
      <label class="sz-ck"><input type="checkbox" id="sz-needstamp"${g.needStamp ? " checked" : ""}><span>Punkty tylko dla klientów, którzy mają już co najmniej 1 pieczątkę (blokuje farmienie punktów na fałszywych kontach)</span></label>
      <div class="rb-actions"><button type="button" class="rb-btn small" data-sz="saveguard">Zapisz limity</button></div><div class="rb-msg" id="sz-msg" role="status"></div>`);
   root.innerHTML = h;
-  root.insertAdjacentHTML("beforeend", '<p class="sz-why" style="margin-top:14px">🛡️ Ochrona przed botami (App Check): <b>jeszcze niewdrożona</b>. Wymaga darmowego klucza reCAPTCHA z konsoli Firebase — to najlepsza obrona przed skryptami, które spamują bazę. Daj znać, to ją podepnę.</p><p class="sz-why">Straż v3 · konta admina (' + esc(me ? me.email || me.uid : "") + ') są pomijane w analizie.</p>');
+  root.insertAdjacentHTML("beforeend", '<p class="sz-why" style="margin-top:14px">🛡️ Ochrona przed botami (App Check + reCAPTCHA v3): <b>kod strony jest podpięty</b>. Zostało jedno kliknięcie w Firebase: App Check → Cloud Firestore → <b>Egzekwuj</b> — zrób to dopiero po kilku dniach, gdy prawie cały ruch jest tam widoczny jako „zweryfikowany”. Do tego czasu App Check tylko zbiera statystyki i niczego nie blokuje.</p><p class="sz-why">Straż v4 · konta admina (' + esc(me ? me.email || me.uid : "") + ') są pomijane w analizie.</p>');
   const badge = document.getElementById("rb-straz-badge");
   if (badge) { const n = D.flags.length + A.staffAlerts.length; badge.textContent = n > 9 ? "9+" : String(n); badge.hidden = !n; }
 }
@@ -313,6 +313,6 @@ const API = {
   report,
   open() { mountPane(); D = null; load(); },
   async isBlocked() { for (let i = 0; i < 20 && !blockedChecked; i++) await new Promise((r) => setTimeout(r, 100)); return blockedNow; },
-  version: 3
+  version: 4
 };
 Object.defineProperty(window, "WRStraz", { value: Object.freeze(API), writable: false, configurable: false });
