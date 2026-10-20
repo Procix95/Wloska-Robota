@@ -1886,11 +1886,11 @@ const firebaseConfig = {
 /* ▲▲▲ */
 
 const app = initializeApp(firebaseConfig);
-/* App Check (reCAPTCHA v3): ładowany osobno i z obsługą błędu, żeby ewentualna awaria CDN/reCAPTCHA nie zepsuła strony.
+/* App Check (reCAPTCHA Enterprise / Fraud Defense): ładowany osobno i z obsługą błędu, żeby ewentualna awaria CDN/reCAPTCHA nie zepsuła strony.
    Klucz witryny jest publiczny (tajny klucz jest tylko w konsoli Firebase). Egzekwowanie włączasz w Firebase → App Check. */
 const RECAPTCHA_SITE_KEY = "6Ld86fgtAAAAAHq4eFMDBO2cO_1V5agYP1fiBBjH";
 import("https://www.gstatic.com/firebasejs/10.14.1/firebase-app-check.js").then((m) => {
-  m.initializeAppCheck(app, { provider: new m.ReCaptchaV3Provider(RECAPTCHA_SITE_KEY), isTokenAutoRefreshEnabled: true });
+  m.initializeAppCheck(app, { provider: new m.ReCaptchaEnterpriseProvider(RECAPTCHA_SITE_KEY), isTokenAutoRefreshEnabled: true });
 }).catch((e) => console.warn("App Check niedostępny:", e && (e.code || e.message)));
 const auth = getAuth(app);
 auth.languageCode = "pl";
@@ -5875,7 +5875,7 @@ $("rb-s-result").addEventListener("click", async (e) => {
 });
 loadSite();
 </script>
-<script type="module" src="/straz.js?v=4"></script>
+<script type="module" src="/straz.js?v=5"></script>
 <!-- ===== RABAT: KONIEC ===== -->
 
 </body>
