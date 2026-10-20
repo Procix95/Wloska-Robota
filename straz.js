@@ -69,7 +69,7 @@ async function checkBlocked(user) {
 async function report(kind, detail) {
   try {
     const u = auth && auth.currentUser;
-    if (!u || !db || sent.has(kind) || !KIND_TXT[kind]) return false;
+    if (!u || !db || admin || sent.has(kind) || !KIND_TXT[kind]) return false;
     sent.add(kind);
     const d = new Date(), day = d.getUTCFullYear() * 10000 + (d.getUTCMonth() + 1) * 100 + d.getUTCDate();
     await setDoc(doc(db, "flags", u.uid + "_" + kind + "_" + day), { uid: u.uid, kind, detail: String(detail || "").slice(0, 240), at: serverTimestamp() });
@@ -128,9 +128,11 @@ async function fetchAll() {
   ]);
   let guard = {};
   try { const g = await getDoc(doc(db, "site", "guard")); if (g.exists()) guard = g.data() || {}; } catch (e) { /* brak = domyślne */ }
+  /* konto admina (to, na którym jesteś zalogowany) pomijamy — jego własne testy i pieczątki nie są „nadużyciem” */
+  const notMe = (uid) => !(me && uid === me.uid);
   return {
-    users: new Map((users || []).map((u) => [u.id, u])), flags: flags || [], blocked: blocked || [], devices: devices || [],
-    points: points || [], logs: logs || [], guard, ok: { users: !!users, flags: !!flags, devices: !!devices, points: !!points, logs: !!logs, blocked: !!blocked }
+    users: new Map((users || []).map((u) => [u.id, u])), flags: (flags || []).filter((f) => notMe(f.uid)), blocked: blocked || [],
+    devices: (devices || []).filter((d) => notMe(d.id)), points: (points || []).filter((p) => notMe(p.id)), logs: (logs || []).filter((l) => notMe(l.byUid)), guard, ok: { users: !!users, flags: !!flags, devices: !!devices, points: !!points, logs: !!logs, blocked: !!blocked }
   };
 }
 
@@ -287,12 +289,13 @@ async function onUser(user) {
   const tab = document.getElementById("rb-straz-tab");
   if (tab) tab.hidden = true;
   if (!user) { blockedNow = false; blockedChecked = true; return; }
-  checkBlocked(user); rememberDevice(user);
+  checkBlocked(user);
   try { const a = await getDoc(doc(db, "admins", user.uid)); admin = !!(a && a.exists()); } catch (e) { admin = false; }
+  if (!admin) rememberDevice(user);
   if (admin) {
     if (tab) tab.hidden = false;
     mountPane();
-    try { const f = await getDocs(query(collection(db, "flags"), orderBy("at", "desc"), limit(50))); const b = document.getElementById("rb-straz-badge"); if (b) { b.textContent = f.size > 9 ? "9+" : String(f.size); b.hidden = !f.size; } } catch (e) { /* reguły jeszcze niewgrane */ }
+    try { const f = await getDocs(query(collection(db, "flags"), orderBy("at", "desc"), limit(50))); const n = f.docs.filter((x) => (x.data() || {}).uid !== user.uid).length, b = document.getElementById("rb-straz-badge"); if (b) { b.textContent = n > 9 ? "9+" : String(n); b.hidden = !n; } } catch (e) { /* reguły jeszcze niewgrane */ }
   }
 }
 
@@ -308,6 +311,6 @@ const API = {
   report,
   open() { mountPane(); D = null; load(); },
   async isBlocked() { for (let i = 0; i < 20 && !blockedChecked; i++) await new Promise((r) => setTimeout(r, 100)); return blockedNow; },
-  version: 1
+  version: 2
 };
 Object.defineProperty(window, "WRStraz", { value: Object.freeze(API), writable: false, configurable: false });
