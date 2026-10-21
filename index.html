@@ -571,6 +571,20 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
   </div>
 </section>
  
+<section class="ranks" id="rangi" hidden>
+  <div class="container">
+    <h2 class="section-title fade-in">Program <span>lojalnościowy</span></h2>
+    <p class="section-subtitle fade-in">Zbieraj pieczątki, odbieraj pizze gratis i awansuj na wyższe rangi</p>
+    <div class="rk-steps">
+      <div class="rk-step"><b>1</b><span>Zamów pizzę i pokaż kartę w aplikacji — dostajesz pieczątkę</span></div>
+      <div class="rk-step"><b>2</b><span>10 pieczątek = pizza gratis 🍕</span></div>
+      <div class="rk-step"><b>3</b><span>Każda odebrana pizza gratis to krok do wyższej rangi i lepszych przywilejów</span></div>
+    </div>
+    <div class="rk-ladder" id="rkLadder"></div>
+    <div class="rk-cta"><a class="rev-btn" href="#konto">Załóż konto i zbieraj pieczątki</a></div>
+  </div>
+</section>
+
 <section class="reviews" id="opinie" hidden>
   <div class="container">
     <h2 class="section-title fade-in">Co mówią <span>klienci</span></h2>
@@ -1130,6 +1144,22 @@ body.has-notice .hero{margin-top:0}
 .unavail-badge{display:inline-block;margin-top:.6rem;padding:.15rem .7rem;border-radius:99px;background:var(--red);color:#fff;font-size:.8rem;font-weight:700}
 .menu-item.is-dish{outline:3px solid var(--gold);outline-offset:-3px}
 .menu-item.is-hidden{display:none!important}
+/* program lojalnościowy na stronie głównej */
+.ranks{background:white}body.dark .ranks{background:var(--dark-card)}
+.rk-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem;max-width:920px;margin:2rem auto 2.2rem}
+.rk-step{display:flex;gap:.8rem;align-items:center;padding:1rem 1.1rem;border-radius:16px;background:var(--light);box-shadow:0 4px 16px rgba(0,0,0,.07);font-weight:600;font-size:.95rem}
+body.dark .rk-step{background:var(--dark-bg)}
+.rk-step b{flex:0 0 38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--green),var(--red));color:#fff;font-size:1.1rem}
+.rk-ladder{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1rem}
+.rk-card{text-align:center;padding:1.3rem 1rem;border-radius:18px;background:var(--light);box-shadow:0 5px 20px rgba(0,0,0,.08);border-top:5px solid var(--tc,#d4af37);transition:var(--transition)}
+.rk-card:hover{transform:translateY(-6px);box-shadow:0 14px 34px rgba(0,0,0,.16)}
+body.dark .rk-card{background:var(--dark-bg)}
+.rk-card .ic{display:block;font-size:2.7rem;line-height:1.1}
+.rk-card h3{margin:.4rem 0 .1rem;font-family:'Playfair Display',serif;font-size:1.25rem}
+.rk-card .from{font-size:.85rem;font-weight:700;color:var(--tc,#b8860b)}
+.rk-card p{margin:.5rem 0 0;font-size:.88rem;opacity:.85}
+.rk-card.lv-t0{--tc:#cd7f32}.rk-card.lv-t1{--tc:#9aa6b6}.rk-card.lv-t2{--tc:#d4af37}.rk-card.lv-t3{--tc:#22b8d4}.rk-card.lv-t4{--tc:#a855f7}.rk-card.lv-t5{--tc:#ef4444}
+.rk-cta{text-align:center;margin-top:2rem}
 /* motyw sezonowy: style w motyw.css (włączany w panelu: Konto → Strona → Motyw sezonowy) */
 /* poziomy i polecenia */
 #rabat-overlay .rb-level{margin:0 0 12px;padding:12px;border:1px solid var(--rb-border);border-radius:12px;background:var(--rb-input)}
@@ -1147,6 +1177,27 @@ body.has-notice .hero{margin-top:0}
 #rabat-overlay .rb-lv-row input{margin:0}
 #rabat-overlay .rb-lv-row .rb-lv-ic{flex:0 0 56px;text-align:center;font-size:20px}
 #rabat-overlay .rb-lv-row .rb-lv-f{flex:0 0 80px}
+#rabat-overlay .rb-lv-row .rb-lv-del{flex:0 0 auto;min-height:38px;padding:4px 10px}
+#rabat-overlay .rb-lv-chip.lv-t0{background:rgba(205,127,50,.22);border-color:#cd7f32}
+#rabat-overlay .rb-lv-chip.lv-t1{background:rgba(170,180,194,.25);border-color:#aab4c2}
+#rabat-overlay .rb-lv-chip.lv-t3{background:rgba(52,198,224,.2);border-color:#34c6e0}
+#rabat-overlay .rb-lv-chip.lv-t4{background:rgba(168,85,247,.2);border-color:#a855f7}
+#rabat-overlay .rb-lv-chip.lv-t5{background:rgba(239,68,68,.2);border-color:#ef4444}
+#rabat-overlay .rb-lv-ladder{display:flex;gap:6px;margin:10px 0;overflow-x:auto;padding-bottom:2px}
+#rabat-overlay .rb-lv-step{flex:1 1 0;min-width:50px;text-align:center;padding:6px 4px;border-radius:10px;border:1px solid var(--rb-border);background:var(--rb-card);font-size:11px;line-height:1.25}
+#rabat-overlay .rb-lv-step .ic{display:block;font-size:22px}
+#rabat-overlay .rb-lv-step b{display:block;font-size:12px}
+#rabat-overlay .rb-lv-step small{color:var(--rb-muted)}
+#rabat-overlay .rb-lv-step.done{opacity:.8}
+#rabat-overlay .rb-lv-step.cur{border-color:var(--rb-gold);box-shadow:0 0 0 2px rgba(212,175,55,.4)}
+#rabat-overlay .rb-lv-step.lock .ic{filter:grayscale(1);opacity:.4}
+#rabat-overlay .rb-lv-step.lock{opacity:.7}
+#rabat-overlay .rb-ach-h{margin:12px 0 6px;font-weight:800;font-size:13px;display:flex;justify-content:space-between}
+#rabat-overlay .rb-ach-h span{color:var(--rb-muted);font-weight:600}
+#rabat-overlay .rb-ach{display:flex;flex-wrap:wrap;gap:6px}
+#rabat-overlay .rb-ach span{padding:4px 10px;border-radius:99px;font-size:12px;border:1px solid var(--rb-border);background:var(--rb-card)}
+#rabat-overlay .rb-ach span.on{border-color:var(--rb-accent);background:rgba(0,146,70,.18);font-weight:700}
+#rabat-overlay .rb-ach span.off{opacity:.5;filter:grayscale(1)}
 #rabat-overlay .rb-ref{background:var(--rb-card);border:1px solid var(--rb-border);border-radius:16px;padding:16px;margin:0 0 16px}
 #rabat-overlay .rb-ref-code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:26px;font-weight:800;letter-spacing:4px;text-align:center;padding:8px;border:1px dashed var(--rb-accent);border-radius:12px;margin-bottom:10px}
 #ref-invite{position:fixed;left:12px;right:12px;bottom:12px;z-index:1200;max-width:520px;margin:0 auto;display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:14px;background:#0c6b38;color:#fff;box-shadow:0 8px 30px rgba(0,0,0,.4);font-size:14px;font-weight:600}
@@ -1519,7 +1570,8 @@ body.dark #site-dish .sd-text{color:#bbb}
             <option value="never">🆕 Jeszcze nie byli w lokalu</option>
             <option value="bday">🎂 Urodziny w ciągu 7 dni</option>
             <option value="mkt">✉ Zgoda na e-mail</option>
-            <option value="vip">🏅 Stali klienci (Srebro i wyżej)</option>
+            <option value="vip">🏆 Ranking: najwięcej darmowych pizz</option>
+            <option value="rankup">🚀 Blisko awansu na wyższą rangę</option>
             <option value="refs">🤝 Polecenia (nagrody do przyznania)</option>
             <option value="dups">👥 Możliwe duplikaty kont</option>
           </select>
@@ -1619,7 +1671,7 @@ body.dark #site-dish .sd-text{color:#bbb}
           <select id="rb-t-type">
             <option value="percent">Procent (np. -20%)</option>
             <option value="amount">Kwota (np. -5 zł)</option>
-            <option value="free">Produkt gratis</option>
+            <option value="free">Produkt za 1 zł</option>
             <option value="custom">Własny opis</option>
           </select>
           <div id="rb-t-valwrap">
@@ -1711,9 +1763,11 @@ body.dark #site-dish .sd-text{color:#bbb}
           <button type="button" class="rb-btn secondary small" id="rb-gal-reset" style="margin-top:8px">Przywróć usunięte i domyślną kolejność</button>
 
           <h4 class="rb-hsec"><span>Lojalność i polecenia</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
-          <div class="rb-meta" style="margin:-4px 0 8px">Poziomy liczone są z łącznej liczby wizyt (pieczątek). Klient widzi swój poziom, postęp i przywilej, a obsługa widzi go przy skanowaniu, żeby go zastosować. Na start oba mechanizmy są wyłączone — sprawdź teksty i włącz, kiedy będziesz gotowy.</div>
-          <label class="rb-check"><input id="rb-lv-on" type="checkbox"> Pokazuj klientom poziomy (Brąz / Srebro / Złoto)</label>
+          <div class="rb-meta" style="margin:-4px 0 8px">Klient widzi swoją rangę, postęp, osiągnięcia i przywilej, a obsługa widzi rangę przy skanowaniu, żeby przywilej zastosować. Na start oba mechanizmy są wyłączone — sprawdź teksty i włącz, kiedy będziesz gotowy.</div>
+          <label class="rb-check"><input id="rb-lv-on" type="checkbox"> Pokazuj klientom rangi i osiągnięcia oraz sekcję „Program lojalnościowy” na stronie</label>
+          <div class="rb-meta" style="margin:6px 0">Ranga zależy od liczby <b>odebranych darmowych pizz</b> z karty lojalnościowej (10 pieczątek = 1 pizza gratis). Możesz mieć od 3 do 6 rang, zmieniać nazwy, ikony, progi i przywileje.</div>
           <div id="rb-lv-rows"></div>
+          <button type="button" class="rb-btn secondary small" id="rb-lv-add">+ Dodaj rangę</button>
           <label class="rb-check" style="margin-top:10px"><input id="rb-ref-on" type="checkbox"> Włącz program poleceń: polecający dostaje −5 zł po pierwszym zakupie znajomego (nagrodę przyznajesz w zakładce Klienci → Polecenia)</label>
 
           <h4 class="rb-hsec"><span>Opinie w Google</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
@@ -2592,18 +2646,22 @@ async function handleUser(user) {
 function stampDots(n) {
   return Array.from({ length: LOYAL_GOAL }, (_, i) => `<span class="rb-stamp${i < n ? " on" : ""}">${i < n ? "🍕" : i + 1}</span>`).join("");
 }
-/* ---------- poziomy klienta ---------- */
+/* ---------- rangi klienta: liczone z odebranych darmowych pizz z karty lojalnościowej ---------- */
+const LV_MIN = 3, LV_MAX = 6;
 function defLevels() {
   return [
     { n: "Brąz", ic: "🥉", from: 0, perk: "Karta lojalnościowa: co 10. pizza gratis" },
-    { n: "Srebro", ic: "🥈", from: 10, perk: "Darmowy sos do każdego zamówienia" },
-    { n: "Złoto", ic: "🥇", from: 25, perk: "Darmowy sos i mały dodatek do każdego zamówienia" }
+    { n: "Srebro", ic: "🥈", from: 2, perk: "Sos do każdego zamówienia za 1 zł" },
+    { n: "Złoto", ic: "🥇", from: 5, perk: "Sos i mały dodatek do każdego zamówienia — razem za 1 zł" },
+    { n: "Platyna", ic: "💎", from: 10, perk: "Sos i dodatek za 1 zł + pierwszeństwo przy zamówieniach na konkretną godzinę" },
+    { n: "Legenda", ic: "👑", from: 20, perk: "Pizza urodzinowa za 1 zł raz w roku + wszystkie wcześniejsze przywileje" }
   ];
 }
-function cleanLevels(a) {
-  if (!Array.isArray(a) || a.length !== 3) return defLevels();
+/* v === 2: progi są w darmowych pizzach (starsze ustawienia liczyły wizyty, więc wracają do domyślnych) */
+function cleanLevels(a, v) {
+  if (v !== 2 || !Array.isArray(a) || a.length < LV_MIN || a.length > LV_MAX) return defLevels();
   const out = [];
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < a.length; i++) {
     const x = a[i] || {};
     const n = String(x.n || "").trim().slice(0, 20), ic = String(x.ic || "").trim().slice(0, 4);
     const from = Number(x.from), perk = String(x.perk || "").trim().slice(0, 100);
@@ -2614,56 +2672,111 @@ function cleanLevels(a) {
   return out;
 }
 const curLevels = () => siteCfg.levels || defLevels();
-function levelInfo(total) {
+const rewardsOf = (L) => Math.max(0, Math.floor(Number(L && L.rewards) || 0));
+const lvTier = (i) => "lv-t" + Math.min(Math.max(i, 0), 5);
+function pizzaWord(n) {
+  n = Math.abs(n); const m10 = n % 10, m100 = n % 100;
+  return n === 1 ? "pizza" : (m10 >= 2 && m10 <= 4 && !(m100 >= 12 && m100 <= 14)) ? "pizze" : "pizz";
+}
+/* ranga wynika z liczby odebranych darmowych pizz (pole rewards na karcie) */
+function levelInfo(rewards) {
   const L = curLevels(); let idx = 0;
-  for (let i = 0; i < L.length; i++) if (total >= L[i].from) idx = i;
+  for (let i = 0; i < L.length; i++) if (rewards >= L[i].from) idx = i;
   const next = L[idx + 1] || null;
-  return { idx, lvl: L[idx], next, left: next ? next.from - total : 0 };
+  return { idx, lvl: L[idx], next, left: next ? next.from - rewards : 0 };
+}
+function lvRowHtml(l, i, n) {
+  return `<div class="rb-lv-row">
+      <div class="rb-row"><input class="rb-lv-ic" maxlength="4" value="${esc(l.ic)}" aria-label="Ikona"><input class="rb-lv-n" maxlength="20" value="${esc(l.n)}" aria-label="Nazwa rangi"><input class="rb-lv-f" type="number" min="0" max="9999" step="1" value="${esc(String(l.from))}" ${i === 0 ? "disabled" : ""} aria-label="Od ilu darmowych pizz">${i > 0 && n > LV_MIN ? `<button type="button" class="rb-btn secondary small rb-lv-del" data-i="${i}" aria-label="Usuń rangę">🗑</button>` : ""}</div>
+      <input class="rb-lv-p" maxlength="100" value="${esc(l.perk)}" placeholder="Przywilej tej rangi (np. sos za 1 zł)" aria-label="Przywilej">
+      <div class="rb-meta">${i === 0 ? "Ranga startowa — od 0 darmowych pizz." : "Liczba w polu = od ilu odebranych darmowych pizz z karty klient ma tę rangę."}</div>
+    </div>`;
+}
+function renderLevelRows(list) {
+  const box = $("rb-lv-rows"); if (!box) return;
+  box.innerHTML = list.map((l, i) => lvRowHtml(l, i, list.length)).join("");
+  const add = $("rb-lv-add"); if (add) add.disabled = list.length >= LV_MAX;
+}
+function readLevelRows() {
+  return [...document.querySelectorAll("#rb-lv-rows .rb-lv-row")].map((r, i) => ({
+    ic: r.querySelector(".rb-lv-ic").value.trim(), n: r.querySelector(".rb-lv-n").value.trim(),
+    from: i === 0 ? 0 : r.querySelector(".rb-lv-f").value, perk: r.querySelector(".rb-lv-p").value.trim()
+  }));
 }
 function fillLevelsForm() {
   const on = $("rb-lv-on"), box = $("rb-lv-rows");
   if (!on || !box) return;
   on.checked = !!siteCfg.levelsOn;
   $("rb-ref-on").checked = !!siteCfg.refOn;
-  box.innerHTML = curLevels().map((l, i) => `<div class="rb-lv-row">
-      <div class="rb-row"><input class="rb-lv-ic" maxlength="4" value="${esc(l.ic)}" aria-label="Ikona"><input class="rb-lv-n" maxlength="20" value="${esc(l.n)}" aria-label="Nazwa poziomu"><input class="rb-lv-f" type="number" min="0" max="9999" step="1" value="${l.from}" ${i === 0 ? "disabled" : ""} aria-label="Od ilu wizyt"></div>
-      <input class="rb-lv-p" maxlength="100" value="${esc(l.perk)}" placeholder="Przywilej tego poziomu (np. darmowy sos)" aria-label="Przywilej">
-      <div class="rb-meta">${i === 0 ? "Poziom startowy — od 0 wizyt." : "Liczba w polu po prawej = od ilu wizyt (pieczątek łącznie) klient ma ten poziom."}</div>
-    </div>`).join("");
+  renderLevelRows(curLevels());
 }
+(function lvEditorEvents() {
+  const box = $("rb-lv-rows"), add = $("rb-lv-add");
+  if (box) box.addEventListener("click", (e) => {
+    const b = e.target.closest(".rb-lv-del"); if (!b) return;
+    const list = readLevelRows(), i = Number(b.dataset.i);
+    if (list.length > LV_MIN && i > 0) { list.splice(i, 1); renderLevelRows(list); }
+  });
+  if (add) add.addEventListener("click", () => {
+    const list = readLevelRows(); if (list.length >= LV_MAX) return;
+    const last = Number(list[list.length - 1].from) || 0;
+    list.push({ ic: "⭐", n: "Nowa ranga", from: last + 5, perk: "" });
+    renderLevelRows(list);
+  });
+})();
 function collectLevels() {
-  const rows = [...document.querySelectorAll("#rb-lv-rows .rb-lv-row")];
-  if (rows.length !== 3) return { list: curLevels() };
-  const list = rows.map((r, i) => ({
-    ic: r.querySelector(".rb-lv-ic").value.trim(), n: r.querySelector(".rb-lv-n").value.trim(),
-    from: i === 0 ? 0 : Number(r.querySelector(".rb-lv-f").value), perk: r.querySelector(".rb-lv-p").value.trim()
-  }));
-  for (let i = 0; i < 3; i++) {
-    if (!list[i].n) return { bad: "Podaj nazwę każdego poziomu." };
-    if (!Number.isInteger(list[i].from) || list[i].from < 0 || list[i].from > 9999) return { bad: "Liczba wizyt musi być liczbą całkowitą." };
-    if (i > 0 && list[i].from <= list[i - 1].from) return { bad: "Każdy kolejny poziom musi zaczynać się od większej liczby wizyt." };
+  const raw = readLevelRows();
+  if (raw.length < LV_MIN || raw.length > LV_MAX) return { list: curLevels() };
+  const list = raw.map((r, i) => ({ ic: r.ic, n: r.n, from: i === 0 ? 0 : Number(r.from), perk: r.perk }));
+  for (let i = 0; i < list.length; i++) {
+    if (!list[i].n) return { bad: "Podaj nazwę każdej rangi." };
+    if (!Number.isInteger(list[i].from) || list[i].from < 0 || list[i].from > 9999) return { bad: "Liczba darmowych pizz musi być liczbą całkowitą." };
+    if (i > 0 && list[i].from <= list[i - 1].from) return { bad: "Każda kolejna ranga musi zaczynać się od większej liczby darmowych pizz." };
   }
   return { list };
+}
+/* osiągnięcia: wyliczane z danych karty (nic nie trzeba zapisywać) */
+function achievements(L) {
+  const rw = rewardsOf(L), tot = L.total || 0, st = L.stamps || 0, c = tsMs(L.createdAt), age = c ? (Date.now() - c) / 86400000 : 0;
+  return [
+    { ic: "🍕", n: "Pierwsza pieczątka", d: "Zdobądź pierwszą pieczątkę", ok: tot >= 1 },
+    { ic: "🔥", n: "Prawie pełna karta", d: "Uzbieraj 8 pieczątek na karcie", ok: st >= 8 || rw >= 1 },
+    { ic: "🎁", n: "Pierwsza pizza gratis", d: "Odbierz pierwszą darmową pizzę", ok: rw >= 1 },
+    { ic: "🔟", n: "10 wizyt", d: "10 pieczątek łącznie", ok: tot >= 10 },
+    { ic: "🥳", n: "Trzy gratisy", d: "Odbierz 3 darmowe pizze", ok: rw >= 3 },
+    { ic: "🎯", n: "25 wizyt", d: "25 pieczątek łącznie", ok: tot >= 25 },
+    { ic: "🏅", n: "50 wizyt", d: "50 pieczątek łącznie", ok: tot >= 50 },
+    { ic: "👑", n: "Dziesięć gratisów", d: "Odbierz 10 darmowych pizz", ok: rw >= 10 },
+    { ic: "🎂", n: "Rok z nami", d: "Konto starsze niż rok", ok: age >= 365 }
+  ];
 }
 function renderLevel(user) {
   const el = $("rb-level");
   if (!el) return;
   if (!siteCfg.levelsOn || !myLoyal || isStaff || isAdmin) { el.hidden = true; return; }
-  const total = myLoyal.total || 0, LI = levelInfo(total), all = curLevels();
+  const rw = rewardsOf(myLoyal), st = Math.min(LOYAL_GOAL, myLoyal.stamps || 0), LI = levelInfo(rw), all = curLevels();
   try {
-    const k = "wr_lvl_" + user.uid, st = localStorage.getItem(k);
-    if (st !== null && LI.idx > Number(st)) lvUp = LI.idx;
-    if (st === null || LI.idx !== Number(st)) localStorage.setItem(k, String(LI.idx));
+    const k = "wr_lvl2_" + user.uid, s0 = localStorage.getItem(k);
+    if (s0 !== null && LI.idx > Number(s0)) lvUp = LI.idx;
+    if (s0 === null || LI.idx !== Number(s0)) localStorage.setItem(k, String(LI.idx));
   } catch (_) {}
-  const pct = LI.next ? Math.max(0, Math.min(100, Math.round((total - LI.lvl.from) / (LI.next.from - LI.lvl.from) * 100))) : 100;
+  const base = rw + st / LOYAL_GOAL;
+  const pct = LI.next ? Math.max(0, Math.min(100, Math.round((base - LI.lvl.from) / (LI.next.from - LI.lvl.from) * 100))) : 100;
+  const needSt = LI.next ? Math.max(0, (LI.next.from - rw) * LOYAL_GOAL - st) : 0;
+  const ach = achievements(myLoyal), done = ach.filter((a) => a.ok).length;
   el.hidden = false;
-  el.innerHTML = (lvUp === LI.idx && LI.idx > 0 ? `<div class="rb-lv-up">🎉 Awans! Jesteś teraz na poziomie ${esc(LI.lvl.ic)} ${esc(LI.lvl.n)}.</div>` : "")
-    + `<div class="rb-lv-top"><span class="rb-lv-chip">${esc(LI.lvl.ic)} ${esc(LI.lvl.n)}</span><span class="rb-meta">Wizyt: ${total}</span></div>`
+  el.innerHTML = (lvUp === LI.idx && LI.idx > 0 ? `<div class="rb-lv-up">🎉 Awans! Jesteś teraz w randze ${esc(LI.lvl.ic)} ${esc(LI.lvl.n)}.</div>` : "")
+    + `<div class="rb-lv-top"><span class="rb-lv-chip ${lvTier(LI.idx)}">${esc(LI.lvl.ic)} ${esc(LI.lvl.n)}</span><span class="rb-meta">🍕 Darmowe pizze: <b>${rw}</b></span></div>`
     + `<div class="rb-lv-bar"><i style="width:${pct}%"></i></div>`
-    + (LI.next ? `<div class="rb-meta">Do poziomu ${esc(LI.next.ic)} ${esc(LI.next.n)} brakuje jeszcze ${LI.left} ${LI.left === 1 ? "wizyty" : "wizyt"}.</div>` : `<div class="rb-meta">Masz najwyższy poziom. Dziękujemy, że z nami jesteś! 💚</div>`)
+    + (LI.next
+      ? `<div class="rb-meta">Do rangi ${esc(LI.next.ic)} ${esc(LI.next.n)}: jeszcze ${LI.left} ${pizzaWord(LI.left)} gratis (ok. ${needSt} pieczątek). Pizza liczy się do rangi, gdy ją odbierzesz.</div>`
+      : `<div class="rb-meta">Masz najwyższą rangę. Dziękujemy, że z nami jesteś! 💚</div>`)
+    + `<div class="rb-lv-ladder">${all.map((l, i) => `<div class="rb-lv-step ${lvTier(i)} ${i < LI.idx ? "done" : i === LI.idx ? "cur" : "lock"}"><span class="ic">${esc(l.ic)}</span><b>${esc(l.n)}</b><small>${l.from} 🍕</small></div>`).join("")}</div>`
     + (LI.lvl.perk ? `<div class="rb-lv-perk">✨ Twój przywilej: <b>${esc(LI.lvl.perk)}</b><br><span class="rb-meta">Pokaż kartę przy zamówieniu — obsługa go zastosuje.</span></div>` : "")
-    + `<details class="rb-lv-all"><summary>Wszystkie poziomy</summary>${all.map((l, i) => `<div>${esc(l.ic)} <b>${esc(l.n)}</b> — od ${l.from} wizyt${l.perk ? ": " + esc(l.perk) : ""}${i === LI.idx ? " ← Ty" : ""}</div>`).join("")}</details>`;
+    + `<details class="rb-lv-all"><summary>Wszystkie rangi i przywileje</summary>${all.map((l, i) => `<div>${esc(l.ic)} <b>${esc(l.n)}</b> — od ${l.from} ${pizzaWord(l.from)} gratis${l.perk ? ": " + esc(l.perk) : ""}${i === LI.idx ? " ← Ty" : ""}</div>`).join("")}</details>`
+    + `<div class="rb-ach-h">🏆 Osiągnięcia <span>${done}/${ach.length}</span></div><div class="rb-ach">${ach.map((a) => `<span class="${a.ok ? "on" : "off"}" title="${esc(a.d)}">${a.ic} ${esc(a.n)}</span>`).join("")}</div>`;
 }
+
 function refreshLoyaltyUi() {
   const u = auth.currentUser;
   try { if (u && myLoyal && !isAdmin && !isStaff) renderLoyal(u); } catch (_) {}
@@ -3450,8 +3563,9 @@ function renderCustomer() {
     const adminInfo = isAdmin
       ? `<div class="rb-meta">🎂 ${esc(bdayFull(uu))} · ✉ zgoda na e-mail: ${uu.marketing === true ? "tak" : "nie"}</div><div class="rb-meta">Konto od: ${L.createdAt ? new Date(tsMs(L.createdAt)).toLocaleDateString("pl-PL") : "—"} · ostatnia wizyta: ${lastMs ? new Date(lastMs).toLocaleDateString("pl-PL") + " (" + agoText(lastMs) + ")" : "jeszcze nie było"}</div>`
       : "";
-    const LI = siteCfg.levelsOn ? levelInfo(L.total || 0) : null;
-    const lvLine = LI ? `<div class="rb-meta">🏅 Poziom: <b>${esc(LI.lvl.ic)} ${esc(LI.lvl.n)}</b>${LI.lvl.perk ? " — przywilej: <b>" + esc(LI.lvl.perk) + "</b>" : ""}</div>` : "";
+    const LI = siteCfg.levelsOn ? levelInfo(rewardsOf(L)) : null;
+    const lvUpNow = !!(LI && LI.next && (L.stamps || 0) >= LOYAL_GOAL && rewardsOf(L) + 1 >= LI.next.from);
+    const lvLine = LI ? `<div class="rb-meta">🏅 Ranga: <b>${esc(LI.lvl.ic)} ${esc(LI.lvl.n)}</b>${LI.lvl.perk ? " — przywilej: <b>" + esc(LI.lvl.perk) + "</b>" : ""}${LI.next ? " · do " + esc(LI.next.ic + " " + LI.next.n) + ": " + LI.left + " " + pizzaWord(LI.left) + " gratis" : ""}</div>${lvUpNow ? `<div class="rb-lv-up">⭐ Wydanie tej pizzy gratis awansuje klienta na rangę ${esc(LI.next.ic + " " + LI.next.n)}!</div>` : ""}` : "";
     head = `<div class="rb-big">👤 ${esc(L.name || L.email)}</div><div class="rb-meta">${esc(L.email)} · pieczątek łącznie: ${L.total || 0} · darmowe pizze: ${L.rewards || 0}</div>${lvLine}${adminInfo}
       <div class="rb-stamps">${stampDots(n)}</div>
       <div class="rb-loyal-txt"><b>${n} / ${LOYAL_GOAL}</b>${full ? " — 🎉 należy się pizza gratis (1 szt.)" : ""}</div>`;
@@ -3542,7 +3656,7 @@ $("rb-k-card").addEventListener("click", (e) => {
 });
 
 /* ---------- szablony rabatów ---------- */
-const DEFAULT_TPL = ["-10% na całe zamówienie", "-20% na pizzę", "-5 zł na zamówienie", "Darmowy sos do pizzy", "Darmowe frytki", "Darmowy dowóz"];
+const DEFAULT_TPL = ["-10% na całe zamówienie", "-20% na pizzę", "-5 zł na zamówienie", "Sos do pizzy za 1 zł", "Frytki za 1 zł", "Dowóz za 1 zł"];
 
 function renderTemplates() {
   const sel = $("rb-a-tpl");
@@ -3589,7 +3703,7 @@ function buildText() {
   if (!raw) return "";
   if (type === "percent") return "-" + val + "% na " + (scope || "całe zamówienie");
   if (type === "amount") return "-" + val + " zł na " + (scope || "zamówienie");
-  if (type === "free") return "Gratis: " + raw;
+  if (type === "free") return raw + " za 1 zł";
   return "";
 }
 function syncBuilder() {
@@ -3600,7 +3714,7 @@ function syncBuilder() {
   $("rb-t-scopewrap").hidden = isCustom || isFree;
   vi.type = isFree ? "text" : "number";
   vi.placeholder = isFree ? "np. sos czosnkowy" : (type === "percent" ? "np. 20" : "np. 5");
-  $("rb-t-vallabel").textContent = type === "percent" ? "Ile procent (%)" : type === "amount" ? "Ile złotych (zł)" : "Jaki produkt gratis";
+  $("rb-t-vallabel").textContent = type === "percent" ? "Ile procent (%)" : type === "amount" ? "Ile złotych (zł)" : "Jaki produkt za 1 zł";
   if (!tTextTouched) $("rb-t-text").value = buildText();
 }
 $("rb-t-type").addEventListener("change", () => { $("rb-t-value").value = ""; tTextTouched = false; syncBuilder(); });
@@ -3625,7 +3739,7 @@ $("rb-t-save").addEventListener("click", async () => {
     if (!(value > 0 && value <= 1000)) { setMsg(tMsg, "Kwota: liczba większa od 0 (do 1000 zł).", "err"); return; }
   } else if (type === "free") {
     value = $("rb-t-value").value.trim();
-    if (!value) { setMsg(tMsg, "Wpisz, jaki produkt ma być gratis.", "err"); return; }
+    if (!value) { setMsg(tMsg, "Wpisz, jaki produkt ma być za 1 zł.", "err"); return; }
   }
   if (!text) { setMsg(tMsg, "Wpisz opis rabatu.", "err"); return; }
   let validDays = null;
@@ -3771,7 +3885,7 @@ const tsMs = (t) => (t ? (t.toDate ? t.toDate().getTime() : (t.seconds ? t.secon
 function plainCfg(c) {
   const n = c.notice ? { ...c.notice, until: c.notice.until ? { seconds: Math.floor(tsMs(c.notice.until) / 1000) } : null } : null;
   const camps = (c.campaigns || []).map((x) => ({ ...x, from: x.from ? { seconds: Math.floor(tsMs(x.from) / 1000) } : null, until: x.until ? { seconds: Math.floor(tsMs(x.until) / 1000) } : null }));
-  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, badges: c.badges || {}, products: c.products || [], campaigns: camps, notice: n, dish: c.dish || null, delivery: c.delivery || null, googleReviewUrl: typeof c.googleReviewUrl === "string" ? c.googleReviewUrl : null, reviews: Array.isArray(c.reviews) ? c.reviews : [], googleMapsUrl: typeof c.googleMapsUrl === "string" ? c.googleMapsUrl : "", theme: typeof c.theme === "string" ? c.theme : "auto", levelsOn: c.levelsOn === true, levels: Array.isArray(c.levels) ? c.levels : null, refOn: c.refOn === true };
+  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, badges: c.badges || {}, products: c.products || [], campaigns: camps, notice: n, dish: c.dish || null, delivery: c.delivery || null, googleReviewUrl: typeof c.googleReviewUrl === "string" ? c.googleReviewUrl : null, reviews: Array.isArray(c.reviews) ? c.reviews : [], googleMapsUrl: typeof c.googleMapsUrl === "string" ? c.googleMapsUrl : "", theme: typeof c.theme === "string" ? c.theme : "auto", levelsOn: c.levelsOn === true, levels: Array.isArray(c.levels) ? c.levels : null, levelsV: c.levelsV === 2 ? 2 : 0, refOn: c.refOn === true };
 }
 
 function renderDish() {
@@ -3913,7 +4027,7 @@ function applySite(cfg) {
     googleReviewUrl: (cfg && typeof cfg.googleReviewUrl === "string") ? cfg.googleReviewUrl : GOOGLE_REVIEW_DEFAULT,
     reviews: Array.isArray(cfg && cfg.reviews) ? cfg.reviews : [], googleMapsUrl: (cfg && typeof cfg.googleMapsUrl === "string") ? cfg.googleMapsUrl : "",
     theme: (cfg && typeof cfg.theme === "string") ? cfg.theme : "auto",
-    levelsOn: !!(cfg && cfg.levelsOn === true), levels: cleanLevels(cfg && cfg.levels), refOn: !!(cfg && cfg.refOn === true)
+    levelsOn: !!(cfg && cfg.levelsOn === true), levels: cleanLevels(cfg && cfg.levels, cfg && cfg.levelsV), refOn: !!(cfg && cfg.refOn === true)
   };
   applyTheme(siteCfg.theme);
   setTimeout(() => { try { refreshLoyaltyUi(); } catch (_) {} }, 0);
@@ -3948,6 +4062,7 @@ function applySite(cfg) {
   renderNotice();
   renderDelivery();
   try { renderReviews(); } catch (_) {}
+  try { renderRanks(); } catch (_) {}
   try { applyPhotos(); } catch (_) {}
 }
 
@@ -3957,6 +4072,15 @@ const GMAPS_DEFAULT = "https://www.google.com/maps/search/?api=1&query=W%C5%82os
 const httpsUrl = (u) => typeof u === "string" && /^https:\/\/\S+$/.test(u.trim());
 function validReview(r) {
   return !!(r && typeof r.name === "string" && r.name.trim() && typeof r.text === "string" && r.text.trim() && Number.isInteger(r.stars) && r.stars >= 1 && r.stars <= 5);
+}
+function renderRanks() {
+  const sec = $("rangi");
+  if (!sec) return;
+  if (!siteCfg.levelsOn) { sec.hidden = true; return; }
+  $("rkLadder").innerHTML = curLevels().map((l, i) =>
+    '<div class="rk-card ' + lvTier(i) + '"><span class="ic">' + esc(l.ic) + "</span><h3>" + esc(l.n) + '</h3><div class="from">' +
+    (i === 0 ? "na start" : "od " + l.from + " " + pizzaWord(l.from) + " gratis") + "</div>" + (l.perk ? "<p>" + esc(l.perk) + "</p>" : "") + "</div>").join("");
+  sec.hidden = false;
 }
 function renderReviews() {
   const sec = $("opinie");
@@ -4765,8 +4889,8 @@ async function saveSite() {
   const btns = [$("rb-site-save"), ...document.querySelectorAll(".rb-sec-save")];
   btns.forEach((b) => { b.disabled = true; });
   try {
-    await setDoc(doc(db, "site", "config"), { prices, unavailable, hidden, badges, products, campaigns, notice, dish, delivery, googleReviewUrl, reviews, googleMapsUrl, theme, levelsOn, levels, refOn, updatedAt: serverTimestamp() });
-    const cfg = { prices, unavailable, hidden, badges, products, campaigns, notice, dish, delivery, googleReviewUrl, reviews, googleMapsUrl, theme, levelsOn, levels, refOn };
+    await setDoc(doc(db, "site", "config"), { prices, unavailable, hidden, badges, products, campaigns, notice, dish, delivery, googleReviewUrl, reviews, googleMapsUrl, theme, levelsOn, levels, levelsV: 2, refOn, updatedAt: serverTimestamp() });
+    const cfg = { prices, unavailable, hidden, badges, products, campaigns, notice, dish, delivery, googleReviewUrl, reviews, googleMapsUrl, theme, levelsOn, levels, levelsV: 2, refOn };
     applySite(cfg);
     fillSiteForm();
     try { localStorage.setItem(SITE_CACHE_KEY, JSON.stringify(plainCfg(cfg))); } catch (_) {}
@@ -5226,7 +5350,8 @@ function clientRows(opts) {
   if (f === "full") rows = rows.filter((r) => r.L && (r.L.stamps || 0) >= LOYAL_GOAL).sort((a, b) => b.last - a.last);
   else if (f === "inactive") rows = rows.filter((r) => r.u.id !== me && !staffIds.has(r.u.id) && r.last > 0 && now - r.last >= days * DAY).sort((a, b) => a.last - b.last);
   else if (f === "never") rows = rows.filter((r) => r.u.id !== me && !staffIds.has(r.u.id) && !(r.L && ((r.L.total || 0) > 0 || (r.L.rewards || 0) > 0)) && (!r.created || now - r.created >= 2 * DAY)).sort((a, b) => a.created - b.created);
-  else if (f === "vip") rows = rows.filter((r) => r.L && levelInfo(r.L.total || 0).idx >= 1).sort((a, b) => (b.L.total || 0) - (a.L.total || 0));
+  else if (f === "vip") rows = rows.filter((r) => r.L && rewardsOf(r.L) >= 1).sort((a, b) => rewardsOf(b.L) - rewardsOf(a.L) || (b.L.total || 0) - (a.L.total || 0));
+  else if (f === "rankup") rows = rows.filter((r) => { if (!r.L) return false; const li = levelInfo(rewardsOf(r.L)); return !!li.next && li.left === 1 && (r.L.stamps || 0) >= 5; }).sort((a, b) => (b.L.stamps || 0) - (a.L.stamps || 0));
   else if (f === "refs") { const ord = { ready: 0, wait: 1, nobody: 2, paid: 3 }; rows = rows.filter((r) => r.u.refBy).sort((a, b) => ord[refInfo(a.u).state] - ord[refInfo(b.u).state] || label(a).localeCompare(label(b))); }
   else if (f === "bday") rows = rows.filter((r) => bdayInDays(r.u) <= 7).sort((a, b) => bdayInDays(a.u) - bdayInDays(b.u));
   else if (f === "mkt") rows = rows.filter((r) => r.u.marketing === true).sort((a, b) => label(a).localeCompare(label(b)));
@@ -5259,7 +5384,7 @@ function renderClients() {
   if (!list) return;
   renderMsgBox();
   const f = $("rb-k-filter").value;
-  const needsLoyal = f === "full" || f === "inactive" || f === "never" || f === "vip" || f === "refs";
+  const needsLoyal = f === "full" || f === "inactive" || f === "never" || f === "vip" || f === "rankup" || f === "refs";
   if (needsLoyal && !loyalOk) {
     kRows = [];
     $("rb-k-wb").hidden = true;
@@ -5285,7 +5410,7 @@ function renderClients() {
     const badges = [];
     if (L && (L.stamps || 0) >= LOYAL_GOAL) badges.push('<span class="rb-badge gold">Pełna karta</span>');
     if (r.created && now - r.created < 7 * DAY) badges.push('<span class="rb-badge">Nowy</span>');
-    if (siteCfg.levelsOn && L) { const li = levelInfo(L.total || 0); if (li.idx >= 1) badges.push('<span class="rb-badge gold">' + esc(li.lvl.ic + " " + li.lvl.n) + "</span>"); }
+    if (siteCfg.levelsOn && L) { const li = levelInfo(rewardsOf(L)); if (li.idx >= 1) badges.push('<span class="rb-badge gold">' + esc(li.lvl.ic + " " + li.lvl.n) + "</span>"); }
     const di = dups.info.get(u.id);
     if (f === "dups") {
       const w = allCoupons.find((c) => c.id === "welcome_" + u.id);

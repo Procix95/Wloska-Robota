@@ -34,7 +34,7 @@ body[data-theme] .section-title::before{content:var(--th-tl);margin-right:.45em}
 body[data-theme] .section-title::after{content:var(--th-tr);margin-left:.45em;animation-delay:-1.4s}
 
 /* --- tło sekcji: wzór z ozdób + girlanda na górze --- */
-body[data-theme] .about,body[data-theme] .menu,body[data-theme] .gallery,body[data-theme] .reviews,body[data-theme] .contact{background-image:var(--th-pat);background-size:150px 150px;border-top:7px dotted var(--th1)}
+body[data-theme] .about,body[data-theme] .menu,body[data-theme] .gallery,body[data-theme] .reviews,body[data-theme] .ranks,body[data-theme] .contact{background-image:var(--th-pat);background-size:150px 150px;border-top:7px dotted var(--th1)}
 body[data-theme] .skladniki{border-top:7px dotted var(--th2)}
 
 /* --- karty menu: pasek w barwach motywu, emotka-naklejka w rogu, obwódka, kolor ceny --- */
@@ -51,7 +51,7 @@ body[data-theme] .category-btn.active,body[data-theme] .category-btn:hover{backg
 
 /* --- przyciski, kafelki, opinie --- */
 body[data-theme] .btn-primary{color:var(--th1);box-shadow:0 10px 30px rgba(0,0,0,.2),0 0 0 3px var(--th1)}
-body[data-theme] .feature-card,body[data-theme] .rev-card,body[data-theme] .contact-card{border-top:5px solid var(--th1)}
+body[data-theme] .feature-card,body[data-theme] .rev-card,body[data-theme] .rk-step,body[data-theme] .contact-card{border-top:5px solid var(--th1)}
 body[data-theme] .sticky-phone{background:var(--th-grad)}
 
 /* --- stopka --- */
@@ -74,7 +74,7 @@ body[data-page="sub"] a{color:var(--th1)}
   #theme-banner .tb-row span:nth-child(n+7){display:none}
   body[data-theme] .menu-item::after{width:2.3rem;height:2.3rem;font-size:1.25rem;bottom:12px;right:12px}
   body[data-theme] footer::before,#theme-subrow{font-size:1.5rem;letter-spacing:.2em}
-  body[data-theme] .about,body[data-theme] .menu,body[data-theme] .gallery,body[data-theme] .reviews,body[data-theme] .contact{background-size:120px 120px}
+  body[data-theme] .about,body[data-theme] .menu,body[data-theme] .gallery,body[data-theme] .reviews,body[data-theme] .ranks,body[data-theme] .contact{background-size:120px 120px}
 }
 @media (prefers-reduced-motion:reduce){
   #theme-deco span,#theme-banner .tb-row span,body[data-theme] .logo::before,body[data-theme] .section-title::before,body[data-theme] .section-title::after,body[data-theme] .theme-greet,body[data-page="sub"] h1::before,body[data-page="sub"] h1::after{animation:none}
