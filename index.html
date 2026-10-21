@@ -1177,6 +1177,15 @@ body.dark .rk-card{background:var(--dark-bg)}
 #rabat-overlay .rb-lv-row input{margin:0}
 #rabat-overlay .rb-lv-row .rb-lv-ic{flex:0 0 56px;text-align:center;font-size:20px}
 #rabat-overlay .rb-lv-row .rb-lv-f{flex:0 0 80px}
+#rabat-overlay .rb-adm-box{margin-top:10px;border:1px dashed var(--rb-border);border-radius:10px;padding:8px 10px}
+#rabat-overlay .rb-adm-box>summary{cursor:pointer;font-weight:700;font-size:13px}
+#rabat-overlay .rb-adm-box .rb-level{margin:8px 0 0}
+#rabat-overlay .rb-adm-row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin:8px 0}
+#rabat-overlay .rb-adm-row label{display:block;font-size:12px;color:var(--rb-muted);margin-bottom:3px}
+#rabat-overlay .rb-adm-row input{width:110px;margin:0}
+#rabat-overlay .rb-adm-row select{margin:0;max-width:240px}
+#rabat-overlay .rb-hist{max-height:240px;overflow:auto;margin-top:6px}
+#rabat-overlay .rb-hist div{font-size:12px;padding:4px 0;border-bottom:1px solid var(--rb-border)}
 #rabat-overlay .rb-lv-row .rb-lv-del{flex:0 0 auto;min-height:38px;padding:4px 10px}
 #rabat-overlay .rb-lv-chip.lv-t0{background:rgba(205,127,50,.22);border-color:#cd7f32}
 #rabat-overlay .rb-lv-chip.lv-t1{background:rgba(170,180,194,.25);border-color:#aab4c2}
@@ -2679,12 +2688,16 @@ function pizzaWord(n) {
   return n === 1 ? "pizza" : (m10 >= 2 && m10 <= 4 && !(m100 >= 12 && m100 <= 14)) ? "pizze" : "pizz";
 }
 /* ranga wynika z liczby odebranych darmowych pizz (pole rewards na karcie) */
-function levelInfo(rewards) {
+function levelInfo(rewards, minIdx) {
   const L = curLevels(); let idx = 0;
   for (let i = 0; i < L.length; i++) if (rewards >= L[i].from) idx = i;
+  const auto = idx, mi = Math.floor(Number(minIdx));
+  if (Number.isInteger(mi) && mi > idx) idx = Math.min(mi, L.length - 1);   // ranga nadana ręcznie przez właściciela
   const next = L[idx + 1] || null;
-  return { idx, lvl: L[idx], next, left: next ? next.from - rewards : 0 };
+  return { idx, auto, lvl: L[idx], next, left: next ? next.from - rewards : 0, granted: idx > auto };
 }
+/* ranga klienta = większa z: liczonej z darmowych pizz i nadanej ręcznie przez admina (pole rankSet na karcie) */
+const rankOf = (L) => levelInfo(rewardsOf(L), L && L.rankSet);
 function lvRowHtml(l, i, n) {
   return `<div class="rb-lv-row">
       <div class="rb-row"><input class="rb-lv-ic" maxlength="4" value="${esc(l.ic)}" aria-label="Ikona"><input class="rb-lv-n" maxlength="20" value="${esc(l.n)}" aria-label="Nazwa rangi"><input class="rb-lv-f" type="number" min="0" max="9999" step="1" value="${esc(String(l.from))}" ${i === 0 ? "disabled" : ""} aria-label="Od ilu darmowych pizz">${i > 0 && n > LV_MIN ? `<button type="button" class="rb-btn secondary small rb-lv-del" data-i="${i}" aria-label="Usuń rangę">🗑</button>` : ""}</div>
@@ -2750,23 +2763,22 @@ function achievements(L) {
     { ic: "🎂", n: "Rok z nami", d: "Konto starsze niż rok", ok: age >= 365 }
   ];
 }
-function renderLevel(user) {
-  const el = $("rb-level");
-  if (!el) return;
-  if (!siteCfg.levelsOn || !myLoyal || isStaff || isAdmin) { el.hidden = true; return; }
-  const rw = rewardsOf(myLoyal), st = Math.min(LOYAL_GOAL, myLoyal.stamps || 0), LI = levelInfo(rw), all = curLevels();
-  try {
-    const k = "wr_lvl2_" + user.uid, s0 = localStorage.getItem(k);
-    if (s0 !== null && LI.idx > Number(s0)) lvUp = LI.idx;
-    if (s0 === null || LI.idx !== Number(s0)) localStorage.setItem(k, String(LI.idx));
-  } catch (_) {}
+function rankHtml(L, preview, uid) {
+  const rw = rewardsOf(L), st = Math.min(LOYAL_GOAL, L.stamps || 0), LI = rankOf(L), all = curLevels();
+  if (!preview) {
+    try {
+      const k = "wr_lvl2_" + uid, s0 = localStorage.getItem(k);
+      if (s0 !== null && LI.idx > Number(s0)) lvUp = LI.idx;
+      if (s0 === null || LI.idx !== Number(s0)) localStorage.setItem(k, String(LI.idx));
+    } catch (_) {}
+  }
   const base = rw + st / LOYAL_GOAL;
   const pct = LI.next ? Math.max(0, Math.min(100, Math.round((base - LI.lvl.from) / (LI.next.from - LI.lvl.from) * 100))) : 100;
   const needSt = LI.next ? Math.max(0, (LI.next.from - rw) * LOYAL_GOAL - st) : 0;
-  const ach = achievements(myLoyal), done = ach.filter((a) => a.ok).length;
-  el.hidden = false;
-  el.innerHTML = (lvUp === LI.idx && LI.idx > 0 ? `<div class="rb-lv-up">🎉 Awans! Jesteś teraz w randze ${esc(LI.lvl.ic)} ${esc(LI.lvl.n)}.</div>` : "")
+  const ach = achievements(L), done = ach.filter((a) => a.ok).length;
+  return (!preview && lvUp === LI.idx && LI.idx > 0 ? `<div class="rb-lv-up">🎉 Awans! Jesteś teraz w randze ${esc(LI.lvl.ic)} ${esc(LI.lvl.n)}.</div>` : "")
     + `<div class="rb-lv-top"><span class="rb-lv-chip ${lvTier(LI.idx)}">${esc(LI.lvl.ic)} ${esc(LI.lvl.n)}</span><span class="rb-meta">🍕 Darmowe pizze: <b>${rw}</b></span></div>`
+    + (LI.granted ? `<div class="rb-meta">🎖 Tę rangę nadał Ci właściciel pizzerii.</div>` : "")
     + `<div class="rb-lv-bar"><i style="width:${pct}%"></i></div>`
     + (LI.next
       ? `<div class="rb-meta">Do rangi ${esc(LI.next.ic)} ${esc(LI.next.n)}: jeszcze ${LI.left} ${pizzaWord(LI.left)} gratis (ok. ${needSt} pieczątek). Pizza liczy się do rangi, gdy ją odbierzesz.</div>`
@@ -2776,7 +2788,13 @@ function renderLevel(user) {
     + `<details class="rb-lv-all"><summary>Wszystkie rangi i przywileje</summary>${all.map((l, i) => `<div>${esc(l.ic)} <b>${esc(l.n)}</b> — od ${l.from} ${pizzaWord(l.from)} gratis${l.perk ? ": " + esc(l.perk) : ""}${i === LI.idx ? " ← Ty" : ""}</div>`).join("")}</details>`
     + `<div class="rb-ach-h">🏆 Osiągnięcia <span>${done}/${ach.length}</span></div><div class="rb-ach">${ach.map((a) => `<span class="${a.ok ? "on" : "off"}" title="${esc(a.d)}">${a.ic} ${esc(a.n)}</span>`).join("")}</div>`;
 }
-
+function renderLevel(user) {
+  const el = $("rb-level");
+  if (!el) return;
+  if (!siteCfg.levelsOn || !myLoyal || isStaff || isAdmin) { el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = rankHtml(myLoyal, false, user.uid);
+}
 function refreshLoyaltyUi() {
   const u = auth.currentUser;
   try { if (u && myLoyal && !isAdmin && !isStaff) renderLoyal(u); } catch (_) {}
@@ -3536,7 +3554,35 @@ async function loadCustomer(uid) {
     getDoc(doc(db, "loyalty", uid)),
     getDocs(query(collection(db, "coupons"), where("uid", "==", uid)))
   ]);
-  return { loyal: ls.exists() ? ls.data() : null, coupons: cs.docs.map((d) => ({ id: d.id, ...d.data() })) };
+  const out = { loyal: ls.exists() ? ls.data() : null, coupons: cs.docs.map((d) => ({ id: d.id, ...d.data() })), pts: null, logs: [], fb: [] };
+  if (isAdmin) {
+    try {
+      const [ps, lg, fb] = await Promise.all([
+        getDoc(doc(db, "points", uid)),
+        getDocs(query(collection(db, "logs"), where("customerUid", "==", uid))),
+        getDocs(query(collection(db, "feedback"), where("uid", "==", uid)))
+      ]);
+      out.pts = ps.exists() ? ps.data() : null;
+      out.logs = lg.docs.map((d) => d.data()).sort((a, b) => tsMs(b.at) - tsMs(a.at)).slice(0, 25);
+      out.fb = fb.docs.map((d) => d.data()).sort((a, b) => tsMs(b.createdAt) - tsMs(a.createdAt)).slice(0, 5);
+    } catch (e) { console.error(e); }
+  }
+  return out;
+}
+/* karta klienta w Klienci (tylko admin): podgląd „tak widzi klient”, pełna kontrola, historia */
+function adminCustHtml(uid, L, data) {
+  const lv = curLevels(), cur = Number.isInteger(L.rankSet) ? L.rankSet : -1;
+  const hist = data.logs.map((e) => `<div><b>${esc(EV_LABEL[e.type] || e.type)}</b> · ${esc(fmtDateTime(e.at))} · ${esc(e.byName || "")}${e.detail ? " — " + esc(e.detail) : ""}</div>`).join("")
+    + data.fb.map((f) => `<div>⭐ Ocena ${esc(String(f.rating))}/5 · ${esc(fmtDateTime(f.createdAt))}${f.comment ? " — „" + esc(f.comment) + "”" : ""}</div>`).join("");
+  const pts = data.pts ? Number(data.pts.points) || 0 : 0;
+  return `<details class="rb-adm-box" open><summary>👁 Tak widzi to klient</summary>${siteCfg.levelsOn ? `<div class="rb-level">${rankHtml(L, true, uid)}</div>` : '<div class="rb-meta">Rangi są wyłączone (Strona → Lojalność), więc klient ich nie widzi.</div>'}</details>
+    <details class="rb-adm-box"><summary>🛠 Pełna kontrola (tylko admin)</summary>
+      <div class="rb-adm-row"><div><label>Ranga (nadana ręcznie)</label><select class="rb-adm-rank"><option value="-1"${cur < 0 ? " selected" : ""}>Automatyczna (z darmowych pizz)</option>${lv.map((l, i) => `<option value="${i}"${cur === i ? " selected" : ""}>${esc(l.ic)} ${esc(l.n)} (co najmniej)</option>`).join("")}</select></div><button type="button" class="rb-btn small" data-act="adm-rank">Zapisz rangę</button></div>
+      <div class="rb-meta">Ranga ręczna działa jako minimum: klient nigdy nie spadnie poniżej niej, a wyższą dostanie normalnie z darmowych pizz.</div>
+      <div class="rb-adm-row"><div><label>Pieczątki na karcie (0–${LOYAL_GOAL})</label><input type="number" class="rb-adm-st" min="0" max="${LOYAL_GOAL}" step="1" value="${Math.min(LOYAL_GOAL, L.stamps || 0)}"></div><div><label>Darmowe pizze (odebrane)</label><input type="number" class="rb-adm-rw" min="0" max="9999" step="1" value="${rewardsOf(L)}"></div><div><label>Pieczątki łącznie</label><input type="number" class="rb-adm-tot" min="0" max="99999" step="1" value="${L.total || 0}"></div><button type="button" class="rb-btn small" data-act="adm-card">Zapisz kartę</button></div>
+      <div class="rb-adm-row"><div><label>Punkty z gier (saldo: ${pts})</label><input type="number" class="rb-adm-pts" step="1" min="-10000" max="10000" placeholder="np. 20 lub -10"></div><button type="button" class="rb-btn small" data-act="adm-pts">Dodaj / odejmij</button></div>
+    </details>
+    <details class="rb-adm-box"><summary>📜 Historia klienta${data.logs.length ? " (" + data.logs.length + ")" : ""}</summary><div class="rb-hist">${hist || '<div class="rb-meta">Brak wpisów w dzienniku.</div>'}</div></details>`;
 }
 async function showCustomer(uid, target, withNext) {
   custView = { uid, target, withNext: !!withNext, data: null };
@@ -3563,7 +3609,7 @@ function renderCustomer() {
     const adminInfo = isAdmin
       ? `<div class="rb-meta">🎂 ${esc(bdayFull(uu))} · ✉ zgoda na e-mail: ${uu.marketing === true ? "tak" : "nie"}</div><div class="rb-meta">Konto od: ${L.createdAt ? new Date(tsMs(L.createdAt)).toLocaleDateString("pl-PL") : "—"} · ostatnia wizyta: ${lastMs ? new Date(lastMs).toLocaleDateString("pl-PL") + " (" + agoText(lastMs) + ")" : "jeszcze nie było"}</div>`
       : "";
-    const LI = siteCfg.levelsOn ? levelInfo(rewardsOf(L)) : null;
+    const LI = siteCfg.levelsOn ? rankOf(L) : null;
     const lvUpNow = !!(LI && LI.next && (L.stamps || 0) >= LOYAL_GOAL && rewardsOf(L) + 1 >= LI.next.from);
     const lvLine = LI ? `<div class="rb-meta">🏅 Ranga: <b>${esc(LI.lvl.ic)} ${esc(LI.lvl.n)}</b>${LI.lvl.perk ? " — przywilej: <b>" + esc(LI.lvl.perk) + "</b>" : ""}${LI.next ? " · do " + esc(LI.next.ic + " " + LI.next.n) + ": " + LI.left + " " + pizzaWord(LI.left) + " gratis" : ""}</div>${lvUpNow ? `<div class="rb-lv-up">⭐ Wydanie tej pizzy gratis awansuje klienta na rangę ${esc(LI.next.ic + " " + LI.next.n)}!</div>` : ""}` : "";
     head = `<div class="rb-big">👤 ${esc(L.name || L.email)}</div><div class="rb-meta">${esc(L.email)} · pieczątek łącznie: ${L.total || 0} · darmowe pizze: ${L.rewards || 0}</div>${lvLine}${adminInfo}
@@ -3579,7 +3625,8 @@ function renderCustomer() {
   const cps = active.length
     ? `<div class="rb-cust-sub">Aktywne rabaty klienta</div>` + active.map((c) => `<div class="rb-cust-cp"><span><b>${esc(c.code)}</b><br>${esc(c.description)}</span><button type="button" class="rb-btn small" data-act="cuse" data-id="${esc(c.id)}">Wykorzystaj</button></div>`).join("")
     : `<div class="rb-cust-sub">Klient nie ma aktywnych rabatów</div>`;
-  target.innerHTML = `<div class="rb-res big ok rb-cust">${head}${body}${cps}
+  const admBox = isAdmin && L && target.id === "rb-k-card" ? adminCustHtml(uid, L, data) : "";
+  target.innerHTML = `<div class="rb-res big ok rb-cust">${head}${body}${cps}${admBox}
     <div class="rb-actions" style="margin-top:10px">
       ${isAdmin ? `<button type="button" class="rb-btn secondary small" data-act="grant">🎟 Przyznaj rabat</button>` : ""}
       ${withNext ? `<button type="button" class="rb-btn secondary small" data-act="next">Skanuj następny</button>` : ""}
@@ -3587,7 +3634,7 @@ function renderCustomer() {
     </div></div>`;
 }
 async function customerClick(e) {
-  const b = e.target.closest('[data-act="stamp"],[data-act="reward"],[data-act="unstamp"],[data-act="grant"],[data-act="cuse"]');
+  const b = e.target.closest('[data-act="stamp"],[data-act="reward"],[data-act="unstamp"],[data-act="grant"],[data-act="cuse"],[data-act="adm-rank"],[data-act="adm-card"],[data-act="adm-pts"]');
   if (!b || !custView) return;
   const act = b.dataset.act;
   let okAct = false;
@@ -3628,6 +3675,26 @@ async function customerClick(e) {
         tx.update(ref, { stamps: Math.max(0, (d.stamps || 0) - 1), total: Math.max(0, (d.total || 0) - 1), lastStampAt: null });
         tx.set(newLogRef(), logData("unstamp", { uid: custView.uid, name: d.name || d.email }, "cofnięto do " + Math.max(0, (d.stamps || 0) - 1) + "/" + LOYAL_GOAL));
       });
+    } else if (act === "adm-rank" && isAdmin) {
+      const v = Number(custView.target.querySelector(".rb-adm-rank").value);
+      await updateDoc(ref, { rankSet: Number.isInteger(v) && v >= 0 ? v : null, adjustedAt: serverTimestamp() });
+      setMsg(msg, v >= 0 ? "✅ Nadano rangę ręcznie." : "✅ Ranga znów liczona automatycznie.", "ok");
+    } else if (act === "adm-card" && isAdmin) {
+      const q = (c) => Number(custView.target.querySelector(c).value), st = q(".rb-adm-st"), rw = q(".rb-adm-rw"), tot = q(".rb-adm-tot");
+      if (![st, rw, tot].every(Number.isInteger) || st < 0 || st > LOYAL_GOAL || rw < 0 || rw > 9999 || tot < 0 || tot > 99999) throw new Error("Wpisz poprawne liczby całkowite (pieczątki 0–" + LOYAL_GOAL + ").");
+      if (!confirm("Zapisać kartę: " + st + "/" + LOYAL_GOAL + " pieczątek, " + rw + " darmowych pizz, " + tot + " pieczątek łącznie?")) { b.disabled = false; return; }
+      await updateDoc(ref, { stamps: st, rewards: rw, total: tot, adjustedAt: serverTimestamp() });
+      setMsg(msg, "✅ Karta zapisana.", "ok");
+    } else if (act === "adm-pts" && isAdmin) {
+      const dlt = Number(custView.target.querySelector(".rb-adm-pts").value);
+      if (!Number.isInteger(dlt) || dlt === 0 || Math.abs(dlt) > 10000) throw new Error("Wpisz niezerową liczbę całkowitą punktów (do 10000).");
+      const pref = doc(db, "points", custView.uid);
+      await runTransaction(db, async (tx) => {
+        const sn = await tx.get(pref);
+        if (sn.exists()) tx.update(pref, { points: Math.max(0, (Number(sn.data().points) || 0) + dlt) });
+        else tx.set(pref, { points: Math.max(0, dlt), total: 0, dayPts: 0, redeemN: 0, lastAt: null, createdAt: serverTimestamp() });
+      });
+      setMsg(msg, "✅ Saldo punktów zmienione o " + dlt + ".", "ok");
     } else if (act === "cuse") {
       const r = await redeem(b.dataset.id);
       if (!r.ok) { setMsg(msg, r.reason, "err"); beep("err"); } else { buzz(200); okAct = true; scanHistPush(custName(), "🎟 rabat"); }
@@ -5351,7 +5418,7 @@ function clientRows(opts) {
   else if (f === "inactive") rows = rows.filter((r) => r.u.id !== me && !staffIds.has(r.u.id) && r.last > 0 && now - r.last >= days * DAY).sort((a, b) => a.last - b.last);
   else if (f === "never") rows = rows.filter((r) => r.u.id !== me && !staffIds.has(r.u.id) && !(r.L && ((r.L.total || 0) > 0 || (r.L.rewards || 0) > 0)) && (!r.created || now - r.created >= 2 * DAY)).sort((a, b) => a.created - b.created);
   else if (f === "vip") rows = rows.filter((r) => r.L && rewardsOf(r.L) >= 1).sort((a, b) => rewardsOf(b.L) - rewardsOf(a.L) || (b.L.total || 0) - (a.L.total || 0));
-  else if (f === "rankup") rows = rows.filter((r) => { if (!r.L) return false; const li = levelInfo(rewardsOf(r.L)); return !!li.next && li.left === 1 && (r.L.stamps || 0) >= 5; }).sort((a, b) => (b.L.stamps || 0) - (a.L.stamps || 0));
+  else if (f === "rankup") rows = rows.filter((r) => { if (!r.L) return false; const li = rankOf(r.L); return !!li.next && li.left === 1 && (r.L.stamps || 0) >= 5; }).sort((a, b) => (b.L.stamps || 0) - (a.L.stamps || 0));
   else if (f === "refs") { const ord = { ready: 0, wait: 1, nobody: 2, paid: 3 }; rows = rows.filter((r) => r.u.refBy).sort((a, b) => ord[refInfo(a.u).state] - ord[refInfo(b.u).state] || label(a).localeCompare(label(b))); }
   else if (f === "bday") rows = rows.filter((r) => bdayInDays(r.u) <= 7).sort((a, b) => bdayInDays(a.u) - bdayInDays(b.u));
   else if (f === "mkt") rows = rows.filter((r) => r.u.marketing === true).sort((a, b) => label(a).localeCompare(label(b)));
@@ -5410,7 +5477,7 @@ function renderClients() {
     const badges = [];
     if (L && (L.stamps || 0) >= LOYAL_GOAL) badges.push('<span class="rb-badge gold">Pełna karta</span>');
     if (r.created && now - r.created < 7 * DAY) badges.push('<span class="rb-badge">Nowy</span>');
-    if (siteCfg.levelsOn && L) { const li = levelInfo(rewardsOf(L)); if (li.idx >= 1) badges.push('<span class="rb-badge gold">' + esc(li.lvl.ic + " " + li.lvl.n) + "</span>"); }
+    if (siteCfg.levelsOn && L) { const li = rankOf(L); if (li.idx >= 1) badges.push('<span class="rb-badge gold">' + esc(li.lvl.ic + " " + li.lvl.n) + "</span>"); }
     const di = dups.info.get(u.id);
     if (f === "dups") {
       const w = allCoupons.find((c) => c.id === "welcome_" + u.id);
