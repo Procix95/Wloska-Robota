@@ -1,0 +1,82 @@
+/* Włoska Robota — motywy sezonowe (strona główna + podstrony). Panel admina (#rabat-overlay) nie jest ruszany. */
+
+/* --- pasek na samej górze + spadające ozdoby --- */
+#theme-bar{position:fixed;left:0;right:0;top:0;height:6px;z-index:1001;pointer-events:none;background:var(--th-bar);box-shadow:0 2px 10px rgba(0,0,0,.25)}
+#theme-deco{position:fixed;inset:0;pointer-events:none;z-index:900;overflow:hidden}
+#theme-deco span{position:absolute;top:0;font-size:var(--s,24px);line-height:1;opacity:.92;animation:thfall var(--d,12s) linear var(--w,0s) infinite;will-change:transform;filter:drop-shadow(0 2px 3px rgba(0,0,0,.25))}
+#theme-deco span.up{animation-name:thrise}
+@keyframes thfall{0%{transform:translate3d(0,-12vh,0) rotate(0)}50%{transform:translate3d(var(--x,30px),54vh,0) rotate(180deg)}100%{transform:translate3d(calc(var(--x,30px) * -1),112vh,0) rotate(360deg)}}
+@keyframes thrise{0%{transform:translate3d(0,112vh,0) rotate(-12deg)}50%{transform:translate3d(var(--x,30px),50vh,0) rotate(12deg)}100%{transform:translate3d(calc(var(--x,30px) * -1),-14vh,0) rotate(-8deg)}}
+@keyframes thbob{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-9px) rotate(5deg)}}
+@keyframes thpulse{0%,100%{box-shadow:0 6px 18px rgba(0,0,0,.28)}50%{box-shadow:0 8px 30px var(--th1)}}
+
+/* --- napis powitalny w hero --- */
+.theme-greet{display:inline-block;margin:0 0 1rem;padding:.55rem 1.4rem;border-radius:30px;background:rgba(255,255,255,.92);color:#222;font-weight:800;font-size:1.05rem;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.theme-greet[hidden]{display:none}
+body[data-theme] .theme-greet{background:var(--th-grad);color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.35);border:2px solid rgba(255,255,255,.75);animation:thpulse 2.8s ease-in-out infinite}
+
+/* --- hero: barwna poświata + rząd dużych ozdób przy dolnej krawędzi --- */
+#theme-banner{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 115%,var(--th-tint) 0%,transparent 62%),linear-gradient(180deg,var(--th-tint2) 0%,transparent 28%)}
+#theme-banner .tb-row{position:absolute;left:0;right:0;bottom:6px;display:flex;justify-content:space-around;align-items:flex-end;padding:0 1%}
+#theme-banner .tb-row span{font-size:clamp(1.8rem,5vw,3.8rem);line-height:1;animation:thbob 3.4s ease-in-out infinite;filter:drop-shadow(0 4px 8px rgba(0,0,0,.45))}
+body[data-theme] .hero{padding-bottom:84px}
+
+/* --- nagłówek i logo --- */
+body[data-theme] header{border-bottom:3px solid var(--th1)}
+body[data-theme] .logo{position:relative}
+body[data-theme] .logo::before{content:var(--th-logo);position:absolute;left:-12px;top:-12px;font-size:1.55rem;transform:rotate(-18deg);filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));animation:thbob 3s ease-in-out infinite}
+
+/* --- tytuły sekcji --- */
+body[data-theme] .section-title span{background-image:var(--th-grad)}
+body[data-theme] .section-title::before,body[data-theme] .section-title::after{display:inline-block;font-size:.62em;vertical-align:.12em;animation:thbob 3.6s ease-in-out infinite;-webkit-text-fill-color:initial}
+body[data-theme] .section-title::before{content:var(--th-tl);margin-right:.45em}
+body[data-theme] .section-title::after{content:var(--th-tr);margin-left:.45em;animation-delay:-1.4s}
+
+/* --- tło sekcji: wzór z ozdób + girlanda na górze --- */
+body[data-theme] .about,body[data-theme] .menu,body[data-theme] .gallery,body[data-theme] .reviews,body[data-theme] .contact{background-image:var(--th-pat);background-size:150px 150px;border-top:7px dotted var(--th1)}
+body[data-theme] .skladniki{border-top:7px dotted var(--th2)}
+
+/* --- karty menu: pasek w barwach motywu, emotka-naklejka w rogu, obwódka, kolor ceny --- */
+body[data-theme] .menu-item{box-shadow:0 8px 26px rgba(0,0,0,.12),0 0 0 2px var(--th1)}
+body[data-theme] .menu-item:hover{box-shadow:0 16px 40px rgba(0,0,0,.2),0 0 0 3px var(--th1),0 0 24px var(--th1)}
+body[data-theme] .menu-item::before{height:9px;background:var(--th-bar)}
+body[data-theme] .menu-item::after{content:var(--th-c1);position:absolute;bottom:14px;right:14px;z-index:4;width:2.7rem;height:2.7rem;display:flex;align-items:center;justify-content:center;font-size:1.5rem;line-height:1;border-radius:50%;background:#fff;border:3px solid var(--th1);box-shadow:0 4px 12px rgba(0,0,0,.3);transform:rotate(12deg);pointer-events:none;transition:transform .3s}
+body[data-theme] .menu-item:nth-child(even)::after{content:var(--th-c2);transform:rotate(-12deg);border-color:var(--th2)}
+body[data-theme] .menu-item:hover::after{transform:rotate(0) scale(1.18)}
+body[data-theme] .menu-item-price{color:var(--th1)}
+body[data-theme] .size-badge{border-color:var(--th1)}
+body[data-theme] .category-btn{border-color:var(--th1)}
+body[data-theme] .category-btn.active,body[data-theme] .category-btn:hover{background:var(--th-grad);color:#fff;border-color:transparent}
+
+/* --- przyciski, kafelki, opinie --- */
+body[data-theme] .btn-primary{color:var(--th1);box-shadow:0 10px 30px rgba(0,0,0,.2),0 0 0 3px var(--th1)}
+body[data-theme] .feature-card,body[data-theme] .rev-card,body[data-theme] .contact-card{border-top:5px solid var(--th1)}
+body[data-theme] .sticky-phone{background:var(--th-grad)}
+
+/* --- stopka --- */
+body[data-theme] footer{border-top:8px solid var(--th1);background-image:linear-gradient(180deg,var(--th-tint2),transparent 50%)}
+body[data-theme] footer::before{content:var(--th-row);display:block;margin-bottom:1.2rem;font-size:1.9rem;letter-spacing:.35em;white-space:nowrap;overflow:hidden;text-align:center}
+
+/* --- podstrony (regulamin, polityka, zasady zamówień, usuwanie konta) --- */
+body[data-page="sub"] #theme-bar{display:none}
+body[data-page="sub"]{background-image:var(--th-pat);background-size:150px 150px}
+body[data-page="sub"] .bar{height:10px;background:var(--th-bar)}
+body[data-page="sub"] .card{border-top:6px solid var(--th1);box-shadow:0 6px 28px rgba(0,0,0,.12)}
+body[data-page="sub"] h1::before{content:var(--th-tl);margin-right:.4em;display:inline-block;animation:thbob 3.4s ease-in-out infinite}
+body[data-page="sub"] h1::after{content:var(--th-tr);margin-left:.4em;display:inline-block;animation:thbob 3.4s ease-in-out infinite;animation-delay:-1.4s}
+body[data-page="sub"] h2{border-left:5px solid var(--th1);padding-left:.55em}
+body[data-page="sub"] a{color:var(--th1)}
+.theme-greet-sub{display:block;text-align:center;margin:0 0 14px;font-size:1rem}
+#theme-subrow{margin-top:22px;text-align:center;font-size:1.9rem;letter-spacing:.35em;white-space:nowrap;overflow:hidden}
+
+@media (max-width:600px){
+  #theme-banner .tb-row span:nth-child(n+7){display:none}
+  body[data-theme] .menu-item::after{width:2.3rem;height:2.3rem;font-size:1.25rem;bottom:12px;right:12px}
+  body[data-theme] footer::before,#theme-subrow{font-size:1.5rem;letter-spacing:.2em}
+  body[data-theme] .about,body[data-theme] .menu,body[data-theme] .gallery,body[data-theme] .reviews,body[data-theme] .contact{background-size:120px 120px}
+}
+@media (prefers-reduced-motion:reduce){
+  #theme-deco span,#theme-banner .tb-row span,body[data-theme] .logo::before,body[data-theme] .section-title::before,body[data-theme] .section-title::after,body[data-theme] .theme-greet,body[data-page="sub"] h1::before,body[data-page="sub"] h1::after{animation:none}
+  #theme-deco span{top:auto;bottom:6%;opacity:.5}
+}
