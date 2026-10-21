@@ -217,6 +217,22 @@ body.dark footer {background: #0a0a0a;}
   .map-wrapper iframe {height: 300px;}
 }
 </style>
+<style id="wow-css">
+/* ===== WOW 1: pierwszy ekran i karty menu ===== */
+.hero::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,.10) 0%,rgba(0,0,0,.62) 100%),linear-gradient(180deg,rgba(0,0,0,.35) 0%,rgba(0,0,0,0) 28%,rgba(0,0,0,.5) 100%)}
+.hero h1{text-shadow:0 6px 34px rgba(0,0,0,.55)}
+.hero p{text-shadow:0 2px 16px rgba(0,0,0,.6)}
+.theme-greet[hidden]{display:none}
+.hero-chips{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;margin:1.7rem auto 0;max-width:760px;animation:fadeInUp 1s ease .5s both}
+.hero-chips span{padding:.45rem .95rem;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);font-size:.9rem;font-weight:600;white-space:nowrap}
+.hero-scroll{position:absolute;left:50%;bottom:20px;z-index:2;width:44px;height:44px;margin-left:-22px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;font-size:1.1rem;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);animation:wowBounce 2s ease-in-out infinite}
+@keyframes wowBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+.menu-item{position:relative}
+.menu-item::before{content:"";display:block;height:4px;background:linear-gradient(90deg,#009246 0 33.3%,#f4f4f4 33.3% 66.6%,#ce2b37 66.6% 100%)}
+.menu-item-sizes{flex-wrap:wrap}
+@media (max-width:600px){.hero-chips{gap:.45rem}.hero-chips span{font-size:.8rem;padding:.38rem .7rem}.hero-scroll{display:none}}
+@media (prefers-reduced-motion:reduce){.hero-scroll{animation:none}}
+</style>
 </head>
 <body class="dark">
  
@@ -258,12 +274,14 @@ body.dark footer {background: #0a0a0a;}
         <a href="#menu" class="btn btn-secondary"><i class="fas fa-utensils"></i> Zobacz Menu</a>
         <a href="#dowoz" class="btn btn-secondary dowoz-link" hidden><i class="fas fa-truck"></i> Czy dowozimy do mnie?</a>
       </div>
+      <div class="hero-chips" aria-label="Dlaczego nasza pizza jest inna"><span>🔥 Piec 400°C</span><span>⏱️ 24h fermentacji</span><span>🧀 Mozzarella fior di latte</span><span>🍅 Pomidory San Marzano</span></div>
       <div class="opening-timer">
         <div class="timer-text" id="timerText">Sprawdzam godziny otwarcia...</div>
         <div class="timer-countdown" id="timerCountdown"></div>
       </div>
     </div>
   </div>
+  <a class="hero-scroll" href="#about" aria-label="Przewiń w dół"><i class="fas fa-chevron-down"></i></a>
 </section>
 
 <section class="delivery-strip" id="dowoz" hidden>
@@ -3826,6 +3844,7 @@ function renderProducts() {
     el.dataset.category = PROD_CATS.some((c) => c[0] === p.cat) ? p.cat : "dodatki";
     el.dataset.origPrice = p.price;
     if (p.unavail) el.dataset.customUn = "1";
+    el.dataset.badges = badgeIds(p.badges).join(",");
     const tags = (Array.isArray(p.tags) ? p.tags : []).filter((t) => typeof t === "string" && t.trim()).slice(0, 3);
     el.innerHTML = '<div class="menu-item-content"><div class="menu-item-header"><h3 class="menu-item-title">' + esc(p.name) + '</h3><span class="menu-item-price">' + esc(p.price) + "</span></div>" +
       (p.desc ? '<p class="menu-item-desc">' + esc(p.desc) + "</p>" : "") +
@@ -3933,7 +3952,7 @@ function applySite(cfg) {
     }
     if (!un && b) b.remove();
     el.classList.toggle("is-dish", !!(siteCfg.dish && siteCfg.dish.active && siteCfg.dish.key === key));
-    const bd = el.dataset.custom ? [] : badgeIds(siteCfg.badges[key]);
+    const bd = el.dataset.custom ? badgeIds((el.dataset.badges || "").split(",")) : badgeIds(siteCfg.badges[key]);
     const cont = el.querySelector(".menu-item-content");
     let row = el.querySelector(".menu-badges");
     if (cont && bd.length) {
@@ -4260,6 +4279,15 @@ if (galGrid) galGrid.addEventListener("click", (e) => {
   const im = e.target.closest(".gallery-item img");
   if (im) showPhotoBig(im.currentSrc || im.src, im.alt || "");
 });
+/* zdjęcie w „Dlaczego Włoska Robota?” też można powiększyć (jak w galerii i w menu) */
+(function () {
+  const im = document.querySelector(".about-image img");
+  if (!im) return;
+  im.style.cursor = "zoom-in"; im.tabIndex = 0; im.setAttribute("role", "button");
+  const open = () => showPhotoBig(im.currentSrc || im.src, im.alt || "");
+  im.addEventListener("click", open);
+  im.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+})();
 
 /* --- panel admina --- */
 function galAdminRender() {
@@ -4431,6 +4459,7 @@ function prodRowHtml(p) {
     <select class="rb-prod-cat" aria-label="Kategoria">${PROD_CATS.map((c) => `<option value="${c[0]}"${p.cat === c[0] ? " selected" : ""}>${c[1]}</option>`).join("")}</select>
     <textarea class="rb-prod-desc" rows="2" maxlength="200" placeholder="Opis (skład, opcjonalnie)">${esc(p.desc || "")}</textarea>
     <input type="text" class="rb-prod-tags" maxlength="60" placeholder="Plakietki (opcjonalnie, po przecinku), np. 30cm, 24h" value="${esc((p.tags || []).join(", "))}" aria-label="Plakietki">
+    <div class="rb-site-badges rb-prod-badges">${BADGES.map((b) => `<label><input type="checkbox" class="rb-prod-bd" data-b="${b[0]}"${badgeIds(p.badges).includes(b[0]) ? " checked" : ""}> ${b[1]}</label>`).join("")}</div>
     <div class="rb-prod-foot">
       <label class="rb-check"><input type="checkbox" class="rb-prod-un"${p.unavail ? " checked" : ""}> niedostępne dziś</label>
       <button type="button" class="rb-btn secondary small rb-prod-del">Usuń produkt</button>
@@ -4636,7 +4665,8 @@ async function saveSite() {
     const k = name.replace(/^\s*\d+\.\s*/, "").trim().toLowerCase();
     if (usedKeys.has(k)) { prodBad = "Produkt „" + name + "” już istnieje w menu — zmień nazwę."; return; }
     usedKeys.add(k);
-    products.push({ id: row.dataset.id, name, price, cat, desc, tags, unavail: row.querySelector(".rb-prod-un").checked });
+    const bdg = [...row.querySelectorAll(".rb-prod-bd:checked")].map((c) => c.dataset.b);
+    products.push({ id: row.dataset.id, name, price, cat, desc, tags, badges: bdg, unavail: row.querySelector(".rb-prod-un").checked });
   });
   if (prodBad) { say( prodBad, "err"); return; }
   const parseZl = (v) => {
