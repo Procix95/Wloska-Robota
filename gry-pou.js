@@ -7,7 +7,7 @@
 (function () {
 "use strict";
 if (window.__pouLoaded) return;
-if (!window.WRGames || typeof window.WRGames.register !== "function") { setTimeout(function(){ if (window.WRGames && !window.__pouLoaded) { var s = document.createElement("script"); s.src = "/gry-pou.js?v=1"; document.head.appendChild(s); } }, 800); return; }
+if (!window.WRGames || typeof window.WRGames.register !== "function") { setTimeout(function(){ if (window.WRGames && !window.__pouLoaded) { var s = document.createElement("script"); s.src = "/gry-pou.js?v=2"; document.head.appendChild(s); } }, 800); return; }
 window.__pouLoaded = true;
 
 const KEY = "wr_pou_v1", HOUR = 3600000;
@@ -280,7 +280,7 @@ function start(stage, ctx) {
   root.append(h("div", { class: "wp-top" }, nameEl, coinsEl, sndBtn, closeBtn));
   const statEls = {};
   const stats = h("div", { class: "wp-stats" });
-  [["hunger", "🍕"], ["hygiene", "🫧"], ["energy", "⚡"], ["fun", "😊"]].forEach(([k, ic]) => {
+  [["hunger", "🍕"], ["hygiene", "🧼"], ["energy", "⚡"], ["fun", "😊"]].forEach(([k, ic]) => {
     const b = h("b"), bar = h("div", { class: "wp-bar" }, b); statEls[k] = { bar, b };
     stats.append(h("div", { class: "wp-st", title: STAT_LBL[k] }, h("i", null, ic), bar));
   });
@@ -295,7 +295,7 @@ function start(stage, ctx) {
   const scene = h("div", { class: "wp-scene" },
     h("div", { class: "wp-wall" }), h("div", { class: "wp-floor" }),
     h("div", { class: "wp-win" }, h("div", { class: "wp-sky" }), h("div", { class: "wp-sun" }), h("i", { class: "wp-star", style: "left:12px;top:10px" }), h("i", { class: "wp-star", style: "left:56px;top:18px" }), h("i", { class: "wp-star", style: "left:30px;top:40px" }), h("i", { class: "wp-star", style: "left:60px;top:62px" })),
-    h("div", { class: "wp-poster" }, "🍕", h("small", null, "WŁOSKA ROBOTA")), h("div", { class: "wp-plant" }, "🪴"),
+    h("div", { class: "wp-poster" }, "🍕", h("small", null, "WŁOSKA ROBOTA")), h("div", { class: "wp-plant" }, "🌵"),
     pet, say, h("div", { class: "wp-dark" }), h("div", { class: "wp-zzz" }, h("span", null, "Z"), h("span", null, "z"), h("span", null, "z")));
   root.append(scene);
   const nav = h("div", { class: "wp-nav" });
@@ -326,7 +326,7 @@ function start(stage, ctx) {
       [{ label: "🐣 Wykluj Pizzaka", cls: "gold", on: () => { P = fresh(null); save(); lastKey = ""; render(true); } }, { label: "Zamknij", cls: "ghost", on: close }]);
   }
   function deadScreen() {
-    over('<div style="font-size:54px">🪦</div><div class="t">Pizzak odszedł…</div>' +
+    over('<div style="font-size:54px">💀</div><div class="t">Pizzak odszedł…</div>' +
       "<p>Przeżył <b>" + fmtAge(P.diedAt - P.born) + "</b>. Zabrakło opieki — głód, brud i zmęczenie zrobiły swoje.</p><p>Rekord: <b>" + fmtAge(P.best) + "</b> · to było jego życie nr " + P.lives + ".</p>" + rewardsHtml(),
       [{ label: "🐣 Nowy Pizzak", cls: "gold", on: () => { P = fresh(P); save(); lastKey = ""; render(true); } }, { label: "Zamknij", cls: "ghost", on: close }]);
   }
@@ -343,7 +343,7 @@ function start(stage, ctx) {
       const g = h("div", { class: "wp-grid" });
       FOODS.forEach((f) => {
         const eff = Object.keys(f.e).filter((k) => f.e[k] > 0).map((k) => "+" + f.e[k] + " " + STAT_LBL[k]).slice(0, 2).join(", ");
-        const b = h("button", { class: "wp-card", type: "button", disabled: P.coins < f.c ? true : null }, h("span", null, f.ic), h("b", null, f.n), h("small", null, eff), h("em", null, f.c + " 🪙"));
+        const b = h("button", { class: "wp-card", type: "button", disabled: P.coins < f.c ? true : null }, h("span", null, f.ic), h("b", null, f.n), h("small", null, eff), h("em", null, f.c + " 💰"));
         b.addEventListener("click", () => feed(f)); g.append(b);
       });
       panel.append(g);
@@ -370,8 +370,8 @@ function start(stage, ctx) {
       none.addEventListener("click", () => { P.hat = ""; save(); render(true); }); g.append(none);
       HATS.forEach((x) => {
         const own = P.owned.indexOf(x.id) >= 0, locked = level() < x.lv;
-        const ic = { chef: "👨‍🍳", bandana: "🏴‍☠️", shades: "🕶️", stache: "🥸", crown: "👑" }[x.id];
-        const b = h("button", { class: "wp-card" + (P.hat === x.id ? " on" : ""), type: "button", disabled: !own && (locked || P.coins < x.c) ? true : null }, h("span", null, ic), h("b", null, x.n), h("small", null, locked && !own ? "poziom " + x.lv : own ? (P.hat === x.id ? "założone" : "masz to") : ""), own ? null : h("em", null, x.c + " 🪙"));
+        const ic = { chef: "👨‍🍳", bandana: "🏴‍☠️", shades: "🕶️", stache: "🧔", crown: "👑" }[x.id];
+        const b = h("button", { class: "wp-card" + (P.hat === x.id ? " on" : ""), type: "button", disabled: !own && (locked || P.coins < x.c) ? true : null }, h("span", null, ic), h("b", null, x.n), h("small", null, locked && !own ? "poziom " + x.lv : own ? (P.hat === x.id ? "założone" : "masz to") : ""), own ? null : h("em", null, x.c + " 💰"));
         b.addEventListener("click", () => { if (!own) { if (P.coins < x.c || locked) return; P.coins -= x.c; P.owned.push(x.id); SFX.coin(); } P.hat = x.id; addXp(2); save(); render(true); });
         g.append(b);
       });
@@ -450,7 +450,7 @@ function start(stage, ctx) {
       }
     });
     livesEl.textContent = id === "catch" ? "❤️❤️❤️" : "";
-    const GOOD = ["🧀", "🍅", "🍄", "🫒", "🌿"], BAD = ["🔥", "🧦"];
+    const GOOD = ["🧀", "🍅", "🍄", "🌽", "🌿"], BAD = ["🔥", "🧦"];
     function pizzak(x, y, s, face) {
       c.save(); c.translate(x, y); c.scale(s, s);
       c.fillStyle = "#e6b25c"; c.strokeStyle = "#a96d22"; c.lineWidth = 3; c.beginPath(); c.arc(0, 0, 36, 0, 7); c.fill(); c.stroke();
@@ -465,7 +465,7 @@ function start(stage, ctx) {
       P.coins += coins; P.fun = clamp(P.fun + Math.min(40, score * 2), 0, 100); P.energy = clamp(P.energy - 15, 0, 100); addXp(Math.floor(score / 2)); P.hygiene = clamp(P.hygiene - 3, 0, 100);
       P.mgBest = P.mgBest || {}; if (score > (P.mgBest[id] || 0)) P.mgBest[id] = score; save();
       if (coins) SFX.win(); else SFX.bad();
-      const o = h("div", { class: "wp-over" }); o.innerHTML = '<div style="font-size:48px">' + (coins ? "🎉" : "😅") + '</div><div class="t">Wynik: ' + score + '</div><p>Monety: <b>+' + coins + ' 🪙</b> · humor +' + Math.min(40, score * 2) + " · energia −15</p><p>Rekord: <b>" + P.mgBest[id] + "</b></p>";
+      const o = h("div", { class: "wp-over" }); o.innerHTML = '<div style="font-size:48px">' + (coins ? "🎉" : "😅") + '</div><div class="t">Wynik: ' + score + '</div><p>Monety: <b>+' + coins + ' 💰</b> · humor +' + Math.min(40, score * 2) + " · energia −15</p><p>Rekord: <b>" + P.mgBest[id] + "</b></p>";
       const again = h("button", { class: "wp-btn", type: "button" }, "↻ Jeszcze raz"), back = h("button", { class: "wp-btn ghost", type: "button" }, "Wróć do Pizzaka");
       again.addEventListener("click", () => { box.remove(); mg = null; if (P.energy >= 20 && P.hunger >= 10) startMini(id); else { toast("Pizzak potrzebuje odpoczynku.", "err"); render(true); } });
       back.addEventListener("click", () => { box.remove(); mg = null; render(true); });
@@ -485,7 +485,7 @@ function start(stage, ctx) {
         S.spawn -= dt;
         if (S.spawn <= 0) {
           const bad = Math.random() < Math.min(.45, .2 + score * .006), gold = !bad && Math.random() < .07;
-          S.items.push({ x: rnd(24, W - 24), y: -20, vy: rnd(120, 170) + score * 3.6, e: bad ? pick(BAD) : gold ? "🪙" : pick(GOOD), bad, gold, w: rnd(0, 6) });
+          S.items.push({ x: rnd(24, W - 24), y: -20, vy: rnd(120, 170) + score * 3.6, e: bad ? pick(BAD) : gold ? "💰" : pick(GOOD), bad, gold, w: rnd(0, 6) });
           S.spawn = Math.max(.32, .85 - score * .012) * rnd(.8, 1.2);
         }
         for (let i = S.items.length - 1; i >= 0; i--) {
@@ -528,7 +528,7 @@ function start(stage, ctx) {
     root.classList.toggle("sleeping", !!P.sleeping);
     const now = Date.now(), age = (P.dead ? P.diedAt : now) - P.born;
     nameEl.innerHTML = "Pizzak · poz. " + level() + "<small>wiek: " + fmtAge(age) + (P.lives > 1 ? " · życie nr " + P.lives : "") + "</small>";
-    coinsEl.textContent = Math.floor(P.coins) + " 🪙";
+    coinsEl.textContent = Math.floor(P.coins) + " 💰";
     ["hunger", "hygiene", "energy", "fun"].forEach((k) => { const v = P[k], e = statEls[k]; e.b.style.width = v + "%"; e.bar.className = "wp-bar" + (v < 25 ? " low" : v < 50 ? " mid" : ""); });
     statEls.health.b.style.width = P.health + "%";
     const th = P.thrive / HOUR; let nextM = MILESTONES.find((m, i) => !P.award[i]);
@@ -540,7 +540,7 @@ function start(stage, ctx) {
     /* podpowiedź w dymku */
     let msg = "";
     if (!P.dead && !P.sleeping) {
-      const need = [["hunger", "Jestem głodny! 🍕"], ["hygiene", "Potrzebuję kąpieli! 🫧"], ["energy", "Jestem śpiący… 💤"], ["fun", "Nudzę się… pobawmy się!"]].filter((n) => P[n[0]] < 25).sort((a, b) => P[a[0]] - P[b[0]])[0];
+      const need = [["hunger", "Jestem głodny! 🍕"], ["hygiene", "Potrzebuję kąpieli! 🧼"], ["energy", "Jestem śpiący… 💤"], ["fun", "Nudzę się… pobawmy się!"]].filter((n) => P[n[0]] < 25).sort((a, b) => P[a[0]] - P[b[0]])[0];
       if (need) msg = need[1]; else if (P.health < 40) msg = "Nie czuję się dobrze…";
     }
     say_(msg);
@@ -561,7 +561,7 @@ function start(stage, ctx) {
     claiming = true;
     try {
       const r = await ctx.award(1);
-      if (r && r.ok) { P.award[i] = 1; P.day.n++; const bonus = 40 * (i + 1); P.coins += bonus; save(); SFX.win(); toast("🏅 " + MILESTONES[i] / 24 + " dni opieki! " + (r.msg || "+1 pkt") + " (+" + bonus + " 🪙)", "gold", 4200); render(true); }
+      if (r && r.ok) { P.award[i] = 1; P.day.n++; const bonus = 40 * (i + 1); P.coins += bonus; save(); SFX.win(); toast("🏅 " + MILESTONES[i] / 24 + " dni opieki! " + (r.msg || "+1 pkt") + " (+" + bonus + " 💰)", "gold", 4200); render(true); }
       else { if (r && r.cap) P.capDay = today; nextTry = Date.now() + (r && r.wait ? 31000 : 120000); if (r && r.msg && !failShown) { failShown = true; toast(r.msg, "err", 3600); } }
     } catch (e) { nextTry = Date.now() + 120000; }
     claiming = false;
@@ -583,7 +583,7 @@ function start(stage, ctx) {
   else {
     render(true);
     const td = utcDay(Date.now());
-    if (!P.dead && P.bonusDay !== td) { P.bonusDay = td; P.coins += 10; save(); setTimeout(() => toast("🎁 Dzienna premia: +10 🪙", "gold", 3200), 600); }
+    if (!P.dead && P.bonusDay !== td) { P.bonusDay = td; P.coins += 10; save(); setTimeout(() => toast("🎁 Dzienna premia: +10 💰", "gold", 3200), 600); }
   }
 }
 
