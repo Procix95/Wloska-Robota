@@ -1177,6 +1177,27 @@ body.dark .rk-card{background:var(--dark-bg)}
 #rabat-overlay .rb-lv-row input{margin:0}
 #rabat-overlay .rb-lv-row .rb-lv-ic{flex:0 0 56px;text-align:center;font-size:20px}
 #rabat-overlay .rb-lv-row .rb-lv-f{flex:0 0 80px}
+#rabat-overlay .rb-kasa{margin:10px 0;padding:10px 12px;border:2px solid var(--rb-gold);border-radius:12px;background:rgba(212,175,55,.14);text-align:left;font-size:14px}
+#rabat-overlay .rb-kasa-h{font-weight:800;margin-bottom:4px}
+#rabat-overlay .rb-kasa ul{margin:0;padding-left:20px}
+#rabat-overlay .rb-kasa li{margin:3px 0}
+#rabat-overlay .rb-kasa-none{color:var(--rb-muted)}
+#rabat-overlay .rb-pos{margin-top:10px;border:1px solid var(--rb-border);border-radius:10px;padding:8px 10px;text-align:left}
+#rabat-overlay .rb-pos>summary{cursor:pointer;font-weight:700;font-size:13px}
+#rabat-overlay .rb-pos-cat{margin:10px 0 2px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--rb-muted)}
+#rabat-overlay .rb-pos-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--rb-border);font-size:14px}
+#rabat-overlay .rb-pos-row .nm{flex:1;min-width:0}
+#rabat-overlay .rb-pos-row .nm i{font-size:11px;color:#c62828;font-style:normal;font-weight:700}
+#rabat-overlay .rb-pos-row.un{opacity:.55}
+#rabat-overlay .rb-pos-row .pr{font-weight:700;white-space:nowrap}
+#rabat-overlay .rb-pos-row .qty{display:flex;align-items:center;gap:6px}
+#rabat-overlay .rb-pos-row .qty button{width:34px;height:34px;border-radius:50%;border:1px solid var(--rb-border);background:var(--rb-card);color:var(--rb-text);font-size:18px;font-weight:800;cursor:pointer}
+#rabat-overlay .rb-pos-row .qty button:disabled{opacity:.35;cursor:default}
+#rabat-overlay .rb-pos-row .qty b{min-width:20px;text-align:center}
+#rabat-overlay .rb-pos-cps{margin-top:10px;display:grid;gap:4px;font-size:13px}
+#rabat-overlay .rb-pos-cp i{font-style:normal;color:var(--rb-muted)}
+#rabat-overlay .rb-pos-sum{margin:10px 0;padding:10px;border-radius:10px;background:rgba(212,175,55,.14);border:1px solid var(--rb-gold)}
+#rabat-overlay .rb-pos-sum .tot{font-size:18px;font-weight:800;margin:4px 0}
 #rabat-overlay .rb-adm-box{margin-top:10px;border:1px dashed var(--rb-border);border-radius:10px;padding:8px 10px}
 #rabat-overlay .rb-adm-box>summary{cursor:pointer;font-weight:700;font-size:13px}
 #rabat-overlay .rb-adm-box .rb-level{margin:8px 0 0}
@@ -3590,6 +3611,63 @@ async function showCustomer(uid, target, withNext) {
   catch (err) { console.error(err); target.innerHTML = '<div class="rb-res bad">❌ ' + esc(errText(err)) + "</div>"; custView = null; return; }
   renderCustomer();
 }
+/* ---------- cennik i kalkulator zamówienia dla kasy (aktualne ceny ze strony) ---------- */
+let posCart = {}, posUse = {}, posUid = "", posOpen = false;
+const POS_PIZZA = ["klasyczne", "miesne", "vege"];
+const posMoney = (n) => (Math.round(n * 100) / 100).toFixed(2).replace(".", ",") + " zł";
+function posItems() {
+  return menuEls().filter((e) => !e.classList.contains("is-hidden")).map((e) => {
+    const pt = ((e.querySelector(".menu-item-price") || {}).textContent || "").trim();
+    const nums = pt.match(/\d+(?:[.,]\d+)?/g) || [];
+    const cats = String(e.dataset.category || "").split(/\s+/).filter(Boolean);   // pozycja może należeć do kilku kategorii, np. „klasyczne miesne”
+    const cat = cats.find((c) => PROD_CATS.some((x) => x[0] === c)) || "dodatki";
+    return { key: itemKey(e), name: itemName(e).replace(/^\s*\d+\.\s*/, ""), cat, pizza: cats.some((c) => POS_PIZZA.includes(c)), priceText: pt, price: nums.length === 1 ? Number(nums[0].replace(",", ".")) : null, un: e.classList.contains("is-unavail") };
+  });
+}
+function posDiscount(desc, sum, pizzaSum) {
+  const m = String(desc || "").trim().match(/^-\s*(\d+(?:[.,]\d+)?)\s*(%|zł)\s+na\s+(.+)$/i);
+  if (!m) return null;
+  const v = Number(m[1].replace(",", ".")), scope = m[3].toLowerCase();
+  const base = /pizz/.test(scope) ? pizzaSum : /zamówieni|całe/.test(scope) ? sum : null;
+  if (base === null) return null;
+  return m[2] === "%" ? base * v / 100 : Math.min(v, base);
+}
+function posBody(active) {
+  const items = posItems();
+  let sum = 0, pizzaSum = 0;
+  items.forEach((it) => { const q = posCart[it.key] || 0; if (q && it.price !== null) { sum += q * it.price; if (it.pizza) pizzaSum += q * it.price; } });
+  const rows = PROD_CATS.map(([k, n]) => {
+    const list = items.filter((it) => it.cat === k);
+    if (!list.length) return "";
+    return `<div class="rb-pos-cat">${esc(n)}</div>` + list.map((it) => {
+      const q = posCart[it.key] || 0;
+      return `<div class="rb-pos-row${it.un ? " un" : ""}"><span class="nm">${esc(it.name)}${it.un ? " <i>niedostępne</i>" : ""}</span><span class="pr">${esc(it.priceText)}</span>`
+        + (it.price === null ? "" : `<span class="qty"><button type="button" data-pos="-" data-k="${esc(it.key)}" aria-label="Mniej"${q ? "" : " disabled"}>−</button><b>${q}</b><button type="button" data-pos="+" data-k="${esc(it.key)}" aria-label="Więcej"${it.un ? " disabled" : ""}>+</button></span>`) + "</div>";
+    }).join("");
+  }).join("");
+  let disc = 0, cps = "";
+  active.forEach((c) => {
+    const d = posDiscount(c.description, sum, pizzaSum), on = !!posUse[c.id];
+    if (d !== null && on) disc += Math.min(d, Math.max(0, sum - disc));
+    cps += `<label class="rb-pos-cp"><input type="checkbox" data-pos="cp" data-id="${esc(c.id)}"${on ? " checked" : ""}${d === null ? " disabled" : ""}> Kod <b>${esc(c.code)}</b>: ${esc(c.description)}${d === null ? " <i>(odlicz ręcznie)</i>" : sum ? " → −" + posMoney(d) : ""}</label>`;
+  });
+  const total = Math.max(0, sum - disc);
+  return `<div class="rb-pos-list">${rows || '<div class="rb-meta">Brak pozycji w menu.</div>'}</div>`
+    + (cps ? `<div class="rb-pos-cps">${cps}</div>` : "")
+    + `<div class="rb-pos-sum"><div>Suma: <b>${posMoney(sum)}</b></div>${disc ? `<div>Zniżki z kodów: −${posMoney(disc)}</div>` : ""}<div class="tot">Do zapłaty: ${posMoney(total)}</div><div class="rb-meta">Przywilej rangi i pizzę gratis z karty odlicz ręcznie na kasie.</div></div>`
+    + `<button type="button" class="rb-btn secondary small" data-pos="clear">Wyczyść zamówienie</button>`;
+}
+function posSync(uid) { if (uid !== posUid) { posUid = uid; posCart = {}; posUse = {}; } }
+function posClick(b) {
+  const a = b.dataset.pos;
+  if (a === "+" || a === "-") posCart[b.dataset.k] = Math.max(0, Math.min(99, (posCart[b.dataset.k] || 0) + (a === "+" ? 1 : -1)));
+  else if (a === "cp") posUse[b.dataset.id] = b.checked;
+  else if (a === "clear") { posCart = {}; posUse = {}; }
+  const box = custView && custView.target.querySelector(".rb-pos-body");
+  if (box) box.innerHTML = posBody(custView.data.coupons.filter((c) => !couponState(c).off));
+}
+['rb-s-result', 'rb-c-result', 'rb-k-card'].forEach((id) => { const t = $(id); if (t) t.addEventListener("toggle", (e) => { if (e.target.classList && e.target.classList.contains("rb-pos")) posOpen = e.target.open; }, true); });
+
 function renderCustomer() {
   if (!custView || !custView.data) return;
   const { uid, target, withNext, data } = custView;
@@ -3612,7 +3690,14 @@ function renderCustomer() {
     const LI = siteCfg.levelsOn ? rankOf(L) : null;
     const lvUpNow = !!(LI && LI.next && (L.stamps || 0) >= LOYAL_GOAL && rewardsOf(L) + 1 >= LI.next.from);
     const lvLine = LI ? `<div class="rb-meta">🏅 Ranga: <b>${esc(LI.lvl.ic)} ${esc(LI.lvl.n)}</b>${LI.lvl.perk ? " — przywilej: <b>" + esc(LI.lvl.perk) + "</b>" : ""}${LI.next ? " · do " + esc(LI.next.ic + " " + LI.next.n) + ": " + LI.left + " " + pizzaWord(LI.left) + " gratis" : ""}</div>${lvUpNow ? `<div class="rb-lv-up">⭐ Wydanie tej pizzy gratis awansuje klienta na rangę ${esc(LI.next.ic + " " + LI.next.n)}!</div>` : ""}` : "";
-    head = `<div class="rb-big">👤 ${esc(L.name || L.email)}</div><div class="rb-meta">${esc(L.email)} · pieczątek łącznie: ${L.total || 0} · darmowe pizze: ${L.rewards || 0}</div>${lvLine}${adminInfo}
+    /* ściąga dla kasy: co należy się temu klientowi przy płaceniu */
+    const kasa = [];
+    if (LI && LI.idx >= 1 && LI.lvl.perk) kasa.push(`<li>${esc(LI.lvl.ic)} <b>${esc(LI.lvl.n)}</b>: ${esc(LI.lvl.perk)}</li>`);
+    if (full) kasa.push(`<li>🍕 Karta pełna: <b>pizza gratis (1 szt.)</b> — wydaj ją przyciskiem poniżej</li>`);
+    active.forEach((c) => kasa.push(`<li>🎟 Kod <b>${esc(c.code)}</b>: ${esc(c.description)}</li>`));
+    if (isAdmin && bdayInDays(uu) === 0) kasa.push(`<li>🎂 <b>Dziś ma urodziny</b></li>`);
+    const kasaHtml = `<div class="rb-kasa"><div class="rb-kasa-h">💰 Do nabicia na kasie</div>${kasa.length ? "<ul>" + kasa.join("") + "</ul>" : '<div class="rb-kasa-none">Brak zniżek — pełna cena.</div>'}</div>`;
+    head = `<div class="rb-big">👤 ${esc(L.name || L.email)}</div><div class="rb-meta">${esc(L.email)} · pieczątek łącznie: ${L.total || 0} · darmowe pizze: ${L.rewards || 0}</div>${kasaHtml}${lvLine}${adminInfo}
       <div class="rb-stamps">${stampDots(n)}</div>
       <div class="rb-loyal-txt"><b>${n} / ${LOYAL_GOAL}</b>${full ? " — 🎉 należy się pizza gratis (1 szt.)" : ""}</div>`;
     body = `<div class="rb-actions">
@@ -3625,8 +3710,10 @@ function renderCustomer() {
   const cps = active.length
     ? `<div class="rb-cust-sub">Aktywne rabaty klienta</div>` + active.map((c) => `<div class="rb-cust-cp"><span><b>${esc(c.code)}</b><br>${esc(c.description)}</span><button type="button" class="rb-btn small" data-act="cuse" data-id="${esc(c.id)}">Wykorzystaj</button></div>`).join("")
     : `<div class="rb-cust-sub">Klient nie ma aktywnych rabatów</div>`;
+  posSync(uid);
+  const posBox = `<details class="rb-pos"${posOpen ? " open" : ""}><summary>🧾 Cennik i kalkulator zamówienia</summary><div class="rb-pos-body">${posBody(active)}</div></details>`;
   const admBox = isAdmin && L && target.id === "rb-k-card" ? adminCustHtml(uid, L, data) : "";
-  target.innerHTML = `<div class="rb-res big ok rb-cust">${head}${body}${cps}${admBox}
+  target.innerHTML = `<div class="rb-res big ok rb-cust">${head}${body}${cps}${posBox}${admBox}
     <div class="rb-actions" style="margin-top:10px">
       ${isAdmin ? `<button type="button" class="rb-btn secondary small" data-act="grant">🎟 Przyznaj rabat</button>` : ""}
       ${withNext ? `<button type="button" class="rb-btn secondary small" data-act="next">Skanuj następny</button>` : ""}
@@ -3634,6 +3721,8 @@ function renderCustomer() {
     </div></div>`;
 }
 async function customerClick(e) {
+  const pb = e.target.closest("[data-pos]");
+  if (pb && custView) { posClick(pb); return; }
   const b = e.target.closest('[data-act="stamp"],[data-act="reward"],[data-act="unstamp"],[data-act="grant"],[data-act="cuse"],[data-act="adm-rank"],[data-act="adm-card"],[data-act="adm-pts"]');
   if (!b || !custView) return;
   const act = b.dataset.act;
