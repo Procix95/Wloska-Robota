@@ -413,6 +413,10 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
     <h2 class="section-title fade-in">Nasze <span>Menu</span></h2>
     <p class="section-subtitle fade-in">Wszystkie pizze 30cm. Wybierz swoją ulubioną!</p>
     <div class="menu-print-row fade-in"><button type="button" class="menu-print-btn" id="menu-print-btn">🖨️ Menu do druku / PDF</button></div>
+    <div class="quiz fade-in" id="quiz">
+      <button type="button" class="quiz-open" id="quizOpen">🍕 Nie wiesz, co wybrać? Dobierz mi pizzę</button>
+      <div class="quiz-card" id="quizCard" hidden></div>
+    </div>
     <div class="menu-categories fade-in">
       <button class="category-btn active" data-category="all">Wszystkie</button>
       <button class="category-btn" data-category="klasyczne">Klasyczne</button>
@@ -629,8 +633,10 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
       <div class="contact-card fade-in">
         <div class="contact-icon"><i class="fas fa-clock"></i></div>
         <h3>Godziny</h3>
-        <p>Śr-Pt: 12:00 - 20:00</p>
-        <p>Sob-Nd: 14:00 - 22:00</p>
+        <div id="hoursList">
+          <p>Śr-Pt: 12:00 - 20:00</p>
+          <p>Sob-Nd: 14:00 - 22:00</p>
+        </div>
       </div>
       <div class="contact-card fade-in">
         <div class="contact-icon"><i class="fas fa-truck"></i></div>
@@ -673,7 +679,7 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
         <h4>Kontakt</h4>
         <a href="tel:668862396"><i class="fas fa-phone"></i> 668 862 396</a>
         <p><i class="fas fa-map-marker-alt"></i> Głuponie, woj. Wielkopolskie</p>
-        <p><i class="fas fa-clock"></i> Śr-Pt: 12:00-20:00 | Sob-Nd: 14:00-22:00</p>
+        <p id="footHours"><i class="fas fa-clock"></i> Śr-Pt: 12:00-20:00 | Sob-Nd: 14:00-22:00</p>
       </div>
     </div>
     <div class="footer-bottom">
@@ -741,6 +747,54 @@ themeToggle.addEventListener('click', () => {
 // Format: 'RRRR-MM-DD'. Żeby usunąć wyjątek, po prostu skasuj wpis z tej listy.
 // ========================================
 const dniZamkniete = [];
+
+// Godziny otwarcia z panelu admina (Strona → Godziny). Moduł ustawia window.WR_HOURS = {days:[nd..sb], closed:[daty]}; bez niego działają godziny domyślne.
+window.WR_DEF_HOURS = [{ o: 840, c: 1320 }, null, null, { o: 720, c: 1200 }, { o: 720, c: 1200 }, { o: 720, c: 1200 }, { o: 840, c: 1320 }];
+window.WR_HOURS = null;
+// Polskie święta ustawowo wolne od pracy (z Wielkanocą liczoną algorytmem Gaussa). Klucze: ny, tk, wn, pw, m1, m3, zs, bc, wa, ws, nn, wi, b1, b2
+const PL_HOL_KEYS = ['ny', 'tk', 'wn', 'pw', 'm1', 'm3', 'zs', 'bc', 'wa', 'ws', 'nn', 'wi', 'b1', 'b2'];
+function plHolidays(y) {
+  const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3);
+  const hh = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - hh - k) % 7, m = Math.floor((a + 11 * hh + 22 * l) / 451);
+  const mon = Math.floor((hh + l - 7 * m + 114) / 31), day = ((hh + l - 7 * m + 114) % 31) + 1;
+  const ea = new Date(y, mon - 1, day);
+  const at = (n) => { const x = new Date(ea); x.setDate(x.getDate() + n); return x; };
+  const fx = (mm, dd) => new Date(y, mm - 1, dd);
+  const list = [['ny', 'Nowy Rok', fx(1, 1)], ['tk', 'Trzech Króli', fx(1, 6)], ['wn', 'Wielkanoc', ea], ['pw', 'Poniedziałek Wielkanocny', at(1)], ['m1', 'Święto Pracy', fx(5, 1)], ['m3', 'Święto Konstytucji 3 Maja', fx(5, 3)],
+    ['zs', 'Zielone Świątki (Zesłanie Ducha Świętego)', at(49)], ['bc', 'Boże Ciało', at(60)], ['wa', 'Wniebowzięcie NMP', fx(8, 15)], ['ws', 'Wszystkich Świętych', fx(11, 1)], ['nn', 'Narodowe Święto Niepodległości', fx(11, 11)]];
+  if (y >= 2025) list.push(['wi', 'Wigilia Bożego Narodzenia', fx(12, 24)]);
+  list.push(['b1', 'Boże Narodzenie (1. dzień)', fx(12, 25)], ['b2', 'Boże Narodzenie (2. dzień)', fx(12, 26)]);
+  const iso = (x) => x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0');
+  return list.map(([key, name, dt]) => ({ key, name, date: iso(dt), dt }));
+}
+window.plHolidays = plHolidays;
+window.PL_HOL_KEYS = PL_HOL_KEYS;
+function hoursNow() {
+  const x = window.WR_HOURS;
+  const on = x && Array.isArray(x.hol) ? x.hol : PL_HOL_KEYS, names = {}, closed = dniZamkniete.concat(x && x.closed ? x.closed : []);
+  const y0 = new Date().getFullYear();
+  [y0, y0 + 1, y0 + 2].forEach((y) => plHolidays(y).forEach((hd) => { if (on.includes(hd.key)) { closed.push(hd.date); names[hd.date] = hd.name; } }));
+  return { days: x && x.days ? x.days : window.WR_DEF_HOURS, closed, names };
+}
+function fmtMin(m) { return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
+function renderHoursText() {
+  const H = hoursNow(), names = ['Nd', 'Pn', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob'], order = [1, 2, 3, 4, 5, 6, 0], groups = [];
+  order.forEach((d, i) => {
+    const x = H.days[d];
+    if (!x) return;
+    const last = groups[groups.length - 1];
+    if (last && last.o === x.o && last.c === x.c && last.i === i - 1) { last.to = d; last.i = i; }
+    else groups.push({ from: d, to: d, o: x.o, c: x.c, i });
+  });
+  const lines = groups.map((g) => (g.from === g.to ? names[g.from] : names[g.from] + '-' + names[g.to]) + ': ' + fmtMin(g.o) + ' - ' + fmtMin(g.c));
+  const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+  const soon = H.closed.map((s) => s.split('-')).map((p) => new Date(+p[0], +p[1] - 1, +p[2])).filter((d) => d >= t0 && d - t0 < 31 * 864e5).sort((a, b) => a - b).map((d) => { const k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); return d.getDate() + '.' + String(d.getMonth() + 1).padStart(2, '0') + (H.names[k] ? ' (' + H.names[k] + ')' : ''); });
+  const box = document.getElementById('hoursList');
+  if (box) box.innerHTML = (lines.length ? lines.map((l) => '<p>' + l + '</p>').join('') : '<p>Obecnie nieczynne</p>') + (soon.length ? '<p class="hours-off">Wolne: ' + soon.join(', ') + '</p>' : '');
+  const f = document.getElementById('footHours');
+  if (f) f.innerHTML = '<i class="fas fa-clock"></i> ' + (lines.length ? lines.join(' | ').replace(/ - /g, '-') : 'Obecnie nieczynne');
+}
+window.wrHoursApply = function () { renderHoursText(); updateTimer(); };
  
 // Opening timer — śr-pt 12:00-20:00, sob-nd 14:00-22:00
 function updateTimer() {
@@ -748,13 +802,9 @@ function updateTimer() {
   const day = now.getDay(); // 0=nd, 1=pon, 2=wt, 3=śr, 4=czw, 5=pt, 6=sb
   const totalMinutes = now.getHours() * 60 + now.getMinutes();
  
-  const harmonogram = {
-    3: { open: 12 * 60, close: 20 * 60 }, // środa
-    4: { open: 12 * 60, close: 20 * 60 }, // czwartek
-    5: { open: 12 * 60, close: 20 * 60 }, // piątek
-    6: { open: 14 * 60, close: 22 * 60 }, // sobota
-    0: { open: 14 * 60, close: 22 * 60 }, // niedziela
-  };
+  const H = hoursNow();
+  const harmonogram = {};
+  H.days.forEach((d, i) => { if (d) harmonogram[i] = { open: d.o, close: d.c }; });
  
   const nazwyDni = ['Niedzielę', 'Poniedziałek', 'Wtorek', 'Środę', 'Czwartek', 'Piątek', 'Sobotę'];
  
@@ -768,9 +818,10 @@ function updateTimer() {
     const y = dataObj.getFullYear();
     const m = String(dataObj.getMonth() + 1).padStart(2, '0');
     const d = String(dataObj.getDate()).padStart(2, '0');
-    return dniZamkniete.includes(`${y}-${m}-${d}`);
+    return H.closed.includes(`${y}-${m}-${d}`);
   }
  
+  if (!Object.keys(harmonogram).length) { timerText.textContent = '🔴 Obecnie nieczynne.'; timerCountdown.textContent = ''; return; }
   const dzisiajZamkniete = jestZamknieteDnia(now);
   const dzisiaj = dzisiajZamkniete ? null : harmonogram[day];
  
@@ -799,15 +850,16 @@ function updateTimer() {
       dataSzukana.setDate(now.getDate() + dniDoOtwarcia);
       nastepnyDzien = dataSzukana.getDay();
       nastepneGodziny = jestZamknieteDnia(dataSzukana) ? null : harmonogram[nastepnyDzien];
-    } while (!nastepneGodziny);
+    } while (!nastepneGodziny && dniDoOtwarcia < 400);
   }
  
+  if (!nastepneGodziny) { timerText.textContent = '🔴 Aktualnie zamknięte.'; timerCountdown.textContent = ''; return; }
   const minutesToOpen = dniDoOtwarcia * 24 * 60 + nastepneGodziny.open - totalMinutes;
   const dni = Math.floor(minutesToOpen / (24 * 60));
   const h = Math.floor((minutesToOpen % (24 * 60)) / 60);
   const m = minutesToOpen % 60;
   const odliczanie = dni > 0 ? `${dni}d ${h}h ${m}min` : `${h}h ${m}min`;
-  const godzinaOtwarcia = nastepneGodziny.open === 12 * 60 ? '12:00' : '14:00';
+  const godzinaOtwarcia = fmtMin(nastepneGodziny.open);
  
   timerText.textContent = '🔴 Aktualnie zamknięte.';
  
@@ -820,6 +872,7 @@ function updateTimer() {
 }
  
 updateTimer();
+renderHoursText();
 setInterval(updateTimer, 60000);
  
 // Mapa Google: ładowana dopiero po kliknięciu (Google może zapisywać cookies)
@@ -1264,9 +1317,50 @@ body.dark .rk-card{background:var(--dark-bg)}
 #rabat-overlay .rb-subnav{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:0 0 16px}
 #rabat-overlay .rb-subtab{border:1px solid var(--rb-border);background:var(--rb-card);color:inherit;padding:8px 13px;border-radius:99px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;min-height:38px}
 #rabat-overlay .rb-subtab.active{background:var(--green);border-color:var(--green);color:#fff}
+.quiz{text-align:center;margin:0 0 1.6rem}
+.quiz-open{border:0;background:linear-gradient(135deg,var(--green),var(--red));color:#fff;padding:.8rem 1.6rem;border-radius:99px;font-weight:800;font-size:1rem;cursor:pointer;font-family:inherit;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.quiz-card{max-width:560px;margin:1rem auto 0;padding:1.3rem 1.2rem;border-radius:18px;background:#fff;box-shadow:0 8px 28px rgba(0,0,0,.12);text-align:left;color:#222}
+body.dark .quiz-card{background:var(--dark-card);color:#eee}
+.quiz-card[hidden]{display:none}
+.qz-prog{font-size:.8rem;opacity:.65;margin-bottom:.3rem}
+.qz-q{font-weight:800;font-size:1.15rem;margin:.2rem 0 .8rem}
+.qz-opts{display:flex;flex-wrap:wrap;gap:.6rem}
+.qz-opt{flex:1 1 140px;padding:.75rem 1rem;border-radius:14px;border:2px solid var(--red);background:transparent;color:inherit;font-weight:700;cursor:pointer;font-family:inherit;font-size:.95rem}
+.qz-opt:hover{background:var(--red);color:#fff}
+.qz-back,.qz-show{background:transparent;border:0;color:var(--red);font-weight:700;cursor:pointer;font-family:inherit;padding:.4rem .2rem}
+.qz-hit{display:flex;gap:.8rem;align-items:center;justify-content:space-between;padding:.8rem 0;border-bottom:1px solid rgba(127,127,127,.25)}
+.qz-price{color:var(--red);font-weight:800;margin-left:.4rem}
+.qz-desc{font-size:.85rem;opacity:.75;margin-top:.15rem}
+.qz-note{font-size:.9rem;opacity:.85;margin:.8rem 0}
+.qz-actions{display:flex;flex-wrap:wrap;gap:.8rem;align-items:center;margin-top:.6rem}
+.qz-actions .btn{font-size:.95rem;padding:.7rem 1.3rem}
+.menu-item.quiz-flash{animation:quizflash 3s ease}
+@keyframes quizflash{0%,100%{box-shadow:0 8px 26px rgba(0,0,0,.12)}15%,60%{box-shadow:0 0 0 5px var(--red),0 0 28px var(--red)}}
 .menu-print-row{text-align:center;margin:-.4rem 0 1.2rem}
 .menu-print-btn{display:inline-flex;align-items:center;gap:.4rem;border:2px solid var(--red);background:transparent;color:var(--red);padding:.45rem 1.1rem;border-radius:99px;font-weight:800;font-size:.9rem;cursor:pointer;font-family:inherit}
 .menu-print-btn:hover{background:var(--red);color:#fff}
+#print-poster{display:none}
+.qp{background:#fff;color:#111;font-family:Georgia,"Times New Roman",serif;text-align:center;padding:10mm 8mm;border-radius:6px}
+.qp h1{font-size:34pt;margin:0;color:#b3141c;letter-spacing:1px}
+.qp-sub{font-size:14pt;color:#444;margin:4pt 0 14pt;font-style:italic}
+.qp-grid{display:flex;justify-content:center;align-items:flex-start;gap:8mm;flex-wrap:wrap}
+.qp-item{text-align:center}
+.qp .qp-qr{background:#fff;margin:0 auto;border:1px solid #ddd;padding:3mm;box-sizing:border-box;max-width:100%}
+.qp .qp-qr svg{display:block;width:100%;height:auto}
+.qp-t{font-weight:700;font-size:14pt;margin-top:4mm}
+.qp-s{font-size:10.5pt;color:#555;margin-top:1mm}
+.qp-foot{margin-top:14mm;border-top:1px solid #999;padding-top:3mm;font-size:11pt;color:#333}
+.qp-sheet{display:grid;grid-template-columns:repeat(3,1fr);gap:4mm}
+.qp-cell{text-align:center;border:1px dashed #bbb;padding:3mm}
+.qp-cell .qp-qr{width:36mm;border:0;padding:0}
+.qp-cl{font-size:9pt;margin-top:2mm;font-weight:700}
+#rabat-overlay .qp-prev{margin-top:12px;max-height:420px;overflow:auto;border:1px solid var(--rb-border);border-radius:10px}
+#rabat-overlay .qp-prev .qp h1{font-size:22pt}
+@media print{
+  body.printing-poster>*:not(#print-poster){display:none!important}
+  body.printing-poster #print-poster{display:block!important;background:#fff}
+  body.printing-poster{background:#fff!important}
+}
 #print-menu{display:none}
 @media print{
   body.printing-menu>*:not(#print-menu){display:none!important}
@@ -1350,6 +1444,17 @@ body.dark #site-dish .sd-text{color:#bbb}
 #rabat-overlay .rb-poll-o{display:flex;gap:8px;align-items:center;padding:7px 4px;cursor:pointer;font-size:14px}
 #rabat-overlay .rb-poll-o input{width:auto;margin:0}
 #rabat-overlay #rb-poll-opts .rb-poll-opt{display:block;margin:0 0 6px}
+#rabat-overlay .rb-scratch{margin:10px 0;padding:10px 12px;border-radius:12px;border:2px dashed var(--rb-accent)}
+#rabat-overlay .rb-scratch[hidden]{display:none}
+#rabat-overlay .sc-wrap{position:relative;width:300px;max-width:100%;height:110px;margin:8px auto;border-radius:12px;overflow:hidden}
+#rabat-overlay .sc-prize{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:900;background:linear-gradient(135deg,#ffe58a,#ffb347);color:#7a1d00}
+#rabat-overlay .sc-wrap canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:pointer;transition:opacity .5s}
+#rabat-overlay .sc-done{font-size:15px;padding:4px 0}
+#rabat-overlay .rb-hrs-row{display:flex;gap:8px;align-items:center;margin:4px 0}
+#rabat-overlay .rb-hrs-row .rb-check{flex:0 0 130px;margin:0}
+#rabat-overlay .rb-hrs-row input[type=time]{width:112px;margin:0;padding:8px 10px}
+#rabat-overlay .rb-poll-chip a{margin-left:6px;text-decoration:none;color:inherit;opacity:.7}
+.hours-off{color:var(--red);font-weight:600}
 #rabat-overlay .rb-poll-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
 #rabat-overlay .rb-poll-chip{padding:5px 11px;border-radius:20px;background:rgba(127,127,127,.18);font-size:13px}
 #rabat-overlay .rb-poll #rb-poll-prop{margin:6px 0}
@@ -1506,6 +1611,7 @@ body.dark .poll-opt{background:var(--dark-card)}
         <div class="rb-pts-top"><h3 style="margin:0;font-size:18px">🎮 Gry i punkty</h3><b id="rb-pts-n">0</b></div>
         <div class="rb-pts-bar" aria-hidden="true"><i id="rb-pts-fill"></i></div>
         <div class="rb-meta" id="rb-pts-txt"></div>
+        <div class="rb-scratch" id="rb-scratch" hidden></div>
         <div class="rb-game-list" id="rb-game-list"></div>
         <div class="rb-stage" id="rb-game-stage" hidden></div>
         <button type="button" class="rb-btn" id="rb-pts-redeem" disabled>Wymień punkty na rabat −5 zł</button>
@@ -1853,6 +1959,17 @@ body.dark .poll-opt{background:var(--dark-card)}
           <button type="button" class="rb-btn secondary small" id="rb-lv-add">+ Dodaj rangę</button>
           <label class="rb-check" style="margin-top:10px"><input id="rb-ref-on" type="checkbox"> Włącz program poleceń: polecający dostaje −5 zł po pierwszym zakupie znajomego (nagrodę przyznajesz w zakładce Klienci → Polecenia)</label>
 
+          <h4 class="rb-hsec"><span>Godziny otwarcia</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
+          <div class="rb-meta" style="margin:-4px 0 6px">Godziny pokazują się na stronie (sekcja Kontakt, stopka) i w odliczaniu „otwarte / zamknięte” na górze. Odznacz dzień, w którym nie pracujecie. Dni wolne (urlop, święto) dodajesz niżej, a miną same.</div>
+          <div id="rb-hrs-rows"></div>
+          <label for="rb-hrs-date" style="margin-top:10px">Dzień wolny (urlop, święto)</label>
+          <div class="rb-adm-row"><div><input type="date" id="rb-hrs-date" style="width:170px"></div><div><button type="button" class="rb-btn secondary small" id="rb-hrs-add">+ Dodaj dzień wolny</button></div></div>
+          <div id="rb-hrs-closed"></div>
+          <label style="margin-top:12px">Polskie święta ustawowo wolne od pracy</label>
+          <div class="rb-meta">Zaznaczone święta strona traktuje jak dzień zamknięty (odliczanie pokaże, kiedy otwieracie następnym razem, a w sekcji Kontakt pojawi się informacja „Wolne”). Odznacz święto, w które pracujecie. Daty (także ruchome, jak Wielkanoc czy Boże Ciało) liczą się same na każdy rok.</div>
+          <div class="rb-actions" style="margin:4px 0"><button type="button" class="rb-btn secondary small" id="rb-hrs-hol-all">Zaznacz wszystkie</button><button type="button" class="rb-btn secondary small" id="rb-hrs-hol-none">Odznacz wszystkie</button></div>
+          <div id="rb-hrs-hol"></div>
+
           <h4 class="rb-hsec"><span>Głosowanie klientów</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
           <div class="rb-meta" style="margin:-4px 0 6px">Zadaj klientom pytanie (np. „Jaką pizzę dodać do menu?”). Zalogowani klienci głosują w swoim koncie, każdy jeden raz. Wyniki widzisz tylko Ty, dopóki ich nie opublikujesz przyciskiem „Zamknij i opublikuj wyniki”.</div>
           <label for="rb-poll-mode">Rodzaj głosowania</label>
@@ -1880,6 +1997,7 @@ body.dark .poll-opt{background:var(--dark-card)}
             <button type="button" class="rb-btn secondary small" id="rb-poll-new">🆕 Nowe głosowanie</button>
           </div>
           <div id="rb-poll-out"></div>
+          <div id="rb-poll-towin" hidden><button type="button" class="rb-btn small" id="rb-poll-tomenu">➕ Dodaj zwycięzcę do menu</button><div class="rb-meta">Doda pozycję w Strona → Produkty z plakietką „Nowość” i „wybór klientów”. Uzupełnij cenę i opis, a potem zapisz.</div></div>
 
           <h4 class="rb-hsec"><span>Kopia zapasowa</span></h4>
           <div class="rb-meta" style="margin:-4px 0 6px">Jeden plik z danymi strony, kart, kodów i klientów. Zrób kopię przed większymi zmianami i co jakiś czas. Plik zawiera dane osobowe klientów, więc trzymaj go w bezpiecznym miejscu.</div>
@@ -1891,6 +2009,23 @@ body.dark .poll-opt{background:var(--dark-card)}
           <div id="rb-kz-prev"></div>
           <div class="rb-actions" style="margin-top:8px"><button type="button" class="rb-btn secondary small" id="rb-kz-restore" hidden>♻ Przywróć wybrane</button></div>
           <div class="rb-msg" id="rb-kz-msg" role="status"></div>
+
+          <h4 class="rb-hsec"><span>Plakat QR</span></h4>
+          <div class="rb-meta" style="margin:-4px 0 6px">Wydrukuj plakat albo arkusz naklejek z kodami QR: do menu, do opinii w Google i do założenia konta z kartą lojalnościową. Wybierz, co ma się znaleźć na kartce, i kliknij „Drukuj”. W oknie drukowania możesz też wybrać „Zapisz jako PDF”.</div>
+          <label class="rb-check"><input type="checkbox" id="rb-qp-site" checked> Menu i zamówienia (strona)</label>
+          <label class="rb-check"><input type="checkbox" id="rb-qp-rev" checked> Opinia w Google</label>
+          <label class="rb-check"><input type="checkbox" id="rb-qp-acc" checked> Konto i karta lojalnościowa</label>
+          <label class="rb-check"><input type="checkbox" id="rb-qp-cus"> Własny kod:</label>
+          <input type="text" id="rb-qp-clab" maxlength="40" placeholder="Podpis, np. Nasz Facebook">
+          <input type="url" id="rb-qp-curl" maxlength="300" placeholder="https://...">
+          <label for="rb-qp-layout">Układ</label>
+          <select id="rb-qp-layout"><option value="poster">Plakat A4 (wybrane kody obok siebie)</option><option value="sheet">Arkusz naklejek (12 małych kodów, pierwszy wybrany)</option></select>
+          <label for="rb-qp-title">Nagłówek plakatu</label>
+          <input type="text" id="rb-qp-title" maxlength="40" value="Włoska Robota">
+          <label for="rb-qp-sub">Podtytuł</label>
+          <input type="text" id="rb-qp-sub" maxlength="80" value="Zeskanuj telefonem 📱">
+          <div class="rb-actions" style="margin-top:8px"><button type="button" class="rb-btn small" id="rb-qp-print">🖨 Drukuj / zapisz PDF</button></div>
+          <div id="rb-qp-prev" class="qp-prev"></div>
 
           <h4 class="rb-hsec"><span>Opinie w Google</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
           <div class="rb-meta" style="margin:-4px 0 6px">Link, pod którym klient może zostawić opinię w Google (przycisk pokaże się każdemu klientowi po ocenie, niezależnie od liczby gwiazdek). Pusty = przycisku nie będzie.</div>
@@ -2454,6 +2589,7 @@ function renderGames() {
     $("rb-pts-txt").textContent = "Konto obsługi nie zbiera punktów — grasz próbnie.";
     $("rb-pts-test").hidden = true; $("rb-pts-redeem").hidden = true;
     $("rb-game-list").innerHTML = gameRows();
+    $("rb-scratch").hidden = true;
     return;
   }
   $("rb-pts-redeem").hidden = false;
@@ -2467,6 +2603,7 @@ function renderGames() {
   $("rb-pts-redeem").disabled = p < PTS_COST;
   $("rb-pts-redeem").textContent = "Wymień " + PTS_COST + " pkt na rabat −5 zł";
   $("rb-game-list").innerHTML = gameRows();
+  try { renderScratch(); } catch (e) { console.warn(e); }
 }
 function gameRows() {
   return GAMES.map((g) =>
@@ -2481,6 +2618,98 @@ function loadGamesScript() {
     document.head.appendChild(sc);
   });
 }
+/* ---------- zdrapka dnia (raz na dobę, 1–3 pkt, poza dziennym limitem z gier) ---------- */
+let scSt = { day: 0, uid: "", doc: undefined, prize: 0, busy: false, drawn: false };
+const scDay = () => { const t = new Date(Date.now() + 2 * 3600e3); return t.getUTCFullYear() * 10000 + (t.getUTCMonth() + 1) * 100 + t.getUTCDate(); };
+const scPrize = () => { const r = Math.random(); return r < 0.6 ? 1 : r < 0.9 ? 2 : 3; };
+async function renderScratch() {
+  const box = $("rb-scratch");
+  if (!box) return;
+  if (isStaff || !ptsUser || !myPoints) { box.hidden = true; return; }
+  box.hidden = false;
+  const day = scDay();
+  if (scSt.day !== day || scSt.uid !== ptsUser.uid) scSt = { day, uid: ptsUser.uid, doc: undefined, prize: scPrize(), busy: false, drawn: false };
+  if (scSt.busy) return;
+  const st = scSt;
+  if (st.doc === undefined) {
+    st.busy = true;
+    try { const s = await getDoc(doc(db, "dailyScratch", st.uid + "_" + st.day)); st.doc = s.exists() ? s.data() : null; }
+    catch (_) { st.doc = null; }
+    st.busy = false;
+    if (scSt !== st) return;
+  }
+  const head = '<div class="rb-sec" style="margin-top:0"><h3>🎟 Zdrapka dnia</h3></div>';
+  if (st.doc) {
+    st.drawn = false;
+    box.innerHTML = head + `<div class="sc-done">✅ Dzisiejsza zdrapka: <b>+${esc(String(st.doc.pts))} pkt</b>. Wróć jutro po kolejną!</div>`;
+    return;
+  }
+  if (PTS_NEED_STAMP && !(myLoyal && (myLoyal.total || 0) >= 1)) {
+    box.innerHTML = head + '<div class="rb-meta">Zdrapka odblokuje się po pierwszej pieczątce na karcie lojalnościowej.</div>';
+    return;
+  }
+  if (st.drawn) return;
+  st.drawn = true;
+  box.innerHTML = head + `<div class="sc-wrap"><div class="sc-prize">+${st.prize} pkt</div><canvas id="sc-cv" width="300" height="110" aria-label="Zdrapka"></canvas></div>`
+    + '<div class="rb-meta">Zdrap srebrne pole palcem lub myszką. Raz dziennie, nagroda to 1–3 punkty (poza dziennym limitem z gier).</div>'
+    + '<button type="button" class="rb-btn secondary small" id="sc-reveal">Odsłoń</button><div class="rb-msg" id="sc-msg" role="status"></div>';
+  scpInit($("sc-cv"));
+  $("sc-reveal").addEventListener("click", () => scFinish());
+}
+function scpInit(cv) {
+  const g = cv.getContext("2d");
+  const gr = g.createLinearGradient(0, 0, 300, 110);
+  gr.addColorStop(0, "#c9ced6"); gr.addColorStop(0.5, "#f1f3f6"); gr.addColorStop(1, "#aeb4be");
+  g.fillStyle = gr; g.fillRect(0, 0, 300, 110);
+  g.fillStyle = "#6b7380"; g.font = "bold 22px sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("ZDRAP TUTAJ 🍕", 150, 55);
+  let down = false, n = 0;
+  const pos = (e) => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * 300 / r.width, (e.clientY - r.top) * 110 / r.height]; };
+  const scratch = (e) => {
+    const [x, y] = pos(e);
+    g.globalCompositeOperation = "destination-out";
+    g.beginPath(); g.arc(x, y, 16, 0, 7); g.fill();
+    if (++n % 6 === 0) {
+      const d = g.getImageData(0, 0, 300, 110).data; let c = 0, t = 0;
+      for (let i = 3; i < d.length; i += 4 * 37) { t++; if (d[i] < 40) c++; }
+      if (c / t > 0.45) scFinish();
+    }
+  };
+  cv.addEventListener("pointerdown", (e) => { down = true; try { cv.setPointerCapture(e.pointerId); } catch (_) {} scratch(e); });
+  cv.addEventListener("pointermove", (e) => { if (down) scratch(e); });
+  ["pointerup", "pointercancel"].forEach((ev) => cv.addEventListener(ev, () => { down = false; }));
+}
+async function scFinish() {
+  const st = scSt;
+  if (st.busy || st.doc || !ptsUser) return;
+  st.busy = true;
+  const cv = $("sc-cv"), msg = $("sc-msg");
+  if (cv) cv.style.opacity = "0";
+  const rv = $("sc-reveal"); if (rv) rv.hidden = true;
+  try {
+    if (window.WRStraz && await window.WRStraz.isBlocked()) throw { soft: "To konto ma wyłączone zdobywanie punktów." };
+    const pref = doc(db, "points", ptsUser.uid), dref = doc(db, "dailyScratch", st.uid + "_" + st.day), pts = st.prize;
+    await runTransaction(db, async (tx) => {
+      const [cur, dd] = await Promise.all([tx.get(pref), tx.get(dref)]);
+      if (!cur.exists()) throw { soft: "Konto punktów nie jest gotowe." };
+      if (dd.exists()) throw { done: dd.data() };
+      const d = cur.data();
+      tx.update(pref, { points: (d.points || 0) + pts, total: (d.total || 0) + pts });
+      tx.set(dref, { uid: st.uid, pts, at: serverTimestamp() });
+    });
+    st.doc = { pts };
+  } catch (err) {
+    if (err && err.done) st.doc = err.done;
+    else {
+      console.warn("Zdrapka:", err && (err.code || err.message));
+      if (cv) cv.style.opacity = "1";
+      if (rv) rv.hidden = false;
+      if (msg) setMsg(msg, err && err.soft ? err.soft : err && err.code === "permission-denied" ? "Nie udało się zapisać zdrapki. Spróbuj za chwilę (jeśli to się powtarza, mogła być już wykorzystana)." : "Nie udało się zapisać zdrapki. Spróbuj ponownie.", "err");
+    }
+  }
+  st.busy = false;
+  if (st.doc) { st.drawn = false; renderScratch(); }
+}
+
 async function awardPoints(n, gameId) {
   if (isStaff) return { ok: false, msg: "Tryb próbny obsługi — punkty nie są naliczane." };
   if (!ptsUser || !myPoints) return { ok: false, msg: "Zaloguj się, żeby zbierać punkty." };
@@ -4118,7 +4347,7 @@ const DELIVERY_DEFAULT = ["Głuponie", "Trzcianka", "Tomaszewo", "Michorzewo", "
   .map((name) => ({ name, fee: 10, min: null, freeFrom: null }));
 // Link do formularza opinii w Google (domyślny; admin może go zmienić lub wyczyścić w panelu: Strona → Opinie w Google).
 const GOOGLE_REVIEW_DEFAULT = "https://g.page/r/CUq2_T6CQcy5EAE/review";
-let siteCfg = { prices: {}, unavailable: {}, hidden: {}, badges: {}, products: [], campaigns: [], notice: null, dish: null, delivery: { places: DELIVERY_DEFAULT }, googleReviewUrl: GOOGLE_REVIEW_DEFAULT, reviews: [], googleMapsUrl: "", theme: "auto", levelsOn: false, levels: null, refOn: false, poll: null };
+let siteCfg = { prices: {}, unavailable: {}, hidden: {}, badges: {}, products: [], campaigns: [], notice: null, dish: null, delivery: { places: DELIVERY_DEFAULT }, googleReviewUrl: GOOGLE_REVIEW_DEFAULT, reviews: [], googleMapsUrl: "", theme: "auto", levelsOn: false, levels: null, refOn: false, poll: null, hours: null };
 const PROD_CATS = [["klasyczne", "Klasyczne"], ["miesne", "Mięsne"], ["vege", "Wege"], ["sosy", "Sosy"], ["makarony", "Makarony"], ["dodatki", "Dodatki"]];
 const MAX_PRODUCTS = 40;
 const BADGES = [["hit", "🔥 Hit"], ["ostra", "🌶 Ostra"], ["wege", "🌱 Wege"], ["nowosc", "⭐ Nowość"], ["polecamy", "👍 Polecamy"]];
@@ -4135,7 +4364,7 @@ const tsMs = (t) => (t ? (t.toDate ? t.toDate().getTime() : (t.seconds ? t.secon
 function plainCfg(c) {
   const n = c.notice ? { ...c.notice, until: c.notice.until ? { seconds: Math.floor(tsMs(c.notice.until) / 1000) } : null } : null;
   const camps = (c.campaigns || []).map((x) => ({ ...x, from: x.from ? { seconds: Math.floor(tsMs(x.from) / 1000) } : null, until: x.until ? { seconds: Math.floor(tsMs(x.until) / 1000) } : null }));
-  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, badges: c.badges || {}, products: c.products || [], campaigns: camps, notice: n, dish: c.dish || null, delivery: c.delivery || null, googleReviewUrl: typeof c.googleReviewUrl === "string" ? c.googleReviewUrl : null, reviews: Array.isArray(c.reviews) ? c.reviews : [], googleMapsUrl: typeof c.googleMapsUrl === "string" ? c.googleMapsUrl : "", theme: typeof c.theme === "string" ? c.theme : "auto", levelsOn: c.levelsOn === true, levels: Array.isArray(c.levels) ? c.levels : null, levelsV: c.levelsV === 2 ? 2 : 0, refOn: c.refOn === true, poll: c.poll || null };
+  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, badges: c.badges || {}, products: c.products || [], campaigns: camps, notice: n, dish: c.dish || null, delivery: c.delivery || null, googleReviewUrl: typeof c.googleReviewUrl === "string" ? c.googleReviewUrl : null, reviews: Array.isArray(c.reviews) ? c.reviews : [], googleMapsUrl: typeof c.googleMapsUrl === "string" ? c.googleMapsUrl : "", theme: typeof c.theme === "string" ? c.theme : "auto", levelsOn: c.levelsOn === true, levels: Array.isArray(c.levels) ? c.levels : null, levelsV: c.levelsV === 2 ? 2 : 0, refOn: c.refOn === true, poll: c.poll || null, hours: c.hours || null };
 }
 
 function renderDish() {
@@ -4236,6 +4465,71 @@ function renderProducts() {
   });
 }
 
+/* ---------- „Dobierz mi pizzę” (3 pytania → polecenia z aktualnego menu) ---------- */
+const QZ_Q = [
+  { k: "meat", q: "Na co masz ochotę?", o: [["meat", "🥓 Mięsna"], ["vege", "🌱 Bez mięsa"], ["any", "🤷 Wszystko jedno"]] },
+  { k: "hot", q: "Jak z ostrością?", o: [["mild", "😌 Łagodna"], ["hot", "🌶 Ostra"], ["any", "🤷 Obojętnie"]] },
+  { k: "n", q: "Ile Was będzie?", o: [["1", "🙋 Sam(a)"], ["2", "👫 Dwie osoby"], ["4", "👨‍👩‍👧 3–4 osoby"], ["6", "🎉 5 i więcej"]] }
+];
+let qzSt = { step: 0, a: {} };
+const QZ_MEAT = /pepperoni|prosciutto|szynk|salami|boczek|nduja|kiełbas|kurczak|wołow|bekon|mięs|cotto/i;
+const QZ_HOT = /piccante|jalape|nduja|ostr|chili|diavola/i;
+function qzPizzas() {
+  return menuEls().filter((el) => !el.classList.contains("is-hidden") && !el.classList.contains("is-unavail") && /klasyczne|miesne|vege/.test(el.dataset.category || "")).map((el) => {
+    const key = itemKey(el), cat = el.dataset.category || "";
+    const bd = el.dataset.custom ? badgeIds((el.dataset.badges || "").split(",")) : badgeIds(siteCfg.badges[key]);
+    const txt = itemName(el) + " " + ((el.querySelector(".menu-item-desc") || {}).textContent || "");
+    return { el, name: itemName(el).replace(/^\d+\.\s*/, ""), price: ((el.querySelector(".menu-item-price") || {}).textContent || "").trim(), desc: ((el.querySelector(".menu-item-desc") || {}).textContent || "").trim(),
+      meat: /miesne/.test(cat) || QZ_MEAT.test(txt), hot: bd.includes("ostra") || QZ_HOT.test(txt), top: bd.includes("hit") || bd.includes("polecamy") };
+  });
+}
+function qzResult() {
+  const a = qzSt.a, all = qzPizzas();
+  const fm = (p) => a.meat === "any" || (a.meat === "meat" ? p.meat : !p.meat);
+  const fh = (p) => a.hot === "any" || (a.hot === "hot" ? p.hot : !p.hot);
+  let list = all.filter((p) => fm(p) && fh(p)), note = "";
+  if (!list.length) { list = all.filter(fm); note = "Nie mamy dokładnie takiej pizzy, więc luzujemy ostrość. Poniżej najbliższe propozycje."; }
+  if (!list.length) { list = all; note = "Dziś nie mamy pizzy pasującej do wyboru — oto nasze propozycje."; }
+  list = list.slice().sort((x, y) => Number(y.top) - Number(x.top)).slice(0, 3);
+  const n = Number(a.n || 1), k = n === 1 ? "1 pizza 30 cm" : n === 2 ? "2 pizze 30 cm" : n === 4 ? "3 pizze 30 cm" : "5–6 pizz 30 cm (zadzwoń z wyprzedzeniem)";
+  return { list, note, k, n, all };
+}
+function qzRender() {
+  const box = $("quizCard"), st = qzSt;
+  if (st.step < QZ_Q.length) {
+    const q = QZ_Q[st.step];
+    box.innerHTML = `<div class="qz-prog">Pytanie ${st.step + 1} z ${QZ_Q.length}</div><div class="qz-q">${esc(q.q)}</div><div class="qz-opts">${q.o.map((o) => `<button type="button" class="qz-opt" data-qv="${o[0]}">${esc(o[1])}</button>`).join("")}</div>${st.step ? '<button type="button" class="qz-back" data-qback>← Wróć</button>' : ""}`;
+    return;
+  }
+  const r = qzResult();
+  box.innerHTML = `<div class="qz-q">Polecamy dla Ciebie:</div>${r.note ? `<div class="qz-note">${esc(r.note)}</div>` : ""}`
+    + r.list.map((p, i) => `<div class="qz-hit"><div><b>${esc(p.name)}</b> <span class="qz-price">${esc(p.price)}</span><div class="qz-desc">${esc(p.desc)}</div></div><button type="button" class="qz-show" data-qshow="${i}">Pokaż w menu</button></div>`).join("")
+    + `<div class="qz-note">Dla ${r.n === 1 ? "jednej osoby" : r.n === 2 ? "dwóch osób" : r.n === 4 ? "3–4 osób" : "większej ekipy"} zwykle wystarczy ${esc(r.k)}${r.n > 1 ? " — weźcie kilka różnych z tej listy." : "."}</div>`
+    + `<div class="qz-actions"><a class="btn btn-primary" href="tel:668862396">📞 Zamów: 668 862 396</a><button type="button" class="qz-back" data-qreset>🔄 Jeszcze raz</button></div>`;
+  box._list = r.list;
+}
+$("quizOpen").addEventListener("click", () => {
+  const c = $("quizCard");
+  if (!c.hidden) { c.hidden = true; return; }
+  qzSt = { step: 0, a: {} }; c.hidden = false; qzRender();
+});
+$("quizCard").addEventListener("click", (e) => {
+  const o = e.target.closest("[data-qv]");
+  if (o) { qzSt.a[QZ_Q[qzSt.step].k] = o.dataset.qv; qzSt.step++; qzRender(); return; }
+  if (e.target.closest("[data-qback]")) { qzSt.step = Math.max(0, qzSt.step - 1); qzRender(); return; }
+  if (e.target.closest("[data-qreset]")) { qzSt = { step: 0, a: {} }; qzRender(); return; }
+  const s = e.target.closest("[data-qshow]");
+  if (s) {
+    const p = $("quizCard")._list[Number(s.dataset.qshow)];
+    if (!p) return;
+    const all = document.querySelector('.category-btn[data-category="all"]');
+    if (all) all.click();
+    p.el.scrollIntoView({ behavior: "smooth", block: "center" });
+    p.el.classList.remove("quiz-flash"); void p.el.offsetWidth; p.el.classList.add("quiz-flash");
+    setTimeout(() => p.el.classList.remove("quiz-flash"), 3200);
+  }
+});
+
 /* ---------- motyw sezonowy (silnik w motyw.js; tu tylko cienkie wrappery) ---------- */
 const WRT = window.WRTheme || { THEMES: {}, list: [], auto: () => null, label: () => "żaden (zwykła strona)", apply: () => {} };
 const THEMES = WRT.THEMES;
@@ -4277,8 +4571,10 @@ function applySite(cfg) {
     googleReviewUrl: (cfg && typeof cfg.googleReviewUrl === "string") ? cfg.googleReviewUrl : GOOGLE_REVIEW_DEFAULT,
     reviews: Array.isArray(cfg && cfg.reviews) ? cfg.reviews : [], googleMapsUrl: (cfg && typeof cfg.googleMapsUrl === "string") ? cfg.googleMapsUrl : "",
     theme: (cfg && typeof cfg.theme === "string") ? cfg.theme : "auto",
-    levelsOn: !!(cfg && cfg.levelsOn === true), levels: cleanLevels(cfg && cfg.levels, cfg && cfg.levelsV), refOn: !!(cfg && cfg.refOn === true), poll: validPoll(cfg && cfg.poll)
+    levelsOn: !!(cfg && cfg.levelsOn === true), levels: cleanLevels(cfg && cfg.levels, cfg && cfg.levelsV), refOn: !!(cfg && cfg.refOn === true), poll: validPoll(cfg && cfg.poll), hours: validHours(cfg && cfg.hours)
   };
+  window.WR_HOURS = siteCfg.hours;
+  try { if (window.wrHoursApply) window.wrHoursApply(); } catch (_) {}
   applyTheme(siteCfg.theme);
   setTimeout(() => { try { refreshLoyaltyUi(); } catch (_) {} try { renderPoll(auth.currentUser); } catch (_) {} }, 0);
   renderProducts();
@@ -4933,7 +5229,9 @@ function fillSiteForm() {
   showThemeNow();
   fillLevelsForm();
   fillPollForm();
+  fillHoursForm();
   try { bkFillList(); } catch (_) {}
+  try { qpPreview(); } catch (_) {}
   $("rb-prod-list").innerHTML = siteCfg.products.filter(validProduct).map(prodRowHtml).join("");
   $("rb-rev-list").innerHTML = (siteCfg.reviews || []).filter(validReview).map(revRowHtml).join("");
   $("rb-site-gmaps").value = siteCfg.googleMapsUrl || "";
@@ -5109,6 +5407,9 @@ async function saveSite() {
   const pollRes = collectPoll();
   if (pollRes.bad) { say(pollRes.bad, "err"); return; }
   const poll = pollRes.poll;
+  const hoursRes = collectHours();
+  if (hoursRes.bad) { say(hoursRes.bad, "err"); return; }
+  const hours = hoursRes.hours;
   const levels = lvRes.list, levelsOn = $("rb-lv-on").checked, refOn = $("rb-ref-on").checked;
   const googleReviewUrl = $("rb-site-google").value.trim();
   if (googleReviewUrl && !/^https:\/\/\S+$/.test(googleReviewUrl)) { say( "Link do opinii w Google musi zaczynać się od https://", "err"); return; }
@@ -5145,8 +5446,8 @@ async function saveSite() {
   const btns = [$("rb-site-save"), ...document.querySelectorAll(".rb-sec-save")];
   btns.forEach((b) => { b.disabled = true; });
   try {
-    await setDoc(doc(db, "site", "config"), { prices, unavailable, hidden, badges, products, campaigns, notice, dish, delivery, googleReviewUrl, reviews, googleMapsUrl, theme, levelsOn, levels, levelsV: 2, refOn, poll, updatedAt: serverTimestamp() });
-    const cfg = { prices, unavailable, hidden, badges, products, campaigns, notice, dish, delivery, googleReviewUrl, reviews, googleMapsUrl, theme, levelsOn, levels, levelsV: 2, refOn, poll };
+    await setDoc(doc(db, "site", "config"), { prices, unavailable, hidden, badges, products, campaigns, notice, dish, delivery, googleReviewUrl, reviews, googleMapsUrl, theme, levelsOn, levels, levelsV: 2, refOn, poll, hours, updatedAt: serverTimestamp() });
+    const cfg = { prices, unavailable, hidden, badges, products, campaigns, notice, dish, delivery, googleReviewUrl, reviews, googleMapsUrl, theme, levelsOn, levels, levelsV: 2, refOn, poll, hours };
     applySite(cfg);
     fillSiteForm();
     try { localStorage.setItem(SITE_CACHE_KEY, JSON.stringify(plainCfg(cfg))); } catch (_) {}
@@ -5158,6 +5459,63 @@ async function saveSite() {
 }
 $("rb-site-save").addEventListener("click", saveSite);
 document.querySelectorAll(".rb-sec-save").forEach((b) => b.addEventListener("click", saveSite));
+
+/* ---------- godziny otwarcia i dni wolne (Strona → Godziny) ---------- */
+const HRS_DAYS = [[1, "Poniedziałek"], [2, "Wtorek"], [3, "Środa"], [4, "Czwartek"], [5, "Piątek"], [6, "Sobota"], [0, "Niedziela"]];
+const hrsMin = (s) => { const m = /^(\d{1,2}):(\d{2})$/.exec(s || ""); return m ? Number(m[1]) * 60 + Number(m[2]) : NaN; };
+const hrsStr = (n) => String(Math.floor(n / 60)).padStart(2, "0") + ":" + String(n % 60).padStart(2, "0");
+function validHours(h) {
+  if (!h || !Array.isArray(h.days) || h.days.length !== 7) return null;
+  const days = h.days.map((d) => (d && Number.isInteger(d.o) && Number.isInteger(d.c) && d.o >= 0 && d.c <= 1440 && d.o < d.c ? { o: d.o, c: d.c } : null));
+  const closed = Array.isArray(h.closed) ? h.closed.filter((s) => typeof s === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s)).slice(0, 80) : [];
+  const hol = Array.isArray(h.hol) ? h.hol.filter((k) => window.PL_HOL_KEYS.includes(k)) : window.PL_HOL_KEYS.slice();
+  return { days, closed, hol };
+}
+let hrsClosed = [];
+function hrsClosedHtml() {
+  $("rb-hrs-closed").innerHTML = hrsClosed.length
+    ? hrsClosed.map((d, i) => `<span class="rb-poll-chip">${esc(d.split("-").reverse().join("."))} <a href="#" data-hrs-del="${i}" aria-label="Usuń">✕</a></span>`).join(" ")
+    : '<div class="rb-meta">Brak dni wolnych.</div>';
+}
+function fillHoursForm() {
+  const h = siteCfg.hours || { days: window.WR_DEF_HOURS, closed: [] };
+  $("rb-hrs-rows").innerHTML = HRS_DAYS.map(([d, n]) => {
+    const x = h.days[d];
+    return `<div class="rb-hrs-row"><label class="rb-check"><input type="checkbox" class="rb-hrs-on" data-d="${d}"${x ? " checked" : ""}> ${n}</label><input type="time" class="rb-hrs-o" data-d="${d}" value="${hrsStr(x ? x.o : 720)}"><span>–</span><input type="time" class="rb-hrs-c" data-d="${d}" value="${hrsStr(x ? x.c : 1200)}"></div>`;
+  }).join("");
+  const t = new Date(); t.setHours(0, 0, 0, 0);
+  const on = h.hol || window.PL_HOL_KEYS, y0 = t.getFullYear();
+  $("rb-hrs-hol").innerHTML = window.PL_HOL_KEYS.map((k) => {
+    const hd = [y0, y0 + 1].map((y) => window.plHolidays(y).find((x) => x.key === k)).find((x) => x && x.dt >= t) || window.plHolidays(y0 + 1).find((x) => x.key === k) || window.plHolidays(y0).find((x) => x.key === k);
+    return `<label class="rb-check"><input type="checkbox" class="rb-hrs-hol" data-k="${k}"${on.includes(k) ? " checked" : ""}> ${esc(hd.name)} <span class="rb-meta">— ${hd.dt.toLocaleDateString("pl-PL", { weekday: "short", day: "numeric", month: "long", year: "numeric" })}</span></label>`;
+  }).join("");
+  const keep = (s) => { const p = s.split("-"); return new Date(+p[0], +p[1] - 1, +p[2]) >= t; };
+  hrsClosed = (h.closed || []).filter(keep).sort();
+  hrsClosedHtml();
+}
+function collectHours() {
+  const days = [0, 1, 2, 3, 4, 5, 6].map(() => null);
+  for (const [d, n] of HRS_DAYS) {
+    if (!document.querySelector(`.rb-hrs-on[data-d="${d}"]`).checked) continue;
+    const o = hrsMin(document.querySelector(`.rb-hrs-o[data-d="${d}"]`).value), c = hrsMin(document.querySelector(`.rb-hrs-c[data-d="${d}"]`).value);
+    if (!(o >= 0 && c > o)) return { bad: n + ": godzina otwarcia musi być wcześniejsza niż zamknięcia." };
+    days[d] = { o, c };
+  }
+  return { hours: { days, closed: hrsClosed.slice(), hol: [...document.querySelectorAll(".rb-hrs-hol:checked")].map((c) => c.dataset.k) } };
+}
+$("rb-hrs-hol-all").addEventListener("click", () => document.querySelectorAll(".rb-hrs-hol").forEach((c) => { c.checked = true; }));
+$("rb-hrs-hol-none").addEventListener("click", () => document.querySelectorAll(".rb-hrs-hol").forEach((c) => { c.checked = false; }));
+$("rb-hrs-add").addEventListener("click", () => {
+  const v = $("rb-hrs-date").value;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return;
+  if (!hrsClosed.includes(v) && hrsClosed.length < 80) hrsClosed.push(v);
+  hrsClosed.sort(); $("rb-hrs-date").value = ""; hrsClosedHtml();
+});
+$("rb-hrs-closed").addEventListener("click", (e) => {
+  const a = e.target.closest("[data-hrs-del]");
+  if (!a) return;
+  e.preventDefault(); hrsClosed.splice(Number(a.dataset.hrsDel), 1); hrsClosedHtml();
+});
 
 /* ---------- głosowanie klientów (np. „jaką pizzę dodać do menu?”) ---------- */
 /* Dwa rodzaje: „fixed” (odpowiedzi wpisuje admin) i „open” (klienci zgłaszają propozycje, po zebraniu limitu lista się zamyka i wszyscy głosują przez kilka dni). */
@@ -5324,6 +5682,7 @@ function pollModeUi() {
 }
 function pollInfo(txt) {
   const p = siteCfg.poll;
+  $("rb-poll-towin").hidden = !(p && !p.open && p.results && Math.max(...p.results) > 0);
   $("rb-poll-id").textContent = txt || (p ? "Zapisane głosowanie: " + (p.open ? "aktywne" : p.results ? "zakończone, wyniki opublikowane" : "zamknięte") + "." : "Brak zapisanego głosowania.");
 }
 function fillPollForm() {
@@ -5396,6 +5755,22 @@ async function pollShow() {
   try { pollLast = await pollTally(); out.innerHTML = pollOutHtml(pollLast); }
   catch (err) { out.innerHTML = '<div class="rb-msg err">' + esc(err.code ? errText(err) : err.message) + "</div>"; }
 }
+$("rb-poll-tomenu").addEventListener("click", () => {
+  const p = siteCfg.poll;
+  if (!p || !p.results) return;
+  const top = Math.max(...p.results), name = p.opts[p.results.indexOf(top)];
+  const list = $("rb-prod-list");
+  const have = [...list.querySelectorAll(".rb-prod-name")].some((i) => i.value.trim().toLowerCase() === name.trim().toLowerCase());
+  if (have) { alert("Produkt „" + name + "” jest już na liście produktów."); return; }
+  if (list.querySelectorAll(".rb-prod").length >= MAX_PRODUCTS) { alert("Maksymalnie " + MAX_PRODUCTS + " własnych produktów."); return; }
+  list.insertAdjacentHTML("beforeend", prodRowHtml({ name: name.toUpperCase(), cat: "klasyczne", badges: ["nowosc"], tags: ["wybór klientów"] }));
+  const tab = [...document.querySelectorAll(".rb-subtab")].find((t) => t.textContent.includes("Produkty"));
+  if (tab) tab.click();
+  const last = list.lastElementChild;
+  last.scrollIntoView({ behavior: "smooth", block: "center" });
+  last.querySelector(".rb-prod-price").focus();
+  siteSay("Dodano „" + name + "” do produktów. Wpisz cenę, popraw nazwę i opis, potem kliknij Zapisz.", "ok");
+});
 $("rb-poll-mode").addEventListener("change", pollModeUi);
 $("rb-poll-add").addEventListener("click", () => {
   const cur = [...document.querySelectorAll("#rb-poll-opts .rb-poll-opt")].map((i) => i.value);
@@ -5987,6 +6362,7 @@ const BK_COLS = [
   ["users", "Profile klientów (imię, urodziny, zgody)", true, false],
   ["feedback", "Oceny klientów", true, false],
   ["pollVotes", "Głosy w głosowaniach", true, false],
+  ["dailyScratch", "Zdrapki dnia", true, false],
   ["pollProps", "Propozycje klientów w głosowaniach", true, false],
   ["pollMarks", "Znaczniki zgłoszonych propozycji", true, false],
   ["refs", "Kody polecające", true, false],
@@ -6346,10 +6722,19 @@ function renderToday() {
     const rdy = allUsers.filter((u) => u.refBy && refInfo(u).state === "ready").length;
     if (rdy) alerts.push({ cls: "", text: "🤝 Polecenia do nagrodzenia: " + rdy, sub: "Znajomy zrobił już pierwszy zakup — przyznaj nagrodę polecającemu.", go: "clients", filter: "refs", btn: "Pokaż" });
   }
+  if (loaded && loyalOk && siteCfg.levelsOn) {
+    const lv = allLoyal.filter((l) => l.id !== me0 && rewardsOf(l) > 0 && tsMs(l.lastRewardAt) >= now - 7 * DAY).map((l) => ({ l, li: rankOf(l) })).filter((x) => x.li.idx >= 1 && rewardsOf(x.l) === x.li.lvl.from);
+    if (lv.length) alerts.push({ cls: "", text: "🏅 Nowe rangi w ostatnich 7 dniach: " + lv.length,
+      sub: lv.slice(0, 3).map((x) => (x.l.name || x.l.email || "?") + " → " + x.li.lvl.ic + " " + x.li.lvl.n).join(" · ") + (lv.length > 3 ? " · …" : "") + ". Pamiętaj o przywileju przy kasie.", go: "clients", filter: "rankup", btn: "Pokaż" });
+  }
+  if (siteCfg.poll && siteCfg.poll.open) alerts.push({ cls: "", text: "🗳 Trwa głosowanie: " + siteCfg.poll.q, sub: siteCfg.poll.mode === "open" ? "Klienci zgłaszają propozycje i głosują. Zobacz stan i wyniki." : "Zobacz aktualne wyniki.", go: "site", subtab: "Głosowanie", btn: "Zobacz" });
+  { let lb = 0; try { lb = Number(localStorage.getItem("wr_last_backup") || 0); } catch (_) {}
+    const age = lb ? Math.floor((now - lb) / DAY) : -1;
+    if (age < 0 || age >= 14) alerts.push({ cls: "", text: "💾 " + (age < 0 ? "Nie robiłeś jeszcze kopii zapasowej na tym urządzeniu" : "Ostatnia kopia zapasowa sprzed " + age + " dni"), sub: "Zapisz plik z danymi strony i klientów (kilka sekund).", go: "site", subtab: "Kopia", btn: "Zrób kopię" }); }
   const dg = dupInfo();
   if (dg.groups) alerts.push({ cls: "bad", text: "👥 Możliwe duplikaty kont: " + dg.info.size + " kont w " + dg.groups + (dg.groups === 1 ? " grupie" : " grupach"), sub: "Ten sam adres e-mail (aliasy) lub to samo imię i nazwisko.", go: "clients", filter: "dups", btn: "Sprawdź" });
   $("rb-td-alerts").innerHTML = alerts.length
-    ? alerts.map((a) => `<div class="rb-alert ${a.cls}"><div>${esc(a.text)}${a.sub ? `<small>${esc(a.sub)}</small>` : ""}</div><button type="button" class="rb-btn secondary small" data-go="${a.go}"${a.filter ? ` data-filter="${a.filter}"` : ""}${a.lfilter ? ` data-lfilter="${a.lfilter}"` : ""}>${a.btn}</button></div>`).join("")
+    ? alerts.map((a) => `<div class="rb-alert ${a.cls}"><div>${esc(a.text)}${a.sub ? `<small>${esc(a.sub)}</small>` : ""}</div><button type="button" class="rb-btn secondary small" data-go="${a.go}"${a.filter ? ` data-filter="${a.filter}"` : ""}${a.lfilter ? ` data-lfilter="${a.lfilter}"` : ""}${a.subtab ? ` data-subtab="${a.subtab}"` : ""}>${a.btn}</button></div>`).join("")
     : (loaded ? '<div class="rb-alert ok"><div>✅ Nic pilnego. Wszystko w porządku.</div></div>' : '<div class="rb-empty">Wczytuję…</div>');
 
   const recent = reportEvents.slice().sort((a, b) => tsMs(b.at) - tsMs(a.at)).slice(0, 6);
@@ -6374,6 +6759,7 @@ document.querySelector('#rb-admin .rb-pane[data-pane="today"]').addEventListener
     syncKFilterUI();
   }
   setAdminTab(b.dataset.go);
+  if (b.dataset.subtab) setTimeout(() => { const t = [...document.querySelectorAll(".rb-subtab")].find((x) => x.textContent.includes(b.dataset.subtab)); if (t) t.click(); }, 50);
 });
 
 /* ---------- zakładki panelu admina ---------- */
@@ -6416,7 +6802,7 @@ $("rb-site-theme").addEventListener("change", showThemeNow);
   const pane = document.querySelector('#rb-admin .rb-pane[data-pane="site"]');
   if (!pane) return;
   const heads = [...pane.querySelectorAll(":scope > h4.rb-hsec")];
-  const LABELS = { "Komunikat na górze strony": "📢 Komunikat", "Akcje i specjalne dni": "🎯 Akcje", "Pizza dnia": "🍕 Pizza dnia", "Dowóz": "🚚 Dowóz", "Motyw sezonowy": "🎨 Motyw", "Galeria zdjęć": "🖼️ Galeria", "Lojalność i polecenia": "🏅 Lojalność", "Opinie w Google": "⭐ Opinie", "Głosowanie klientów": "🗳 Głosowanie", "Kopia zapasowa": "💾 Kopia", "Opinie z Google na stronie": "💬 Opinie klientów", "Własne produkty": "➕ Produkty", "Ceny i dostępność pozycji ze strony": "💲 Ceny" };
+  const LABELS = { "Komunikat na górze strony": "📢 Komunikat", "Akcje i specjalne dni": "🎯 Akcje", "Pizza dnia": "🍕 Pizza dnia", "Dowóz": "🚚 Dowóz", "Motyw sezonowy": "🎨 Motyw", "Galeria zdjęć": "🖼️ Galeria", "Lojalność i polecenia": "🏅 Lojalność", "Opinie w Google": "⭐ Opinie", "Godziny otwarcia": "🕐 Godziny", "Plakat QR": "🖨 Plakat QR", "Głosowanie klientów": "🗳 Głosowanie", "Kopia zapasowa": "💾 Kopia", "Opinie z Google na stronie": "💬 Opinie klientów", "Własne produkty": "➕ Produkty", "Ceny i dostępność pozycji ze strony": "💲 Ceny" };
   const groups = heads.map((h) => {
     const g = document.createElement("div"); g.className = "rb-sub"; g.hidden = true;
     const label = LABELS[(h.querySelector("span") || h).textContent.trim()] || h.textContent.trim();
@@ -6504,7 +6890,7 @@ function qrSvg(text) {
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + size + " " + size + '" shape-rendering="crispEdges" role="img" aria-label="Kod QR"><rect width="' + size + '" height="' + size + '" fill="#fff"/><path d="' + d + '" fill="#000"/></svg>';
 }
 async function drawQRs(root) {
-  const boxes = [...root.querySelectorAll(".rb-qr[data-qr],.rb-qr[data-qrfull]")];
+  const boxes = [...root.querySelectorAll(".rb-qr[data-qr],.rb-qr[data-qrfull],.qp-qr[data-qrfull]")];
   if (!boxes.length) return;
   try {
     if (!QRfn) QRfn = pickFn(await import("https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/+esm"));
@@ -6516,6 +6902,49 @@ async function drawQRs(root) {
     });
   } catch (err) { console.warn("Kod QR niedostępny:", err); }
 }
+
+/* ---------- plakat QR do wydruku (Strona → Plakat QR) ---------- */
+function qpCodes() {
+  const g = (id) => $(id).checked;
+  const list = [];
+  const origin = location.origin && /^https?:/.test(location.origin) ? location.origin : "https://wloskarobota.eu";
+  if (g("rb-qp-site")) list.push({ url: origin + "/", t: "Menu i zamówienia", s: "wloskarobota.eu" });
+  if (g("rb-qp-rev")) list.push({ url: httpsUrl(siteCfg.googleReviewUrl) ? siteCfg.googleReviewUrl.trim() : GOOGLE_REVIEW_DEFAULT, t: "Zostaw opinię w Google", s: "Dziękujemy za każdą ⭐" });
+  if (g("rb-qp-acc")) list.push({ url: origin + "/#konto", t: "Karta lojalnościowa", s: "Załóż konto i zbieraj pieczątki" });
+  const cu = $("rb-qp-curl").value.trim();
+  if (g("rb-qp-cus") && httpsUrl(cu)) list.push({ url: cu, t: $("rb-qp-clab").value.trim() || "Zeskanuj", s: "" });
+  return list;
+}
+function qpHtml() {
+  const codes = qpCodes(), sheet = $("rb-qp-layout").value === "sheet";
+  const title = esc($("rb-qp-title").value.trim() || "Włoska Robota"), sub = esc($("rb-qp-sub").value.trim());
+  if (!codes.length) return '<div class="rb-meta">Zaznacz co najmniej jeden kod (dla własnego wpisz adres zaczynający się od https://).</div>';
+  if (sheet) {
+    const c = codes[0], cell = '<div class="qp-cell"><div class="qp-qr" data-qrfull="' + esc(c.url) + '"></div><div class="qp-cl">' + esc(c.t) + "</div></div>";
+    return '<div class="qp qp-sheet-wrap"><div class="qp-sheet">' + cell.repeat(12) + "</div></div>";
+  }
+  const w = codes.length === 1 ? "11cm" : codes.length === 2 ? "7.5cm" : "5.6cm";
+  return '<div class="qp"><h1>' + title + "</h1>" + (sub ? '<div class="qp-sub">' + sub + "</div>" : "") + '<div class="qp-grid">'
+    + codes.map((c) => '<div class="qp-item"><div class="qp-qr" style="width:' + w + '" data-qrfull="' + esc(c.url) + '"></div><div class="qp-t">' + esc(c.t) + "</div>" + (c.s ? '<div class="qp-s">' + esc(c.s) + "</div>" : "") + "</div>").join("")
+    + '</div><div class="qp-foot">668 862 396 · Głuponie 103</div></div>';
+}
+async function qpPreview() {
+  const box = $("rb-qp-prev");
+  box.innerHTML = qpHtml();
+  await drawQRs(box);
+}
+["rb-qp-site", "rb-qp-rev", "rb-qp-acc", "rb-qp-cus", "rb-qp-layout", "rb-qp-title", "rb-qp-sub", "rb-qp-curl", "rb-qp-clab"].forEach((id) => $(id).addEventListener("input", () => { qpPreview(); }));
+$("rb-qp-print").addEventListener("click", async () => {
+  if (!qpCodes().length) { qpPreview(); return; }
+  let box = document.getElementById("print-poster");
+  if (!box) { box = document.createElement("div"); box.id = "print-poster"; document.body.appendChild(box); }
+  box.innerHTML = qpHtml();
+  await drawQRs(box);
+  const done = () => { document.body.classList.remove("printing-poster"); window.removeEventListener("afterprint", done); };
+  window.addEventListener("afterprint", done);
+  document.body.classList.add("printing-poster");
+  setTimeout(() => { try { window.print(); } catch (_) { done(); } }, 80);
+});
 
 /* ---------- skaner QR (tylko telefon) ---------- */
 const IS_PHONE = matchMedia("(pointer: coarse)").matches || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
