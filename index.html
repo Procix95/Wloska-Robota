@@ -585,6 +585,18 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
   </div>
 </section>
 
+<section class="pollsec" id="glosowanie" hidden>
+  <div class="container">
+    <h2 class="section-title fade-in">Zdecyduj <span>razem z nami</span></h2>
+    <p class="section-subtitle fade-in">Głosowanie klientów</p>
+    <div class="poll-box">
+      <div class="poll-q" id="pollQ"></div>
+      <div id="pollPub"></div>
+      <div class="poll-cta" id="pollCta"></div>
+    </div>
+  </div>
+</section>
+
 <section class="reviews" id="opinie" hidden>
   <div class="container">
     <h2 class="section-title fade-in">Co mówią <span>klienci</span></h2>
@@ -1319,7 +1331,38 @@ body.dark #dc-result.no{color:#ff8a8f}
 body.dark #site-dish .sd-text{color:#bbb}
 #site-dish .sd-price{font-size:1.5rem;font-weight:800;color:var(--red)}
 
-#rabat-overlay input[type=checkbox]{width:auto;margin:0 8px 0 0;padding:0;flex:none;accent-color:var(--rb-accent)}
+#rabat-overlay input[type=checkbox],#rabat-overlay input[type=radio]{width:auto;margin:0 8px 0 0;padding:0;flex:none;accent-color:var(--rb-accent)}
+/* statystyki / głosowanie / kopia (admin) */
+#rabat-overlay .rb-rs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin:8px 0}
+#rabat-overlay .rb-rs-k{background:var(--rb-bg2,rgba(127,127,127,.12));border-radius:10px;padding:8px 10px;text-align:center}
+#rabat-overlay .rb-rs-k b{display:block;font-size:22px}
+#rabat-overlay .rb-rs-k span{font-size:12px;color:var(--rb-muted)}
+#rabat-overlay .rb-rs-h{font-weight:700;margin:14px 0 6px}
+#rabat-overlay .rb-rs-bar{display:grid;grid-template-columns:130px 1fr 34px;gap:8px;align-items:center;font-size:13px;margin:4px 0}
+#rabat-overlay .rb-rs-bar>div{height:10px;border-radius:6px;background:rgba(127,127,127,.2);overflow:hidden}
+#rabat-overlay .rb-rs-bar i{display:block;height:100%;background:linear-gradient(90deg,#2e7d32,#c62828)}
+#rabat-overlay .rb-rs-bar b{text-align:right}
+#rabat-overlay .rb-rs-top{font-size:13px;padding:3px 0;border-bottom:1px solid rgba(127,127,127,.15)}
+#rabat-overlay .rb-rs-top span{color:var(--rb-muted)}
+#rabat-overlay .rb-poll{margin:0 0 12px;padding:12px;border-radius:12px;border:2px solid #c62828;background:rgba(198,40,40,.06)}
+#rabat-overlay .rb-poll[hidden]{display:none}
+#rabat-overlay .rb-poll-q{font-weight:700;margin:4px 0 8px}
+#rabat-overlay .rb-poll-o{display:flex;gap:8px;align-items:center;padding:7px 4px;cursor:pointer;font-size:14px}
+#rabat-overlay .rb-poll-o input{width:auto;margin:0}
+#rabat-overlay #rb-poll-opts .rb-poll-opt{display:block;margin:0 0 6px}
+.poll-bar{display:grid;grid-template-columns:minmax(90px,1.2fr) 3fr minmax(70px,.9fr);gap:10px;align-items:center;margin:8px 0;font-size:.95rem}
+.poll-bar>div{height:14px;border-radius:8px;background:rgba(127,127,127,.2);overflow:hidden}
+.poll-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--red))}
+.poll-bar.win span{font-weight:800}
+.poll-bar b{text-align:right;font-size:.85rem}
+.pollsec{background:var(--light)}body.dark .pollsec{background:var(--dark-bg)}
+.poll-box{max-width:620px;margin:0 auto}
+.poll-q{text-align:center;font-weight:800;font-size:1.25rem;margin:0 0 1rem}
+.poll-opt{display:flex;gap:.8rem;align-items:center;padding:.85rem 1.1rem;margin:.5rem 0;border-radius:14px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.07);font-weight:600}
+body.dark .poll-opt{background:var(--dark-card)}
+.poll-opt b{flex:0 0 32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--green),var(--red));color:#fff}
+.poll-win{text-align:center;font-size:1.1rem;margin-top:1rem}
+.poll-cta{text-align:center;margin-top:1.2rem}
 #rabat-overlay .rb-check{display:flex;align-items:center;font-size:14px;color:var(--rb-text);margin:6px 0 10px;cursor:pointer}
 #rabat-overlay textarea{width:100%;padding:12px 14px;margin-bottom:10px;border-radius:12px;border:1px solid var(--rb-border);background:var(--rb-input);color:var(--rb-text);font:inherit;font-size:16px;resize:vertical}
 #rabat-overlay .rb-site-row{display:grid;grid-template-columns:1fr 92px;gap:6px 10px;align-items:center;padding:10px 0;border-top:1px solid var(--rb-border)}
@@ -1432,6 +1475,7 @@ body.dark #site-dish .sd-text{color:#bbb}
       </div>
       <div style="margin:0 0 12px"><button type="button" class="rb-btn secondary small" data-pwa hidden>📲 Zainstaluj aplikację na telefonie</button></div>
       <div class="rb-res ok" id="rb-welcome" hidden>🎉 Witaj! Na start dostajesz rabat <b>5 zł</b> na zamówienie, ważny <b>miesiąc</b> od założenia konta. Znajdziesz go poniżej, pokaż jego kod QR przy kasie.</div>
+      <div class="rb-poll" id="rb-poll" hidden></div>
       <div class="rb-loyal" id="rb-loyal" hidden>
         <div class="rb-sec" style="margin-top:0"><h3>🍕 Karta lojalnościowa</h3><span id="rb-loyal-count"></span></div>
         <div class="rb-level" id="rb-level" hidden></div>
@@ -1564,6 +1608,10 @@ body.dark #site-dish .sd-text{color:#bbb}
         <div class="rb-pane" data-pane="clients" hidden>
           <div id="rb-k-card"></div>
           <div class="rb-msg" id="rb-k-msg" role="status"></div>
+          <details class="rb-res" id="rb-rs-box">
+            <summary><b>📊 Statystyki rang i klientów</b></summary>
+            <div id="rb-rs-body"></div>
+          </details>
           <details class="rb-res rb-msgbox" id="rb-m-box">
             <summary><b>✉ Wiadomość e-mail do klientów</b></summary>
             <div class="rb-meta" style="margin:6px 0 8px">Strona nie wysyła e-maili sama. Wybierasz klientów, a program pocztowy otwiera się z gotową wiadomością, adresy są w UDW (klienci nie widzą nawzajem swoich adresów). Dostają ją tylko ci, którzy zaznaczyli zgodę w Koncie.</div>
@@ -1799,6 +1847,33 @@ body.dark #site-dish .sd-text{color:#bbb}
           <div id="rb-lv-rows"></div>
           <button type="button" class="rb-btn secondary small" id="rb-lv-add">+ Dodaj rangę</button>
           <label class="rb-check" style="margin-top:10px"><input id="rb-ref-on" type="checkbox"> Włącz program poleceń: polecający dostaje −5 zł po pierwszym zakupie znajomego (nagrodę przyznajesz w zakładce Klienci → Polecenia)</label>
+
+          <h4 class="rb-hsec"><span>Głosowanie klientów</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
+          <div class="rb-meta" style="margin:-4px 0 6px">Zadaj klientom pytanie (np. „Jaką pizzę dodać do menu?”). Zalogowani klienci głosują w swoim koncie, każdy jeden raz. Wyniki widzisz tylko Ty, dopóki ich nie opublikujesz przyciskiem „Zamknij i opublikuj wyniki”.</div>
+          <label for="rb-poll-q">Pytanie</label>
+          <input id="rb-poll-q" maxlength="120" placeholder="np. Jaką nową pizzę chcesz zobaczyć w menu?">
+          <label>Odpowiedzi (2–6)</label>
+          <div id="rb-poll-opts"></div>
+          <button type="button" class="rb-btn secondary small" id="rb-poll-add">+ Dodaj odpowiedź</button>
+          <label class="rb-check" style="margin-top:10px"><input id="rb-poll-open" type="checkbox"> Głosowanie aktywne (klienci mogą głosować)</label>
+          <div class="rb-meta" id="rb-poll-id"></div>
+          <div class="rb-actions" style="margin-top:8px">
+            <button type="button" class="rb-btn secondary small" id="rb-poll-res">📊 Pokaż wyniki</button>
+            <button type="button" class="rb-btn secondary small" id="rb-poll-close">🔒 Zamknij i opublikuj wyniki</button>
+            <button type="button" class="rb-btn secondary small" id="rb-poll-new">🆕 Nowe głosowanie</button>
+          </div>
+          <div id="rb-poll-out"></div>
+
+          <h4 class="rb-hsec"><span>Kopia zapasowa</span></h4>
+          <div class="rb-meta" style="margin:-4px 0 6px">Jeden plik z danymi strony, kart, kodów i klientów. Zrób kopię przed większymi zmianami i co jakiś czas. Plik zawiera dane osobowe klientów, więc trzymaj go w bezpiecznym miejscu.</div>
+          <div id="rb-kz-cols"></div>
+          <div class="rb-actions" style="margin-top:8px"><button type="button" class="rb-btn small" id="rb-kz-export">⬇ Zapisz kopię do pliku</button></div>
+          <div class="rb-meta" id="rb-kz-last" style="margin-top:6px"></div>
+          <label for="rb-kz-file" style="margin-top:12px">Przywracanie z pliku kopii</label>
+          <input type="file" id="rb-kz-file" accept=".json,application/json">
+          <div id="rb-kz-prev"></div>
+          <div class="rb-actions" style="margin-top:8px"><button type="button" class="rb-btn secondary small" id="rb-kz-restore" hidden>♻ Przywróć wybrane</button></div>
+          <div class="rb-msg" id="rb-kz-msg" role="status"></div>
 
           <h4 class="rb-hsec"><span>Opinie w Google</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
           <div class="rb-meta" style="margin:-4px 0 6px">Link, pod którym klient może zostawić opinię w Google (przycisk pokaże się każdemu klientowi po ocenie, niezależnie od liczby gwiazdek). Pusty = przycisku nie będzie.</div>
@@ -2820,6 +2895,7 @@ function refreshLoyaltyUi() {
   const u = auth.currentUser;
   try { if (u && myLoyal && !isAdmin && !isStaff) renderLoyal(u); } catch (_) {}
   try { renderRef(); updateRefInvite(); maybeInitRef(); } catch (_) {}
+  try { renderPoll(u); } catch (_) {}
   try { if (isAdmin) { renderClients(); renderToday(); } } catch (_) {}
 }
 
@@ -2961,6 +3037,7 @@ async function rewardReferral(uid) {
 function renderLoyal(user) {
   const box = $("rb-loyal");
   try { renderRef(); } catch (_) {}
+  try { renderPoll(user); } catch (_) {}
   if (!myLoyal || isStaff || isAdmin) { box.hidden = true; return; }
   try { renderLevel(user); } catch (e) { console.warn(e); }
   const n = Math.min(LOYAL_GOAL, myLoyal.stamps || 0);
@@ -4024,7 +4101,7 @@ const DELIVERY_DEFAULT = ["Głuponie", "Trzcianka", "Tomaszewo", "Michorzewo", "
   .map((name) => ({ name, fee: 10, min: null, freeFrom: null }));
 // Link do formularza opinii w Google (domyślny; admin może go zmienić lub wyczyścić w panelu: Strona → Opinie w Google).
 const GOOGLE_REVIEW_DEFAULT = "https://g.page/r/CUq2_T6CQcy5EAE/review";
-let siteCfg = { prices: {}, unavailable: {}, hidden: {}, badges: {}, products: [], campaigns: [], notice: null, dish: null, delivery: { places: DELIVERY_DEFAULT }, googleReviewUrl: GOOGLE_REVIEW_DEFAULT, reviews: [], googleMapsUrl: "", theme: "auto", levelsOn: false, levels: null, refOn: false };
+let siteCfg = { prices: {}, unavailable: {}, hidden: {}, badges: {}, products: [], campaigns: [], notice: null, dish: null, delivery: { places: DELIVERY_DEFAULT }, googleReviewUrl: GOOGLE_REVIEW_DEFAULT, reviews: [], googleMapsUrl: "", theme: "auto", levelsOn: false, levels: null, refOn: false, poll: null };
 const PROD_CATS = [["klasyczne", "Klasyczne"], ["miesne", "Mięsne"], ["vege", "Wege"], ["sosy", "Sosy"], ["makarony", "Makarony"], ["dodatki", "Dodatki"]];
 const MAX_PRODUCTS = 40;
 const BADGES = [["hit", "🔥 Hit"], ["ostra", "🌶 Ostra"], ["wege", "🌱 Wege"], ["nowosc", "⭐ Nowość"], ["polecamy", "👍 Polecamy"]];
@@ -4041,7 +4118,7 @@ const tsMs = (t) => (t ? (t.toDate ? t.toDate().getTime() : (t.seconds ? t.secon
 function plainCfg(c) {
   const n = c.notice ? { ...c.notice, until: c.notice.until ? { seconds: Math.floor(tsMs(c.notice.until) / 1000) } : null } : null;
   const camps = (c.campaigns || []).map((x) => ({ ...x, from: x.from ? { seconds: Math.floor(tsMs(x.from) / 1000) } : null, until: x.until ? { seconds: Math.floor(tsMs(x.until) / 1000) } : null }));
-  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, badges: c.badges || {}, products: c.products || [], campaigns: camps, notice: n, dish: c.dish || null, delivery: c.delivery || null, googleReviewUrl: typeof c.googleReviewUrl === "string" ? c.googleReviewUrl : null, reviews: Array.isArray(c.reviews) ? c.reviews : [], googleMapsUrl: typeof c.googleMapsUrl === "string" ? c.googleMapsUrl : "", theme: typeof c.theme === "string" ? c.theme : "auto", levelsOn: c.levelsOn === true, levels: Array.isArray(c.levels) ? c.levels : null, levelsV: c.levelsV === 2 ? 2 : 0, refOn: c.refOn === true };
+  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, badges: c.badges || {}, products: c.products || [], campaigns: camps, notice: n, dish: c.dish || null, delivery: c.delivery || null, googleReviewUrl: typeof c.googleReviewUrl === "string" ? c.googleReviewUrl : null, reviews: Array.isArray(c.reviews) ? c.reviews : [], googleMapsUrl: typeof c.googleMapsUrl === "string" ? c.googleMapsUrl : "", theme: typeof c.theme === "string" ? c.theme : "auto", levelsOn: c.levelsOn === true, levels: Array.isArray(c.levels) ? c.levels : null, levelsV: c.levelsV === 2 ? 2 : 0, refOn: c.refOn === true, poll: c.poll || null };
 }
 
 function renderDish() {
@@ -4183,10 +4260,10 @@ function applySite(cfg) {
     googleReviewUrl: (cfg && typeof cfg.googleReviewUrl === "string") ? cfg.googleReviewUrl : GOOGLE_REVIEW_DEFAULT,
     reviews: Array.isArray(cfg && cfg.reviews) ? cfg.reviews : [], googleMapsUrl: (cfg && typeof cfg.googleMapsUrl === "string") ? cfg.googleMapsUrl : "",
     theme: (cfg && typeof cfg.theme === "string") ? cfg.theme : "auto",
-    levelsOn: !!(cfg && cfg.levelsOn === true), levels: cleanLevels(cfg && cfg.levels, cfg && cfg.levelsV), refOn: !!(cfg && cfg.refOn === true)
+    levelsOn: !!(cfg && cfg.levelsOn === true), levels: cleanLevels(cfg && cfg.levels, cfg && cfg.levelsV), refOn: !!(cfg && cfg.refOn === true), poll: validPoll(cfg && cfg.poll)
   };
   applyTheme(siteCfg.theme);
-  setTimeout(() => { try { refreshLoyaltyUi(); } catch (_) {} }, 0);
+  setTimeout(() => { try { refreshLoyaltyUi(); } catch (_) {} try { renderPoll(auth.currentUser); } catch (_) {} }, 0);
   renderProducts();
   menuEls().forEach((el) => {
     const key = itemKey(el);
@@ -4219,6 +4296,7 @@ function applySite(cfg) {
   renderDelivery();
   try { renderReviews(); } catch (_) {}
   try { renderRanks(); } catch (_) {}
+  try { renderPollPublic(); } catch (_) {}
   try { applyPhotos(); } catch (_) {}
 }
 
@@ -4837,6 +4915,8 @@ function fillSiteForm() {
   $("rb-site-theme").value = siteCfg.theme === "auto" || THEMES[siteCfg.theme] ? siteCfg.theme : "";
   showThemeNow();
   fillLevelsForm();
+  fillPollForm();
+  try { bkFillList(); } catch (_) {}
   $("rb-prod-list").innerHTML = siteCfg.products.filter(validProduct).map(prodRowHtml).join("");
   $("rb-rev-list").innerHTML = (siteCfg.reviews || []).filter(validReview).map(revRowHtml).join("");
   $("rb-site-gmaps").value = siteCfg.googleMapsUrl || "";
@@ -5009,6 +5089,9 @@ async function saveSite() {
   const tv = $("rb-site-theme").value, theme = tv === "auto" || THEMES[tv] ? tv : "";
   const lvRes = collectLevels();
   if (lvRes.bad) { say(lvRes.bad, "err"); return; }
+  const pollRes = collectPoll();
+  if (pollRes.bad) { say(pollRes.bad, "err"); return; }
+  const poll = pollRes.poll;
   const levels = lvRes.list, levelsOn = $("rb-lv-on").checked, refOn = $("rb-ref-on").checked;
   const googleReviewUrl = $("rb-site-google").value.trim();
   if (googleReviewUrl && !/^https:\/\/\S+$/.test(googleReviewUrl)) { say( "Link do opinii w Google musi zaczynać się od https://", "err"); return; }
@@ -5045,8 +5128,8 @@ async function saveSite() {
   const btns = [$("rb-site-save"), ...document.querySelectorAll(".rb-sec-save")];
   btns.forEach((b) => { b.disabled = true; });
   try {
-    await setDoc(doc(db, "site", "config"), { prices, unavailable, hidden, badges, products, campaigns, notice, dish, delivery, googleReviewUrl, reviews, googleMapsUrl, theme, levelsOn, levels, levelsV: 2, refOn, updatedAt: serverTimestamp() });
-    const cfg = { prices, unavailable, hidden, badges, products, campaigns, notice, dish, delivery, googleReviewUrl, reviews, googleMapsUrl, theme, levelsOn, levels, levelsV: 2, refOn };
+    await setDoc(doc(db, "site", "config"), { prices, unavailable, hidden, badges, products, campaigns, notice, dish, delivery, googleReviewUrl, reviews, googleMapsUrl, theme, levelsOn, levels, levelsV: 2, refOn, poll, updatedAt: serverTimestamp() });
+    const cfg = { prices, unavailable, hidden, badges, products, campaigns, notice, dish, delivery, googleReviewUrl, reviews, googleMapsUrl, theme, levelsOn, levels, levelsV: 2, refOn, poll };
     applySite(cfg);
     fillSiteForm();
     try { localStorage.setItem(SITE_CACHE_KEY, JSON.stringify(plainCfg(cfg))); } catch (_) {}
@@ -5058,6 +5141,152 @@ async function saveSite() {
 }
 $("rb-site-save").addEventListener("click", saveSite);
 document.querySelectorAll(".rb-sec-save").forEach((b) => b.addEventListener("click", saveSite));
+
+/* ---------- głosowanie klientów (np. „jaką pizzę dodać do menu?”) ---------- */
+const POLL_MAX = 6;
+function validPoll(p) {
+  if (!p || typeof p !== "object" || typeof p.id !== "string" || !/^[a-z0-9]{4,24}$/.test(p.id)) return null;
+  const q = String(p.q || "").trim().slice(0, 120);
+  const opts = Array.isArray(p.opts) ? p.opts.map((o) => String(o || "").trim().slice(0, 40)).filter(Boolean).slice(0, POLL_MAX) : [];
+  if (!q || opts.length < 2) return null;
+  const res = Array.isArray(p.results) && p.results.length === opts.length && p.results.every((n) => Number.isInteger(n) && n >= 0) ? p.results : null;
+  return { id: p.id, q, opts, open: p.open === true, results: res };
+}
+const newPollId = () => "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+const pollTotal = (r) => r.reduce((a, b) => a + b, 0);
+const pollWord = (n) => { const m10 = n % 10, m100 = n % 100; return n === 1 ? "głos" : (m10 >= 2 && m10 <= 4 && !(m100 >= 12 && m100 <= 14)) ? "głosy" : "głosów"; };
+function pollBarsHtml(opts, counts) {
+  const tot = Math.max(1, pollTotal(counts)), top = Math.max(...counts);
+  return opts.map((o, i) => `<div class="poll-bar${counts[i] === top && top > 0 ? " win" : ""}"><span>${esc(o)}</span><div><i style="width:${Math.round(counts[i] / tot * 100)}%"></i></div><b>${counts[i]} (${Math.round(counts[i] / tot * 100)}%)</b></div>`).join("");
+}
+/* --- strona główna --- */
+function renderPollPublic() {
+  const sec = $("glosowanie");
+  if (!sec) return;
+  const p = siteCfg.poll;
+  if (!p || (!p.open && !p.results)) { sec.hidden = true; return; }
+  $("pollQ").textContent = p.q;
+  if (p.open) {
+    $("pollPub").innerHTML = p.opts.map((o, i) => `<div class="poll-opt"><b>${String.fromCharCode(65 + i)}</b> ${esc(o)}</div>`).join("");
+    $("pollCta").innerHTML = '<a class="rev-btn" href="#konto">Zaloguj się i zagłosuj w swoim koncie</a>';
+  } else {
+    const r = p.results, top = Math.max(...r), w = r.indexOf(top);
+    $("pollPub").innerHTML = '<div class="poll-res">' + pollBarsHtml(p.opts, r) + "</div>";
+    $("pollCta").innerHTML = top > 0 ? `<div class="poll-win">🏆 Wygrywa: <b>${esc(p.opts[w])}</b> — dziękujemy za ${pollTotal(r)} ${pollWord(pollTotal(r))}!</div>` : "";
+  }
+  sec.hidden = false;
+}
+/* --- panel klienta (Konto) --- */
+let pollMine = { key: "", opt: null };
+async function renderPoll(user) {
+  const el = $("rb-poll");
+  if (!el) return;
+  const p = siteCfg.poll;
+  if (!user || !p || !p.open || isAdmin || isStaff) { el.hidden = true; return; }
+  const key = p.id + "_" + user.uid;
+  if (pollMine.key !== key) {
+    pollMine = { key, opt: undefined };
+    try { const s = await getDoc(doc(db, "pollVotes", key)); pollMine.opt = s.exists() ? s.data().opt : null; } catch (_) { pollMine.opt = null; }
+  }
+  if (!siteCfg.poll || siteCfg.poll.id !== p.id || pollMine.key !== key || pollMine.opt === undefined) return;
+  paintPoll(el, p);
+}
+function paintPoll(el, p, note) {
+  const voted = Number.isInteger(pollMine.opt);
+  el.hidden = false;
+  el.innerHTML = `<div class="rb-sec" style="margin-top:0"><h3>🗳 Głosowanie</h3></div><div class="rb-poll-q">${esc(p.q)}</div>`
+    + (voted
+      ? `<div class="rb-meta">✅ Dziękujemy! Twój głos: <b>${esc(p.opts[pollMine.opt] || "")}</b>. Wyniki ogłosimy na stronie po zakończeniu.</div>`
+      : p.opts.map((o, i) => `<label class="rb-poll-o"><input type="radio" name="rbpoll" value="${i}"> ${esc(o)}</label>`).join("") + `<button type="button" class="rb-btn small" data-pvote>Zagłosuj</button>`)
+    + (note ? `<div class="rb-msg err">${esc(note)}</div>` : "");
+}
+$("rb-poll").addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-pvote]"), p = siteCfg.poll, user = auth.currentUser;
+  if (!b || !p || !user || !p.open) return;
+  const ch = $("rb-poll").querySelector('input[name="rbpoll"]:checked');
+  if (!ch) { paintPoll($("rb-poll"), p, "Wybierz jedną odpowiedź."); return; }
+  const opt = Number(ch.value);
+  b.disabled = true;
+  try {
+    await setDoc(doc(db, "pollVotes", p.id + "_" + user.uid), { uid: user.uid, pollId: p.id, opt, at: serverTimestamp() });
+    pollMine = { key: p.id + "_" + user.uid, opt };
+    paintPoll($("rb-poll"), p);
+  } catch (err) {
+    console.error(err);
+    paintPoll($("rb-poll"), p, err && err.code === "permission-denied" ? "Nie udało się zagłosować: głosowanie mogło się zakończyć, już głosowałeś albo konto jest zablokowane." : errText(err));
+  }
+});
+/* --- panel admina (Strona → Głosowanie) --- */
+let pollDraft = { id: "", results: null };
+function renderPollOpts(list) {
+  const box = $("rb-poll-opts");
+  const arr = list.slice(0, POLL_MAX);
+  while (arr.length < 2) arr.push("");
+  box.innerHTML = arr.map((o, i) => `<input class="rb-poll-opt" maxlength="40" placeholder="Odpowiedź ${i + 1}" value="${esc(o)}">`).join("");
+  $("rb-poll-add").disabled = arr.length >= POLL_MAX;
+}
+function pollInfo(txt) {
+  const p = siteCfg.poll;
+  $("rb-poll-id").textContent = txt || (p ? "Zapisane głosowanie: " + (p.open ? "aktywne" : p.results ? "zakończone, wyniki opublikowane" : "zamknięte") + "." : "Brak zapisanego głosowania.");
+}
+function fillPollForm() {
+  const p = siteCfg.poll;
+  pollDraft = { id: p ? p.id : "", results: p ? p.results : null };
+  $("rb-poll-q").value = p ? p.q : "";
+  renderPollOpts(p ? p.opts : ["", ""]);
+  $("rb-poll-open").checked = p ? p.open : true;
+  $("rb-poll-out").innerHTML = "";
+  pollInfo();
+}
+function collectPoll() {
+  const q = $("rb-poll-q").value.trim();
+  const opts = [...document.querySelectorAll("#rb-poll-opts .rb-poll-opt")].map((i) => i.value.trim()).filter(Boolean);
+  if (!q && !opts.length) return { poll: null };
+  if (!q) return { bad: "Wpisz pytanie głosowania (albo wyczyść odpowiedzi, żeby je usunąć)." };
+  if (opts.length < 2) return { bad: "W głosowaniu muszą być co najmniej 2 odpowiedzi." };
+  if (new Set(opts.map((o) => o.toLowerCase())).size !== opts.length) return { bad: "Odpowiedzi w głosowaniu nie mogą się powtarzać." };
+  if (!pollDraft.id) pollDraft.id = newPollId();
+  const open = $("rb-poll-open").checked;
+  let results = pollDraft.results;
+  if (open || !results || results.length !== opts.length) results = null;
+  return { poll: { id: pollDraft.id, q: q.slice(0, 120), opts: opts.map((o) => o.slice(0, 40)), open, results } };
+}
+async function pollTally() {
+  const p = siteCfg.poll;
+  if (!p) throw new Error("Najpierw zapisz głosowanie (przycisk Zapisz).");
+  const s = await getDocs(query(collection(db, "pollVotes"), where("pollId", "==", p.id)));
+  const counts = p.opts.map(() => 0);
+  s.docs.forEach((d) => { const o = d.data().opt; if (Number.isInteger(o) && o >= 0 && o < counts.length) counts[o]++; });
+  return counts;
+}
+$("rb-poll-add").addEventListener("click", () => {
+  const cur = [...document.querySelectorAll("#rb-poll-opts .rb-poll-opt")].map((i) => i.value);
+  if (cur.length < POLL_MAX) { cur.push(""); renderPollOpts(cur); }
+});
+$("rb-poll-res").addEventListener("click", async () => {
+  const out = $("rb-poll-out");
+  out.innerHTML = '<div class="rb-meta">Liczę głosy…</div>';
+  try { const c = await pollTally(); out.innerHTML = '<div class="poll-res">' + pollBarsHtml(siteCfg.poll.opts, c) + `</div><div class="rb-meta">Razem głosów: ${pollTotal(c)} (na żywo, widzisz je tylko Ty).</div>`; }
+  catch (err) { out.innerHTML = '<div class="rb-msg err">' + esc(err.code ? errText(err) : err.message) + "</div>"; }
+});
+$("rb-poll-new").addEventListener("click", () => {
+  if (siteCfg.poll && !confirm("Rozpocząć NOWE głosowanie? Stare głosy przestaną się liczyć (nie kasują się, ale nowe zaczyna od zera). Pamiętaj, żeby zmienić pytanie i odpowiedzi, a potem kliknąć Zapisz.")) return;
+  pollDraft = { id: newPollId(), results: null };
+  $("rb-poll-open").checked = true; $("rb-poll-out").innerHTML = "";
+  pollInfo("Nowe głosowanie — zmień pytanie i odpowiedzi, potem kliknij Zapisz, żeby ruszyło.");
+});
+$("rb-poll-close").addEventListener("click", async () => {
+  if (!siteCfg.poll) { $("rb-poll-out").innerHTML = '<div class="rb-msg err">Najpierw zapisz głosowanie.</div>'; return; }
+  if (!confirm("Zamknąć głosowanie i opublikować wyniki na stronie?")) return;
+  try {
+    pollDraft.id = siteCfg.poll.id;
+    pollDraft.results = await pollTally();
+    $("rb-poll-open").checked = false;
+    await saveSite();
+    fillPollForm();
+  } catch (err) { $("rb-poll-out").innerHTML = '<div class="rb-msg err">' + esc(err.code ? errText(err) : err.message) + "</div>"; }
+});
+
 
 /* ---------- panel admina: zakładka Raport (dziennik zdarzeń) ---------- */
 const rpMsg = $("rb-rp-msg");
@@ -5534,10 +5763,192 @@ const K_HINT = {
   mkt: "Klienci, którzy zaznaczyli zgodę na e-maile z promocjami.",
   dups: "Konta z tym samym adresem e-mail (kropki i „+coś” w Gmailu to ten sam adres) albo z tym samym imieniem i nazwiskiem. To tylko podejrzenie, więc sprawdź, zanim cokolwiek zrobisz."
 };
+/* ---------- statystyki rang i klientów (zakładka Klienci) ---------- */
+let stPerkVisits = 0;
+function stCostLine() {
+  const el = $("rb-rs-costline"), inp = $("rb-rs-cost");
+  if (!el || !inp) return;
+  const c = Number(String(inp.value).replace(",", "."));
+  el.textContent = Number.isFinite(c) && c >= 0 ? "Szacowany koszt przywilejów w ciągu 30 dni: ok. " + posMoney(stPerkVisits * c) + " (" + stPerkVisits + " wizyt × " + posMoney(c) + ")." : "";
+}
+function renderRankStats() {
+  const box = $("rb-rs-body");
+  if (!box || !isAdmin) return;
+  if (!loyalOk) { box.innerHTML = '<div class="rb-meta">Dane kart jeszcze się nie wczytały — wejdź w zakładkę Dziś i kliknij „Odśwież”.</div>'; return; }
+  const me = (auth.currentUser || {}).uid, staffIds = new Set(allStaff.map((s) => s.id)), now = Date.now();
+  const cust = allUsers.filter((u) => u.id !== me && !staffIds.has(u.id));
+  const lm = new Map(allLoyal.map((l) => [l.id, l]));
+  let active = 0, cooling = 0, lost = 0, never = 0, fresh = 0, full = 0;
+  cust.forEach((u) => {
+    const L = lm.get(u.id), lv = lastVisitMs(L);
+    if (!lv) never++; else { const d = (now - lv) / DAY; if (d <= 30) active++; else if (d <= 90) cooling++; else lost++; }
+    if (tsMs(u.createdAt) && now - tsMs(u.createdAt) < 7 * DAY) fresh++;
+    if (L && (L.stamps || 0) >= LOYAL_GOAL) full++;
+  });
+  const lvls = curLevels(), cnt = lvls.map(() => 0);
+  const rows = cust.map((u) => ({ u, L: lm.get(u.id) })).filter((r) => r.L);
+  rows.forEach((r) => { cnt[rankOf(r.L).idx]++; });
+  const maxc = Math.max(1, ...cnt);
+  const bars = lvls.map((l, i) => `<div class="rb-rs-bar"><span>${esc(l.ic)} ${esc(l.n)}</span><div><i style="width:${Math.round(cnt[i] / maxc * 100)}%"></i></div><b>${cnt[i]}</b></div>`).join("");
+  const top = rows.slice().filter((r) => rewardsOf(r.L) > 0 || (r.L.total || 0) > 0)
+    .sort((a, b) => rewardsOf(b.L) - rewardsOf(a.L) || (b.L.total || 0) - (a.L.total || 0)).slice(0, 10)
+    .map((r, i) => { const li = rankOf(r.L); return `<div class="rb-rs-top"><b>${i + 1}.</b> ${esc(r.u.name || r.u.email || "—")} <span>${esc(li.lvl.ic)} ${esc(li.lvl.n)} · 🍕 ${rewardsOf(r.L)} · wizyt ${r.L.total || 0}</span></div>`; }).join("");
+  const close = rows.filter((r) => { const li = rankOf(r.L); return li.next && li.left === 1 && (r.L.stamps || 0) >= 5; }).slice(0, 6)
+    .map((r) => { const li = rankOf(r.L); return `<div class="rb-rs-top">${esc(r.u.name || r.u.email || "—")} <span>→ ${esc(li.next.ic)} ${esc(li.next.n)} (${r.L.stamps}/${LOYAL_GOAL} pieczątek)</span></div>`; }).join("");
+  const rankIdx = new Map(rows.map((r) => [r.u.id, rankOf(r.L).idx]));
+  const start = now - 30 * DAY;
+  const ev = reportEvents.filter((e) => (e.type === "stamp" || e.type === "reward") && tsMs(e.at) >= start);
+  stPerkVisits = ev.filter((e) => (rankIdx.get(e.customerUid) || 0) >= 1).length;
+  const perkShare = ev.length ? Math.round(stPerkVisits / ev.length * 100) : 0;
+  let cost = "4"; try { cost = localStorage.getItem("wr_perk_cost") || "4"; } catch (_) {}
+  box.innerHTML = `<div class="rb-rs-grid">
+      <div class="rb-rs-k"><b>${cust.length}</b><span>kont klientów</span></div>
+      <div class="rb-rs-k"><b>${rows.length}</b><span>z kartą</span></div>
+      <div class="rb-rs-k"><b>${active}</b><span>aktywnych (30 dni)</span></div>
+      <div class="rb-rs-k"><b>${cooling}</b><span>wychładza się (30–90 dni)</span></div>
+      <div class="rb-rs-k"><b>${lost}</b><span>zniknęło (&gt;90 dni)</span></div>
+      <div class="rb-rs-k"><b>${never}</b><span>bez żadnej wizyty</span></div>
+      <div class="rb-rs-k"><b>${fresh}</b><span>nowych (7 dni)</span></div>
+      <div class="rb-rs-k"><b>${full}</b><span>pełnych kart</span></div>
+    </div>
+    <div class="rb-rs-h">Klienci w rangach</div>${bars}
+    <div class="rb-rs-h">🏆 TOP 10 (wg darmowych pizz)</div>${top || '<div class="rb-meta">Jeszcze nikt nie ma wizyt.</div>'}
+    <div class="rb-rs-h">🚀 Blisko awansu</div>${close || '<div class="rb-meta">Nikomu nie brakuje teraz jednej pizzy do awansu.</div>'}
+    <div class="rb-rs-h">💰 Koszt przywilejów</div>
+    <div class="rb-meta">W ciągu 30 dni było ${ev.length} wizyt (pieczątki i wydane pizze gratis), z czego ${stPerkVisits} (${perkShare}%) od klientów z rangą od drugiego poziomu wzwyż.</div>
+    <div class="rb-adm-row"><div><label>Ile średnio kosztuje przywilej na jedną wizytę (zł)</label><input type="text" id="rb-rs-cost" inputmode="decimal" maxlength="6" value="${esc(cost)}"></div></div>
+    <div class="rb-meta" id="rb-rs-costline"></div>`;
+  const inp = $("rb-rs-cost");
+  inp.addEventListener("input", () => { try { localStorage.setItem("wr_perk_cost", inp.value); } catch (_) {} stCostLine(); });
+  stCostLine();
+}
+
+/* ---------- kopia zapasowa (Strona → Kopia): eksport i przywracanie jednym plikiem ---------- */
+/* [kolekcja, opis, zaznaczona domyślnie, da się przywrócić] — reguły bazy pozwalają adminowi odtworzyć tylko część kolekcji */
+const BK_COLS = [
+  ["site", "Ustawienia strony i Straży", true, true],
+  ["loyalty", "Karty lojalnościowe (pieczątki, darmowe pizze, rangi)", true, true],
+  ["points", "Punkty z gier", true, true],
+  ["coupons", "Kody rabatowe klientów", true, true],
+  ["promoCodes", "Kody promocyjne", true, true],
+  ["templates", "Własne szablony rabatów", true, true],
+  ["staff", "Konta obsługi", true, true],
+  ["blocked", "Zablokowane konta (Straż)", true, true],
+  ["users", "Profile klientów (imię, urodziny, zgody)", true, false],
+  ["feedback", "Oceny klientów", true, false],
+  ["pollVotes", "Głosy w głosowaniach", true, false],
+  ["refs", "Kody polecające", true, false],
+  ["visits", "Licznik odwiedzin", true, false],
+  ["flags", "Flagi Straży", true, false],
+  ["devices", "Urządzenia (Straż)", true, false],
+  ["logs", "Dziennik zdarzeń (może być duży)", false, false]
+];
+function bkEnc(v) {
+  if (v && typeof v.toMillis === "function") return { __ts: v.toMillis() };
+  if (v instanceof Date) return { __ts: v.getTime() };
+  if (Array.isArray(v)) return v.map(bkEnc);
+  if (v && typeof v === "object") { const o = {}; Object.keys(v).forEach((k) => { if (v[k] !== undefined) o[k] = bkEnc(v[k]); }); return o; }
+  return v;
+}
+function bkDec(v) {
+  if (Array.isArray(v)) return v.map(bkDec);
+  if (v && typeof v === "object") {
+    if (Object.keys(v).length === 1 && typeof v.__ts === "number") return Timestamp.fromMillis(v.__ts);
+    const o = {}; Object.keys(v).forEach((k) => { o[k] = bkDec(v[k]); }); return o;
+  }
+  return v;
+}
+function bkFillList() {
+  const box = $("rb-kz-cols");
+  if (!box || box.dataset.f) return;
+  box.dataset.f = "1";
+  box.innerHTML = BK_COLS.map((c) => `<label class="rb-check"><input type="checkbox" class="rb-kz-col" value="${c[0]}"${c[2] ? " checked" : ""}> ${esc(c[1])}${c[3] ? "" : ' <span class="rb-meta">(tylko do wglądu — nie da się przywrócić)</span>'}</label>`).join("");
+  bkLast();
+}
+function bkLast() {
+  let t = ""; try { t = localStorage.getItem("wr_last_backup") || ""; } catch (_) {}
+  const el = $("rb-kz-last");
+  if (!el) return;
+  if (!t) { el.textContent = "Nie robiłeś jeszcze kopii na tym urządzeniu."; return; }
+  const d = Math.floor((Date.now() - Number(t)) / DAY);
+  el.textContent = "Ostatnia kopia z tego urządzenia: " + new Date(Number(t)).toLocaleDateString("pl-PL") + (d >= 14 ? " — minęło już " + d + " dni, warto zrobić nową." : ".");
+}
+$("rb-kz-export").addEventListener("click", async () => {
+  const msg = $("rb-kz-msg"), picks = [...document.querySelectorAll(".rb-kz-col:checked")].map((c) => c.value);
+  if (!picks.length) { setMsg(msg, "Zaznacz, co zapisać.", "err"); return; }
+  const btn = $("rb-kz-export"); btn.disabled = true;
+  setMsg(msg, "Pobieram dane…");
+  try {
+    const out = { app: "wloska-robota-backup", v: 1, createdAt: new Date().toISOString(), cols: {} };
+    const stat = [];
+    for (const name of picks) {
+      const s = await getDocs(collection(db, name));
+      out.cols[name] = s.docs.map((d) => ({ id: d.id, data: bkEnc(d.data()) }));
+      stat.push(name + ": " + s.docs.length);
+    }
+    const blob = new Blob([JSON.stringify(out)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "wloskarobota-kopia-" + new Date().toISOString().slice(0, 10) + ".json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    try { localStorage.setItem("wr_last_backup", String(Date.now())); } catch (_) {}
+    bkLast();
+    setMsg(msg, "✅ Zapisano plik kopii. " + stat.join(", ") + ". Trzymaj go w bezpiecznym miejscu (zawiera dane klientów).", "ok");
+  } catch (err) {
+    console.error(err);
+    setMsg(msg, "Nie udało się: " + (err.code ? errText(err) : err.message), "err");
+  }
+  btn.disabled = false;
+});
+let bkData = null;
+$("rb-kz-file").addEventListener("change", async (e) => {
+  const f = e.target.files && e.target.files[0], box = $("rb-kz-prev"), msg = $("rb-kz-msg");
+  bkData = null; box.innerHTML = ""; $("rb-kz-restore").hidden = true; setMsg(msg, "");
+  if (!f) return;
+  try {
+    const j = JSON.parse(await f.text());
+    if (!j || j.app !== "wloska-robota-backup" || j.v !== 1 || !j.cols || typeof j.cols !== "object") throw new Error("To nie jest plik kopii Włoskiej Roboty.");
+    bkData = j;
+    const rows = BK_COLS.filter((c) => c[3] && Array.isArray(j.cols[c[0]])).map((c) => `<label class="rb-check"><input type="checkbox" class="rb-kz-rcol" value="${c[0]}" checked> ${esc(c[1])} — ${j.cols[c[0]].length} dok.</label>`).join("");
+    box.innerHTML = `<div class="rb-meta">Kopia z ${esc(String(j.createdAt || "").slice(0, 16).replace("T", " "))}. Wybierz, co przywrócić:</div>${rows || '<div class="rb-msg err">W pliku nie ma niczego, co da się przywrócić.</div>'}<div class="rb-meta">Dokumenty z pliku <b>nadpiszą</b> obecne o tych samych identyfikatorach. Dokumenty, których nie ma w pliku, zostają bez zmian. Profili klientów, ocen i dziennika nie da się przywrócić z panelu (reguły bazy tego nie pozwalają).</div>`;
+    $("rb-kz-restore").hidden = !rows;
+  } catch (err) { setMsg(msg, err.message || "Nie udało się odczytać pliku.", "err"); }
+});
+$("rb-kz-restore").addEventListener("click", async () => {
+  const msg = $("rb-kz-msg"), picks = [...document.querySelectorAll(".rb-kz-rcol:checked")].map((c) => c.value);
+  if (!bkData || !picks.length) { setMsg(msg, "Wybierz plik i zaznacz, co przywrócić.", "err"); return; }
+  const total = picks.reduce((a, n) => a + bkData.cols[n].length, 0);
+  const word = prompt("Przywrócisz " + total + " dokumentów z kopii (" + picks.join(", ") + "). To nadpisze obecne dane o tych samych identyfikatorach.\n\nWpisz słowo PRZYWRÓĆ, żeby potwierdzić:");
+  if (word === null) return;
+  if (String(word).trim().toUpperCase() !== "PRZYWRÓĆ") { setMsg(msg, "Anulowano (nie wpisano słowa PRZYWRÓĆ).", "err"); return; }
+  const btn = $("rb-kz-restore"); btn.disabled = true;
+  setMsg(msg, "Przywracam…");
+  try {
+    let n = 0;
+    for (const name of picks) {
+      const docs = bkData.cols[name];
+      for (let i = 0; i < docs.length; i += 400) {
+        const b = writeBatch(db);
+        docs.slice(i, i + 400).forEach((d) => { if (d && typeof d.id === "string" && d.id && d.data && typeof d.data === "object") { b.set(doc(db, name, d.id), bkDec(d.data)); n++; } });
+        await b.commit();
+      }
+    }
+    setMsg(msg, "✅ Przywrócono " + n + " dokumentów. Odśwież stronę (Ctrl+F5), żeby zobaczyć zmiany.", "ok");
+    try { dataAt = 0; } catch (_) {}
+  } catch (err) {
+    console.error(err);
+    setMsg(msg, "Nie udało się przywrócić (część mogła się zapisać): " + (err.code ? errText(err) : err.message), "err");
+  }
+  btn.disabled = false;
+});
+
 function renderClients() {
   if (!isAdmin) return;
   const list = $("rb-k-list");
   if (!list) return;
+  try { renderRankStats(); } catch (e) { console.warn(e); }
+  try { bkFillList(); } catch (_) {}
   renderMsgBox();
   const f = $("rb-k-filter").value;
   const needsLoyal = f === "full" || f === "inactive" || f === "never" || f === "vip" || f === "rankup" || f === "refs";
@@ -5853,7 +6264,7 @@ $("rb-site-theme").addEventListener("change", showThemeNow);
   const pane = document.querySelector('#rb-admin .rb-pane[data-pane="site"]');
   if (!pane) return;
   const heads = [...pane.querySelectorAll(":scope > h4.rb-hsec")];
-  const LABELS = { "Komunikat na górze strony": "📢 Komunikat", "Akcje i specjalne dni": "🎯 Akcje", "Pizza dnia": "🍕 Pizza dnia", "Dowóz": "🚚 Dowóz", "Motyw sezonowy": "🎨 Motyw", "Galeria zdjęć": "🖼️ Galeria", "Lojalność i polecenia": "🏅 Lojalność", "Opinie w Google": "⭐ Opinie", "Opinie z Google na stronie": "💬 Opinie klientów", "Własne produkty": "➕ Produkty", "Ceny i dostępność pozycji ze strony": "💲 Ceny" };
+  const LABELS = { "Komunikat na górze strony": "📢 Komunikat", "Akcje i specjalne dni": "🎯 Akcje", "Pizza dnia": "🍕 Pizza dnia", "Dowóz": "🚚 Dowóz", "Motyw sezonowy": "🎨 Motyw", "Galeria zdjęć": "🖼️ Galeria", "Lojalność i polecenia": "🏅 Lojalność", "Opinie w Google": "⭐ Opinie", "Głosowanie klientów": "🗳 Głosowanie", "Kopia zapasowa": "💾 Kopia", "Opinie z Google na stronie": "💬 Opinie klientów", "Własne produkty": "➕ Produkty", "Ceny i dostępność pozycji ze strony": "💲 Ceny" };
   const groups = heads.map((h) => {
     const g = document.createElement("div"); g.className = "rb-sub"; g.hidden = true;
     const label = LABELS[(h.querySelector("span") || h).textContent.trim()] || h.textContent.trim();
