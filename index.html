@@ -1350,6 +1350,11 @@ body.dark #site-dish .sd-text{color:#bbb}
 #rabat-overlay .rb-poll-o{display:flex;gap:8px;align-items:center;padding:7px 4px;cursor:pointer;font-size:14px}
 #rabat-overlay .rb-poll-o input{width:auto;margin:0}
 #rabat-overlay #rb-poll-opts .rb-poll-opt{display:block;margin:0 0 6px}
+#rabat-overlay .rb-poll-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+#rabat-overlay .rb-poll-chip{padding:5px 11px;border-radius:20px;background:rgba(127,127,127,.18);font-size:13px}
+#rabat-overlay .rb-poll #rb-poll-prop{margin:6px 0}
+#rabat-overlay .rb-poll-row{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(127,127,127,.15);font-size:14px}
+#rabat-overlay .rb-poll-row span{flex:1}
 .poll-bar{display:grid;grid-template-columns:minmax(90px,1.2fr) 3fr minmax(70px,.9fr);gap:10px;align-items:center;margin:8px 0;font-size:.95rem}
 .poll-bar>div{height:14px;border-radius:8px;background:rgba(127,127,127,.2);overflow:hidden}
 .poll-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--red))}
@@ -1850,11 +1855,23 @@ body.dark .poll-opt{background:var(--dark-card)}
 
           <h4 class="rb-hsec"><span>Głosowanie klientów</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
           <div class="rb-meta" style="margin:-4px 0 6px">Zadaj klientom pytanie (np. „Jaką pizzę dodać do menu?”). Zalogowani klienci głosują w swoim koncie, każdy jeden raz. Wyniki widzisz tylko Ty, dopóki ich nie opublikujesz przyciskiem „Zamknij i opublikuj wyniki”.</div>
+          <label for="rb-poll-mode">Rodzaj głosowania</label>
+          <select id="rb-poll-mode"><option value="fixed">Stałe odpowiedzi (wpisuję je sam)</option><option value="open">Klienci sami proponują, potem głosują</option></select>
           <label for="rb-poll-q">Pytanie</label>
           <input id="rb-poll-q" maxlength="120" placeholder="np. Jaką nową pizzę chcesz zobaczyć w menu?">
-          <label>Odpowiedzi (2–6)</label>
-          <div id="rb-poll-opts"></div>
-          <button type="button" class="rb-btn secondary small" id="rb-poll-add">+ Dodaj odpowiedź</button>
+          <div id="rb-poll-fixed">
+            <label>Odpowiedzi (2–6)</label>
+            <div id="rb-poll-opts"></div>
+            <button type="button" class="rb-btn secondary small" id="rb-poll-add">+ Dodaj odpowiedź</button>
+          </div>
+          <div id="rb-poll-openbox" hidden>
+            <div class="rb-meta" style="margin:4px 0">Zalogowani klienci zgłaszają własne propozycje (jedna na osobę). Gdy zbierze się ustalona liczba, propozycje się zamykają i zostaje sztywna lista. Wtedy głosują wszyscy, także autorzy propozycji, przez ustaloną liczbę dni. Po tym czasie głosowanie samo się blokuje, a Ty publikujesz wyniki. Nieodpowiednią propozycję możesz poprawić przyciskiem ✏ w „Pokaż wyniki”.</div>
+            <div class="rb-adm-row">
+              <div><label for="rb-poll-max">Ile propozycji zebrać (3–20)</label><input id="rb-poll-max" type="number" min="3" max="20" step="1"></div>
+              <div><label for="rb-poll-days">Ile dni głosowania (1–14)</label><input id="rb-poll-days" type="number" min="1" max="14" step="1"></div>
+            </div>
+            <div class="rb-meta">Liczbę propozycji można ustawić tylko przed startem. Potem zmieniasz tylko czas głosowania.</div>
+          </div>
           <label class="rb-check" style="margin-top:10px"><input id="rb-poll-open" type="checkbox"> Głosowanie aktywne (klienci mogą głosować)</label>
           <div class="rb-meta" id="rb-poll-id"></div>
           <div class="rb-actions" style="margin-top:8px">
@@ -5143,18 +5160,25 @@ $("rb-site-save").addEventListener("click", saveSite);
 document.querySelectorAll(".rb-sec-save").forEach((b) => b.addEventListener("click", saveSite));
 
 /* ---------- głosowanie klientów (np. „jaką pizzę dodać do menu?”) ---------- */
-const POLL_MAX = 6;
+/* Dwa rodzaje: „fixed” (odpowiedzi wpisuje admin) i „open” (klienci zgłaszają propozycje, po zebraniu limitu lista się zamyka i wszyscy głosują przez kilka dni). */
+const POLL_MAX = 6, PROP_MAX = 20;
 function validPoll(p) {
   if (!p || typeof p !== "object" || typeof p.id !== "string" || !/^[a-z0-9]{4,24}$/.test(p.id)) return null;
   const q = String(p.q || "").trim().slice(0, 120);
-  const opts = Array.isArray(p.opts) ? p.opts.map((o) => String(o || "").trim().slice(0, 40)).filter(Boolean).slice(0, POLL_MAX) : [];
-  if (!q || opts.length < 2) return null;
-  const res = Array.isArray(p.results) && p.results.length === opts.length && p.results.every((n) => Number.isInteger(n) && n >= 0) ? p.results : null;
-  return { id: p.id, q, opts, open: p.open === true, results: res };
+  const mode = p.mode === "open" ? "open" : "fixed";
+  const opts = Array.isArray(p.opts) ? p.opts.map((o) => String(o || "").trim().slice(0, 40)).filter(Boolean).slice(0, PROP_MAX) : [];
+  if (!q || (mode === "fixed" && opts.length < 2)) return null;
+  const res = Array.isArray(p.results) && p.results.length === opts.length && opts.length >= 2 && p.results.every((n) => Number.isInteger(n) && n >= 0) ? p.results : null;
+  const maxP = Number.isInteger(p.maxP) && p.maxP >= 3 && p.maxP <= PROP_MAX ? p.maxP : 10;
+  const days = Number.isInteger(p.days) && p.days >= 1 && p.days <= 14 ? p.days : 2;
+  return { id: p.id, q, mode, opts, open: p.open === true, results: res, maxP, days };
 }
 const newPollId = () => "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
 const pollTotal = (r) => r.reduce((a, b) => a + b, 0);
 const pollWord = (n) => { const m10 = n % 10, m100 = n % 100; return n === 1 ? "głos" : (m10 >= 2 && m10 <= 4 && !(m100 >= 12 && m100 <= 14)) ? "głosy" : "głosów"; };
+const pollDays = (n) => n + " " + (n === 1 ? "dzień" : "dni");
+const atMs = (t) => (typeof t === "number" ? t : tsMs(t));
+const pollFmt = (ms) => new Date(ms).toLocaleString("pl-PL", { dateStyle: "short", timeStyle: "short" });
 function pollBarsHtml(opts, counts) {
   const tot = Math.max(1, pollTotal(counts)), top = Math.max(...counts);
   return opts.map((o, i) => `<div class="poll-bar${counts[i] === top && top > 0 ? " win" : ""}"><span>${esc(o)}</span><div><i style="width:${Math.round(counts[i] / tot * 100)}%"></i></div><b>${counts[i]} (${Math.round(counts[i] / tot * 100)}%)</b></div>`).join("");
@@ -5167,8 +5191,10 @@ function renderPollPublic() {
   if (!p || (!p.open && !p.results)) { sec.hidden = true; return; }
   $("pollQ").textContent = p.q;
   if (p.open) {
-    $("pollPub").innerHTML = p.opts.map((o, i) => `<div class="poll-opt"><b>${String.fromCharCode(65 + i)}</b> ${esc(o)}</div>`).join("");
-    $("pollCta").innerHTML = '<a class="rev-btn" href="#konto">Zaloguj się i zagłosuj w swoim koncie</a>';
+    $("pollPub").innerHTML = p.mode === "open"
+      ? `<div class="poll-opt"><b>💡</b> <span>Zaproponuj własną pizzę! Zbieramy pierwszych ${p.maxP} propozycji od klientów, a potem wszyscy głosują przez ${pollDays(p.days)}.</span></div>`
+      : p.opts.map((o, i) => `<div class="poll-opt"><b>${String.fromCharCode(65 + i)}</b> ${esc(o)}</div>`).join("");
+    $("pollCta").innerHTML = '<a class="rev-btn" href="#konto">Zaloguj się i weź udział w swoim koncie</a>';
   } else {
     const r = p.results, top = Math.max(...r), w = r.indexOf(top);
     $("pollPub").innerHTML = '<div class="poll-res">' + pollBarsHtml(p.opts, r) + "</div>";
@@ -5177,47 +5203,113 @@ function renderPollPublic() {
   sec.hidden = false;
 }
 /* --- panel klienta (Konto) --- */
-let pollMine = { key: "", opt: null };
-async function renderPoll(user) {
+let pollSt = { key: "", props: null, mark: undefined, vote: undefined, at: 0, busy: false };
+const propRows = (s) => s.docs.map((d) => ({ id: d.id, slot: d.data().slot, text: d.data().text, at: d.data().at, uid: d.data().uid })).sort((a, b) => a.slot - b.slot);
+async function renderPoll(user, force) {
   const el = $("rb-poll");
   if (!el) return;
   const p = siteCfg.poll;
   if (!user || !p || !p.open || isAdmin || isStaff) { el.hidden = true; return; }
   const key = p.id + "_" + user.uid;
-  if (pollMine.key !== key) {
-    pollMine = { key, opt: undefined };
-    try { const s = await getDoc(doc(db, "pollVotes", key)); pollMine.opt = s.exists() ? s.data().opt : null; } catch (_) { pollMine.opt = null; }
+  if (pollSt.key !== key) pollSt = { key, props: null, mark: undefined, vote: undefined, at: 0, busy: false };
+  if (pollSt.busy) return;
+  if (force || pollSt.vote === undefined || Date.now() - pollSt.at > 20000) {
+    pollSt.busy = true;
+    try {
+      const tasks = [getDoc(doc(db, "pollVotes", key)).then((s) => { pollSt.vote = s.exists() ? s.data().opt : null; }).catch(() => { pollSt.vote = null; })];
+      if (p.mode === "open") {
+        tasks.push(getDocs(query(collection(db, "pollProps"), where("pollId", "==", p.id))).then((s) => { pollSt.props = propRows(s); }).catch(() => { pollSt.props = pollSt.props || []; }));
+        tasks.push(getDoc(doc(db, "pollMarks", key)).then((s) => { pollSt.mark = s.exists(); }).catch(() => { pollSt.mark = !!pollSt.mark; }));
+      }
+      await Promise.all(tasks);
+    } finally { pollSt.busy = false; pollSt.at = Date.now(); }
   }
-  if (!siteCfg.poll || siteCfg.poll.id !== p.id || pollMine.key !== key || pollMine.opt === undefined) return;
-  paintPoll(el, p);
+  if (!siteCfg.poll || siteCfg.poll.id !== p.id || pollSt.key !== key) return;
+  paintPoll(el, siteCfg.poll);
+}
+function pollPhase(p) {
+  if (p.mode !== "open") return { ph: "vote", opts: p.opts.map((t, i) => ({ v: i, t })) };
+  const props = pollSt.props || [];
+  if (props.length < p.maxP) return { ph: "propose", props };
+  const end = atMs(props[p.maxP - 1].at) + p.days * DAY;
+  const opts = props.map((x) => ({ v: x.slot, t: x.text }));
+  return { ph: Date.now() < end ? "vote" : "ended", opts, end };
 }
 function paintPoll(el, p, note) {
-  const voted = Number.isInteger(pollMine.opt);
+  const st = pollPhase(p);
+  let body = "";
+  if (st.ph === "propose") {
+    const left = p.maxP - st.props.length;
+    body = `<div class="rb-meta">Zbieramy pierwszych ${p.maxP} propozycji od klientów (wolnych miejsc: ${left}). Potem lista się zamyka i wszyscy głosują przez ${pollDays(p.days)}.</div>`
+      + (st.props.length ? '<div class="rb-poll-chips">' + st.props.map((x) => `<span class="rb-poll-chip">${esc(x.text)}</span>`).join("") + "</div>" : "")
+      + (pollSt.mark
+        ? '<div class="rb-meta">✅ Twoja propozycja jest zgłoszona. Wrócimy do głosowania, gdy zbierzemy komplet.</div><button type="button" class="rb-btn secondary small" data-prefresh>🔄 Odśwież</button>'
+        : '<input id="rb-poll-prop" maxlength="40" placeholder="Twoja propozycja, np. Bolognese" autocomplete="off"><button type="button" class="rb-btn small" data-ppropose>Zaproponuj</button>');
+  } else if (st.ph === "ended") {
+    body = '<div class="rb-meta">Głosowanie zakończone. Wyniki ogłosimy wkrótce na stronie.</div>';
+  } else {
+    const voted = Number.isInteger(pollSt.vote), mine = voted ? st.opts.find((o) => o.v === pollSt.vote) : null;
+    body = (st.end ? `<div class="rb-meta">Głosować można do ${esc(pollFmt(st.end))}.</div>` : "")
+      + (voted
+        ? `<div class="rb-meta">✅ Dziękujemy! Twój głos: <b>${esc(mine ? mine.t : "")}</b>. Wyniki ogłosimy na stronie po zakończeniu.</div>`
+        : st.opts.map((o) => `<label class="rb-poll-o"><input type="radio" name="rbpoll" value="${o.v}"> ${esc(o.t)}</label>`).join("") + '<button type="button" class="rb-btn small" data-pvote>Zagłosuj</button>');
+  }
   el.hidden = false;
-  el.innerHTML = `<div class="rb-sec" style="margin-top:0"><h3>🗳 Głosowanie</h3></div><div class="rb-poll-q">${esc(p.q)}</div>`
-    + (voted
-      ? `<div class="rb-meta">✅ Dziękujemy! Twój głos: <b>${esc(p.opts[pollMine.opt] || "")}</b>. Wyniki ogłosimy na stronie po zakończeniu.</div>`
-      : p.opts.map((o, i) => `<label class="rb-poll-o"><input type="radio" name="rbpoll" value="${i}"> ${esc(o)}</label>`).join("") + `<button type="button" class="rb-btn small" data-pvote>Zagłosuj</button>`)
-    + (note ? `<div class="rb-msg err">${esc(note)}</div>` : "");
+  el.innerHTML = `<div class="rb-sec" style="margin-top:0"><h3>🗳 Głosowanie</h3></div><div class="rb-poll-q">${esc(p.q)}</div>${body}` + (note ? `<div class="rb-msg err">${esc(note)}</div>` : "");
+}
+async function submitProp(user, p, text) {
+  const key = p.id + "_" + user.uid;
+  for (let i = 0; i < 4; i++) {
+    const props = propRows(await getDocs(query(collection(db, "pollProps"), where("pollId", "==", p.id))));
+    pollSt.props = props;
+    if (props.length >= p.maxP) throw { full: true };
+    if (props.some((x) => String(x.text).toLowerCase() === text.toLowerCase())) throw { dup: true };
+    const slot = props.length + 1;
+    try {
+      const b = writeBatch(db);
+      b.set(doc(db, "pollMarks", key), { uid: user.uid, pollId: p.id, at: serverTimestamp() });
+      b.set(doc(db, "pollProps", p.id + "_" + slot), { uid: user.uid, pollId: p.id, slot, text, at: serverTimestamp() });
+      await b.commit();
+      pollSt.mark = true;
+      pollSt.props = propRows(await getDocs(query(collection(db, "pollProps"), where("pollId", "==", p.id))));
+      return;
+    } catch (e) { if (!(e && e.code === "permission-denied" && i < 3)) throw e; }
+  }
 }
 $("rb-poll").addEventListener("click", async (e) => {
-  const b = e.target.closest("[data-pvote]"), p = siteCfg.poll, user = auth.currentUser;
-  if (!b || !p || !user || !p.open) return;
-  const ch = $("rb-poll").querySelector('input[name="rbpoll"]:checked');
-  if (!ch) { paintPoll($("rb-poll"), p, "Wybierz jedną odpowiedź."); return; }
+  const p = siteCfg.poll, user = auth.currentUser, el = $("rb-poll");
+  if (!p || !user || !p.open) return;
+  if (e.target.closest("[data-prefresh]")) { renderPoll(user, true); return; }
+  const pb = e.target.closest("[data-ppropose]");
+  if (pb) {
+    const text = ($("rb-poll-prop").value || "").replace(/\s+/g, " ").trim();
+    if (text.length < 2) { paintPoll(el, p, "Wpisz propozycję (minimum 2 znaki)."); return; }
+    pb.disabled = true;
+    try { await submitProp(user, p, text); paintPoll(el, p); }
+    catch (err) {
+      console.error(err);
+      paintPoll(el, p, err && err.full ? "Komplet propozycji już się zebrał, teraz czas na głosowanie." : err && err.dup ? "Taka propozycja już jest na liście." : err && err.code === "permission-denied" ? "Nie udało się dodać propozycji: mogłeś już jedną zgłosić albo limit właśnie się zapełnił. Odśwież listę." : errText(err));
+      if (err && err.full) renderPoll(user, true);
+    }
+    return;
+  }
+  const b = e.target.closest("[data-pvote]");
+  if (!b) return;
+  const ch = el.querySelector('input[name="rbpoll"]:checked');
+  if (!ch) { paintPoll(el, p, "Wybierz jedną odpowiedź."); return; }
   const opt = Number(ch.value);
   b.disabled = true;
   try {
     await setDoc(doc(db, "pollVotes", p.id + "_" + user.uid), { uid: user.uid, pollId: p.id, opt, at: serverTimestamp() });
-    pollMine = { key: p.id + "_" + user.uid, opt };
-    paintPoll($("rb-poll"), p);
+    pollSt.vote = opt;
+    paintPoll(el, p);
   } catch (err) {
     console.error(err);
-    paintPoll($("rb-poll"), p, err && err.code === "permission-denied" ? "Nie udało się zagłosować: głosowanie mogło się zakończyć, już głosowałeś albo konto jest zablokowane." : errText(err));
+    paintPoll(el, p, err && err.code === "permission-denied" ? "Nie udało się zagłosować: głosowanie mogło się zakończyć, już głosowałeś albo konto jest zablokowane." : errText(err));
   }
 });
 /* --- panel admina (Strona → Głosowanie) --- */
-let pollDraft = { id: "", results: null };
+let pollDraft = { id: "", results: null, opts: [] };
 function renderPollOpts(list) {
   const box = $("rb-poll-opts");
   const arr = list.slice(0, POLL_MAX);
@@ -5225,68 +5317,126 @@ function renderPollOpts(list) {
   box.innerHTML = arr.map((o, i) => `<input class="rb-poll-opt" maxlength="40" placeholder="Odpowiedź ${i + 1}" value="${esc(o)}">`).join("");
   $("rb-poll-add").disabled = arr.length >= POLL_MAX;
 }
+function pollModeUi() {
+  const open = $("rb-poll-mode").value === "open";
+  $("rb-poll-fixed").hidden = open;
+  $("rb-poll-openbox").hidden = !open;
+}
 function pollInfo(txt) {
   const p = siteCfg.poll;
   $("rb-poll-id").textContent = txt || (p ? "Zapisane głosowanie: " + (p.open ? "aktywne" : p.results ? "zakończone, wyniki opublikowane" : "zamknięte") + "." : "Brak zapisanego głosowania.");
 }
 function fillPollForm() {
   const p = siteCfg.poll;
-  pollDraft = { id: p ? p.id : "", results: p ? p.results : null };
+  pollDraft = { id: p ? p.id : "", results: p ? p.results : null, opts: p ? p.opts : [] };
+  $("rb-poll-mode").value = p ? p.mode : "fixed";
   $("rb-poll-q").value = p ? p.q : "";
-  renderPollOpts(p ? p.opts : ["", ""]);
+  renderPollOpts(p && p.mode === "fixed" ? p.opts : ["", ""]);
+  $("rb-poll-max").value = p ? p.maxP : 10;
+  $("rb-poll-max").disabled = !!(p && p.mode === "open");
+  $("rb-poll-days").value = p ? p.days : 2;
   $("rb-poll-open").checked = p ? p.open : true;
   $("rb-poll-out").innerHTML = "";
+  pollModeUi();
   pollInfo();
 }
 function collectPoll() {
-  const q = $("rb-poll-q").value.trim();
+  const mode = $("rb-poll-mode").value === "open" ? "open" : "fixed";
+  const q = $("rb-poll-q").value.trim(), saved = siteCfg.poll;
   const opts = [...document.querySelectorAll("#rb-poll-opts .rb-poll-opt")].map((i) => i.value.trim()).filter(Boolean);
   if (!q && !opts.length) return { poll: null };
-  if (!q) return { bad: "Wpisz pytanie głosowania (albo wyczyść odpowiedzi, żeby je usunąć)." };
-  if (opts.length < 2) return { bad: "W głosowaniu muszą być co najmniej 2 odpowiedzi." };
-  if (new Set(opts.map((o) => o.toLowerCase())).size !== opts.length) return { bad: "Odpowiedzi w głosowaniu nie mogą się powtarzać." };
-  if (!pollDraft.id) pollDraft.id = newPollId();
+  if (!q) return { bad: "Wpisz pytanie głosowania (albo wyczyść pytanie i odpowiedzi, żeby usunąć głosowanie)." };
+  if (pollDraft.id && saved && saved.id === pollDraft.id && saved.mode !== mode) pollDraft = { id: "", results: null, opts: [] };
   const open = $("rb-poll-open").checked;
-  let results = pollDraft.results;
-  if (open || !results || results.length !== opts.length) results = null;
-  return { poll: { id: pollDraft.id, q: q.slice(0, 120), opts: opts.map((o) => o.slice(0, 40)), open, results } };
+  if (mode === "fixed") {
+    if (opts.length < 2) return { bad: "W głosowaniu muszą być co najmniej 2 odpowiedzi." };
+    if (new Set(opts.map((o) => o.toLowerCase())).size !== opts.length) return { bad: "Odpowiedzi w głosowaniu nie mogą się powtarzać." };
+    if (!pollDraft.id) pollDraft.id = newPollId();
+    let results = pollDraft.results;
+    if (open || !results || results.length !== opts.length) results = null;
+    return { poll: { id: pollDraft.id, q: q.slice(0, 120), mode, opts: opts.map((o) => o.slice(0, 40)), open, results } };
+  }
+  let maxP = Number($("rb-poll-max").value);
+  const days = Number($("rb-poll-days").value);
+  if (saved && saved.id === pollDraft.id && saved.mode === "open") maxP = saved.maxP;
+  if (!Number.isInteger(maxP) || maxP < 3 || maxP > PROP_MAX) return { bad: "Liczba propozycji do zebrania: od 3 do " + PROP_MAX + "." };
+  if (!Number.isInteger(days) || days < 1 || days > 14) return { bad: "Czas głosowania: od 1 do 14 dni." };
+  if (!pollDraft.id) pollDraft.id = newPollId();
+  const keep = !open && pollDraft.results && pollDraft.opts.length === pollDraft.results.length;
+  return { poll: { id: pollDraft.id, q: q.slice(0, 120), mode, maxP, days, opts: keep ? pollDraft.opts : [], open, results: keep ? pollDraft.results : null } };
 }
 async function pollTally() {
   const p = siteCfg.poll;
   if (!p) throw new Error("Najpierw zapisz głosowanie (przycisk Zapisz).");
-  const s = await getDocs(query(collection(db, "pollVotes"), where("pollId", "==", p.id)));
+  const vs = await getDocs(query(collection(db, "pollVotes"), where("pollId", "==", p.id)));
+  if (p.mode === "open") {
+    const props = propRows(await getDocs(query(collection(db, "pollProps"), where("pollId", "==", p.id))));
+    const counts = props.map(() => 0);
+    vs.docs.forEach((d) => { const i = props.findIndex((x) => x.slot === d.data().opt); if (i >= 0) counts[i]++; });
+    return { props, counts, votes: vs.docs.length };
+  }
   const counts = p.opts.map(() => 0);
-  s.docs.forEach((d) => { const o = d.data().opt; if (Number.isInteger(o) && o >= 0 && o < counts.length) counts[o]++; });
-  return counts;
+  vs.docs.forEach((d) => { const o = d.data().opt; if (Number.isInteger(o) && o >= 0 && o < counts.length) counts[o]++; });
+  return { props: null, counts, votes: vs.docs.length };
 }
+let pollLast = null;
+function pollOutHtml(t) {
+  const p = siteCfg.poll;
+  if (!t.props) return '<div class="poll-res">' + pollBarsHtml(p.opts, t.counts) + `</div><div class="rb-meta">Razem głosów: ${pollTotal(t.counts)} (na żywo, widzisz je tylko Ty).</div>`;
+  if (!t.props.length) return '<div class="rb-meta">Klienci nie zgłosili jeszcze żadnych propozycji.</div>';
+  const full = t.props.length >= p.maxP;
+  let end = "";
+  if (full) { const e = atMs(t.props[p.maxP - 1].at) + p.days * DAY; end = e ? " Głosowanie " + (Date.now() < e ? "trwa do " : "zakończyło się ") + pollFmt(e) + "." : ""; }
+  return `<div class="rb-meta">Propozycje: ${t.props.length} / ${p.maxP}${full ? " — lista zamknięta." : "."}${esc(end)} Razem głosów: ${pollTotal(t.counts)}.</div>`
+    + t.props.map((x, i) => `<div class="rb-poll-row"><span>${i + 1}. ${esc(x.text)}</span><b>${t.counts[i]}</b><button type="button" class="rb-btn secondary small" data-pedit="${i}" title="Zmień tekst (np. gdy jest nieodpowiedni)">✏</button></div>`).join("");
+}
+async function pollShow() {
+  const out = $("rb-poll-out");
+  out.innerHTML = '<div class="rb-meta">Liczę…</div>';
+  try { pollLast = await pollTally(); out.innerHTML = pollOutHtml(pollLast); }
+  catch (err) { out.innerHTML = '<div class="rb-msg err">' + esc(err.code ? errText(err) : err.message) + "</div>"; }
+}
+$("rb-poll-mode").addEventListener("change", pollModeUi);
 $("rb-poll-add").addEventListener("click", () => {
   const cur = [...document.querySelectorAll("#rb-poll-opts .rb-poll-opt")].map((i) => i.value);
   if (cur.length < POLL_MAX) { cur.push(""); renderPollOpts(cur); }
 });
-$("rb-poll-res").addEventListener("click", async () => {
-  const out = $("rb-poll-out");
-  out.innerHTML = '<div class="rb-meta">Liczę głosy…</div>';
-  try { const c = await pollTally(); out.innerHTML = '<div class="poll-res">' + pollBarsHtml(siteCfg.poll.opts, c) + `</div><div class="rb-meta">Razem głosów: ${pollTotal(c)} (na żywo, widzisz je tylko Ty).</div>`; }
-  catch (err) { out.innerHTML = '<div class="rb-msg err">' + esc(err.code ? errText(err) : err.message) + "</div>"; }
+$("rb-poll-res").addEventListener("click", pollShow);
+$("rb-poll-out").addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-pedit]");
+  if (!b || !pollLast || !pollLast.props) return;
+  const x = pollLast.props[Number(b.dataset.pedit)];
+  const t = prompt("Nowy tekst propozycji (2–40 znaków). Zmiana jest widoczna dla wszystkich klientów, a głosy zostają:", x.text);
+  if (t === null) return;
+  const nt = t.replace(/\s+/g, " ").trim();
+  if (nt.length < 2 || nt.length > 40) { alert("Tekst musi mieć od 2 do 40 znaków."); return; }
+  try { await updateDoc(doc(db, "pollProps", x.id), { text: nt }); await pollShow(); }
+  catch (err) { alert(errText(err)); }
 });
 $("rb-poll-new").addEventListener("click", () => {
   if (siteCfg.poll && !confirm("Rozpocząć NOWE głosowanie? Stare głosy przestaną się liczyć (nie kasują się, ale nowe zaczyna od zera). Pamiętaj, żeby zmienić pytanie i odpowiedzi, a potem kliknąć Zapisz.")) return;
-  pollDraft = { id: newPollId(), results: null };
+  pollDraft = { id: newPollId(), results: null, opts: [] };
+  $("rb-poll-max").disabled = false;
   $("rb-poll-open").checked = true; $("rb-poll-out").innerHTML = "";
-  pollInfo("Nowe głosowanie — zmień pytanie i odpowiedzi, potem kliknij Zapisz, żeby ruszyło.");
+  pollInfo("Nowe głosowanie — zmień pytanie i ustawienia, potem kliknij Zapisz, żeby ruszyło.");
 });
 $("rb-poll-close").addEventListener("click", async () => {
-  if (!siteCfg.poll) { $("rb-poll-out").innerHTML = '<div class="rb-msg err">Najpierw zapisz głosowanie.</div>'; return; }
+  const p = siteCfg.poll;
+  if (!p) { $("rb-poll-out").innerHTML = '<div class="rb-msg err">Najpierw zapisz głosowanie.</div>'; return; }
   if (!confirm("Zamknąć głosowanie i opublikować wyniki na stronie?")) return;
   try {
-    pollDraft.id = siteCfg.poll.id;
-    pollDraft.results = await pollTally();
+    const t = await pollTally();
+    if (p.mode === "open") {
+      if (t.props.length < 2) throw new Error("Za mało propozycji, żeby ogłosić wyniki (minimum 2).");
+      pollDraft.opts = t.props.map((x) => x.text);
+    }
+    pollDraft.id = p.id;
+    pollDraft.results = t.counts;
     $("rb-poll-open").checked = false;
     await saveSite();
     fillPollForm();
   } catch (err) { $("rb-poll-out").innerHTML = '<div class="rb-msg err">' + esc(err.code ? errText(err) : err.message) + "</div>"; }
 });
-
 
 /* ---------- panel admina: zakładka Raport (dziennik zdarzeń) ---------- */
 const rpMsg = $("rb-rp-msg");
@@ -5837,6 +5987,8 @@ const BK_COLS = [
   ["users", "Profile klientów (imię, urodziny, zgody)", true, false],
   ["feedback", "Oceny klientów", true, false],
   ["pollVotes", "Głosy w głosowaniach", true, false],
+  ["pollProps", "Propozycje klientów w głosowaniach", true, false],
+  ["pollMarks", "Znaczniki zgłoszonych propozycji", true, false],
   ["refs", "Kody polecające", true, false],
   ["visits", "Licznik odwiedzin", true, false],
   ["flags", "Flagi Straży", true, false],
