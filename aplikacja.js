@@ -3350,7 +3350,7 @@ function renderPollPublic() {
 }
 /* --- panel klienta (Konto) --- */
 let pollSt = { key: "", props: null, mark: undefined, vote: undefined, at: 0, busy: false };
-const propRows = (s) => s.docs.map((d) => ({ id: d.id, slot: d.data().slot, text: d.data().text, at: d.data().at, uid: d.data().uid })).sort((a, b) => a.slot - b.slot);
+const propRows = (s) => s.docs.map((d) => ({ id: d.id, slot: d.data().slot, text: d.data().text, at: d.data().at })).sort((a, b) => a.slot - b.slot);
 async function renderPoll(user, force) {
   const el = $("rb-poll");
   if (!el) return;
@@ -3413,8 +3413,8 @@ async function submitProp(user, p, text) {
     const slot = props.length + 1;
     try {
       const b = writeBatch(db);
-      b.set(doc(db, "pollMarks", key), { uid: user.uid, pollId: p.id, at: serverTimestamp() });
-      b.set(doc(db, "pollProps", p.id + "_" + slot), { uid: user.uid, pollId: p.id, slot, text, at: serverTimestamp() });
+      b.set(doc(db, "pollMarks", key), { uid: user.uid, pollId: p.id, slot, at: serverTimestamp() });
+      b.set(doc(db, "pollProps", p.id + "_" + slot), { pollId: p.id, slot, text, at: serverTimestamp() });
       await b.commit();
       pollSt.mark = true;
       pollSt.props = propRows(await getDocs(query(collection(db, "pollProps"), where("pollId", "==", p.id))));
