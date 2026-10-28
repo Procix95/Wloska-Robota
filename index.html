@@ -218,8 +218,10 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Włoska Robota">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/ikony.css?v=1">
 <style>
 :root {--red: #CD212A; --green: #009246; --gold: #D4AF37; --dark: #1a1a1a; --dark-bg: #121212; --dark-card: #1e1e1e; --light: #f8f8f8; --gray: #666; --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
 * {margin: 0; padding: 0; box-sizing: border-box;}
@@ -428,12 +430,11 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
         <li class="dowoz-link" hidden><a href="#dowoz">Dowóz</a></li>
         <li><a href="#gallery">Galeria</a></li>
         <li><a href="#contact">Kontakt</a></li>
-        <li><a href="#gry" class="nav-games">🎮 Gry</a></li>
         <li><a href="#konto">Konto</a></li>
-        <li data-pwa-show hidden><button type="button" class="pwa-nav-btn" data-pwa hidden aria-label="Zainstaluj aplikację Włoska Robota"><i class="fas fa-download"></i> <span class="pwa-long">Zainstaluj aplikację</span><span class="pwa-short">Aplikacja</span></button></li>
-        <li><button class="theme-toggle" id="themeToggle"><i class="fas fa-sun"></i></button></li>
+        <li data-pwa-show hidden><button type="button" class="pwa-nav-btn" data-pwa hidden aria-label="Zainstaluj aplikację Włoska Robota"><i class="fas fa-download" aria-hidden="true"></i> <span class="pwa-long">Zainstaluj aplikację</span><span class="pwa-short">Aplikacja</span></button></li>
+        <li><button type="button" class="theme-toggle" id="themeToggle" aria-label="Przełącz jasny lub ciemny motyw"><i class="fas fa-sun" aria-hidden="true"></i></button></li>
       </ul>
-      <button class="mobile-toggle" id="mobileToggle"><i class="fas fa-bars"></i></button>
+      <button type="button" class="mobile-toggle" id="mobileToggle" aria-label="Otwórz menu" aria-expanded="false" aria-controls="navLinks"><i class="fas fa-bars" aria-hidden="true"></i></button>
     </nav>
   </div>
 </header>
@@ -457,9 +458,9 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
       <h1>Pizza z Sercem z Głupoń</h1>
       <p>Autentyczna włoska pizza 30cm prosto z pieca. Ciasto na 24h fermentacji.</p>
       <div class="hero-buttons">
-        <a href="tel:668862396" class="btn btn-primary"><i class="fas fa-phone"></i> Zamów: 668 862 396</a>
-        <a href="#menu" class="btn btn-secondary"><i class="fas fa-utensils"></i> Zobacz Menu</a>
-        <a href="#dowoz" class="btn btn-secondary dowoz-link" hidden><i class="fas fa-truck"></i> Czy dowozimy do mnie?</a>
+        <a href="tel:668862396" class="btn btn-primary"><i class="fas fa-phone" aria-hidden="true"></i> Zamów: 668 862 396</a>
+        <a href="#menu" class="btn btn-secondary"><i class="fas fa-utensils" aria-hidden="true"></i> Zobacz Menu</a>
+        <a href="#dowoz" class="btn btn-secondary dowoz-link" hidden><i class="fas fa-truck" aria-hidden="true"></i> Czy dowozimy do mnie?</a>
       </div>
       <div class="hero-chips" aria-label="Dlaczego nasza pizza jest inna"><span>🔥 Piec 400°C</span><span>⏱️ 24h fermentacji</span><span>🧀 Mozzarella fior di latte</span><span>🍅 Pomidory San Marzano</span></div>
       <div class="opening-timer">
@@ -468,7 +469,7 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
       </div>
     </div>
   </div>
-  <a class="hero-scroll" href="#about" aria-label="Przewiń w dół"><i class="fas fa-chevron-down"></i></a>
+  <a class="hero-scroll" href="#about" aria-label="Przewiń w dół"><i class="fas fa-chevron-down" aria-hidden="true"></i></a>
 </section>
 
 <section class="delivery-strip" id="dowoz" hidden>
@@ -494,22 +495,22 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
         <p>Używamy tylko składników najwyższej jakości: włoska mąka, pomidory San Marzano, mozzarella fior di latte, świeże zioła. Zero kompromisów.</p>
         <div class="about-features">
           <div class="feature-card">
-            <div class="feature-icon"><i class="fas fa-fire"></i></div>
+            <div class="feature-icon"><i class="fas fa-fire" aria-hidden="true"></i></div>
             <h4>Piec Włoski</h4>
             <p>Wypiek w 400°C daje idealne "lamparty"</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon"><i class="fas fa-clock"></i></div>
+            <div class="feature-icon"><i class="fas fa-clock" aria-hidden="true"></i></div>
             <h4>24h Fermentacji</h4>
             <p>Ciasto lekkostrawne i aromatyczne</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon"><i class="fas fa-leaf"></i></div>
+            <div class="feature-icon"><i class="fas fa-leaf" aria-hidden="true"></i></div>
             <h4>Świeże Składniki</h4>
             <p>Codziennie od lokalnych dostawców</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon"><i class="fas fa-heart"></i></div>
+            <div class="feature-icon"><i class="fas fa-heart" aria-hidden="true"></i></div>
             <h4>Prosto z Serca</h4>
             <p>Każda pizza robiona z pasją</p>
           </div>
@@ -790,19 +791,19 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
     <p class="section-subtitle fade-in" id="deliverySub">Dowóz: Głuponie, Kuślin, Michorzewo, Michorzewko i okolice</p>
     <div class="contact-grid">
       <div class="contact-card fade-in">
-        <div class="contact-icon"><i class="fas fa-phone"></i></div>
+        <div class="contact-icon"><i class="fas fa-phone" aria-hidden="true"></i></div>
         <h3>Zadzwoń</h3>
         <p><a href="tel:668862396">668 862 396</a></p>
         <p>Zamówienia telefoniczne</p>
       </div>
       <div class="contact-card fade-in">
-        <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+        <div class="contact-icon"><i class="fas fa-map-marker-alt" aria-hidden="true"></i></div>
         <h3>Lokalizacja</h3>
         <p>Głuponie 103</p>
         <p>woj. Wielkopolskie</p>
       </div>
       <div class="contact-card fade-in">
-        <div class="contact-icon"><i class="fas fa-clock"></i></div>
+        <div class="contact-icon"><i class="fas fa-clock" aria-hidden="true"></i></div>
         <h3>Godziny</h3>
         <div id="hoursList">
           <p>Śr-Pt: 12:00 - 20:00</p>
@@ -810,7 +811,7 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
         </div>
       </div>
       <div class="contact-card fade-in">
-        <div class="contact-icon"><i class="fas fa-truck"></i></div>
+        <div class="contact-icon"><i class="fas fa-truck" aria-hidden="true"></i></div>
         <h3>Dowóz</h3>
         <p>Głuponie, Kuślin, Michorzewo</p>
         <p>i okolice (koszt dowozu niżej)</p>
@@ -818,11 +819,11 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
     </div>
     <div class="map-wrapper fade-in" id="mapWrap">
       <div class="map-consent" id="mapConsent">
-        <p><i class="fas fa-map-marked-alt"></i> Mapa Google nie wczytuje się automatycznie, bo Google może zapisać na Twoim urządzeniu pliki cookies i otrzymuje Twój adres IP. Kliknij, jeśli chcesz ją zobaczyć.</p>
+        <p><i class="fas fa-map-marked-alt" aria-hidden="true"></i> Mapa Google nie wczytuje się automatycznie, bo Google może zapisać na Twoim urządzeniu pliki cookies i otrzymuje Twój adres IP. Kliknij, jeśli chcesz ją zobaczyć.</p>
         <button type="button" class="btn btn-primary" id="mapLoad">Pokaż mapę</button>
       </div>
       <a href="https://www.google.com/maps/search/G%C5%82uponie+103,+Ku%C5%9Blin,+Wielkopolska" target="_blank" rel="noopener" class="map-link">
-        <i class="fas fa-external-link-alt"></i> Otwórz w Google Maps
+        <i class="fas fa-external-link-alt" aria-hidden="true"></i> Otwórz w Google Maps
       </a>
     </div>
   </div>
@@ -836,8 +837,8 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
         <h4>Włoska Robota</h4>
         <p>Autentyczna pizza prosto z Neapolu.</p>
         <div class="social-links">
-          <a href="https://www.facebook.com/profile.php?id=61591198263542"><i class="fab fa-facebook"></i></a>
-          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="https://www.facebook.com/profile.php?id=61591198263542" aria-label="Włoska Robota na Facebooku"><i class="fab fa-facebook" aria-hidden="true"></i></a>
+          <a href="#" aria-label="Włoska Robota na Instagramie"><i class="fab fa-instagram" aria-hidden="true"></i></a>
         </div>
       </div>
       <div class="footer-section">
@@ -847,10 +848,15 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
         <a href="#menu">Pizza Wege</a>
       </div>
       <div class="footer-section">
+        <h4>Dla klientów</h4>
+        <a href="#konto">Moje konto i karta</a>
+        <a href="#gry" class="nav-games">🎮 Gry</a>
+      </div>
+      <div class="footer-section">
         <h4>Kontakt</h4>
-        <a href="tel:668862396"><i class="fas fa-phone"></i> 668 862 396</a>
-        <p><i class="fas fa-map-marker-alt"></i> Głuponie, woj. Wielkopolskie</p>
-        <p id="footHours"><i class="fas fa-clock"></i> Śr-Pt: 12:00-20:00 | Sob-Nd: 14:00-22:00</p>
+        <a href="tel:668862396"><i class="fas fa-phone" aria-hidden="true"></i> 668 862 396</a>
+        <p><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Głuponie, woj. Wielkopolskie</p>
+        <p id="footHours"><i class="fas fa-clock" aria-hidden="true"></i> Śr-Pt: 12:00-20:00 | Sob-Nd: 14:00-22:00</p>
       </div>
     </div>
     <div class="footer-bottom">
@@ -862,7 +868,7 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
   </div>
 </footer>
  
-<a href="tel:668862396" class="sticky-phone"><i class="fas fa-phone"></i></a>
+<a href="tel:668862396" class="sticky-phone" aria-label="Zadzwoń: 668 862 396"><i class="fas fa-phone" aria-hidden="true"></i></a>
  
 <script>
 // Mobile menu
@@ -870,14 +876,17 @@ const mobileToggle = document.getElementById('mobileToggle');
 const navLinks = document.getElementById('navLinks');
 mobileToggle.addEventListener('click', () => {
   navLinks.classList.toggle('active');
-  mobileToggle.innerHTML = navLinks.classList.contains('active') 
-    ? '<i class="fas fa-times"></i>' 
-    : '<i class="fas fa-bars"></i>';
+  const open = navLinks.classList.contains('active');
+  mobileToggle.innerHTML = open ? '<i class="fas fa-times" aria-hidden="true"></i>' : '<i class="fas fa-bars" aria-hidden="true"></i>';
+  mobileToggle.setAttribute('aria-expanded', open);
+  mobileToggle.setAttribute('aria-label', open ? 'Zamknij menu' : 'Otwórz menu');
 });
 navLinks.querySelectorAll('a').forEach(link => {
   link.addEventListener('click', () => {
     navLinks.classList.remove('active');
-    mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
+    mobileToggle.innerHTML = '<i class="fas fa-bars" aria-hidden="true"></i>';
+    mobileToggle.setAttribute('aria-expanded', 'false');
+    mobileToggle.setAttribute('aria-label', 'Otwórz menu');
   });
 });
  
@@ -909,8 +918,8 @@ const themeToggle = document.getElementById('themeToggle');
 themeToggle.addEventListener('click', () => {
   document.body.classList.toggle('dark');
   themeToggle.innerHTML = document.body.classList.contains('dark') 
-    ? '<i class="fas fa-sun"></i>' 
-    : '<i class="fas fa-moon"></i>';
+    ? '<i class="fas fa-sun" aria-hidden="true"></i>' 
+    : '<i class="fas fa-moon" aria-hidden="true"></i>';
 });
  
 // ========================================
@@ -963,7 +972,7 @@ function renderHoursText() {
   const box = document.getElementById('hoursList');
   if (box) box.innerHTML = (lines.length ? lines.map((l) => '<p>' + l + '</p>').join('') : '<p>Obecnie nieczynne</p>') + (soon.length ? '<p class="hours-off">Wolne: ' + soon.join(', ') + '</p>' : '');
   const f = document.getElementById('footHours');
-  if (f) f.innerHTML = '<i class="fas fa-clock"></i> ' + (lines.length ? lines.join(' | ').replace(/ - /g, '-') : 'Obecnie nieczynne');
+  if (f) f.innerHTML = '<i class="fas fa-clock" aria-hidden="true"></i> ' + (lines.length ? lines.join(' | ').replace(/ - /g, '-') : 'Obecnie nieczynne');
 }
 window.wrHoursApply = function () { renderHoursText(); updateTimer(); };
  
@@ -1718,20 +1727,20 @@ fadeEls.forEach(el => observer.observe(el));
     var android = /Android/i.test(navigator.userAgent);
     var steps, note, title = "Dodaj Włoską Robotę do ekranu głównego";
     if (isIOS) {
-      steps = ['<i class="fas fa-arrow-up-from-bracket"></i><span>Stuknij ikonę <b>Udostępnij</b> (kwadrat ze strzałką) na dole lub u góry przeglądarki.</span>',
-        '<i class="fas fa-square-plus"></i><span>Wybierz <b>„Do ekranu początkowego”</b>.</span>',
-        '<i class="fas fa-check"></i><span>Stuknij <b>„Dodaj”</b>. Ikona pojawi się obok Twoich aplikacji.</span>'];
+      steps = ['<i class="fas fa-arrow-up-from-bracket" aria-hidden="true"></i><span>Stuknij ikonę <b>Udostępnij</b> (kwadrat ze strzałką) na dole lub u góry przeglądarki.</span>',
+        '<i class="fas fa-square-plus" aria-hidden="true"></i><span>Wybierz <b>„Do ekranu początkowego”</b>.</span>',
+        '<i class="fas fa-check" aria-hidden="true"></i><span>Stuknij <b>„Dodaj”</b>. Ikona pojawi się obok Twoich aplikacji.</span>'];
       note = "Działa w przeglądarce Safari.";
     } else if (android) {
-      steps = ['<i class="fas fa-ellipsis-vertical"></i><span>Stuknij <b>menu przeglądarki</b> (trzy kropki w rogu).</span>',
-        '<i class="fas fa-square-plus"></i><span>Wybierz <b>„Zainstaluj aplikację”</b> albo <b>„Dodaj do ekranu głównego”</b>.</span>',
-        '<i class="fas fa-check"></i><span>Potwierdź. Ikona pojawi się na ekranie telefonu.</span>'];
+      steps = ['<i class="fas fa-ellipsis-vertical" aria-hidden="true"></i><span>Stuknij <b>menu przeglądarki</b> (trzy kropki w rogu).</span>',
+        '<i class="fas fa-square-plus" aria-hidden="true"></i><span>Wybierz <b>„Zainstaluj aplikację”</b> albo <b>„Dodaj do ekranu głównego”</b>.</span>',
+        '<i class="fas fa-check" aria-hidden="true"></i><span>Potwierdź. Ikona pojawi się na ekranie telefonu.</span>'];
       note = "Jeśli nie widzisz takiej opcji, otwórz stronę w Chrome.";
     } else {
       title = "Zainstaluj Włoską Robotę na komputerze";
-      steps = ['<i class="fas fa-download"></i><span>Kliknij <b>ikonę instalacji</b> po prawej stronie paska adresu (monitor ze strzałką lub plus).</span>',
-        '<i class="fas fa-ellipsis-vertical"></i><span>Nie ma jej? Otwórz <b>menu przeglądarki</b> i poszukaj <b>„Zainstaluj…”</b> (w Chrome: Zapisz i udostępnij → Zainstaluj).</span>',
-        '<i class="fas fa-check"></i><span>Potwierdź. Aplikacja otworzy się we własnym oknie.</span>'];
+      steps = ['<i class="fas fa-download" aria-hidden="true"></i><span>Kliknij <b>ikonę instalacji</b> po prawej stronie paska adresu (monitor ze strzałką lub plus).</span>',
+        '<i class="fas fa-ellipsis-vertical" aria-hidden="true"></i><span>Nie ma jej? Otwórz <b>menu przeglądarki</b> i poszukaj <b>„Zainstaluj…”</b> (w Chrome: Zapisz i udostępnij → Zainstaluj).</span>',
+        '<i class="fas fa-check" aria-hidden="true"></i><span>Potwierdź. Aplikacja otworzy się we własnym oknie.</span>'];
       note = "Działa w Chrome, Edge i Brave. Firefox nie instaluje stron jako aplikacji.";
     }
     var m = document.createElement("div");
@@ -1757,7 +1766,7 @@ fadeEls.forEach(el => observer.observe(el));
     c.id = "pwaCard"; c.setAttribute("role", "region"); c.setAttribute("aria-label", "Zainstaluj aplikację");
     c.innerHTML = '<img src="/logo-mark.webp" width="54" height="54" alt="">' +
       '<div><b>Włoska Robota na ekranie telefonu</b><p>Karta lojalnościowa i rabaty zawsze pod ręką, jak zwykła aplikacja.</p>' +
-      '<div class="pwa-actions"><button type="button" class="pwa-go" id="pwaGo"><i class="fas fa-download"></i> ' + (isIOS ? "Jak dodać" : "Zainstaluj") + '</button>' +
+      '<div class="pwa-actions"><button type="button" class="pwa-go" id="pwaGo"><i class="fas fa-download" aria-hidden="true"></i> ' + (isIOS ? "Jak dodać" : "Zainstaluj") + '</button>' +
       '<button type="button" class="pwa-later" id="pwaLater">Nie teraz</button></div></div>';
     document.body.appendChild(c);
     c.querySelector("#pwaGo").addEventListener("click", install);
