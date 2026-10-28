@@ -580,6 +580,28 @@ body.dark .poll-opt{background:var(--dark-card)}
 #rabat-overlay .rb-site-badges label:has(input:checked){background:rgba(0,146,70,.22);border-color:var(--rb-accent)}
 #rabat-overlay .rb-site-badges label:has(.rb-site-unav:checked){background:rgba(212,150,0,.24);border-color:var(--rb-gold)}
 #rabat-overlay .rb-site-badges label:has(.rb-site-hide:checked){background:rgba(205,33,42,.24);border-color:var(--rb-red)}
+/* kreator rabatów: kroki, przyciski rodzaju, karty listy */
+#rabat-overlay .rb-vh{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;margin:0!important;padding:0!important;border:0!important;opacity:0}
+#rabat-overlay .rb-bld{display:grid;gap:12px}
+#rabat-overlay .rb-bcard{background:var(--rb-card);border:1px solid var(--rb-border);border-radius:14px;padding:14px 14px 4px}
+#rabat-overlay .rb-bh{display:flex;align-items:center;gap:9px;font-weight:800;font-size:14px;color:var(--rb-text);margin-bottom:10px}
+#rabat-overlay .rb-bn{width:22px;height:22px;border-radius:50%;background:var(--rb-accent);color:#fff;font-size:12px;display:grid;place-items:center;flex:none}
+#rabat-overlay .rb-bopt{margin-left:auto;font-size:11.5px;font-weight:600;color:var(--rb-muted)}
+#rabat-overlay .rb-seg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+#rabat-overlay .rb-seg button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:60px;padding:8px 4px;border-radius:12px;border:1px solid var(--rb-border);background:var(--rb-input);color:var(--rb-text);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+#rabat-overlay .rb-seg button b{font-size:18px;line-height:1}
+#rabat-overlay .rb-seg button:hover{border-color:var(--rb-accent)}
+#rabat-overlay .rb-seg button[aria-pressed=true]{border-color:var(--rb-accent);background:rgba(0,146,70,.2);box-shadow:inset 0 0 0 1px var(--rb-accent)}
+#rabat-overlay .rb-bpair{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:0 12px}
+#rabat-overlay .rb-bhint{font-size:12px;color:var(--rb-muted);margin:-4px 0 10px}
+#rabat-overlay .rb-tcard{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--rb-card);border:1px solid var(--rb-border);border-left:4px solid var(--rb-accent);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+#rabat-overlay .rb-tic{width:38px;height:38px;border-radius:50%;background:rgba(0,146,70,.2);color:var(--rb-text);font-weight:800;font-size:15px;display:grid;place-items:center;flex:none}
+#rabat-overlay .rb-tbody{flex:1;min-width:150px}
+#rabat-overlay .rb-ttxt{font-weight:700;font-size:15px;color:var(--rb-text);word-break:break-word}
+#rabat-overlay .rb-tchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+#rabat-overlay .rb-tchips span{font-size:11.5px;padding:2px 8px;border-radius:99px;border:1px solid var(--rb-border);color:var(--rb-muted)}
+#rabat-overlay .rb-tact{display:flex;gap:8px;flex:none}
+@media (max-width:520px){#rabat-overlay .rb-tact{width:100%}#rabat-overlay .rb-tact .rb-btn{flex:1}}
 #rabat-overlay .rb-prod{border:1px solid var(--rb-border);border-radius:14px;padding:12px;margin:10px 0;background:var(--rb-input)}
 #rabat-overlay .rb-prod .rb-prod-top{display:grid;grid-template-columns:1fr 92px;gap:8px}
 #rabat-overlay .rb-prod input,#rabat-overlay .rb-prod select,#rabat-overlay .rb-prod textarea{margin-bottom:8px}

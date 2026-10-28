@@ -1979,11 +1979,17 @@ function syncBuilder() {
   const vi = $("rb-t-value");
   $("rb-t-valwrap").hidden = isCustom;
   $("rb-t-scopewrap").hidden = isCustom || isFree;
+  $("rb-t-hint1").hidden = isCustom || isFree;
   vi.type = isFree ? "text" : "number";
   vi.placeholder = isFree ? "np. sos czosnkowy" : (type === "percent" ? "np. 20" : "np. 5");
   $("rb-t-vallabel").textContent = type === "percent" ? "Ile procent (%)" : type === "amount" ? "Ile złotych (zł)" : "Jaki produkt za 1 zł";
+  document.querySelectorAll("#rb-t-seg button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.v === type ? "true" : "false"));
   if (!tTextTouched) $("rb-t-text").value = buildText();
 }
+document.querySelectorAll("#rb-t-seg button").forEach((b) => b.addEventListener("click", () => {
+  const sel = $("rb-t-type");
+  if (sel.value !== b.dataset.v) { sel.value = b.dataset.v; sel.dispatchEvent(new Event("change")); }
+}));
 $("rb-t-type").addEventListener("change", () => { $("rb-t-value").value = ""; tTextTouched = false; syncBuilder(); });
 ["rb-t-value", "rb-t-scope"].forEach((id) => $(id).addEventListener("input", () => { if (!tTextTouched) $("rb-t-text").value = buildText(); }));
 $("rb-t-text").addEventListener("input", () => { tTextTouched = $("rb-t-text").value !== ""; });
@@ -2036,14 +2042,21 @@ function renderOwnList() {
   const box = $("rb-t-list");
   if (!box) return;
   if (!allTemplates.length) { box.innerHTML = '<div class="rb-empty">Nie masz jeszcze własnych rabatów.</div>'; return; }
-  box.innerHTML = allTemplates.map((t) => `<div class="rb-coupon">
-      <div class="rb-desc" style="font-size:17px;font-weight:700">${esc(t.text)}</div>
-      <div class="rb-meta">${t.validDays ? "ważny " + esc(t.validDays) + " dni od przyznania" : "bez terminu"}${t.prefix ? " · kod: " + esc(t.prefix) + "-XXXXXX" : ""}</div>
-      <div class="rb-actions">
+  const TT = { percent: ["%", "Procent"], amount: ["zł", "Kwota"], free: ["🍕", "Za 1 zł"], custom: ["✎", "Własny"] };
+  box.innerHTML = allTemplates.map((t) => {
+    const k = TT[t.type] || TT.custom;
+    return `<div class="rb-tcard">
+      <div class="rb-tic" aria-hidden="true">${k[0]}</div>
+      <div class="rb-tbody">
+        <div class="rb-ttxt">${esc(t.text)}</div>
+        <div class="rb-tchips"><span>${k[1]}</span><span>${t.validDays ? "ważny " + esc(t.validDays) + " dni" : "bez terminu"}</span>${t.prefix ? "<span>kod " + esc(t.prefix) + "-XXXXXX</span>" : ""}</div>
+      </div>
+      <div class="rb-tact">
         <button type="button" class="rb-btn small" data-act="grant" data-id="${esc(t.id)}">Przyznaj…</button>
         <button type="button" class="rb-btn secondary small" data-act="del" data-id="${esc(t.id)}">Usuń</button>
       </div>
-    </div>`).join("");
+    </div>`;
+  }).join("");
 }
 $("rb-t-list").addEventListener("click", async (e) => {
   const b = e.target.closest("[data-act]");
