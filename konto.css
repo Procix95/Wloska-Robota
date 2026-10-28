@@ -601,6 +601,10 @@ body.dark .poll-opt{background:var(--dark-card)}
 #rabat-overlay .rb-tchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
 #rabat-overlay .rb-tchips span{font-size:11.5px;padding:2px 8px;border-radius:99px;border:1px solid var(--rb-border);color:var(--rb-muted)}
 #rabat-overlay .rb-tact{display:flex;gap:8px;flex:none}
+#rabat-overlay .rb-seg3{grid-template-columns:repeat(3,1fr)}
+#rabat-overlay .rb-nsub{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+#rabat-overlay .rb-nsub button{border:1px solid var(--rb-border);background:var(--rb-card);color:inherit;padding:8px 13px;border-radius:99px;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;min-height:38px}
+#rabat-overlay .rb-nsub button[aria-pressed=true]{background:var(--rb-accent);border-color:var(--rb-accent);color:#fff}
 @media (max-width:520px){#rabat-overlay .rb-tact{width:100%}#rabat-overlay .rb-tact .rb-btn{flex:1}}
 #rabat-overlay .rb-prod{border:1px solid var(--rb-border);border-radius:14px;padding:12px;margin:10px 0;background:var(--rb-input)}
 #rabat-overlay .rb-prod .rb-prod-top{display:grid;grid-template-columns:1fr 92px;gap:8px}

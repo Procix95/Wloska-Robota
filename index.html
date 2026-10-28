@@ -1087,7 +1087,7 @@ fadeEls.forEach(el => observer.observe(el));
      ===================================================================== -->
 
 <!-- ===== RABAT: STYLE ===== -->
-<link rel="stylesheet" href="/konto.css?v=2">
+<link rel="stylesheet" href="/konto.css?v=3">
 
 <!-- ===== RABAT: HTML ===== -->
 <div id="rabat-overlay" role="dialog" aria-modal="true" aria-labelledby="rb-title">
@@ -1252,9 +1252,7 @@ fadeEls.forEach(el => observer.observe(el));
           <button type="button" class="rb-atab active" data-pane="today" role="tab"><i>🏠</i><span>Dziś</span></button>
           <button type="button" class="rb-atab" data-pane="check" role="tab"><i>📷</i><span>Skanuj</span></button>
           <button type="button" class="rb-atab" data-pane="clients" role="tab"><i>👥</i><span>Klienci</span></button>
-          <button type="button" class="rb-atab" data-pane="grant" role="tab"><i>🎁</i><span>Przyznaj</span></button>
           <button type="button" class="rb-atab" data-pane="builder" role="tab"><i>🏷️</i><span>Rabaty</span></button>
-          <button type="button" class="rb-atab" data-pane="list" role="tab"><i>🎟️</i><span>Kody</span></button>
           <button type="button" class="rb-atab" data-pane="staff" role="tab"><i>🧑‍🍳</i><span>Obsługa</span></button>
           <button type="button" class="rb-atab" data-pane="site" role="tab"><i>🛠️</i><span>Strona</span></button>
           <button type="button" class="rb-atab" data-pane="report" role="tab"><i>📊</i><span>Raport</span></button>
@@ -1383,102 +1381,127 @@ fadeEls.forEach(el => observer.observe(el));
           <div id="rb-c-result"></div>
         </div>
 
-        <!-- Zakładka: Przyznaj kod -->
-        <div class="rb-pane" data-pane="grant" hidden>
-          <label for="rb-a-filter">Szukaj klienta</label>
-          <input id="rb-a-filter" type="search" placeholder="e-mail lub imię">
-          <label for="rb-a-user">Klient</label>
-          <select id="rb-a-user"></select>
-          <label for="rb-a-tpl">Gotowy rabat (własne oznaczone ★)</label>
-          <select id="rb-a-tpl"></select>
-          <div class="rb-meta" style="margin:-4px 0 10px">Własne rabaty tworzysz w zakładce „Rabaty”.</div>
-          <label for="rb-a-desc">Opis rabatu</label>
-          <input id="rb-a-desc" type="text" maxlength="120" placeholder="np. -20% na pizzę Margherita">
-          <label for="rb-a-code">Kod (puste = losowy; przy „Wszyscy klienci” możesz wpisać przedrostek, np. WEEKEND)</label>
-          <div class="rb-row">
-            <input id="rb-a-code" type="text" maxlength="30" placeholder="np. 7K2M9Q" autocapitalize="characters">
-            <button type="button" class="rb-btn secondary small" id="rb-a-gen" style="margin-bottom:10px">Losuj</button>
-          </div>
-          <label for="rb-a-exp">Ważny do (opcjonalnie)</label>
-          <input id="rb-a-exp" type="date">
-          <button type="button" class="rb-btn" id="rb-a-add">Przyznaj kod</button>
-          <div class="rb-msg" id="rb-a-msg" role="status"></div>
-
-          <h4>Kod promocyjny dla wszystkich</h4>
-          <div class="rb-meta" style="margin:-4px 0 10px">Jak w sklepach internetowych: klient wpisuje kod w swoim Koncie i dostaje rabat. Każdy klient może użyć danego kodu tylko raz. Po dacie ważności nie da się go już wpisać, a odebrany rabat przestaje działać tego samego dnia.</div>
-          <label for="rb-p-code">Kod (3–20 liter i cyfr)</label>
-          <div class="rb-row">
-            <input id="rb-p-code" type="text" maxlength="20" placeholder="np. WLOSKAROBOTA5" autocapitalize="characters" autocomplete="off" spellcheck="false">
-            <button type="button" class="rb-btn secondary small" id="rb-p-gen" style="margin-bottom:10px">Losuj</button>
-          </div>
-          <label for="rb-p-tpl">Gotowy rabat (własne oznaczone ★)</label>
-          <select id="rb-p-tpl"></select>
-          <label for="rb-p-desc">Opis rabatu (widzi klient)</label>
-          <input id="rb-p-desc" type="text" maxlength="120" placeholder="np. -5 zł na zamówienie">
-          <label for="rb-p-exp">Ważny do (puste = bez terminu)</label>
-          <input id="rb-p-exp" type="date">
-          <button type="button" class="rb-btn" id="rb-p-add">Utwórz kod promocyjny</button>
-          <div class="rb-msg" id="rb-p-msg" role="status"></div>
-          <h4>Twoje kody promocyjne</h4>
-          <div id="rb-p-list"></div>
-        </div>
-
-        <!-- Zakładka: własne rabaty (kreator) -->
+        <!-- Zakładka: Rabaty (jeden kreator: nowy rabat, gotowe, kody promocyjne, przyznane kody) -->
         <div class="rb-pane" data-pane="builder" hidden>
-          <h4>Stwórz własny rabat</h4>
-          <div class="rb-bld">
-            <section class="rb-bcard">
-              <div class="rb-bh"><span class="rb-bn">1</span>Co dostaje klient?</div>
-              <label for="rb-t-type" class="rb-vh">Rodzaj rabatu</label>
-              <select id="rb-t-type" class="rb-vh" tabindex="-1" aria-hidden="true">
-                <option value="percent">Procent (np. -20%)</option>
-                <option value="amount">Kwota (np. -5 zł)</option>
-                <option value="free">Produkt za 1 zł</option>
-                <option value="custom">Własny opis</option>
-              </select>
-              <div class="rb-seg" id="rb-t-seg" role="group" aria-label="Rodzaj rabatu">
-                <button type="button" data-v="percent" aria-pressed="true"><b>%</b>Procent</button>
-                <button type="button" data-v="amount" aria-pressed="false"><b>zł</b>Kwota</button>
-                <button type="button" data-v="free" aria-pressed="false"><b>🍕</b>Za 1 zł</button>
-                <button type="button" data-v="custom" aria-pressed="false"><b>✎</b>Własny</button>
-              </div>
-              <div class="rb-bpair">
-                <div id="rb-t-valwrap">
-                  <label for="rb-t-value" id="rb-t-vallabel">Ile procent (%)</label>
-                  <input id="rb-t-value" type="number" min="1" step="any" inputmode="decimal" placeholder="np. 20">
-                </div>
-                <div id="rb-t-scopewrap">
-                  <label for="rb-t-scope">Dotyczy (opcjonalnie)</label>
-                  <input id="rb-t-scope" type="text" maxlength="60" placeholder="np. pizzę Margherita">
-                </div>
-              </div>
-              <div class="rb-bhint" id="rb-t-hint1">Puste pole „Dotyczy” = rabat na całe zamówienie.</div>
-            </section>
-            <section class="rb-bcard">
-              <div class="rb-bh"><span class="rb-bn">2</span>Co zobaczy klient?</div>
-              <label for="rb-t-text">Opis rabatu</label>
-              <input id="rb-t-text" type="text" maxlength="120" placeholder="np. -20% na pizzę Margherita">
-              <div class="rb-bhint">Wypełnia się sam z kroku 1. Możesz go poprawić.</div>
-            </section>
-            <section class="rb-bcard">
-              <div class="rb-bh"><span class="rb-bn">3</span>Ważność i kod <span class="rb-bopt">opcjonalnie</span></div>
-              <div class="rb-bpair">
-                <div>
-                  <label for="rb-t-days">Ważny (dni od przyznania)</label>
-                  <input id="rb-t-days" type="number" min="1" max="3650" inputmode="numeric" placeholder="np. 30">
-                </div>
-                <div>
-                  <label for="rb-t-prefix">Przedrostek kodu</label>
-                  <input id="rb-t-prefix" type="text" maxlength="12" placeholder="np. WEEKEND" autocapitalize="characters">
-                </div>
-              </div>
-              <div class="rb-bhint">Puste „Ważny” = bez terminu. Kod będzie wyglądał np. WEEKEND-7K2M9Q.</div>
-            </section>
-            <button type="button" class="rb-btn" id="rb-t-save">Zapisz rabat</button>
-            <div class="rb-msg" id="rb-t-msg" role="status"></div>
+          <div class="rb-nsub" id="rb-n-sub" role="group" aria-label="Rabaty">
+            <button type="button" data-sec="new" aria-pressed="true">➕ Nowy rabat</button>
+            <button type="button" data-sec="tpl" aria-pressed="false">★ Gotowe</button>
+            <button type="button" data-sec="promo" aria-pressed="false">🌐 Kody promocyjne</button>
+            <button type="button" data-sec="granted" aria-pressed="false">🎟 Przyznane</button>
           </div>
-          <h4>Twoje rabaty</h4>
-          <div id="rb-t-list"></div>
+
+          <div class="rb-nsec" data-sec="new">
+            <label for="rb-n-from">Zacznij od gotowego rabatu (opcjonalnie)</label>
+            <select id="rb-n-from"></select>
+            <div class="rb-bld">
+              <section class="rb-bcard">
+                <div class="rb-bh"><span class="rb-bn">1</span>Co dostaje klient?</div>
+                <label for="rb-t-type" class="rb-vh">Rodzaj rabatu</label>
+                <select id="rb-t-type" class="rb-vh" tabindex="-1" aria-hidden="true">
+                  <option value="percent">Procent (np. -20%)</option>
+                  <option value="amount">Kwota (np. -5 zł)</option>
+                  <option value="free">Produkt za 1 zł</option>
+                  <option value="custom">Własny opis</option>
+                </select>
+                <div class="rb-seg" id="rb-t-seg" role="group" aria-label="Rodzaj rabatu">
+                  <button type="button" data-v="percent" aria-pressed="true"><b>%</b>Procent</button>
+                  <button type="button" data-v="amount" aria-pressed="false"><b>zł</b>Kwota</button>
+                  <button type="button" data-v="free" aria-pressed="false"><b>🍕</b>Za 1 zł</button>
+                  <button type="button" data-v="custom" aria-pressed="false"><b>✎</b>Własny</button>
+                </div>
+                <div class="rb-bpair">
+                  <div id="rb-t-valwrap">
+                    <label for="rb-t-value" id="rb-t-vallabel">Ile procent (%)</label>
+                    <input id="rb-t-value" type="number" min="1" step="any" inputmode="decimal" placeholder="np. 20">
+                  </div>
+                  <div id="rb-t-scopewrap">
+                    <label for="rb-t-scope">Dotyczy (opcjonalnie)</label>
+                    <input id="rb-t-scope" type="text" maxlength="60" placeholder="np. pizzę Margherita">
+                  </div>
+                </div>
+                <div class="rb-bhint" id="rb-t-hint1">Puste pole „Dotyczy” = rabat na całe zamówienie.</div>
+              </section>
+              <section class="rb-bcard">
+                <div class="rb-bh"><span class="rb-bn">2</span>Co zobaczy klient?</div>
+                <label for="rb-t-text">Opis rabatu</label>
+                <input id="rb-t-text" type="text" maxlength="120" placeholder="np. -20% na pizzę Margherita">
+                <div class="rb-bhint">Wypełnia się sam z kroku 1. Możesz go poprawić.</div>
+              </section>
+              <section class="rb-bcard">
+                <div class="rb-bh"><span class="rb-bn">3</span>Ważność i kod <span class="rb-bopt">opcjonalnie</span></div>
+                <div class="rb-bpair">
+                  <div>
+                    <label for="rb-t-days">Ważny (dni od przyznania)</label>
+                    <input id="rb-t-days" type="number" min="1" max="3650" inputmode="numeric" placeholder="np. 30">
+                  </div>
+                  <div>
+                    <label for="rb-n-exp">albo do dnia</label>
+                    <input id="rb-n-exp" type="date">
+                  </div>
+                </div>
+                <label for="rb-t-prefix">Przedrostek kodu</label>
+                <input id="rb-t-prefix" type="text" maxlength="12" placeholder="np. WEEKEND" autocapitalize="characters">
+                <div class="rb-bhint">Brak ważności = bez terminu. Kod będzie wyglądał np. WEEKEND-7K2M9Q.</div>
+              </section>
+              <section class="rb-bcard">
+                <div class="rb-bh"><span class="rb-bn">4</span>Komu?</div>
+                <div class="rb-seg rb-seg3" id="rb-n-mode" role="group" aria-label="Komu">
+                  <button type="button" data-m="grant" aria-pressed="true"><b>👤</b>Klientowi</button>
+                  <button type="button" data-m="promo" aria-pressed="false"><b>🌐</b>Kod dla wszystkich</button>
+                  <button type="button" data-m="save" aria-pressed="false"><b>💾</b>Tylko zapisz</button>
+                </div>
+                <div id="rb-n-grant">
+                  <label for="rb-a-filter">Szukaj klienta</label>
+                  <input id="rb-a-filter" type="search" placeholder="e-mail lub imię">
+                  <label for="rb-a-user">Klient</label>
+                  <select id="rb-a-user"></select>
+                  <label for="rb-a-code">Kod (puste = losowy; przy „Wszyscy klienci” to przedrostek)</label>
+                  <div class="rb-row">
+                    <input id="rb-a-code" type="text" maxlength="30" placeholder="np. 7K2M9Q" autocapitalize="characters">
+                    <button type="button" class="rb-btn secondary small" id="rb-a-gen" style="margin-bottom:10px">Losuj</button>
+                  </div>
+                </div>
+                <div id="rb-n-promo" hidden>
+                  <div class="rb-bhint" style="margin-top:0">Jak w sklepach internetowych: klient wpisuje kod w swoim Koncie i dostaje rabat. Każdy klient może użyć danego kodu tylko raz. Po dacie ważności nie da się go już wpisać, a odebrany rabat przestaje działać tego samego dnia.</div>
+                  <label for="rb-p-code">Kod promocyjny (3–20 liter i cyfr)</label>
+                  <div class="rb-row">
+                    <input id="rb-p-code" type="text" maxlength="20" placeholder="np. WLOSKAROBOTA5" autocapitalize="characters" autocomplete="off" spellcheck="false">
+                    <button type="button" class="rb-btn secondary small" id="rb-p-gen" style="margin-bottom:10px">Losuj</button>
+                  </div>
+                </div>
+                <div id="rb-n-save" hidden><div class="rb-bhint" style="margin-top:0">Rabat trafi na listę „Gotowe”. Później użyjesz go jednym kliknięciem, dla klienta albo jako kod promocyjny.</div></div>
+                <label class="rb-check" id="rb-n-keepwrap" style="margin-bottom:10px"><input type="checkbox" id="rb-n-keep"> Zapisz też jako gotowy rabat do ponownego użycia</label>
+              </section>
+              <button type="button" class="rb-btn" id="rb-n-go">Przyznaj kod</button>
+              <div class="rb-msg" id="rb-t-msg" role="status"></div>
+            </div>
+          </div>
+
+          <div class="rb-nsec" data-sec="tpl" hidden>
+            <h4>Gotowe rabaty</h4>
+            <div class="rb-meta" style="margin:-4px 0 10px">Zapisane rabaty do ponownego użycia. „Użyj” wczytuje rabat do kreatora.</div>
+            <div id="rb-t-list"></div>
+          </div>
+
+          <div class="rb-nsec" data-sec="promo" hidden>
+            <h4>Kody promocyjne dla wszystkich</h4>
+            <div class="rb-meta" style="margin:-4px 0 10px">Nowy kod tworzysz w kreatorze (krok 4 → „Kod dla wszystkich”). Tu włączasz, wyłączasz i usuwasz istniejące.</div>
+            <div id="rb-p-list"></div>
+          </div>
+
+          <div class="rb-nsec" data-sec="granted" hidden>
+            <h4>Wszystkie przyznane kody</h4>
+            <input id="rb-l-search" type="search" placeholder="Szukaj: kod lub e-mail klienta" autocomplete="off">
+            <select id="rb-l-filter" aria-label="Filtr kodów">
+              <option value="all">Wszystkie kody</option>
+              <option value="active">Aktywne</option>
+              <option value="soon">⏳ Wygasają w ciągu 7 dni</option>
+              <option value="used">Wykorzystane</option>
+              <option value="expired">Wygasłe</option>
+            </select>
+            <div class="rb-meta" id="rb-l-count" style="margin:-2px 0 8px"></div>
+            <div id="rb-a-list"></div>
+          </div>
         </div>
 
         <!-- Zakładka: konta obsługi (tylko skanowanie) -->
@@ -1712,20 +1735,6 @@ fadeEls.forEach(el => observer.observe(el));
           <div class="rb-msg" id="rb-bk-msg" role="status"></div>
         </div>
 
-        <!-- Zakładka: lista wszystkich kodów -->
-        <div class="rb-pane" data-pane="list" hidden>
-          <h4>Wszystkie przyznane kody</h4>
-          <input id="rb-l-search" type="search" placeholder="Szukaj: kod lub e-mail klienta" autocomplete="off">
-          <select id="rb-l-filter" aria-label="Filtr kodów">
-            <option value="all">Wszystkie kody</option>
-            <option value="active">Aktywne</option>
-            <option value="soon">⏳ Wygasają w ciągu 7 dni</option>
-            <option value="used">Wykorzystane</option>
-            <option value="expired">Wygasłe</option>
-          </select>
-          <div class="rb-meta" id="rb-l-count" style="margin:-2px 0 8px"></div>
-          <div id="rb-a-list"></div>
-        </div>
       </div>
     </div>
   </div>
@@ -1807,7 +1816,7 @@ fadeEls.forEach(el => observer.observe(el));
   btns.forEach(function (b) { b.addEventListener("click", install); });
 })();
 </script>
-<script type="module" src="/aplikacja.js?v=3"></script>
+<script type="module" src="/aplikacja.js?v=4"></script>
 <script type="module" src="/straz.js?v=7"></script>
 <!-- ===== RABAT: KONIEC ===== -->
 
