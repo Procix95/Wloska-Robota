@@ -1392,33 +1392,8 @@ $("rb-promo-btn").addEventListener("click", async () => {
 });
 $("rb-promo-in").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); $("rb-promo-btn").click(); } });
 
-const pMsg = $("rb-p-msg");
+const pMsg = $("rb-t-msg");
 $("rb-p-gen").addEventListener("click", () => { $("rb-p-code").value = "WR" + genCode(); });
-$("rb-p-tpl").addEventListener("change", () => {
-  const v = $("rb-p-tpl").value;
-  if (!v) return;
-  if (v[0] === "d") $("rb-p-desc").value = DEFAULT_TPL[Number(v.slice(2))] || "";
-  else { const t = allTemplates.find((x) => x.id === v.slice(2)); if (t) $("rb-p-desc").value = t.text || ""; }
-});
-$("rb-p-add").addEventListener("click", async () => {
-  setMsg(pMsg, "");
-  const code = $("rb-p-code").value.replace(/\s+/g, "").toUpperCase();
-  const description = $("rb-p-desc").value.trim();
-  const exp = $("rb-p-exp").value;
-  if (!/^[A-Z0-9]{3,20}$/.test(code)) { setMsg(pMsg, "Kod: 3–20 liter i cyfr (bez spacji i polskich znaków).", "err"); return; }
-  if (!description) { setMsg(pMsg, "Wpisz opis rabatu, który zobaczy klient.", "err"); return; }
-  if (allPromos.some((p) => p.id === code)) { setMsg(pMsg, "Taki kod promocyjny już istnieje.", "err"); return; }
-  const expiresAt = exp ? Timestamp.fromDate(new Date(exp + "T23:59:59")) : null;
-  if (expiresAt && tsMs(expiresAt) < Date.now()) { setMsg(pMsg, "Data ważności jest w przeszłości.", "err"); return; }
-  try {
-    await setDoc(doc(db, "promoCodes", code), { code, description, expiresAt, active: true, createdAt: serverTimestamp() });
-    setMsg(pMsg, "Kod " + code + " utworzony. Klient wpisuje go w Koncie, w polu „Masz kod promocyjny?”.", "ok");
-    $("rb-p-code").value = ""; $("rb-p-desc").value = ""; $("rb-p-exp").value = ""; $("rb-p-tpl").value = "";
-  } catch (err) {
-    console.error(err);
-    setMsg(pMsg, err.code === "permission-denied" ? "Brak uprawnień. Opublikuj nowe reguły z pliku firestore.rules." : errText(err), "err");
-  }
-});
 function renderPromos() {
   const box = $("rb-p-list");
   if (!box) return;
@@ -1452,17 +1427,17 @@ $("rb-p-list").addEventListener("click", async (e) => {
 });
 
 /* ---------- panel administratora ---------- */
-const aMsg = $("rb-a-msg");
+const aMsg = $("rb-t-msg");
 
 function renderUserSelect() {
   const sel = $("rb-a-user");
   const prev = sel.value;
   const q = $("rb-a-filter").value.trim().toLowerCase();
   const items = allUsers.filter((u) => !q || (u.email || "").toLowerCase().includes(q) || (u.name || "").toLowerCase().includes(q));
-  sel.innerHTML = '<option value="__all__">★ Wszyscy klienci (' + allUsers.length + ')</option>'
+  sel.innerHTML = '<option value="">— wybierz klienta —</option><option value="__all__">★ Wszyscy klienci (' + allUsers.length + ')</option>'
     + items.map((u) => `<option value="${esc(u.id)}">${esc(u.name ? u.name + " — " : "")}${esc(u.email)}</option>`).join("");
   if (prev && [...sel.options].some((o) => o.value === prev)) sel.value = prev;
-  else if (items.length) sel.value = items[0].id;
+  else sel.value = "";
 }
 $("rb-a-filter").addEventListener("input", renderUserSelect);
 
@@ -1473,57 +1448,7 @@ function genCode(prefix = "") {
   const body = Array.from(buf, (n) => alphabet[n % alphabet.length]).join("");
   return prefix ? prefix + "-" + body : body;
 }
-$("rb-a-gen").addEventListener("click", () => { $("rb-a-code").value = genCode(selTpl.prefix || ""); });
-
-$("rb-a-add").addEventListener("click", async () => {
-  setMsg(aMsg, "");
-  const sel = $("rb-a-user").value;
-  const description = $("rb-a-desc").value.trim();
-  const codeIn = $("rb-a-code").value.trim().toUpperCase();
-  const exp = $("rb-a-exp").value;
-  const expiresAt = exp ? Timestamp.fromDate(new Date(exp + "T23:59:59")) : null;
-  if (!sel) { setMsg(aMsg, "Wybierz klienta.", "err"); return; }
-  if (!description) { setMsg(aMsg, "Wpisz opis rabatu.", "err"); return; }
-  try {
-    if (sel === "__all__") {
-      const prefix = codeIn || selTpl.prefix || "";
-      if (prefix && !/^[A-Z0-9-]{2,18}$/.test(prefix)) { setMsg(aMsg, "Przedrostek: 2–18 znaków (litery, cyfry, myślnik).", "err"); return; }
-      if (!allUsers.length) { setMsg(aMsg, "Nie ma jeszcze żadnych klientów.", "err"); return; }
-      if (!confirm("Przyznać ten rabat WSZYSTKIM klientom (" + allUsers.length + ")?")) return;
-      const taken = new Set(allCoupons.map((c) => c.code));
-      let n = 0;
-      for (let i = 0; i < allUsers.length; i += 400) {
-        const batch = writeBatch(db);
-        allUsers.slice(i, i + 400).forEach((u) => {
-          let code;
-          do { code = genCode(prefix); } while (taken.has(code));
-          taken.add(code);
-          batch.set(doc(collection(db, "coupons")), {
-            uid: u.id, userEmail: u.email || "", code, description, expiresAt, used: false, createdAt: serverTimestamp()
-          });
-          n++;
-        });
-        await batch.commit();
-      }
-      setMsg(aMsg, "Przyznano " + n + " kodów" + (prefix ? " (" + prefix + "-XXXXXX)" : "") + ", każdy klient ma własny.", "ok");
-    } else {
-      const user = allUsers.find((u) => u.id === sel);
-      if (!user) { setMsg(aMsg, "Wybierz klienta.", "err"); return; }
-      let code = codeIn;
-      if (!code) { code = genCode(selTpl.prefix || ""); $("rb-a-code").value = code; }
-      if (!/^[A-Z0-9-]{3,30}$/.test(code)) { setMsg(aMsg, "Kod: 3–30 znaków (litery, cyfry, myślnik).", "err"); return; }
-      if (allCoupons.some((c) => c.code === code)) { setMsg(aMsg, "Taki kod już istnieje. Wpisz inny albo kliknij Losuj.", "err"); return; }
-      await addDoc(collection(db, "coupons"), {
-        uid: user.id, userEmail: user.email || "", code, description, expiresAt, used: false, createdAt: serverTimestamp()
-      });
-      setMsg(aMsg, "Kod " + code + " przyznany: " + (user.email || ""), "ok");
-    }
-    $("rb-a-desc").value = ""; $("rb-a-code").value = ""; $("rb-a-exp").value = ""; $("rb-a-tpl").value = ""; selTpl = {};
-  } catch (err) {
-    console.error(err);
-    setMsg(aMsg, errText(err), "err");
-  }
-});
+$("rb-a-gen").addEventListener("click", () => { $("rb-a-code").value = genCode($("rb-t-prefix").value.trim().toUpperCase()); });
 
 const SOON_DAYS = 7;
 function daysLeftText(ms) {
@@ -1845,7 +1770,7 @@ async function customerClick(e) {
     $("rb-a-filter").value = "";
     renderUserSelect();
     $("rb-a-user").value = custView.uid;
-    $("rb-a-desc").scrollIntoView({ block: "center" });
+    $("rb-n-mode").scrollIntoView({ block: "center" });
     return;
   }
   const ref = doc(db, "loyalty", custView.uid);
@@ -1926,41 +1851,24 @@ $("rb-k-card").addEventListener("click", (e) => {
 const DEFAULT_TPL = ["-10% na całe zamówienie", "-20% na pizzę", "-5 zł na zamówienie", "Sos do pizzy za 1 zł", "Frytki za 1 zł", "Dowóz za 1 zł"];
 
 function renderTemplates() {
-  const sel = $("rb-a-tpl");
+  const sel = $("rb-n-from");
   if (!sel) return;
   const prev = sel.value;
   sel.innerHTML = '<option value="">— wybierz gotowy rabat —</option>'
     + DEFAULT_TPL.map((t, i) => `<option value="d:${i}">${esc(t)}</option>`).join("")
     + allTemplates.map((t) => `<option value="c:${esc(t.id)}">★ ${esc(t.text)}</option>`).join("");
-  if ([...sel.options].some((o) => o.value === prev)) sel.value = prev; else selTpl = {};
-  const ps = $("rb-p-tpl");
-  if (ps) { const pv = ps.value; ps.innerHTML = sel.innerHTML; if ([...ps.options].some((o) => o.value === pv)) ps.value = pv; }
+  if ([...sel.options].some((o) => o.value === prev)) sel.value = prev;
   renderOwnList();
 }
 /* ---------- gotowe rabaty: wybór w zakładce Przyznaj ---------- */
 function ymd(d) {
   return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 }
-$("rb-a-tpl").addEventListener("change", () => {
-  const v = $("rb-a-tpl").value;
-  selTpl = {};
-  if (!v) return;
-  const id = v.slice(2);
-  if (v[0] === "d") { $("rb-a-desc").value = DEFAULT_TPL[Number(id)] || ""; return; }
-  const t = allTemplates.find((x) => x.id === id);
-  if (!t) return;
-  $("rb-a-desc").value = t.text || "";
-  selTpl = { prefix: t.prefix || "" };
-  if (t.validDays) {
-    const d = new Date();
-    d.setDate(d.getDate() + Number(t.validDays));
-    $("rb-a-exp").value = ymd(d);
-  }
-});
-
-/* ---------- kreator własnych rabatów ---------- */
+/* ---------- jeden kreator rabatów: co → opis → ważność → komu ---------- */
 const tMsg = $("rb-t-msg");
 let tTextTouched = false;
+let nMode = "grant";
+const NMODE_LABEL = { grant: "Przyznaj kod", promo: "Utwórz kod promocyjny", save: "Zapisz rabat" };
 
 function buildText() {
   const type = $("rb-t-type").value;
@@ -1995,53 +1903,183 @@ $("rb-t-type").addEventListener("change", () => { $("rb-t-value").value = ""; tT
 $("rb-t-text").addEventListener("input", () => { tTextTouched = $("rb-t-text").value !== ""; });
 syncBuilder();
 
-$("rb-t-save").addEventListener("click", async () => {
-  setMsg(tMsg, "");
+/* tryb („komu”) i sekcje zakładki */
+function setNMode(m) {
+  if (!NMODE_LABEL[m]) m = "grant";
+  nMode = m;
+  document.querySelectorAll("#rb-n-mode button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.m === m ? "true" : "false"));
+  $("rb-n-grant").hidden = m !== "grant";
+  $("rb-n-promo").hidden = m !== "promo";
+  $("rb-n-save").hidden = m !== "save";
+  $("rb-n-keepwrap").hidden = m === "save";
+  $("rb-n-go").textContent = NMODE_LABEL[m];
+}
+document.querySelectorAll("#rb-n-mode button").forEach((b) => b.addEventListener("click", () => setNMode(b.dataset.m)));
+function setNSec(sec) {
+  document.querySelectorAll("#rb-n-sub button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.sec === sec ? "true" : "false"));
+  document.querySelectorAll("#rabat-overlay .rb-nsec").forEach((x) => { x.hidden = x.dataset.sec !== sec; });
+}
+document.querySelectorAll("#rb-n-sub button").forEach((b) => b.addEventListener("click", () => setNSec(b.dataset.sec)));
+setNMode("grant");
+setNSec("new");
+
+/* wczytanie gotowego rabatu do formularza */
+function fillSpec(t) {
+  const type = ["percent", "amount", "free", "custom"].includes(t.type) ? t.type : "custom";
+  $("rb-t-type").value = type;
+  tTextTouched = false;
+  syncBuilder();
+  $("rb-t-value").value = t.value == null ? "" : String(t.value);
+  $("rb-t-scope").value = t.scope || "";
+  $("rb-t-days").value = t.validDays || "";
+  $("rb-t-prefix").value = t.prefix || "";
+  $("rb-n-exp").value = "";
+  $("rb-t-text").value = t.text || "";
+  tTextTouched = true;
+}
+$("rb-n-from").addEventListener("change", () => {
+  const v = $("rb-n-from").value;
+  if (!v) return;
+  if (v[0] === "d") fillSpec({ type: "custom", text: DEFAULT_TPL[Number(v.slice(2))] || "" });
+  else { const t = allTemplates.find((x) => x.id === v.slice(2)); if (t) fillSpec(t); }
+});
+
+/* odczyt i sprawdzenie formularza (kroki 1–3) */
+function readSpec() {
   const type = $("rb-t-type").value;
   const rawVal = $("rb-t-value").value.trim().replace(",", ".");
   const scope = $("rb-t-scope").value.trim();
   const text = $("rb-t-text").value.trim();
   const daysRaw = $("rb-t-days").value.trim();
+  const expRaw = $("rb-n-exp").value;
   const prefix = $("rb-t-prefix").value.trim().toUpperCase();
   let value = null;
   if (type === "percent") {
     value = Number(rawVal);
-    if (!(value >= 1 && value <= 100)) { setMsg(tMsg, "Procent: liczba od 1 do 100.", "err"); return; }
+    if (!(value >= 1 && value <= 100)) { setMsg(tMsg, "Procent: liczba od 1 do 100.", "err"); return null; }
   } else if (type === "amount") {
     value = Number(rawVal);
-    if (!(value > 0 && value <= 1000)) { setMsg(tMsg, "Kwota: liczba większa od 0 (do 1000 zł).", "err"); return; }
+    if (!(value > 0 && value <= 1000)) { setMsg(tMsg, "Kwota: liczba większa od 0 (do 1000 zł).", "err"); return null; }
   } else if (type === "free") {
     value = $("rb-t-value").value.trim();
-    if (!value) { setMsg(tMsg, "Wpisz, jaki produkt ma być za 1 zł.", "err"); return; }
+    if (!value) { setMsg(tMsg, "Wpisz, jaki produkt ma być za 1 zł.", "err"); return null; }
   }
-  if (!text) { setMsg(tMsg, "Wpisz opis rabatu.", "err"); return; }
+  if (!text) { setMsg(tMsg, "Wpisz opis rabatu.", "err"); return null; }
   let validDays = null;
   if (daysRaw) {
     validDays = Math.floor(Number(daysRaw));
-    if (!(validDays >= 1 && validDays <= 3650)) { setMsg(tMsg, "Ważność: liczba dni od 1 do 3650.", "err"); return; }
+    if (!(validDays >= 1 && validDays <= 3650)) { setMsg(tMsg, "Ważność: liczba dni od 1 do 3650.", "err"); return null; }
   }
-  if (prefix && !/^[A-Z0-9-]{2,12}$/.test(prefix)) { setMsg(tMsg, "Przedrostek: 2–12 znaków (litery, cyfry, myślnik).", "err"); return; }
-  if (allTemplates.some((t) => t.text === text) || DEFAULT_TPL.includes(text)) { setMsg(tMsg, "Taki rabat już istnieje.", "err"); return; }
-  try {
-    await addDoc(collection(db, "templates"), {
-      text, type, value,
-      scope: (type === "percent" || type === "amount") && scope ? scope : null,
-      validDays, prefix: prefix || null, createdAt: serverTimestamp()
+  if (prefix && !/^[A-Z0-9-]{2,12}$/.test(prefix)) { setMsg(tMsg, "Przedrostek: 2–12 znaków (litery, cyfry, myślnik).", "err"); return null; }
+  let expiresAt = null;
+  if (expRaw) {
+    const dt = new Date(expRaw + "T23:59:59");
+    if (isNaN(dt.getTime()) || dt.getTime() < Date.now()) { setMsg(tMsg, "Data ważności jest w przeszłości.", "err"); return null; }
+    expiresAt = Timestamp.fromDate(dt);
+  } else if (validDays) {
+    const d = new Date();
+    d.setDate(d.getDate() + validDays);
+    d.setHours(23, 59, 59, 0);
+    expiresAt = Timestamp.fromDate(d);
+  }
+  return { type, value, scope: (type === "percent" || type === "amount") && scope ? scope : null, text, validDays, prefix, expiresAt, expRaw };
+}
+const isDupTpl = (text) => allTemplates.some((t) => t.text === text) || DEFAULT_TPL.includes(text);
+async function saveTemplate(sp) {
+  await addDoc(collection(db, "templates"), {
+    text: sp.text, type: sp.type, value: sp.value, scope: sp.scope,
+    validDays: sp.validDays, prefix: sp.prefix || null, createdAt: serverTimestamp()
+  });
+}
+function resetCreator() {
+  ["rb-t-value", "rb-t-scope", "rb-t-text", "rb-t-days", "rb-t-prefix", "rb-n-exp", "rb-a-code", "rb-p-code"].forEach((id) => { $(id).value = ""; });
+  $("rb-n-keep").checked = false;
+  $("rb-a-user").value = "";
+  $("rb-n-from").value = "";
+  tTextTouched = false;
+  syncBuilder();
+}
+
+$("rb-p-gen").addEventListener("click", () => { $("rb-p-code").value = "WR" + genCode(); });
+
+/* krok 4: wykonanie zależnie od trybu */
+async function runGrant(sp) {
+  const sel = $("rb-a-user").value;
+  const codeIn = $("rb-a-code").value.trim().toUpperCase();
+  if (!sel) { setMsg(tMsg, "Wybierz klienta.", "err"); return false; }
+  if (sel === "__all__") {
+    const prefix = codeIn || sp.prefix || "";
+    if (prefix && !/^[A-Z0-9-]{2,18}$/.test(prefix)) { setMsg(tMsg, "Przedrostek: 2–18 znaków (litery, cyfry, myślnik).", "err"); return false; }
+    if (!allUsers.length) { setMsg(tMsg, "Nie ma jeszcze żadnych klientów.", "err"); return false; }
+    if (!confirm("Przyznać ten rabat WSZYSTKIM klientom (" + allUsers.length + ")?")) return false;
+    const taken = new Set(allCoupons.map((c) => c.code));
+    let n = 0;
+    for (let i = 0; i < allUsers.length; i += 400) {
+      const batch = writeBatch(db);
+      allUsers.slice(i, i + 400).forEach((u) => {
+        let code;
+        do { code = genCode(prefix); } while (taken.has(code));
+        taken.add(code);
+        batch.set(doc(collection(db, "coupons")), {
+          uid: u.id, userEmail: u.email || "", code, description: sp.text, expiresAt: sp.expiresAt, used: false, createdAt: serverTimestamp()
+        });
+        n++;
+      });
+      await batch.commit();
+    }
+    setMsg(tMsg, "Przyznano " + n + " kodów" + (prefix ? " (" + prefix + "-XXXXXX)" : "") + ", każdy klient ma własny.", "ok");
+  } else {
+    const user = allUsers.find((u) => u.id === sel);
+    if (!user) { setMsg(tMsg, "Wybierz klienta.", "err"); return false; }
+    let code = codeIn;
+    if (!code) { code = genCode(sp.prefix || ""); $("rb-a-code").value = code; }
+    if (!/^[A-Z0-9-]{3,30}$/.test(code)) { setMsg(tMsg, "Kod: 3–30 znaków (litery, cyfry, myślnik).", "err"); return false; }
+    if (allCoupons.some((c) => c.code === code)) { setMsg(tMsg, "Taki kod już istnieje. Wpisz inny albo kliknij Losuj.", "err"); return false; }
+    await addDoc(collection(db, "coupons"), {
+      uid: user.id, userEmail: user.email || "", code, description: sp.text, expiresAt: sp.expiresAt, used: false, createdAt: serverTimestamp()
     });
-    setMsg(tMsg, "Rabat zapisany. Przyznasz go w zakładce „Przyznaj”.", "ok");
-    ["rb-t-value", "rb-t-scope", "rb-t-text", "rb-t-days", "rb-t-prefix"].forEach((id) => { $(id).value = ""; });
-    tTextTouched = false;
-    syncBuilder();
+    setMsg(tMsg, "Kod " + code + " przyznany: " + (user.email || ""), "ok");
+  }
+  return true;
+}
+async function runPromo(sp) {
+  const code = $("rb-p-code").value.replace(/\s+/g, "").toUpperCase();
+  if (!/^[A-Z0-9]{3,20}$/.test(code)) { setMsg(tMsg, "Kod: 3–20 liter i cyfr (bez spacji i polskich znaków).", "err"); return false; }
+  if (allPromos.some((p) => p.id === code)) { setMsg(tMsg, "Taki kod promocyjny już istnieje.", "err"); return false; }
+  await setDoc(doc(db, "promoCodes", code), { code, description: sp.text, expiresAt: sp.expiresAt, active: true, createdAt: serverTimestamp() });
+  setMsg(tMsg, "Kod " + code + " utworzony. Klient wpisuje go w Koncie, w polu „Masz kod promocyjny?”.", "ok");
+  return true;
+}
+$("rb-n-go").addEventListener("click", async () => {
+  setMsg(tMsg, "");
+  const sp = readSpec();
+  if (!sp) return;
+  const btn = $("rb-n-go");
+  btn.disabled = true;
+  try {
+    if (nMode === "save") {
+      if (sp.expRaw) { setMsg(tMsg, "Do zapisania na później podaj ważność w dniach (bez daty).", "err"); return; }
+      if (isDupTpl(sp.text)) { setMsg(tMsg, "Taki rabat już istnieje.", "err"); return; }
+      await saveTemplate(sp);
+      setMsg(tMsg, "Rabat zapisany na liście „Gotowe”.", "ok");
+      resetCreator();
+      return;
+    }
+    const done = nMode === "promo" ? await runPromo(sp) : await runGrant(sp);
+    if (!done) return;
+    const keep = $("rb-n-keep").checked;
+    if (keep && !sp.expRaw && !isDupTpl(sp.text)) { await saveTemplate(sp); tMsg.textContent += " Zapisano też na liście „Gotowe”."; }
+    resetCreator();
   } catch (err) {
     console.error(err);
     setMsg(tMsg, err.code === "permission-denied" ? "Brak uprawnień. Opublikuj reguły z pliku firestore.rules." : errText(err), "err");
-  }
+  } finally { btn.disabled = false; }
 });
 
 function renderOwnList() {
   const box = $("rb-t-list");
   if (!box) return;
-  if (!allTemplates.length) { box.innerHTML = '<div class="rb-empty">Nie masz jeszcze własnych rabatów.</div>'; return; }
+  if (!allTemplates.length) { box.innerHTML = '<div class="rb-empty">Nie masz jeszcze własnych rabatów. Zapisz pierwszy w kreatorze („Tylko zapisz”).</div>'; return; }
   const TT = { percent: ["%", "Procent"], amount: ["zł", "Kwota"], free: ["🍕", "Za 1 zł"], custom: ["✎", "Własny"] };
   box.innerHTML = allTemplates.map((t) => {
     const k = TT[t.type] || TT.custom;
@@ -2052,7 +2090,7 @@ function renderOwnList() {
         <div class="rb-tchips"><span>${k[1]}</span><span>${t.validDays ? "ważny " + esc(t.validDays) + " dni" : "bez terminu"}</span>${t.prefix ? "<span>kod " + esc(t.prefix) + "-XXXXXX</span>" : ""}</div>
       </div>
       <div class="rb-tact">
-        <button type="button" class="rb-btn small" data-act="grant" data-id="${esc(t.id)}">Przyznaj…</button>
+        <button type="button" class="rb-btn small" data-act="grant" data-id="${esc(t.id)}">Użyj</button>
         <button type="button" class="rb-btn secondary small" data-act="del" data-id="${esc(t.id)}">Usuń</button>
       </div>
     </div>`;
@@ -2063,9 +2101,10 @@ $("rb-t-list").addEventListener("click", async (e) => {
   if (!b) return;
   const id = b.dataset.id;
   if (b.dataset.act === "grant") {
-    $("rb-a-tpl").value = "c:" + id;
-    $("rb-a-tpl").dispatchEvent(new Event("change"));
-    setAdminTab("grant");
+    setNSec("new");
+    $("rb-n-from").value = "c:" + id;
+    $("rb-n-from").dispatchEvent(new Event("change"));
+    $("rb-n-from").scrollIntoView({ block: "start" });
   } else if (b.dataset.act === "del") {
     const t = allTemplates.find((x) => x.id === id);
     if (!t || !confirm("Usunąć rabat „" + t.text + "”? Już przyznane kody zostaną.")) return;
@@ -4566,7 +4605,10 @@ document.querySelector('#rb-admin .rb-pane[data-pane="today"]').addEventListener
 /* ---------- zakładki panelu admina ---------- */
 const cMsg = $("rb-c-msg");
 const sMsg = $("rb-s-msg");
+const TAB_ALIAS = { grant: ["builder", "new", "grant"], list: ["builder", "granted", ""] };
 function setAdminTab(name) {
+  let nsec = "";
+  if (TAB_ALIAS[name]) { nsec = TAB_ALIAS[name][1]; if (TAB_ALIAS[name][2]) setNMode(TAB_ALIAS[name][2]); name = TAB_ALIAS[name][0]; }
   const adm = $("rb-admin"); if (adm) adm.dataset.tab = name;
   overlay.dataset.atab = name;
   document.querySelectorAll("#rb-admin .rb-atab").forEach((b) => b.classList.toggle("active", b.dataset.pane === name));
@@ -4580,6 +4622,7 @@ function setAdminTab(name) {
   if (name === "straz" && window.WRStraz) window.WRStraz.open();
   if (name === "today" || name === "clients") ensureData(false);
   if (name === "clients") renderClients();
+  if (name === "builder" && nsec) setNSec(nsec);
 }
 document.querySelectorAll("#rb-admin .rb-atab").forEach((b) => b.addEventListener("click", () => setAdminTab(b.dataset.pane)));
 const szRef = $("rb-straz-refresh"); if (szRef) szRef.addEventListener("click", () => { if (window.WRStraz) window.WRStraz.open(); });
