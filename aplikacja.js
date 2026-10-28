@@ -2307,30 +2307,34 @@ function renderProducts() {
 
 /* ---------- „Dobierz mi pizzę” (3 pytania → polecenia z aktualnego menu) ---------- */
 const QZ_Q = [
-  { k: "meat", q: "Na co masz ochotę?", o: [["meat", "🥓 Mięsna"], ["vege", "🌱 Bez mięsa"], ["any", "🤷 Wszystko jedno"]] },
+  { k: "meat", q: "Na co masz ochotę?", o: [["meat", "🥓 Mięsna"], ["sea", "🦐 Owoce morza"], ["vege", "🌱 Bez mięsa"], ["any", "🤷 Wszystko jedno"]] },
   { k: "hot", q: "Jak z ostrością?", o: [["mild", "😌 Łagodna"], ["hot", "🌶 Ostra"], ["any", "🤷 Obojętnie"]] },
   { k: "n", q: "Ile Was będzie?", o: [["1", "🙋 Sam(a)"], ["2", "👫 Dwie osoby"], ["4", "👨‍👩‍👧 3–4 osoby"], ["6", "🎉 5 i więcej"]] }
 ];
 let qzSt = { step: 0, a: {} };
 const QZ_MEAT = /pepperoni|prosciutto|szynk|salami|boczek|nduja|kiełbas|kurczak|wołow|bekon|mięs|cotto/i;
+const QZ_SEA = /krewet|gamberetti|gambero|owoce morza|frutti di mare|tuńczyk|tuncz|tonno|łosoś|losos|salmone|anchois|acciug|ryb|małż|mule\b|kalmar|ośmiorn/i;
 const QZ_HOT = /piccante|jalape|nduja|ostr|chili|diavola/i;
 function qzPizzas() {
   return menuEls().filter((el) => !el.classList.contains("is-hidden") && !el.classList.contains("is-unavail") && /klasyczne|miesne|vege/.test(el.dataset.category || "")).map((el) => {
     const key = itemKey(el), cat = el.dataset.category || "";
     const bd = el.dataset.custom ? badgeIds((el.dataset.badges || "").split(",")) : badgeIds(siteCfg.badges[key]);
     const txt = itemName(el) + " " + ((el.querySelector(".menu-item-desc") || {}).textContent || "");
+    const sea = QZ_SEA.test(txt);
     return { el, name: itemName(el).replace(/^\d+\.\s*/, ""), price: ((el.querySelector(".menu-item-price") || {}).textContent || "").trim(), desc: ((el.querySelector(".menu-item-desc") || {}).textContent || "").trim(),
-      meat: /miesne/.test(cat) || QZ_MEAT.test(txt), hot: bd.includes("ostra") || QZ_HOT.test(txt), top: bd.includes("hit") || bd.includes("polecamy") };
+      sea, meat: (!sea && /miesne/.test(cat)) || QZ_MEAT.test(txt), hot: bd.includes("ostra") || QZ_HOT.test(txt), top: bd.includes("hit") || bd.includes("polecamy"),
+      score: (bd.includes("hit") || bd.includes("polecamy") ? 2 : 0) + (bd.includes("nowosc") ? 2 : 0) + (el.dataset.custom ? 1 : 0) };
   });
 }
 function qzResult() {
   const a = qzSt.a, all = qzPizzas();
-  const fm = (p) => a.meat === "any" || (a.meat === "meat" ? p.meat : !p.meat);
+  const fm = (p) => a.meat === "any" || (a.meat === "meat" ? p.meat : a.meat === "sea" ? p.sea : !p.meat && !p.sea);
   const fh = (p) => a.hot === "any" || (a.hot === "hot" ? p.hot : !p.hot);
   let list = all.filter((p) => fm(p) && fh(p)), note = "";
   if (!list.length) { list = all.filter(fm); note = "Nie mamy dokładnie takiej pizzy, więc luzujemy ostrość. Poniżej najbliższe propozycje."; }
   if (!list.length) { list = all; note = "Dziś nie mamy pizzy pasującej do wyboru — oto nasze propozycje."; }
-  list = list.slice().sort((x, y) => Number(y.top) - Number(x.top)).slice(0, 3);
+  list = list.map((p) => [Math.random(), p]).sort((x, y) => x[0] - y[0]).map((x) => x[1]); // losowa kolejność przy równym wyniku, żeby nowe pizze też się pokazywały
+  list = list.sort((x, y) => y.score - x.score).slice(0, 3);
   const n = Number(a.n || 1), k = n === 1 ? "1 pizza 30 cm" : n === 2 ? "2 pizze 30 cm" : n === 4 ? "3 pizze 30 cm" : "5–6 pizz 30 cm (zadzwoń z wyprzedzeniem)";
   return { list, note, k, n, all };
 }
