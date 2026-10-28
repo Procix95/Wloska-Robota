@@ -2187,9 +2187,13 @@ const DELIVERY_DEFAULT = ["Głuponie", "Trzcianka", "Tomaszewo", "Michorzewo", "
   .map((name) => ({ name, fee: 10, min: null, freeFrom: null }));
 // Link do formularza opinii w Google (domyślny; admin może go zmienić lub wyczyścić w panelu: Strona → Opinie w Google).
 const GOOGLE_REVIEW_DEFAULT = "https://g.page/r/CUq2_T6CQcy5EAE/review";
-let siteCfg = { prices: {}, unavailable: {}, hidden: {}, badges: {}, products: [], campaigns: [], notice: null, dish: null, delivery: { places: DELIVERY_DEFAULT }, googleReviewUrl: GOOGLE_REVIEW_DEFAULT, reviews: [], googleMapsUrl: "", theme: "auto", levelsOn: false, levels: null, refOn: false, poll: null, hours: null };
+let siteCfg = { prices: {}, unavailable: {}, hidden: {}, badges: {}, qz: {}, products: [], campaigns: [], notice: null, dish: null, delivery: { places: DELIVERY_DEFAULT }, googleReviewUrl: GOOGLE_REVIEW_DEFAULT, reviews: [], googleMapsUrl: "", theme: "auto", levelsOn: false, levels: null, refOn: false, poll: null, hours: null };
 const PROD_CATS = [["klasyczne", "Klasyczne"], ["miesne", "Mięsne"], ["vege", "Wege"], ["sosy", "Sosy"], ["makarony", "Makarony"], ["dodatki", "Dodatki"]];
 const MAX_PRODUCTS = 40;
+const QZ_TYPES = [["meat", "🥓 Mięsna"], ["sea", "🦐 Owoce morza"], ["vege", "🌱 Bez mięsa"], ["none", "🚫 Nie pokazuj w quizie"]];
+const qzType = (v) => (QZ_TYPES.some((t) => t[0] === v) ? v : "");
+function cleanQz(m) { const o = {}; if (m && typeof m === "object") Object.keys(m).slice(0, 200).forEach((k) => { if (qzType(m[k])) o[k] = m[k]; }); return o; }
+const qzSelectHtml = (cls, cur) => `<label class="rb-qz-row">🍕 Quiz „Dobierz mi pizzę”: <select class="${cls}" aria-label="Rodzaj pizzy w quizie"><option value="">Auto (po opisie)</option>${QZ_TYPES.map((t) => `<option value="${t[0]}"${cur === t[0] ? " selected" : ""}>${t[1]}</option>`).join("")}</select></label>`;
 const BADGES = [["hit", "🔥 Hit"], ["ostra", "🌶 Ostra"], ["wege", "🌱 Wege"], ["nowosc", "⭐ Nowość"], ["polecamy", "👍 Polecamy"]];
 const badgeIds = (v) => (Array.isArray(v) ? v : []).filter((b) => BADGES.some((x) => x[0] === b));
 const menuEls = () => [...document.querySelectorAll("#menuGrid .menu-item")];
@@ -2204,7 +2208,7 @@ const tsMs = (t) => (t ? (t.toDate ? t.toDate().getTime() : (t.seconds ? t.secon
 function plainCfg(c) {
   const n = c.notice ? { ...c.notice, until: c.notice.until ? { seconds: Math.floor(tsMs(c.notice.until) / 1000) } : null } : null;
   const camps = (c.campaigns || []).map((x) => ({ ...x, from: x.from ? { seconds: Math.floor(tsMs(x.from) / 1000) } : null, until: x.until ? { seconds: Math.floor(tsMs(x.until) / 1000) } : null }));
-  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, badges: c.badges || {}, products: c.products || [], campaigns: camps, notice: n, dish: c.dish || null, delivery: c.delivery || null, googleReviewUrl: typeof c.googleReviewUrl === "string" ? c.googleReviewUrl : null, reviews: Array.isArray(c.reviews) ? c.reviews : [], googleMapsUrl: typeof c.googleMapsUrl === "string" ? c.googleMapsUrl : "", theme: typeof c.theme === "string" ? c.theme : "auto", levelsOn: c.levelsOn === true, levels: Array.isArray(c.levels) ? c.levels : null, levelsV: c.levelsV === 2 ? 2 : 0, refOn: c.refOn === true, poll: c.poll || null, hours: c.hours || null };
+  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, badges: c.badges || {}, qz: c.qz || {}, products: c.products || [], campaigns: camps, notice: n, dish: c.dish || null, delivery: c.delivery || null, googleReviewUrl: typeof c.googleReviewUrl === "string" ? c.googleReviewUrl : null, reviews: Array.isArray(c.reviews) ? c.reviews : [], googleMapsUrl: typeof c.googleMapsUrl === "string" ? c.googleMapsUrl : "", theme: typeof c.theme === "string" ? c.theme : "auto", levelsOn: c.levelsOn === true, levels: Array.isArray(c.levels) ? c.levels : null, levelsV: c.levelsV === 2 ? 2 : 0, refOn: c.refOn === true, poll: c.poll || null, hours: c.hours || null };
 }
 
 function renderDish() {
@@ -2297,6 +2301,7 @@ function renderProducts() {
     el.dataset.origPrice = p.price;
     if (p.unavail) el.dataset.customUn = "1";
     el.dataset.badges = badgeIds(p.badges).join(",");
+    el.dataset.qz = qzType(p.qz);
     const tags = (Array.isArray(p.tags) ? p.tags : []).filter((t) => typeof t === "string" && t.trim()).slice(0, 3);
     el.innerHTML = '<div class="menu-item-content"><div class="menu-item-header"><h3 class="menu-item-title">' + esc(p.name) + '</h3><span class="menu-item-price">' + esc(p.price) + "</span></div>" +
       (p.desc ? '<p class="menu-item-desc">' + esc(p.desc) + "</p>" : "") +
@@ -2311,20 +2316,28 @@ const QZ_Q = [
   { k: "hot", q: "Jak z ostrością?", o: [["mild", "😌 Łagodna"], ["hot", "🌶 Ostra"], ["any", "🤷 Obojętnie"]] },
   { k: "n", q: "Ile Was będzie?", o: [["1", "🙋 Sam(a)"], ["2", "👫 Dwie osoby"], ["4", "👨‍👩‍👧 3–4 osoby"], ["6", "🎉 5 i więcej"]] }
 ];
-let qzSt = { step: 0, a: {} };
+let qzSt = { step: 0, a: {}, qty: {} };
 const QZ_MEAT = /pepperoni|prosciutto|szynk|salami|boczek|nduja|kiełbas|kurczak|wołow|bekon|mięs|cotto/i;
-const QZ_SEA = /krewet|gamberetti|gambero|owoce morza|frutti di mare|tuńczyk|tuncz|tonno|łosoś|losos|salmone|anchois|acciug|ryb|małż|mule\b|kalmar|ośmiorn/i;
+const QZ_SEA = /krewet|gamber|owoce morza|frutti di mare|tuńczyk|tuncz|tonno|łosoś|losos|salmone|anchois|acciug|ryb|małż|mule\b|kalmar|ośmiorn/i;
 const QZ_HOT = /piccante|jalape|nduja|ostr|chili|diavola/i;
 function qzPizzas() {
-  return menuEls().filter((el) => !el.classList.contains("is-hidden") && !el.classList.contains("is-unavail") && /klasyczne|miesne|vege/.test(el.dataset.category || "")).map((el) => {
+  // pizza = kategoria Klasyczne/Mięsne/Wege, a dla pozycji dodanych w panelu także każda, która wygląda na pizzę (nazwa „Pizza…” albo sos/mozzarella w opisie)
+  const looksPizza = (el) => !!el.dataset.custom && !/sosy|makarony/.test(el.dataset.category || "") && /^\s*pizza\b|mozzarell|sos pomidorow|ciasto/i.test(itemName(el) + " " + ((el.querySelector(".menu-item-desc") || {}).textContent || ""));
+  return menuEls().filter((el) => !el.classList.contains("is-hidden") && !el.classList.contains("is-unavail")).map((el) => {
     const key = itemKey(el), cat = el.dataset.category || "";
+    const qt = el.dataset.custom ? qzType(el.dataset.qz) : qzType(siteCfg.qz[key]);
+    if (qt === "none") return null;
+    if (!qt && !(/klasyczne|miesne|vege/.test(cat) || looksPizza(el))) return null;
     const bd = el.dataset.custom ? badgeIds((el.dataset.badges || "").split(",")) : badgeIds(siteCfg.badges[key]);
     const txt = itemName(el) + " " + ((el.querySelector(".menu-item-desc") || {}).textContent || "");
-    const sea = QZ_SEA.test(txt);
+    // rodzaj z ręcznego tagu w panelu; bez tagu zgadujemy z nazwy i opisu
+    const sea = qt ? qt === "sea" : QZ_SEA.test(txt);
+    const meat = qt ? qt === "meat" : ((!sea && /miesne/.test(cat)) || QZ_MEAT.test(txt));
+    const hot = bd.includes("ostra") || (!qt && QZ_HOT.test(txt));
     return { el, name: itemName(el).replace(/^\d+\.\s*/, ""), price: ((el.querySelector(".menu-item-price") || {}).textContent || "").trim(), desc: ((el.querySelector(".menu-item-desc") || {}).textContent || "").trim(),
-      sea, meat: (!sea && /miesne/.test(cat)) || QZ_MEAT.test(txt), hot: bd.includes("ostra") || QZ_HOT.test(txt), top: bd.includes("hit") || bd.includes("polecamy"),
+      sea, meat, hot, top: bd.includes("hit") || bd.includes("polecamy"),
       score: (bd.includes("hit") || bd.includes("polecamy") ? 2 : 0) + (bd.includes("nowosc") ? 2 : 0) + (el.dataset.custom ? 1 : 0) };
-  });
+  }).filter(Boolean);
 }
 function qzResult() {
   const a = qzSt.a, all = qzPizzas();
@@ -2338,6 +2351,37 @@ function qzResult() {
   const n = Number(a.n || 1), k = n === 1 ? "1 pizza 30 cm" : n === 2 ? "2 pizze 30 cm" : n === 4 ? "3 pizze 30 cm" : "5–6 pizz 30 cm (zadzwoń z wyprzedzeniem)";
   return { list, note, k, n, all };
 }
+/* dodatki do zamówienia (sosy, frytki…): to, co klient może dorzucić jak na kiosku */
+function qzExtras() {
+  const ord = { sosy: 0, dodatki: 1 };
+  return menuEls().filter((el) => !el.classList.contains("is-hidden") && !el.classList.contains("is-unavail") && /(^|\s)(sosy|dodatki)(\s|$)/.test(el.dataset.category || "")).map((el) => {
+    const key = itemKey(el), cat = (el.dataset.category || "").split(/\s+/).find((c) => c in ord) || "dodatki";
+    const qt = el.dataset.custom ? qzType(el.dataset.qz) : qzType(siteCfg.qz[key]);
+    if (qt) return null; // pozycja z tagiem rodzaju pizzy albo „nie pokazuj” nie jest dodatkiem
+    const bd = el.dataset.custom ? badgeIds((el.dataset.badges || "").split(",")) : badgeIds(siteCfg.badges[key]);
+    return { el, name: itemName(el).replace(/^\d+\.\s*/, ""), price: ((el.querySelector(".menu-item-price") || {}).textContent || "").trim(), desc: ((el.querySelector(".menu-item-desc") || {}).textContent || "").trim(),
+      ord: ord[cat], score: (bd.includes("hit") || bd.includes("polecamy") ? 2 : 0) + (bd.includes("nowosc") ? 1 : 0) };
+  }).filter(Boolean).sort((x, y) => (y.score - x.score) || (x.ord - y.ord)).slice(0, 4);
+}
+const qzNum = (p) => { const n = parseFloat(String(p || "").replace(/ /g, " ").replace(",", ".")); return isFinite(n) ? n : null; };
+const qzMoney = (n) => (Math.round(n * 100) % 100 === 0 ? String(Math.round(n)) : n.toFixed(2).replace(".", ",")) + " zł";
+function qzStepper(i, q) {
+  return `<span class="qz-step"><button type="button" class="qz-pm" data-qminus="${i}" aria-label="Mniej">−</button><b data-qq="${i}">${q}</b><button type="button" class="qz-pm" data-qplus="${i}" aria-label="Więcej">+</button></span>`;
+}
+function qzSummary() {
+  const box = $("quizCard"), st = qzSt, items = box._items || [];
+  const lines = items.map((it, i) => ({ it, q: st.qty[i] || 0 })).filter((x) => x.q > 0);
+  let total = 0, unknown = false;
+  lines.forEach((x) => { const n = qzNum(x.it.price); if (n == null) unknown = true; else total += n * x.q; });
+  const sum = $("qzSum");
+  if (!sum) return;
+  if (!lines.length) { sum.innerHTML = '<div class="qz-sum-empty">Dodaj plusem to, na co masz ochotę. Policzymy razem.</div>'; return; }
+  const txt = lines.map((x) => x.q + "× " + x.it.name).join(", ") + " — razem " + qzMoney(total) + (unknown ? " (+ pozycje wg cennika)" : "");
+  sum.innerHTML = `<div class="qz-sum-t">🧾 Twoje zamówienie</div>` + lines.map((x) => `<div class="qz-sum-l"><span>${x.q}× ${esc(x.it.name)}</span><span>${esc(unknown && qzNum(x.it.price) == null ? x.it.price : qzMoney((qzNum(x.it.price) || 0) * x.q))}</span></div>`).join("")
+    + `<div class="qz-sum-total"><span>Razem</span><b>${qzMoney(total)}${unknown ? " +" : ""}</b></div>`
+    + `<div class="qz-actions"><a class="btn btn-primary" href="tel:668862396">📞 Zamów: 668 862 396</a><button type="button" class="qz-back" data-qcopy>📋 Skopiuj zamówienie</button></div>`;
+  box._copy = "Chcę zamówić: " + txt;
+}
 function qzRender() {
   const box = $("quizCard"), st = qzSt;
   if (st.step < QZ_Q.length) {
@@ -2345,23 +2389,48 @@ function qzRender() {
     box.innerHTML = `<div class="qz-prog">Pytanie ${st.step + 1} z ${QZ_Q.length}</div><div class="qz-q">${esc(q.q)}</div><div class="qz-opts">${q.o.map((o) => `<button type="button" class="qz-opt" data-qv="${o[0]}">${esc(o[1])}</button>`).join("")}</div>${st.step ? '<button type="button" class="qz-back" data-qback>← Wróć</button>' : ""}`;
     return;
   }
-  const r = qzResult();
-  box.innerHTML = `<div class="qz-q">Polecamy dla Ciebie:</div>${r.note ? `<div class="qz-note">${esc(r.note)}</div>` : ""}`
-    + r.list.map((p, i) => `<div class="qz-hit"><div><b>${esc(p.name)}</b> <span class="qz-price">${esc(p.price)}</span><div class="qz-desc">${esc(p.desc)}</div></div><button type="button" class="qz-show" data-qshow="${i}">Pokaż w menu</button></div>`).join("")
-    + `<div class="qz-note">Dla ${r.n === 1 ? "jednej osoby" : r.n === 2 ? "dwóch osób" : r.n === 4 ? "3–4 osób" : "większej ekipy"} zwykle wystarczy ${esc(r.k)}${r.n > 1 ? " — weźcie kilka różnych z tej listy." : "."}</div>`
-    + `<div class="qz-actions"><a class="btn btn-primary" href="tel:668862396">📞 Zamów: 668 862 396</a><button type="button" class="qz-back" data-qreset>🔄 Jeszcze raz</button></div>`;
+  if (!st.res) {
+    // wynik liczymy raz (kolejność jest losowa), a potem tylko zmieniamy ilości
+    const r = qzResult(), ex = qzExtras();
+    const k = r.n === 1 ? 1 : r.n === 2 ? 2 : r.n === 4 ? 3 : 5;
+    const qty = {};
+    for (let j = 0; j < k && r.list.length; j++) qty[j % r.list.length] = (qty[j % r.list.length] || 0) + 1;
+    st.res = r; st.ex = ex; st.qty = qty;
+  }
+  const r = st.res, ex = st.ex;
   box._list = r.list;
+  box._items = r.list.concat(ex);
+  box.innerHTML = `<div class="qz-q">Polecamy dla Ciebie:</div>${r.note ? `<div class="qz-note">${esc(r.note)}</div>` : ""}`
+    + r.list.map((p, i) => `<div class="qz-hit"><div><b>${esc(p.name)}</b> <span class="qz-price">${esc(p.price)}</span><div class="qz-desc">${esc(p.desc)}</div><button type="button" class="qz-show" data-qshow="${i}">Pokaż w menu</button></div>${qzStepper(i, st.qty[i] || 0)}</div>`).join("")
+    + `<div class="qz-note">Dla ${r.n === 1 ? "jednej osoby" : r.n === 2 ? "dwóch osób" : r.n === 4 ? "3–4 osób" : "większej ekipy"} zwykle wystarczy ${esc(r.k)}${r.n > 1 ? " — wybraliśmy dla Was kilka różnych, ilości możesz zmienić." : "."}</div>`
+    + (ex.length ? `<div class="qz-q qz-q2">Dorzucisz coś do pizzy?</div>` + ex.map((p, j) => { const i = r.list.length + j; return `<div class="qz-hit qz-ex"><div><b>${esc(p.name)}</b> <span class="qz-price">${esc(p.price)}</span>${p.desc ? `<div class="qz-desc">${esc(p.desc)}</div>` : ""}</div>${qzStepper(i, st.qty[i] || 0)}</div>`; }).join("") : "")
+    + `<div class="qz-sum" id="qzSum"></div><div class="qz-actions"><button type="button" class="qz-back" data-qreset>🔄 Jeszcze raz</button></div>`;
+  qzSummary();
 }
 $("quizOpen").addEventListener("click", () => {
   const c = $("quizCard");
   if (!c.hidden) { c.hidden = true; return; }
-  qzSt = { step: 0, a: {} }; c.hidden = false; qzRender();
+  qzSt = { step: 0, a: {}, qty: {} }; c.hidden = false; qzRender();
 });
 $("quizCard").addEventListener("click", (e) => {
   const o = e.target.closest("[data-qv]");
   if (o) { qzSt.a[QZ_Q[qzSt.step].k] = o.dataset.qv; qzSt.step++; qzRender(); return; }
   if (e.target.closest("[data-qback]")) { qzSt.step = Math.max(0, qzSt.step - 1); qzRender(); return; }
-  if (e.target.closest("[data-qreset]")) { qzSt = { step: 0, a: {} }; qzRender(); return; }
+  if (e.target.closest("[data-qreset]")) { qzSt = { step: 0, a: {}, qty: {} }; qzRender(); return; }
+  const pl = e.target.closest("[data-qplus],[data-qminus]");
+  if (pl) {
+    const i = Number(pl.dataset.qplus != null ? pl.dataset.qplus : pl.dataset.qminus);
+    const cur = qzSt.qty[i] || 0, nx = Math.max(0, Math.min(9, cur + (pl.dataset.qplus != null ? 1 : -1)));
+    qzSt.qty[i] = nx;
+    const q = $("quizCard").querySelector('[data-qq="' + i + '"]'); if (q) q.textContent = nx;
+    qzSummary(); return;
+  }
+  if (e.target.closest("[data-qcopy]")) {
+    const t = $("quizCard")._copy || "", b = e.target.closest("[data-qcopy]");
+    const done = () => { b.textContent = "✅ Skopiowano"; setTimeout(() => { b.textContent = "📋 Skopiuj zamówienie"; }, 2000); };
+    try { navigator.clipboard.writeText(t).then(done, () => {}); } catch (_) {}
+    return;
+  }
   const s = e.target.closest("[data-qshow]");
   if (s) {
     const p = $("quizCard")._list[Number(s.dataset.qshow)];
@@ -2409,7 +2478,7 @@ document.getElementById("menu-print-btn").addEventListener("click", printMenu);
 
 function applySite(cfg) {
   siteCfg = {
-    prices: (cfg && cfg.prices) || {}, unavailable: (cfg && cfg.unavailable) || {}, hidden: (cfg && cfg.hidden) || {}, badges: (cfg && cfg.badges) || {},
+    prices: (cfg && cfg.prices) || {}, unavailable: (cfg && cfg.unavailable) || {}, hidden: (cfg && cfg.hidden) || {}, badges: (cfg && cfg.badges) || {}, qz: cleanQz(cfg && cfg.qz),
     products: Array.isArray(cfg && cfg.products) ? cfg.products : [], campaigns: Array.isArray(cfg && cfg.campaigns) ? cfg.campaigns : [], notice: (cfg && cfg.notice) || null, dish: (cfg && cfg.dish) || null,
     delivery: { places: Array.isArray(cfg && cfg.delivery && cfg.delivery.places) ? cfg.delivery.places : DELIVERY_DEFAULT },
     googleReviewUrl: (cfg && typeof cfg.googleReviewUrl === "string") ? cfg.googleReviewUrl : GOOGLE_REVIEW_DEFAULT,
@@ -2979,6 +3048,7 @@ function prodRowHtml(p) {
     <select class="rb-prod-cat" aria-label="Kategoria">${PROD_CATS.map((c) => `<option value="${c[0]}"${p.cat === c[0] ? " selected" : ""}>${c[1]}</option>`).join("")}</select>
     <textarea class="rb-prod-desc" rows="2" maxlength="200" placeholder="Opis (skład, opcjonalnie)">${esc(p.desc || "")}</textarea>
     <input type="text" class="rb-prod-tags" maxlength="60" placeholder="Plakietki (opcjonalnie, po przecinku), np. 30cm, 24h" value="${esc((p.tags || []).join(", "))}" aria-label="Plakietki">
+    ${qzSelectHtml("rb-prod-qz", qzType(p.qz))}
     <div class="rb-site-badges rb-prod-badges">${BADGES.map((b) => `<label><input type="checkbox" class="rb-prod-bd" data-b="${b[0]}"${badgeIds(p.badges).includes(b[0]) ? " checked" : ""}> ${b[1]}</label>`).join("")}</div>
     <div class="rb-prod-foot">
       <label class="rb-check"><input type="checkbox" class="rb-prod-un"${p.unavail ? " checked" : ""}> niedostępne dziś</label>
@@ -3086,6 +3156,7 @@ function fillSiteForm() {
     return `<div class="rb-site-row" data-key="${esc(key)}">
       <div class="rb-site-name">${esc(itemName(el))}<small>w kodzie strony: ${esc(el.dataset.origPrice || "")}</small></div>
       <input type="text" class="rb-site-price" inputmode="decimal" maxlength="12" value="${esc(cur)}" aria-label="Cena: ${esc(itemName(el))}">
+      ${qzSelectHtml("rb-site-qz", qzType(siteCfg.qz[key]))}
       <div class="rb-site-badges">${BADGES.map((b) => `<label><input type="checkbox" class="rb-site-bd" data-b="${b[0]}"${badgeIds(siteCfg.badges[key]).includes(b[0]) ? " checked" : ""}> ${b[1]}</label>`).join("")}
         <label class="rb-site-un"><input type="checkbox" class="rb-site-unav"${siteCfg.unavailable[key] ? " checked" : ""}> ⛔ niedostępne dziś</label>
         <label class="rb-site-un"><input type="checkbox" class="rb-site-hide"${siteCfg.hidden[key] ? " checked" : ""}> 🙈 ukryj</label></div>
@@ -3154,6 +3225,14 @@ $("rb-prod-add").addEventListener("click", () => {
   last.scrollIntoView({ behavior: "smooth", block: "center" });
   last.querySelector(".rb-prod-name").focus();
 });
+// rodzaj dla quizu podpowiada się z kategorii, dopóki nie ustawisz go ręcznie
+$("rb-prod-list").addEventListener("change", (e) => {
+  const row = e.target.closest(".rb-prod");
+  if (!row) return;
+  const qs = row.querySelector(".rb-prod-qz");
+  if (e.target.classList.contains("rb-prod-qz")) { qs.dataset.auto = ""; return; }
+  if (e.target.classList.contains("rb-prod-cat") && qs && (qs.value === "" || qs.dataset.auto === "1")) { qs.value = { miesne: "meat", vege: "vege" }[e.target.value] || ""; qs.dataset.auto = "1"; }
+});
 $("rb-prod-list").addEventListener("click", (e) => {
   const b = e.target.closest(".rb-prod-del");
   if (!b) return;
@@ -3182,7 +3261,7 @@ function siteToast(text, kind) {
 async function saveSite() {
   const say = (text, kind) => { setMsg(siteMsg, text, kind); if (text) siteToast(text, kind); };
   say("");
-  const prices = {}, unavailable = {}, hidden = {}, badges = {};
+  const prices = {}, unavailable = {}, hidden = {}, badges = {}, qz = {};
   let bad = "";
   document.querySelectorAll("#rb-site-items .rb-site-row").forEach((row) => {
     if (bad) return;
@@ -3197,6 +3276,8 @@ async function saveSite() {
     if (row.querySelector(".rb-site-hide").checked) hidden[key] = true;
     const bl = [...row.querySelectorAll(".rb-site-bd:checked")].map((c) => c.dataset.b);
     if (bl.length) badges[key] = bl;
+    const qv = qzType(row.querySelector(".rb-site-qz").value);
+    if (qv) qz[key] = qv;
   });
   if (bad) { say( "Popraw cenę przy: " + bad + " (np. 36 zł).", "err"); return; }
   const products = [];
@@ -3219,7 +3300,7 @@ async function saveSite() {
     if (usedKeys.has(k)) { prodBad = "Produkt „" + name + "” już istnieje w menu — zmień nazwę."; return; }
     usedKeys.add(k);
     const bdg = [...row.querySelectorAll(".rb-prod-bd:checked")].map((c) => c.dataset.b);
-    products.push({ id: row.dataset.id, name, price, cat, desc, tags, badges: bdg, unavail: row.querySelector(".rb-prod-un").checked });
+    products.push({ id: row.dataset.id, name, price, cat, desc, tags, badges: bdg, qz: qzType(row.querySelector(".rb-prod-qz").value), unavail: row.querySelector(".rb-prod-un").checked });
   });
   if (prodBad) { say( prodBad, "err"); return; }
   const parseZl = (v) => {
@@ -3290,8 +3371,8 @@ async function saveSite() {
   const btns = [$("rb-site-save"), ...document.querySelectorAll(".rb-sec-save")];
   btns.forEach((b) => { b.disabled = true; });
   try {
-    await setDoc(doc(db, "site", "config"), { prices, unavailable, hidden, badges, products, campaigns, notice, dish, delivery, googleReviewUrl, reviews, googleMapsUrl, theme, levelsOn, levels, levelsV: 2, refOn, poll, hours, updatedAt: serverTimestamp() });
-    const cfg = { prices, unavailable, hidden, badges, products, campaigns, notice, dish, delivery, googleReviewUrl, reviews, googleMapsUrl, theme, levelsOn, levels, levelsV: 2, refOn, poll, hours };
+    await setDoc(doc(db, "site", "config"), { prices, unavailable, hidden, badges, qz, products, campaigns, notice, dish, delivery, googleReviewUrl, reviews, googleMapsUrl, theme, levelsOn, levels, levelsV: 2, refOn, poll, hours, updatedAt: serverTimestamp() });
+    const cfg = { prices, unavailable, hidden, badges, qz, products, campaigns, notice, dish, delivery, googleReviewUrl, reviews, googleMapsUrl, theme, levelsOn, levels, levelsV: 2, refOn, poll, hours };
     applySite(cfg);
     fillSiteForm();
     try { localStorage.setItem(SITE_CACHE_KEY, JSON.stringify(plainCfg(cfg))); } catch (_) {}
