@@ -1087,7 +1087,7 @@ fadeEls.forEach(el => observer.observe(el));
      ===================================================================== -->
 
 <!-- ===== RABAT: STYLE ===== -->
-<link rel="stylesheet" href="/konto.css?v=1">
+<link rel="stylesheet" href="/konto.css?v=2">
 
 <!-- ===== RABAT: HTML ===== -->
 <div id="rabat-overlay" role="dialog" aria-modal="true" aria-labelledby="rb-title">
@@ -1426,29 +1426,57 @@ fadeEls.forEach(el => observer.observe(el));
         <!-- Zakładka: własne rabaty (kreator) -->
         <div class="rb-pane" data-pane="builder" hidden>
           <h4>Stwórz własny rabat</h4>
-          <label for="rb-t-type">Rodzaj rabatu</label>
-          <select id="rb-t-type">
-            <option value="percent">Procent (np. -20%)</option>
-            <option value="amount">Kwota (np. -5 zł)</option>
-            <option value="free">Produkt za 1 zł</option>
-            <option value="custom">Własny opis</option>
-          </select>
-          <div id="rb-t-valwrap">
-            <label for="rb-t-value" id="rb-t-vallabel">Ile procent (%)</label>
-            <input id="rb-t-value" type="number" min="1" step="any" inputmode="decimal" placeholder="np. 20">
+          <div class="rb-bld">
+            <section class="rb-bcard">
+              <div class="rb-bh"><span class="rb-bn">1</span>Co dostaje klient?</div>
+              <label for="rb-t-type" class="rb-vh">Rodzaj rabatu</label>
+              <select id="rb-t-type" class="rb-vh" tabindex="-1" aria-hidden="true">
+                <option value="percent">Procent (np. -20%)</option>
+                <option value="amount">Kwota (np. -5 zł)</option>
+                <option value="free">Produkt za 1 zł</option>
+                <option value="custom">Własny opis</option>
+              </select>
+              <div class="rb-seg" id="rb-t-seg" role="group" aria-label="Rodzaj rabatu">
+                <button type="button" data-v="percent" aria-pressed="true"><b>%</b>Procent</button>
+                <button type="button" data-v="amount" aria-pressed="false"><b>zł</b>Kwota</button>
+                <button type="button" data-v="free" aria-pressed="false"><b>🍕</b>Za 1 zł</button>
+                <button type="button" data-v="custom" aria-pressed="false"><b>✎</b>Własny</button>
+              </div>
+              <div class="rb-bpair">
+                <div id="rb-t-valwrap">
+                  <label for="rb-t-value" id="rb-t-vallabel">Ile procent (%)</label>
+                  <input id="rb-t-value" type="number" min="1" step="any" inputmode="decimal" placeholder="np. 20">
+                </div>
+                <div id="rb-t-scopewrap">
+                  <label for="rb-t-scope">Dotyczy (opcjonalnie)</label>
+                  <input id="rb-t-scope" type="text" maxlength="60" placeholder="np. pizzę Margherita">
+                </div>
+              </div>
+              <div class="rb-bhint" id="rb-t-hint1">Puste pole „Dotyczy” = rabat na całe zamówienie.</div>
+            </section>
+            <section class="rb-bcard">
+              <div class="rb-bh"><span class="rb-bn">2</span>Co zobaczy klient?</div>
+              <label for="rb-t-text">Opis rabatu</label>
+              <input id="rb-t-text" type="text" maxlength="120" placeholder="np. -20% na pizzę Margherita">
+              <div class="rb-bhint">Wypełnia się sam z kroku 1. Możesz go poprawić.</div>
+            </section>
+            <section class="rb-bcard">
+              <div class="rb-bh"><span class="rb-bn">3</span>Ważność i kod <span class="rb-bopt">opcjonalnie</span></div>
+              <div class="rb-bpair">
+                <div>
+                  <label for="rb-t-days">Ważny (dni od przyznania)</label>
+                  <input id="rb-t-days" type="number" min="1" max="3650" inputmode="numeric" placeholder="np. 30">
+                </div>
+                <div>
+                  <label for="rb-t-prefix">Przedrostek kodu</label>
+                  <input id="rb-t-prefix" type="text" maxlength="12" placeholder="np. WEEKEND" autocapitalize="characters">
+                </div>
+              </div>
+              <div class="rb-bhint">Puste „Ważny” = bez terminu. Kod będzie wyglądał np. WEEKEND-7K2M9Q.</div>
+            </section>
+            <button type="button" class="rb-btn" id="rb-t-save">Zapisz rabat</button>
+            <div class="rb-msg" id="rb-t-msg" role="status"></div>
           </div>
-          <div id="rb-t-scopewrap">
-            <label for="rb-t-scope">Dotyczy (opcjonalnie)</label>
-            <input id="rb-t-scope" type="text" maxlength="60" placeholder="np. pizzę Margherita (puste = całe zamówienie)">
-          </div>
-          <label for="rb-t-text">Opis, który zobaczy klient</label>
-          <input id="rb-t-text" type="text" maxlength="120" placeholder="np. -20% na pizzę Margherita">
-          <label for="rb-t-days">Ważność w dniach od przyznania (opcjonalnie)</label>
-          <input id="rb-t-days" type="number" min="1" max="3650" inputmode="numeric" placeholder="np. 30">
-          <label for="rb-t-prefix">Przedrostek kodu (opcjonalnie)</label>
-          <input id="rb-t-prefix" type="text" maxlength="12" placeholder="np. WEEKEND" autocapitalize="characters">
-          <button type="button" class="rb-btn" id="rb-t-save">Zapisz rabat</button>
-          <div class="rb-msg" id="rb-t-msg" role="status"></div>
           <h4>Twoje rabaty</h4>
           <div id="rb-t-list"></div>
         </div>
@@ -1779,7 +1807,7 @@ fadeEls.forEach(el => observer.observe(el));
   btns.forEach(function (b) { b.addEventListener("click", install); });
 })();
 </script>
-<script type="module" src="/aplikacja.js?v=2"></script>
+<script type="module" src="/aplikacja.js?v=3"></script>
 <script type="module" src="/straz.js?v=7"></script>
 <!-- ===== RABAT: KONIEC ===== -->
 
