@@ -422,17 +422,6 @@ body.dark .quiz-card{background:var(--dark-card);color:#eee}
 .qz-price{color:var(--red);font-weight:800;margin-left:.4rem}
 .qz-desc{font-size:.85rem;opacity:.75;margin-top:.15rem}
 .qz-note{font-size:.9rem;opacity:.85;margin:.8rem 0}
-.qz-q2{margin-top:1.2rem}
-.qz-step{display:inline-flex;align-items:center;gap:.25rem;flex:none;border:2px solid var(--red);border-radius:99px;padding:.1rem}
-.qz-step b{min-width:1.4rem;text-align:center;font-weight:800}
-.qz-pm{width:2rem;height:2rem;border-radius:50%;border:0;background:var(--red);color:#fff;font-size:1.2rem;font-weight:800;line-height:1;cursor:pointer;font-family:inherit}
-.qz-pm:active{transform:scale(.92)}
-.qz-sum{margin-top:1rem;padding:.9rem 1rem;border-radius:14px;background:rgba(127,127,127,.12)}
-.qz-sum-t{font-weight:800;margin-bottom:.4rem}
-.qz-sum-l,.qz-sum-total{display:flex;justify-content:space-between;gap:1rem;font-size:.92rem;padding:.15rem 0}
-.qz-sum-total{border-top:1px solid rgba(127,127,127,.3);margin-top:.35rem;padding-top:.5rem;font-size:1.05rem}
-.qz-sum-total b{color:var(--red)}
-.qz-sum-empty{font-size:.9rem;opacity:.8}
 .qz-actions{display:flex;flex-wrap:wrap;gap:.8rem;align-items:center;margin-top:.6rem}
 .qz-actions .btn{font-size:.95rem;padding:.7rem 1.3rem}
 .menu-item.quiz-flash{animation:quizflash 3s ease}
