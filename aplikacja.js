@@ -2316,7 +2316,7 @@ const QZ_Q = [
   { k: "hot", q: "Jak z ostrością?", o: [["mild", "😌 Łagodna"], ["hot", "🌶 Ostra"], ["any", "🤷 Obojętnie"]] },
   { k: "n", q: "Ile Was będzie?", o: [["1", "🙋 Sam(a)"], ["2", "👫 Dwie osoby"], ["4", "👨‍👩‍👧 3–4 osoby"], ["6", "🎉 5 i więcej"]] }
 ];
-let qzSt = { step: 0, a: {} };
+let qzSt = { step: 0, a: {}, qty: {} };
 const QZ_MEAT = /pepperoni|prosciutto|szynk|salami|boczek|nduja|kiełbas|kurczak|wołow|bekon|mięs|cotto/i;
 const QZ_SEA = /krewet|gamber|owoce morza|frutti di mare|tuńczyk|tuncz|tonno|łosoś|losos|salmone|anchois|acciug|ryb|małż|mule\b|kalmar|ośmiorn/i;
 const QZ_HOT = /piccante|jalape|nduja|ostr|chili|diavola/i;
@@ -2351,6 +2351,37 @@ function qzResult() {
   const n = Number(a.n || 1), k = n === 1 ? "1 pizza 30 cm" : n === 2 ? "2 pizze 30 cm" : n === 4 ? "3 pizze 30 cm" : "5–6 pizz 30 cm (zadzwoń z wyprzedzeniem)";
   return { list, note, k, n, all };
 }
+/* dodatki do zamówienia (sosy, frytki…): to, co klient może dorzucić jak na kiosku */
+function qzExtras() {
+  const ord = { sosy: 0, dodatki: 1 };
+  return menuEls().filter((el) => !el.classList.contains("is-hidden") && !el.classList.contains("is-unavail") && /(^|\s)(sosy|dodatki)(\s|$)/.test(el.dataset.category || "")).map((el) => {
+    const key = itemKey(el), cat = (el.dataset.category || "").split(/\s+/).find((c) => c in ord) || "dodatki";
+    const qt = el.dataset.custom ? qzType(el.dataset.qz) : qzType(siteCfg.qz[key]);
+    if (qt) return null; // pozycja z tagiem rodzaju pizzy albo „nie pokazuj” nie jest dodatkiem
+    const bd = el.dataset.custom ? badgeIds((el.dataset.badges || "").split(",")) : badgeIds(siteCfg.badges[key]);
+    return { el, name: itemName(el).replace(/^\d+\.\s*/, ""), price: ((el.querySelector(".menu-item-price") || {}).textContent || "").trim(), desc: ((el.querySelector(".menu-item-desc") || {}).textContent || "").trim(),
+      ord: ord[cat], score: (bd.includes("hit") || bd.includes("polecamy") ? 2 : 0) + (bd.includes("nowosc") ? 1 : 0) };
+  }).filter(Boolean).sort((x, y) => (y.score - x.score) || (x.ord - y.ord)).slice(0, 4);
+}
+const qzNum = (p) => { const n = parseFloat(String(p || "").replace(/ /g, " ").replace(",", ".")); return isFinite(n) ? n : null; };
+const qzMoney = (n) => (Math.round(n * 100) % 100 === 0 ? String(Math.round(n)) : n.toFixed(2).replace(".", ",")) + " zł";
+function qzStepper(i, q) {
+  return `<span class="qz-step"><button type="button" class="qz-pm" data-qminus="${i}" aria-label="Mniej">−</button><b data-qq="${i}">${q}</b><button type="button" class="qz-pm" data-qplus="${i}" aria-label="Więcej">+</button></span>`;
+}
+function qzSummary() {
+  const box = $("quizCard"), st = qzSt, items = box._items || [];
+  const lines = items.map((it, i) => ({ it, q: st.qty[i] || 0 })).filter((x) => x.q > 0);
+  let total = 0, unknown = false;
+  lines.forEach((x) => { const n = qzNum(x.it.price); if (n == null) unknown = true; else total += n * x.q; });
+  const sum = $("qzSum");
+  if (!sum) return;
+  if (!lines.length) { sum.innerHTML = '<div class="qz-sum-empty">Dodaj plusem to, na co masz ochotę. Policzymy razem.</div>'; return; }
+  const txt = lines.map((x) => x.q + "× " + x.it.name).join(", ") + " — razem " + qzMoney(total) + (unknown ? " (+ pozycje wg cennika)" : "");
+  sum.innerHTML = `<div class="qz-sum-t">🧾 Twoje zamówienie</div>` + lines.map((x) => `<div class="qz-sum-l"><span>${x.q}× ${esc(x.it.name)}</span><span>${esc(unknown && qzNum(x.it.price) == null ? x.it.price : qzMoney((qzNum(x.it.price) || 0) * x.q))}</span></div>`).join("")
+    + `<div class="qz-sum-total"><span>Razem</span><b>${qzMoney(total)}${unknown ? " +" : ""}</b></div>`
+    + `<div class="qz-actions"><a class="btn btn-primary" href="tel:668862396">📞 Zamów: 668 862 396</a><button type="button" class="qz-back" data-qcopy>📋 Skopiuj zamówienie</button></div>`;
+  box._copy = "Chcę zamówić: " + txt;
+}
 function qzRender() {
   const box = $("quizCard"), st = qzSt;
   if (st.step < QZ_Q.length) {
@@ -2358,23 +2389,48 @@ function qzRender() {
     box.innerHTML = `<div class="qz-prog">Pytanie ${st.step + 1} z ${QZ_Q.length}</div><div class="qz-q">${esc(q.q)}</div><div class="qz-opts">${q.o.map((o) => `<button type="button" class="qz-opt" data-qv="${o[0]}">${esc(o[1])}</button>`).join("")}</div>${st.step ? '<button type="button" class="qz-back" data-qback>← Wróć</button>' : ""}`;
     return;
   }
-  const r = qzResult();
-  box.innerHTML = `<div class="qz-q">Polecamy dla Ciebie:</div>${r.note ? `<div class="qz-note">${esc(r.note)}</div>` : ""}`
-    + r.list.map((p, i) => `<div class="qz-hit"><div><b>${esc(p.name)}</b> <span class="qz-price">${esc(p.price)}</span><div class="qz-desc">${esc(p.desc)}</div></div><button type="button" class="qz-show" data-qshow="${i}">Pokaż w menu</button></div>`).join("")
-    + `<div class="qz-note">Dla ${r.n === 1 ? "jednej osoby" : r.n === 2 ? "dwóch osób" : r.n === 4 ? "3–4 osób" : "większej ekipy"} zwykle wystarczy ${esc(r.k)}${r.n > 1 ? " — weźcie kilka różnych z tej listy." : "."}</div>`
-    + `<div class="qz-actions"><a class="btn btn-primary" href="tel:668862396">📞 Zamów: 668 862 396</a><button type="button" class="qz-back" data-qreset>🔄 Jeszcze raz</button></div>`;
+  if (!st.res) {
+    // wynik liczymy raz (kolejność jest losowa), a potem tylko zmieniamy ilości
+    const r = qzResult(), ex = qzExtras();
+    const k = r.n === 1 ? 1 : r.n === 2 ? 2 : r.n === 4 ? 3 : 5;
+    const qty = {};
+    for (let j = 0; j < k && r.list.length; j++) qty[j % r.list.length] = (qty[j % r.list.length] || 0) + 1;
+    st.res = r; st.ex = ex; st.qty = qty;
+  }
+  const r = st.res, ex = st.ex;
   box._list = r.list;
+  box._items = r.list.concat(ex);
+  box.innerHTML = `<div class="qz-q">Polecamy dla Ciebie:</div>${r.note ? `<div class="qz-note">${esc(r.note)}</div>` : ""}`
+    + r.list.map((p, i) => `<div class="qz-hit"><div><b>${esc(p.name)}</b> <span class="qz-price">${esc(p.price)}</span><div class="qz-desc">${esc(p.desc)}</div><button type="button" class="qz-show" data-qshow="${i}">Pokaż w menu</button></div>${qzStepper(i, st.qty[i] || 0)}</div>`).join("")
+    + `<div class="qz-note">Dla ${r.n === 1 ? "jednej osoby" : r.n === 2 ? "dwóch osób" : r.n === 4 ? "3–4 osób" : "większej ekipy"} zwykle wystarczy ${esc(r.k)}${r.n > 1 ? " — wybraliśmy dla Was kilka różnych, ilości możesz zmienić." : "."}</div>`
+    + (ex.length ? `<div class="qz-q qz-q2">Dorzucisz coś do pizzy?</div>` + ex.map((p, j) => { const i = r.list.length + j; return `<div class="qz-hit qz-ex"><div><b>${esc(p.name)}</b> <span class="qz-price">${esc(p.price)}</span>${p.desc ? `<div class="qz-desc">${esc(p.desc)}</div>` : ""}</div>${qzStepper(i, st.qty[i] || 0)}</div>`; }).join("") : "")
+    + `<div class="qz-sum" id="qzSum"></div><div class="qz-actions"><button type="button" class="qz-back" data-qreset>🔄 Jeszcze raz</button></div>`;
+  qzSummary();
 }
 $("quizOpen").addEventListener("click", () => {
   const c = $("quizCard");
   if (!c.hidden) { c.hidden = true; return; }
-  qzSt = { step: 0, a: {} }; c.hidden = false; qzRender();
+  qzSt = { step: 0, a: {}, qty: {} }; c.hidden = false; qzRender();
 });
 $("quizCard").addEventListener("click", (e) => {
   const o = e.target.closest("[data-qv]");
   if (o) { qzSt.a[QZ_Q[qzSt.step].k] = o.dataset.qv; qzSt.step++; qzRender(); return; }
   if (e.target.closest("[data-qback]")) { qzSt.step = Math.max(0, qzSt.step - 1); qzRender(); return; }
-  if (e.target.closest("[data-qreset]")) { qzSt = { step: 0, a: {} }; qzRender(); return; }
+  if (e.target.closest("[data-qreset]")) { qzSt = { step: 0, a: {}, qty: {} }; qzRender(); return; }
+  const pl = e.target.closest("[data-qplus],[data-qminus]");
+  if (pl) {
+    const i = Number(pl.dataset.qplus != null ? pl.dataset.qplus : pl.dataset.qminus);
+    const cur = qzSt.qty[i] || 0, nx = Math.max(0, Math.min(9, cur + (pl.dataset.qplus != null ? 1 : -1)));
+    qzSt.qty[i] = nx;
+    const q = $("quizCard").querySelector('[data-qq="' + i + '"]'); if (q) q.textContent = nx;
+    qzSummary(); return;
+  }
+  if (e.target.closest("[data-qcopy]")) {
+    const t = $("quizCard")._copy || "", b = e.target.closest("[data-qcopy]");
+    const done = () => { b.textContent = "✅ Skopiowano"; setTimeout(() => { b.textContent = "📋 Skopiuj zamówienie"; }, 2000); };
+    try { navigator.clipboard.writeText(t).then(done, () => {}); } catch (_) {}
+    return;
+  }
   const s = e.target.closest("[data-qshow]");
   if (s) {
     const p = $("quizCard")._list[Number(s.dataset.qshow)];
@@ -3168,6 +3224,14 @@ $("rb-prod-add").addEventListener("click", () => {
   const last = list.lastElementChild;
   last.scrollIntoView({ behavior: "smooth", block: "center" });
   last.querySelector(".rb-prod-name").focus();
+});
+// rodzaj dla quizu podpowiada się z kategorii, dopóki nie ustawisz go ręcznie
+$("rb-prod-list").addEventListener("change", (e) => {
+  const row = e.target.closest(".rb-prod");
+  if (!row) return;
+  const qs = row.querySelector(".rb-prod-qz");
+  if (e.target.classList.contains("rb-prod-qz")) { qs.dataset.auto = ""; return; }
+  if (e.target.classList.contains("rb-prod-cat") && qs && (qs.value === "" || qs.dataset.auto === "1")) { qs.value = { miesne: "meat", vege: "vege" }[e.target.value] || ""; qs.dataset.auto = "1"; }
 });
 $("rb-prod-list").addEventListener("click", (e) => {
   const b = e.target.closest(".rb-prod-del");
