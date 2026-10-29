@@ -2221,7 +2221,9 @@ function updateHeroSound() {
   const show = heroSoundOk();
   if (!show) vid.muted = true;
   b.hidden = !show;
-  b.textContent = vid.muted ? "🔇 Włącz dźwięk" : "🔊 Wyłącz dźwięk";
+  const hint = show && vid.muted && heroLoops === 0;
+  b.classList.toggle("hint", hint);
+  b.textContent = vid.muted ? (hint ? "🔇 Kliknij, aby włączyć dźwięk" : "🔇 Włącz dźwięk") : "🔊 Wyłącz dźwięk";
   b.setAttribute("aria-pressed", vid.muted ? "false" : "true");
   b.setAttribute("aria-label", vid.muted ? "Włącz dźwięk wideo" : "Wyłącz dźwięk wideo");
 }
