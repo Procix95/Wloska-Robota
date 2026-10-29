@@ -2561,7 +2561,12 @@ let photoCache = {};
 try { photoCache = JSON.parse(localStorage.getItem(PHOTO_CACHE_KEY) || "{}") || {}; } catch (_) { photoCache = {}; }
 const photoInflight = {};
 let photoObs = null;
-const okImg = (d) => typeof d === "string" && d.length < 250000 && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(d);
+/* zdjęcia ze strony (sekcja „O nas” i tło na górze) są większe niż zdjęcia pizz */
+const SITE_PHOTOS = {
+  "strona-o-nas": { label: "O nas", w: 720, h: 960, soft: 220000, hard: 300000, max: 320000 },
+  "strona-tlo": { label: "Tło na górze", w: 1600, h: 900, soft: 350000, hard: 500000, max: 520000 }
+};
+const okImg = (d, slug) => typeof d === "string" && d.length < ((SITE_PHOTOS[slug] || {}).max || 250000) && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(d);
 const photoSlug = (el) => normTxt(itemKey(el)).replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60);
 function savePhotoCache() {
   try { localStorage.setItem(PHOTO_CACHE_KEY, JSON.stringify(photoCache)); }
@@ -2580,13 +2585,13 @@ async function ensurePhoto(slug) {
   const ts = photoIdx[slug];
   if (!slug || !ts) return;
   const c = photoCache[slug];
-  if (c && c.t === ts && okImg(c.d)) return;
+  if (c && c.t === ts && okImg(c.d, slug)) return;
   if (photoInflight[slug] === ts) return;
   photoInflight[slug] = ts;
   try {
     const d = await withTimeout(getDoc(doc(db, "site", "ph_" + slug)), 12000);
     const data = d.exists() ? d.data() : null;
-    if (data && okImg(data.d)) { photoCache[slug] = { t: ts, d: data.d }; savePhotoCache(); applyPhotos(); }
+    if (data && okImg(data.d, slug)) { photoCache[slug] = { t: ts, d: data.d }; savePhotoCache(); applyPhotos(); }
   } catch (e) { console.warn("Zdjęcie niedostępne:", slug, e && (e.code || e.message)); }
   finally { delete photoInflight[slug]; }
 }
@@ -2597,7 +2602,7 @@ function applyPhotos() {
     let box = el.querySelector(":scope > .menu-photo");
     if (!box) { box = document.createElement("div"); box.className = "menu-photo"; el.insertBefore(box, el.firstChild); }
     const ts = slug ? (photoIdx[slug] || 0) : 0, c = photoCache[slug];
-    const has = !!(ts && c && c.t === ts && okImg(c.d));
+    const has = !!(ts && c && c.t === ts && okImg(c.d, slug));
     const pending = !!ts && !has;
     const adm = !!isAdmin;
     box.classList.toggle("has", has); box.classList.toggle("pending", pending); box.classList.toggle("adm", adm);
@@ -2613,6 +2618,7 @@ function applyPhotos() {
     }
     if (pending) observePhoto(el);
   });
+  try { applySitePhotos(); } catch (_) {}
 }
 async function loadPhotos() {
   try {
@@ -2626,7 +2632,8 @@ async function loadPhotos() {
   applyPhotos();
 }
 /* zmniejszenie zdjęcia do ok. 640×480 (kadr 4:3 ze środka) i JPEG poniżej ~100 KB */
-async function photoToJpeg(file) {
+async function photoToJpeg(file, o) {
+  o = o || {};
   let src, w, h;
   try { src = await createImageBitmap(file, { imageOrientation: "from-image" }); w = src.width; h = src.height; }
   catch (_) {
@@ -2634,7 +2641,7 @@ async function photoToJpeg(file) {
     w = src.naturalWidth; h = src.naturalHeight;
   }
   if (!w || !h) throw new Error("bad");
-  const TW = 640, TH = 480, ratio = TW / TH;
+  const TW = o.w || 640, TH = o.h || 480, ratio = TW / TH;
   let sw = w, sh = h;
   if (w / h > ratio) sw = h * ratio; else sh = w / ratio;
   const cv = document.createElement("canvas"); cv.width = TW; cv.height = TH;
@@ -2643,8 +2650,8 @@ async function photoToJpeg(file) {
   cx.imageSmoothingQuality = "high";
   cx.drawImage(src, (w - sw) / 2, (h - sh) / 2, sw, sh, 0, 0, TW, TH);
   let q = 0.82, out = cv.toDataURL("image/jpeg", q);
-  while (out.length > 135000 && q > 0.45) { q -= 0.08; out = cv.toDataURL("image/jpeg", q); }
-  if (!okImg(out) || out.length > 200000) throw new Error("big");
+  while (out.length > (o.soft || 135000) && q > 0.4) { q -= 0.07; out = cv.toDataURL("image/jpeg", q); }
+  if (!/^data:image\/jpeg;base64,/.test(out) || out.length > (o.hard || 200000)) throw new Error("big");
   return out;
 }
 let photoFileEl = null, photoTarget = null, photoBusy = false;
@@ -2695,6 +2702,91 @@ async function removePhoto(el) {
   } catch (err) { console.error(err); siteToast(errText(err), "err"); }
   finally { photoBusy = false; applyPhotos(); }
 }
+/* zdjęcie w „O nas” (po prawej) i tło na górze strony: własne zdjęcie z panelu zastępuje domyślne (dla tła: wideo) */
+function applySitePhotos() {
+  const get = (slug) => {
+    const ts = photoIdx[slug];
+    if (!ts) return null;
+    const c = photoCache[slug];
+    if (c && c.t === ts && okImg(c.d, slug)) return c.d;
+    ensurePhoto(slug);
+    return null;
+  };
+  const about = $("aboutImg"), vid = $("heroVideo");
+  const a = get("strona-o-nas"), hh = get("strona-tlo");
+  if (about) {
+    if (!about.dataset.orig) about.dataset.orig = about.getAttribute("src");
+    const want = a || about.dataset.orig;
+    if (about.getAttribute("src") !== want) about.src = want;
+  }
+  if (vid) {
+    let img = $("heroImg");
+    if (hh) {
+      if (!img) { img = document.createElement("img"); img.id = "heroImg"; img.className = "hero-bg"; img.alt = ""; img.decoding = "async"; vid.after(img); }
+      if (img.getAttribute("src") !== hh) img.src = hh;
+      vid.style.display = "none";
+      try { vid.pause(); } catch (_) {}
+    } else {
+      if (img) img.remove();
+      if (vid.style.display) { vid.style.display = ""; if (vid.hasAttribute("autoplay")) { try { vid.play(); } catch (_) {} } }
+    }
+  }
+  const pa = $("rb-sp-about-img"), ph = $("rb-sp-hero-img");
+  if (pa) pa.src = a || (about && about.dataset.orig) || "";
+  if (ph) ph.src = hh || "images/hero-poster.jpg";
+  const da = $("rb-sp-about-del"), dh = $("rb-sp-hero-del");
+  if (da) da.hidden = !photoIdx["strona-o-nas"];
+  if (dh) dh.hidden = !photoIdx["strona-tlo"];
+}
+let sitePhotoSlug = "", sitePhotoFile = null;
+async function saveSitePhoto(slug, file) {
+  const cfg = SITE_PHOTOS[slug];
+  if (!cfg || !isAdmin || photoBusy) return;
+  photoBusy = true;
+  const msg = $("rb-sp-msg");
+  setMsg(msg, "Zapisuję zdjęcie…", "");
+  try {
+    if (!/^image\//.test(file.type) && !/\.(jpe?g|png|webp|heic|heif|gif|bmp)$/i.test(file.name || "")) throw new Error("type");
+    const data = await photoToJpeg(file, cfg);
+    const ts = Date.now();
+    await setDoc(doc(db, "site", "ph_" + slug), { d: data, t: ts, name: cfg.label });
+    await setDoc(doc(db, "site", "photos"), { v: { [slug]: ts }, updatedAt: serverTimestamp() }, { merge: true });
+    photoIdx[slug] = ts; photoCache[slug] = { t: ts, d: data }; savePhotoCache();
+    setMsg(msg, "Zapisane: " + cfg.label + ". Klienci zobaczą zmianę po odświeżeniu strony.", "ok");
+  } catch (err) {
+    console.error(err);
+    setMsg(msg, err && err.message === "type" ? "To nie jest zdjęcie. Wybierz plik JPG lub PNG." : err && err.message === "big" ? "Zdjęcie jest zbyt duże, spróbuj innego." : errText(err), "err");
+  } finally { photoBusy = false; applyPhotos(); }
+}
+async function removeSitePhoto(slug) {
+  const cfg = SITE_PHOTOS[slug];
+  if (!cfg || !isAdmin || photoBusy) return;
+  if (!confirm(slug === "strona-tlo" ? "Przywrócić wideo w tle na górze strony?" : "Przywrócić domyślne zdjęcie w „O nas”?")) return;
+  photoBusy = true;
+  const msg = $("rb-sp-msg");
+  try {
+    await setDoc(doc(db, "site", "photos"), { v: { [slug]: 0 }, updatedAt: serverTimestamp() }, { merge: true });
+    try { await deleteDoc(doc(db, "site", "ph_" + slug)); } catch (_) {}
+    delete photoIdx[slug]; delete photoCache[slug]; savePhotoCache();
+    setMsg(msg, "Przywrócono domyślne.", "ok");
+  } catch (err) { console.error(err); setMsg(msg, errText(err), "err"); }
+  finally { photoBusy = false; applyPhotos(); }
+}
+(function bindSitePhotos() {
+  const file = document.createElement("input");
+  file.type = "file"; file.accept = "image/*"; file.hidden = true;
+  file.addEventListener("change", async () => {
+    const f = file.files && file.files[0], slug = sitePhotoSlug;
+    file.value = "";
+    if (f && slug) await saveSitePhoto(slug, f);
+  });
+  document.body.appendChild(file);
+  const bind = (id, fn) => { const b = $(id); if (b) b.addEventListener("click", fn); };
+  bind("rb-sp-about-add", () => { sitePhotoSlug = "strona-o-nas"; file.click(); });
+  bind("rb-sp-hero-add", () => { sitePhotoSlug = "strona-tlo"; file.click(); });
+  bind("rb-sp-about-del", () => removeSitePhoto("strona-o-nas"));
+  bind("rb-sp-hero-del", () => removeSitePhoto("strona-tlo"));
+})();
 function showPhotoBig(src, title) {
   const o = document.createElement("div");
   o.className = "mp-lb"; o.setAttribute("role", "dialog");
@@ -4679,7 +4771,7 @@ $("rb-site-theme").addEventListener("change", showThemeNow);
   const pane = document.querySelector('#rb-admin .rb-pane[data-pane="site"]');
   if (!pane) return;
   const heads = [...pane.querySelectorAll(":scope > h4.rb-hsec")];
-  const LABELS = { "Komunikat na górze strony": "📢 Komunikat", "Akcje i specjalne dni": "🎯 Akcje", "Pizza dnia": "🍕 Pizza dnia", "Dowóz": "🚚 Dowóz", "Motyw sezonowy": "🎨 Motyw", "Galeria zdjęć": "🖼️ Galeria", "Lojalność i polecenia": "🏅 Lojalność", "Opinie w Google": "⭐ Opinie", "Godziny otwarcia": "🕐 Godziny", "Plakat QR": "🖨 Plakat QR", "Głosowanie klientów": "🗳 Głosowanie", "Kopia zapasowa": "💾 Kopia", "Opinie z Google na stronie": "💬 Opinie klientów", "Własne produkty": "➕ Produkty", "Ceny i dostępność pozycji ze strony": "💲 Ceny" };
+  const LABELS = { "Komunikat na górze strony": "📢 Komunikat", "Akcje i specjalne dni": "🎯 Akcje", "Pizza dnia": "🍕 Pizza dnia", "Dowóz": "🚚 Dowóz", "Motyw sezonowy": "🎨 Motyw", "Galeria zdjęć": "🖼️ Galeria", "Zdjęcia strony": "🏞 Zdjęcia strony", "Lojalność i polecenia": "🏅 Lojalność", "Opinie w Google": "⭐ Opinie", "Godziny otwarcia": "🕐 Godziny", "Plakat QR": "🖨 Plakat QR", "Głosowanie klientów": "🗳 Głosowanie", "Kopia zapasowa": "💾 Kopia", "Opinie z Google na stronie": "💬 Opinie klientów", "Własne produkty": "➕ Produkty", "Ceny i dostępność pozycji ze strony": "💲 Ceny" };
   const groups = heads.map((h) => {
     const g = document.createElement("div"); g.className = "rb-sub"; g.hidden = true;
     const label = LABELS[(h.querySelector("span") || h).textContent.trim()] || h.textContent.trim();
