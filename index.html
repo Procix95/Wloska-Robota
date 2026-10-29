@@ -517,7 +517,7 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
         </div>
       </div>
       <div class="about-image fade-in">
-        <img src="images/DSC01433.JPG" alt="Pizzaiolo Włoska Robota przy pracy" width="1350" height="1800" loading="lazy" decoding="async">
+        <img id="aboutImg" src="images/DSC01433.JPG" alt="Pizzaiolo Włoska Robota przy pracy" width="1350" height="1800" loading="lazy" decoding="async">
       </div>
     </div>
   </div>
@@ -1088,7 +1088,7 @@ fadeEls.forEach(el => observer.observe(el));
      ===================================================================== -->
 
 <!-- ===== RABAT: STYLE ===== -->
-<link rel="stylesheet" href="/konto.css?v=6">
+<link rel="stylesheet" href="/konto.css?v=7">
 
 <!-- ===== RABAT: HTML ===== -->
 <div id="rabat-overlay" role="dialog" aria-modal="true" aria-labelledby="rb-title">
@@ -1573,6 +1573,24 @@ fadeEls.forEach(el => observer.observe(el));
           <div id="rb-gal-list"></div>
           <button type="button" class="rb-btn secondary small" id="rb-gal-reset" style="margin-top:8px">Przywróć usunięte i domyślną kolejność</button>
 
+          <h4 class="rb-hsec"><span>Zdjęcia strony</span></h4>
+          <div class="rb-meta" style="margin:-4px 0 10px">Zmiany zapisują się od razu. Własne zdjęcie zastępuje domyślne, a przycisk „Przywróć" cofa je. Zdjęcie jest automatycznie zmniejszane i kadrowane.</div>
+          <div class="rb-sp">
+            <div class="rb-sp-card">
+              <b>Zdjęcie w sekcji „O nas" (po prawej)</b>
+              <img id="rb-sp-about-img" class="rb-sp-thumb rb-sp-portrait" alt="Podgląd zdjęcia w sekcji O nas">
+              <div class="rb-meta">Najlepiej zdjęcie pionowe (proporcje 3:4).</div>
+              <div class="rb-sp-btns"><button type="button" class="rb-btn small" id="rb-sp-about-add">📷 Zmień zdjęcie</button><button type="button" class="rb-btn secondary small" id="rb-sp-about-del" hidden>↩ Przywróć domyślne</button></div>
+            </div>
+            <div class="rb-sp-card">
+              <b>Tło na górze strony</b>
+              <img id="rb-sp-hero-img" class="rb-sp-thumb" alt="Podgląd tła na górze strony">
+              <div class="rb-meta">Domyślnie jest tam wideo. Własne zdjęcie (najlepiej poziome 16:9) zastąpi je. Podgląd pokazuje zdjęcie zastępcze wideo.</div>
+              <div class="rb-sp-btns"><button type="button" class="rb-btn small" id="rb-sp-hero-add">📷 Wgraj zdjęcie jako tło</button><button type="button" class="rb-btn secondary small" id="rb-sp-hero-del" hidden>↩ Przywróć wideo</button></div>
+            </div>
+          </div>
+          <div class="rb-meta" id="rb-sp-msg" role="status" aria-live="polite"></div>
+
           <h4 class="rb-hsec"><span>Lojalność i polecenia</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
           <div class="rb-meta" style="margin:-4px 0 8px">Klient widzi swoją rangę, postęp, osiągnięcia i przywilej, a obsługa widzi rangę przy skanowaniu, żeby przywilej zastosować. Na start oba mechanizmy są wyłączone — sprawdź teksty i włącz, kiedy będziesz gotowy.</div>
           <label class="rb-check"><input id="rb-lv-on" type="checkbox"> Pokazuj klientom rangi i osiągnięcia oraz sekcję „Program lojalnościowy” na stronie</label>
@@ -1817,7 +1835,7 @@ fadeEls.forEach(el => observer.observe(el));
   btns.forEach(function (b) { b.addEventListener("click", install); });
 })();
 </script>
-<script type="module" src="/aplikacja.js?v=9"></script>
+<script type="module" src="/aplikacja.js?v=10"></script>
 <script type="module" src="/straz.js?v=7"></script>
 <!-- ===== RABAT: KONIEC ===== -->
 

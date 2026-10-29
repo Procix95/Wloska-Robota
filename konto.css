@@ -635,3 +635,11 @@ body.dark .poll-opt{background:var(--dark-card)}
 #rabat-overlay .rb-ev b{font-size:14px}
 #rabat-overlay .rb-ev .rb-meta{margin-top:1px}
 @media (prefers-reduced-motion:reduce){#rabat-overlay *{animation:none!important}}
+
+/* zdjęcia strony (panel) */
+#rabat-overlay .rb-sp{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+@media (max-width:560px){#rabat-overlay .rb-sp{grid-template-columns:1fr}}
+#rabat-overlay .rb-sp-card{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid var(--rb-border);border-radius:12px;background:var(--rb-card2,rgba(127,127,127,.06))}
+#rabat-overlay .rb-sp-thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;background:#0002}
+#rabat-overlay .rb-sp-thumb.rb-sp-portrait{aspect-ratio:3/4;max-height:260px;width:auto;max-width:100%;align-self:flex-start}
+#rabat-overlay .rb-sp-btns{display:flex;flex-wrap:wrap;gap:8px}
