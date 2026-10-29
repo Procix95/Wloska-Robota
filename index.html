@@ -1599,7 +1599,7 @@ fadeEls.forEach(el => observer.observe(el));
               <div class="rb-sp-btns"><button type="button" class="rb-btn small" id="rb-sp-hero-add">📷 Wgraj zdjęcie jako tło</button><button type="button" class="rb-btn secondary small" id="rb-sp-hero-del" hidden>↩ Przywróć wideo</button></div>
               <label for="rb-sp-vsel" style="margin-top:6px">Które wideo ma być w tle (gdy nie ma własnego zdjęcia)</label>
               <select id="rb-sp-vsel"><option value="">Nowe wideo (domyślne)</option><option value="old">Poprzednie wideo</option><option value="custom">Własny plik lub link…</option></select>
-              <label class="rb-check"><input id="rb-sp-vsnd" type="checkbox" checked> Pokaż przycisk „Włącz dźwięk" na wideo (domyślnie wyciszone, klient włącza sam)</label>
+              <label class="rb-check"><input id="rb-sp-vsnd" type="checkbox" checked> Dźwięk wideo: włącz od razu po wejściu (gdy przeglądarka pozwoli), wycisz po jednej pętli i pokaż przycisk „Włącz dźwięk"</label>
               <input id="rb-sp-vurl" type="text" maxlength="300" placeholder="video/moje.mp4 albo https://…/film.mp4" hidden>
               <div class="rb-meta" id="rb-sp-vhint" hidden>Najprościej: wrzuć film do folderu <b>video</b> w repozytorium na GitHubie (Add file → Upload files) i wpisz tu <b>video/nazwa.mp4</b>. Lepiej bez dźwięku, 1080p, do ok. 10 MB. Gdy plik się nie wczyta, strona wróci do domyślnego wideo. Chcesz, żebym skompresował film? Wyślij mi go.</div>
             </div>
@@ -1850,7 +1850,7 @@ fadeEls.forEach(el => observer.observe(el));
   btns.forEach(function (b) { b.addEventListener("click", install); });
 })();
 </script>
-<script type="module" src="/aplikacja.js?v=12"></script>
+<script type="module" src="/aplikacja.js?v=13"></script>
 <script type="module" src="/straz.js?v=7"></script>
 <!-- ===== RABAT: KONIEC ===== -->
 

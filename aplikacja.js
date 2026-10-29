@@ -2211,16 +2211,56 @@ function applyHeroVideo() {
   if (vid.hasAttribute("autoplay")) { try { const p = vid.play(); if (p && p.catch) p.catch(() => {}); } catch (_) {} }
   updateHeroSound();
 }
-/* przycisk dźwięku: wideo startuje wyciszone (wymóg przeglądarek), klient włącza dźwięk sam */
+/* dźwięk wideo: próbujemy włączyć go od razu po wejściu; gdy przeglądarka nie pozwala (wymaga kliknięcia),
+   wideo gra wyciszone, a dźwięk włącza się przy pierwszym dotknięciu/kliknięciu. Po pierwszej pętli filmu dźwięk sam się wycisza. */
+let heroSndTried = false, heroLoops = 0, heroLastT = 0, heroGestureOn = false;
+const heroSoundOk = () => { const vid = $("heroVideo"); return !!(vid && siteCfg.heroSound && vid.dataset.lite !== "1" && siteCfg.heroVideo !== "old" && !photoIdx["strona-tlo"] && vid.style.display !== "none"); };
 function updateHeroSound() {
   const b = $("heroSound"), vid = $("heroVideo");
   if (!b || !vid) return;
-  const show = siteCfg.heroSound && vid.dataset.lite !== "1" && siteCfg.heroVideo !== "old" && !photoIdx["strona-tlo"] && vid.style.display !== "none";
+  const show = heroSoundOk();
+  if (!show) vid.muted = true;
   b.hidden = !show;
   b.textContent = vid.muted ? "🔇 Włącz dźwięk" : "🔊 Wyłącz dźwięk";
   b.setAttribute("aria-pressed", vid.muted ? "false" : "true");
   b.setAttribute("aria-label", vid.muted ? "Włącz dźwięk wideo" : "Wyłącz dźwięk wideo");
 }
+function heroAutoSound() {
+  const vid = $("heroVideo");
+  if (heroSndTried || !vid || !heroSoundOk()) return;
+  heroSndTried = true;
+  vid.muted = false; vid.volume = 0.7;
+  const fallback = () => {
+    vid.muted = true;
+    try { const p = vid.play(); if (p && p.catch) p.catch(() => {}); } catch (_) {}
+    updateHeroSound();
+    if (heroGestureOn) return;
+    heroGestureOn = true;
+    const evs = ["pointerdown", "keydown", "touchend"];
+    const on = (e) => {
+      evs.forEach((n) => document.removeEventListener(n, on, true));
+      if (e.target && e.target.closest && e.target.closest("#heroSound")) return;
+      if (heroLoops === 0 && heroSoundOk()) { vid.muted = false; vid.volume = 0.7; updateHeroSound(); }
+    };
+    evs.forEach((n) => document.addEventListener(n, on, true));
+  };
+  try {
+    const p = vid.play();
+    if (p && p.then) p.then(() => updateHeroSound()).catch(fallback); else updateHeroSound();
+  } catch (_) { fallback(); }
+}
+(function bindHeroLoop() {
+  const vid = $("heroVideo");
+  if (!vid) return;
+  vid.addEventListener("timeupdate", () => {
+    const t = vid.currentTime;
+    if (t + 0.5 < heroLastT) {
+      heroLoops++;
+      if (heroLoops === 1 && !vid.muted) { vid.muted = true; updateHeroSound(); }
+    }
+    heroLastT = t;
+  });
+})();
 if ($("heroSound")) $("heroSound").addEventListener("click", () => {
   const vid = $("heroVideo");
   if (!vid) return;
@@ -2474,7 +2514,7 @@ function applySite(cfg) {
   window.WR_HOURS = siteCfg.hours;
   try { if (window.wrHoursApply) window.wrHoursApply(); } catch (_) {}
   applyTheme(siteCfg.theme);
-  try { applyHeroVideo(); } catch (_) {}
+  try { applyHeroVideo(); heroAutoSound(); } catch (_) {}
   setTimeout(() => { try { refreshLoyaltyUi(); } catch (_) {} try { renderPoll(auth.currentUser); } catch (_) {} }, 0);
   renderProducts();
   menuEls().forEach((el) => {
