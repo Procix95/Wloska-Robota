@@ -2187,10 +2187,29 @@ const DELIVERY_DEFAULT = ["Głuponie", "Trzcianka", "Tomaszewo", "Michorzewo", "
   .map((name) => ({ name, fee: 10, min: null, freeFrom: null }));
 // Link do formularza opinii w Google (domyślny; admin może go zmienić lub wyczyścić w panelu: Strona → Opinie w Google).
 const GOOGLE_REVIEW_DEFAULT = "https://g.page/r/CUq2_T6CQcy5EAE/review";
-let siteCfg = { prices: {}, unavailable: {}, hidden: {}, badges: {}, qz: {}, products: [], campaigns: [], notice: null, dish: null, delivery: { places: DELIVERY_DEFAULT }, googleReviewUrl: GOOGLE_REVIEW_DEFAULT, reviews: [], googleMapsUrl: "", theme: "auto", levelsOn: false, levels: null, refOn: false, poll: null, hours: null };
+let siteCfg = { prices: {}, unavailable: {}, hidden: {}, badges: {}, qz: {}, heroVideo: "", products: [], campaigns: [], notice: null, dish: null, delivery: { places: DELIVERY_DEFAULT }, googleReviewUrl: GOOGLE_REVIEW_DEFAULT, reviews: [], googleMapsUrl: "", theme: "auto", levelsOn: false, levels: null, refOn: false, poll: null, hours: null };
 const PROD_CATS = [["klasyczne", "Klasyczne"], ["miesne", "Mięsne"], ["vege", "Wege"], ["sosy", "Sosy"], ["makarony", "Makarony"], ["dodatki", "Dodatki"]];
 const MAX_PRODUCTS = 40;
 const QZ_TYPES = [["meat", "🥓 Mięsna"], ["sea", "🦐 Owoce morza"], ["vege", "🌱 Bez mięsa"], ["none", "🚫 Nie pokazuj w quizie"]];
+/* wideo w tle: "" = nowe domyślne, "old" = poprzednie, albo własny plik video/xxx.mp4 / link https */
+function cleanHeroVideo(v) {
+  if (v === "old") return "old";
+  return typeof v === "string" && (/^https:\/\/\S{4,290}$/.test(v) || /^video\/[\w.\-\/]{1,100}\.(mp4|webm)$/i.test(v)) ? v : "";
+}
+function applyHeroVideo() {
+  const vid = $("heroVideo");
+  if (!vid || vid.dataset.lite === "1" || !window.WR_HERO_SRC) return;
+  const def = window.WR_HERO_SRC(""), src = window.WR_HERO_SRC(siteCfg.heroVideo);
+  if (vid.dataset.src === src) return;
+  vid.dataset.src = src;
+  vid.innerHTML = "";
+  const so = document.createElement("source");
+  so.src = src;
+  if (src !== def) so.addEventListener("error", () => { if (vid.dataset.src === src) { vid.dataset.src = def; vid.innerHTML = '<source src="' + def + '">'; vid.load(); try { vid.play(); } catch (_) {} } });
+  vid.appendChild(so);
+  vid.load();
+  if (vid.hasAttribute("autoplay")) { try { const p = vid.play(); if (p && p.catch) p.catch(() => {}); } catch (_) {} }
+}
 const qzType = (v) => (QZ_TYPES.some((t) => t[0] === v) ? v : "");
 function cleanQz(m) { const o = {}; if (m && typeof m === "object") Object.keys(m).slice(0, 200).forEach((k) => { if (qzType(m[k])) o[k] = m[k]; }); return o; }
 const qzSelectHtml = (cls, cur) => `<label class="rb-qz-row">🍕 Quiz „Dobierz mi pizzę”: <select class="${cls}" aria-label="Rodzaj pizzy w quizie"><option value="">Auto (po opisie)</option>${QZ_TYPES.map((t) => `<option value="${t[0]}"${cur === t[0] ? " selected" : ""}>${t[1]}</option>`).join("")}</select></label>`;
@@ -2208,7 +2227,7 @@ const tsMs = (t) => (t ? (t.toDate ? t.toDate().getTime() : (t.seconds ? t.secon
 function plainCfg(c) {
   const n = c.notice ? { ...c.notice, until: c.notice.until ? { seconds: Math.floor(tsMs(c.notice.until) / 1000) } : null } : null;
   const camps = (c.campaigns || []).map((x) => ({ ...x, from: x.from ? { seconds: Math.floor(tsMs(x.from) / 1000) } : null, until: x.until ? { seconds: Math.floor(tsMs(x.until) / 1000) } : null }));
-  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, badges: c.badges || {}, qz: c.qz || {}, products: c.products || [], campaigns: camps, notice: n, dish: c.dish || null, delivery: c.delivery || null, googleReviewUrl: typeof c.googleReviewUrl === "string" ? c.googleReviewUrl : null, reviews: Array.isArray(c.reviews) ? c.reviews : [], googleMapsUrl: typeof c.googleMapsUrl === "string" ? c.googleMapsUrl : "", theme: typeof c.theme === "string" ? c.theme : "auto", levelsOn: c.levelsOn === true, levels: Array.isArray(c.levels) ? c.levels : null, levelsV: c.levelsV === 2 ? 2 : 0, refOn: c.refOn === true, poll: c.poll || null, hours: c.hours || null };
+  return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, badges: c.badges || {}, qz: c.qz || {}, heroVideo: typeof c.heroVideo === "string" ? c.heroVideo : "", products: c.products || [], campaigns: camps, notice: n, dish: c.dish || null, delivery: c.delivery || null, googleReviewUrl: typeof c.googleReviewUrl === "string" ? c.googleReviewUrl : null, reviews: Array.isArray(c.reviews) ? c.reviews : [], googleMapsUrl: typeof c.googleMapsUrl === "string" ? c.googleMapsUrl : "", theme: typeof c.theme === "string" ? c.theme : "auto", levelsOn: c.levelsOn === true, levels: Array.isArray(c.levels) ? c.levels : null, levelsV: c.levelsV === 2 ? 2 : 0, refOn: c.refOn === true, poll: c.poll || null, hours: c.hours || null };
 }
 
 function renderDish() {
@@ -2426,7 +2445,7 @@ document.getElementById("menu-print-btn").addEventListener("click", printMenu);
 
 function applySite(cfg) {
   siteCfg = {
-    prices: (cfg && cfg.prices) || {}, unavailable: (cfg && cfg.unavailable) || {}, hidden: (cfg && cfg.hidden) || {}, badges: (cfg && cfg.badges) || {}, qz: cleanQz(cfg && cfg.qz),
+    prices: (cfg && cfg.prices) || {}, unavailable: (cfg && cfg.unavailable) || {}, hidden: (cfg && cfg.hidden) || {}, badges: (cfg && cfg.badges) || {}, qz: cleanQz(cfg && cfg.qz), heroVideo: cleanHeroVideo(cfg && cfg.heroVideo),
     products: Array.isArray(cfg && cfg.products) ? cfg.products : [], campaigns: Array.isArray(cfg && cfg.campaigns) ? cfg.campaigns : [], notice: (cfg && cfg.notice) || null, dish: (cfg && cfg.dish) || null,
     delivery: { places: Array.isArray(cfg && cfg.delivery && cfg.delivery.places) ? cfg.delivery.places : DELIVERY_DEFAULT },
     googleReviewUrl: (cfg && typeof cfg.googleReviewUrl === "string") ? cfg.googleReviewUrl : GOOGLE_REVIEW_DEFAULT,
@@ -2437,6 +2456,7 @@ function applySite(cfg) {
   window.WR_HOURS = siteCfg.hours;
   try { if (window.wrHoursApply) window.wrHoursApply(); } catch (_) {}
   applyTheme(siteCfg.theme);
+  try { applyHeroVideo(); } catch (_) {}
   setTimeout(() => { try { refreshLoyaltyUi(); } catch (_) {} try { renderPoll(auth.currentUser); } catch (_) {} }, 0);
   renderProducts();
   menuEls().forEach((el) => {
@@ -2703,6 +2723,12 @@ async function removePhoto(el) {
   finally { photoBusy = false; applyPhotos(); }
 }
 /* zdjęcie w „O nas” (po prawej) i tło na górze strony: własne zdjęcie z panelu zastępuje domyślne (dla tła: wideo) */
+function syncHeroVideoUi() {
+  const c = $("rb-sp-vsel").value === "custom";
+  $("rb-sp-vurl").hidden = !c;
+  $("rb-sp-vhint").hidden = !c;
+}
+$("rb-sp-vsel").addEventListener("change", syncHeroVideoUi);
 function applySitePhotos() {
   const get = (slug) => {
     const ts = photoIdx[slug];
@@ -3189,6 +3215,7 @@ function fillSiteForm() {
   $("rb-prod-list").innerHTML = siteCfg.products.filter(validProduct).map(prodRowHtml).join("");
   $("rb-rev-list").innerHTML = (siteCfg.reviews || []).filter(validReview).map(revRowHtml).join("");
   $("rb-site-gmaps").value = siteCfg.googleMapsUrl || "";
+  { const hv = siteCfg.heroVideo || "", sel = $("rb-sp-vsel"); sel.value = hv === "old" ? "old" : hv ? "custom" : ""; $("rb-sp-vurl").value = hv && hv !== "old" ? hv : ""; syncHeroVideoUi(); }
   const items = menuEls().filter((el) => !el.dataset.custom);
   $("rb-site-items").innerHTML = items.map((el) => {
     const key = itemKey(el);
@@ -3407,12 +3434,17 @@ async function saveSite() {
   if (revBad) { say( revBad, "err"); return; }
   if (reviews.length > MAX_REVIEWS) { say( "Maksymalnie " + MAX_REVIEWS + " opinii.", "err"); return; }
   const googleMapsUrl = $("rb-site-gmaps").value.trim();
+  let heroVideo = "";
+  { const sv = $("rb-sp-vsel").value; if (sv === "old") heroVideo = "old"; else if (sv === "custom") {
+    heroVideo = $("rb-sp-vurl").value.trim();
+    if (!cleanHeroVideo(heroVideo)) { say("Wideo: wpisz ścieżkę w stylu video/nazwa.mp4 albo link zaczynający się od https://", "err"); return; }
+  } }
   if (googleMapsUrl && !httpsUrl(googleMapsUrl)) { say( "Link do opinii w Mapach Google musi zaczynać się od https://", "err"); return; }
   const btns = [$("rb-site-save"), ...document.querySelectorAll(".rb-sec-save")];
   btns.forEach((b) => { b.disabled = true; });
   try {
-    await setDoc(doc(db, "site", "config"), { prices, unavailable, hidden, badges, qz, products, campaigns, notice, dish, delivery, googleReviewUrl, reviews, googleMapsUrl, theme, levelsOn, levels, levelsV: 2, refOn, poll, hours, updatedAt: serverTimestamp() });
-    const cfg = { prices, unavailable, hidden, badges, qz, products, campaigns, notice, dish, delivery, googleReviewUrl, reviews, googleMapsUrl, theme, levelsOn, levels, levelsV: 2, refOn, poll, hours };
+    await setDoc(doc(db, "site", "config"), { prices, unavailable, hidden, badges, qz, heroVideo, products, campaigns, notice, dish, delivery, googleReviewUrl, reviews, googleMapsUrl, theme, levelsOn, levels, levelsV: 2, refOn, poll, hours, updatedAt: serverTimestamp() });
+    const cfg = { prices, unavailable, hidden, badges, qz, heroVideo, products, campaigns, notice, dish, delivery, googleReviewUrl, reviews, googleMapsUrl, theme, levelsOn, levels, levelsV: 2, refOn, poll, hours };
     applySite(cfg);
     fillSiteForm();
     try { localStorage.setItem(SITE_CACHE_KEY, JSON.stringify(plainCfg(cfg))); } catch (_) {}

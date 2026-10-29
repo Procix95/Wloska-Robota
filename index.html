@@ -440,16 +440,22 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
 </header>
  
 <section class="hero" id="home">
-  <video class="hero-bg" id="heroVideo" autoplay muted loop playsinline preload="metadata" poster="images/hero-poster.jpg">
-    <source src="video/C0024.mp4?v=2" type="video/mp4">
-  </video>
+  <video class="hero-bg" id="heroVideo" autoplay muted loop playsinline preload="metadata" poster="images/hero-poster.jpg"></video>
   <script>
   // Przy oszczędzaniu danych, słabym zasięgu lub ograniczonym ruchu zostaje samo zdjęcie zamiast wideo
   (function () {
     var v = document.getElementById('heroVideo'), c = navigator.connection || {};
     var slabo = c.saveData || /(^|-)2g$/.test(c.effectiveType || '');
     var ruch = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (v && (slabo || ruch)) { v.removeAttribute('autoplay'); v.preload = 'none'; v.innerHTML = ''; v.load(); }
+    var mob = window.matchMedia && matchMedia('(max-width: 800px)').matches;
+    // Które wideo: domyślne nowe (osobny plik na telefon), „old” = poprzednie, albo własny plik/link wpisany w panelu
+    window.WR_HERO_SRC = function (s) {
+      if (s === 'old') return 'video/C0024.mp4?v=2';
+      if (s && (/^https:\/\/\S{4,290}$/.test(s) || /^video\/[\w.\-\/]{1,100}\.(mp4|webm)$/i.test(s))) return s;
+      return mob ? 'video/hero-m.mp4?v=3' : 'video/hero-d.mp4?v=3';
+    };
+    if (v && (slabo || ruch)) { v.dataset.lite = '1'; v.removeAttribute('autoplay'); v.preload = 'none'; v.load(); }
+    else if (v) { v.dataset.src = WR_HERO_SRC(''); v.innerHTML = '<source src="' + v.dataset.src + '">'; v.load(); }
   })();
   </script>
   <div class="container">
@@ -1573,8 +1579,8 @@ fadeEls.forEach(el => observer.observe(el));
           <div id="rb-gal-list"></div>
           <button type="button" class="rb-btn secondary small" id="rb-gal-reset" style="margin-top:8px">Przywróć usunięte i domyślną kolejność</button>
 
-          <h4 class="rb-hsec"><span>Zdjęcia strony</span></h4>
-          <div class="rb-meta" style="margin:-4px 0 10px">Zmiany zapisują się od razu. Własne zdjęcie zastępuje domyślne, a przycisk „Przywróć" cofa je. Zdjęcie jest automatycznie zmniejszane i kadrowane.</div>
+          <h4 class="rb-hsec"><span>Zdjęcia strony</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
+          <div class="rb-meta" style="margin:-4px 0 10px">Zdjęcia zapisują się od razu po wybraniu pliku (przycisk „Przywróć" cofa je). Wybór wideo zapisz przyciskiem „💾 Zapisz". Zdjęcie jest automatycznie zmniejszane i kadrowane.</div>
           <div class="rb-sp">
             <div class="rb-sp-card">
               <b>Zdjęcie w sekcji „O nas" (po prawej)</b>
@@ -1587,6 +1593,10 @@ fadeEls.forEach(el => observer.observe(el));
               <img id="rb-sp-hero-img" class="rb-sp-thumb" alt="Podgląd tła na górze strony">
               <div class="rb-meta">Domyślnie jest tam wideo. Własne zdjęcie (najlepiej poziome 16:9) zastąpi je. Podgląd pokazuje zdjęcie zastępcze wideo.</div>
               <div class="rb-sp-btns"><button type="button" class="rb-btn small" id="rb-sp-hero-add">📷 Wgraj zdjęcie jako tło</button><button type="button" class="rb-btn secondary small" id="rb-sp-hero-del" hidden>↩ Przywróć wideo</button></div>
+              <label for="rb-sp-vsel" style="margin-top:6px">Które wideo ma być w tle (gdy nie ma własnego zdjęcia)</label>
+              <select id="rb-sp-vsel"><option value="">Nowe wideo (domyślne)</option><option value="old">Poprzednie wideo</option><option value="custom">Własny plik lub link…</option></select>
+              <input id="rb-sp-vurl" type="text" maxlength="300" placeholder="video/moje.mp4 albo https://…/film.mp4" hidden>
+              <div class="rb-meta" id="rb-sp-vhint" hidden>Najprościej: wrzuć film do folderu <b>video</b> w repozytorium na GitHubie (Add file → Upload files) i wpisz tu <b>video/nazwa.mp4</b>. Lepiej bez dźwięku, 1080p, do ok. 10 MB. Gdy plik się nie wczyta, strona wróci do domyślnego wideo. Chcesz, żebym skompresował film? Wyślij mi go.</div>
             </div>
           </div>
           <div class="rb-meta" id="rb-sp-msg" role="status" aria-live="polite"></div>
@@ -1835,7 +1845,7 @@ fadeEls.forEach(el => observer.observe(el));
   btns.forEach(function (b) { b.addEventListener("click", install); });
 })();
 </script>
-<script type="module" src="/aplikacja.js?v=10"></script>
+<script type="module" src="/aplikacja.js?v=11"></script>
 <script type="module" src="/straz.js?v=7"></script>
 <!-- ===== RABAT: KONIEC ===== -->
 
