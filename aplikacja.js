@@ -1725,7 +1725,9 @@ function renderCustomer() {
       : "";
     const LI = siteCfg.levelsOn ? rankOf(L) : null;
     const lvUpNow = !!(LI && LI.next && (L.stamps || 0) >= LOYAL_GOAL && rewardsOf(L) + 1 >= LI.next.from);
-    const lvLine = LI ? `<div class="rb-meta">🏅 Ranga: <b>${esc(LI.lvl.ic)} ${esc(LI.lvl.n)}</b>${LI.lvl.perk ? " — przywilej: <b>" + esc(LI.lvl.perk) + "</b>" : ""}${LI.next ? " · do " + esc(LI.next.ic + " " + LI.next.n) + ": " + LI.left + " " + pizzaWord(LI.left) + " gratis" : ""}</div>${lvUpNow ? `<div class="rb-lv-up">⭐ Wydanie tej pizzy gratis awansuje klienta na rangę ${esc(LI.next.ic + " " + LI.next.n)}!</div>` : ""}` : "";
+    const lvLine = LI ? `<div class="rb-meta">🏅 Ranga: <b>${esc(LI.lvl.ic)} ${esc(LI.lvl.n)}</b>${LI.next ? " · do " + esc(LI.next.ic + " " + LI.next.n) + ": " + LI.left + " " + pizzaWord(LI.left) + " gratis" : ""}</div>${lvUpNow ? `<div class="rb-lv-up">⭐ Wydanie tej pizzy gratis awansuje klienta na rangę ${esc(LI.next.ic + " " + LI.next.n)}!</div>` : ""}` : "";
+    /* duży pasek z rangą i przywilejem – obsługa widzi to od razu po skanie */
+    const perkBox = LI ? `<div class="rb-perk${LI.idx >= 1 ? " hi" : ""}"><div class="rb-perk-ic">${esc(LI.lvl.ic)}</div><div class="rb-perk-b"><div class="rb-perk-n">Ranga: ${esc(LI.lvl.n)}${LI.granted ? " · nadana przez właściciela" : ""}</div><div class="rb-perk-t">${LI.lvl.perk ? (LI.idx >= 1 ? "Przysługuje: " : "") + "<b>" + esc(LI.lvl.perk) + "</b>" : "Bez dodatkowego przywileju"}</div></div></div>` : "";
     /* ściąga dla kasy: co należy się temu klientowi przy płaceniu */
     const kasa = [];
     if (LI && LI.idx >= 1 && LI.lvl.perk) kasa.push(`<li>${esc(LI.lvl.ic)} <b>${esc(LI.lvl.n)}</b>: ${esc(LI.lvl.perk)}</li>`);
@@ -1733,7 +1735,7 @@ function renderCustomer() {
     active.forEach((c) => kasa.push(`<li>🎟 Kod <b>${esc(c.code)}</b>: ${esc(c.description)}</li>`));
     if (isAdmin && bdayInDays(uu) === 0) kasa.push(`<li>🎂 <b>Dziś ma urodziny</b></li>`);
     const kasaHtml = `<div class="rb-kasa"><div class="rb-kasa-h">💰 Do nabicia na kasie</div>${kasa.length ? "<ul>" + kasa.join("") + "</ul>" : '<div class="rb-kasa-none">Brak zniżek — pełna cena.</div>'}</div>`;
-    head = `<div class="rb-big">👤 ${esc(L.name || L.email)}</div><div class="rb-meta">${esc(L.email)} · pieczątek łącznie: ${L.total || 0} · darmowe pizze: ${L.rewards || 0}</div>${kasaHtml}${lvLine}${adminInfo}
+    head = `<div class="rb-big">👤 ${esc(L.name || L.email)}</div><div class="rb-meta">${esc(L.email)} · pieczątek łącznie: ${L.total || 0} · darmowe pizze: ${L.rewards || 0}</div>${perkBox}${kasaHtml}${lvLine}${adminInfo}
       <div class="rb-stamps">${stampDots(n)}</div>
       <div class="rb-loyal-txt"><b>${n} / ${LOYAL_GOAL}</b>${full ? " — 🎉 należy się pizza gratis (1 szt.)" : ""}</div>`;
     body = `<div class="rb-actions">
