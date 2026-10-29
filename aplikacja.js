@@ -2285,7 +2285,7 @@ menuEls().forEach((el) => {
 const tsMs = (t) => (t ? (t.toDate ? t.toDate().getTime() : (t.seconds ? t.seconds * 1000 : 0)) : 0);
 
 function plainCfg(c) {
-  const n = c.notice ? { ...c.notice, until: c.notice.until ? { seconds: Math.floor(tsMs(c.notice.until) / 1000) } : null } : null;
+  const n = c.notice ? { ...c.notice, from: c.notice.from ? { seconds: Math.floor(tsMs(c.notice.from) / 1000) } : null, until: c.notice.until ? { seconds: Math.floor(tsMs(c.notice.until) / 1000) } : null } : null;
   const camps = (c.campaigns || []).map((x) => ({ ...x, from: x.from ? { seconds: Math.floor(tsMs(x.from) / 1000) } : null, until: x.until ? { seconds: Math.floor(tsMs(x.until) / 1000) } : null }));
   return { prices: c.prices || {}, unavailable: c.unavailable || {}, hidden: c.hidden || {}, badges: c.badges || {}, qz: c.qz || {}, heroVideo: typeof c.heroVideo === "string" ? c.heroVideo : "", heroSound: c.heroSound !== false, products: c.products || [], campaigns: camps, notice: n, dish: c.dish || null, delivery: c.delivery || null, googleReviewUrl: typeof c.googleReviewUrl === "string" ? c.googleReviewUrl : null, reviews: Array.isArray(c.reviews) ? c.reviews : [], googleMapsUrl: typeof c.googleMapsUrl === "string" ? c.googleMapsUrl : "", theme: typeof c.theme === "string" ? c.theme : "auto", levelsOn: c.levelsOn === true, levels: Array.isArray(c.levels) ? c.levels : null, levelsV: c.levelsV === 2 ? 2 : 0, refOn: c.refOn === true, poll: c.poll || null, hours: c.hours || null };
 }
@@ -2324,8 +2324,8 @@ function activeCampaign() {
 }
 function effectiveNotice() {
   const n = siteCfg.notice;
-  const until = n ? tsMs(n.until) : 0;
-  if (n && n.active && n.text && (!until || until > Date.now())) return n;
+  const until = n ? tsMs(n.until) : 0, from = n ? tsMs(n.from) : 0;
+  if (n && n.active && n.text && (!until || until > Date.now()) && (!from || from <= Date.now())) return n;
   const c = activeCampaign();
   return c ? { text: c.text, type: c.type, active: true } : null;
 }
@@ -3294,8 +3294,9 @@ function fillSiteForm() {
   const n = siteCfg.notice || {};
   $("rb-site-notice-text").value = n.text || "";
   $("rb-site-notice-type").value = NOTICE_TYPES.includes(n.type) ? n.type : "info";
-  const um = tsMs(n.until);
-  $("rb-site-notice-until").value = um ? ymd(new Date(um)) : "";
+  const ldt = (ms) => { if (!ms) return ""; const d = new Date(ms); return ymd(d) + "T" + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"); };
+  $("rb-site-notice-from").value = ldt(tsMs(n.from));
+  $("rb-site-notice-until").value = ldt(tsMs(n.until));
   $("rb-site-notice-on").checked = !!n.active;
   const d = siteCfg.dish || {};
   $("rb-site-dish").value = d.key || "";
@@ -3469,11 +3470,13 @@ async function saveSite() {
   const delivery = { places };
   if (products.length > MAX_PRODUCTS) { say( "Maksymalnie " + MAX_PRODUCTS + " własnych produktów.", "err"); return; }
   const text = $("rb-site-notice-text").value.trim();
-  const until = $("rb-site-notice-until").value;
+  const until = $("rb-site-notice-until").value, from = $("rb-site-notice-from").value;
+  if (from && until && new Date(until) <= new Date(from)) { say( "Komunikat: data „do” musi być późniejsza niż „od”.", "err"); return; }
   const notice = {
     text, type: $("rb-site-notice-type").value,
     active: $("rb-site-notice-on").checked && !!text,
-    until: until ? Timestamp.fromDate(new Date(until + "T23:59:59")) : null
+    from: from ? Timestamp.fromDate(new Date(from)) : null,
+    until: until ? Timestamp.fromDate(new Date(until)) : null
   };
   const camp = collectCampaigns();
   if (camp.bad) { say( camp.bad, "err"); return; }

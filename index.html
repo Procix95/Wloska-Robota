@@ -1543,8 +1543,10 @@ fadeEls.forEach(el => observer.observe(el));
             <option value="promo">Promocja (złoty)</option>
             <option value="warn">Uwaga (czerwony)</option>
           </select>
-          <label for="rb-site-notice-until">Wyświetlaj do (puste = dopóki nie wyłączysz)</label>
-          <input id="rb-site-notice-until" type="date">
+          <label for="rb-site-notice-from">Wyświetlaj od (data i godzina; puste = od razu)</label>
+          <input id="rb-site-notice-from" type="datetime-local">
+          <label for="rb-site-notice-until">Wyświetlaj do (data i godzina; puste = dopóki nie wyłączysz)</label>
+          <input id="rb-site-notice-until" type="datetime-local">
           <label class="rb-check"><input id="rb-site-notice-on" type="checkbox"> Pokazuj komunikat na stronie</label>
 
           <h4 class="rb-hsec"><span>Akcje i specjalne dni</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
@@ -1854,7 +1856,7 @@ fadeEls.forEach(el => observer.observe(el));
   btns.forEach(function (b) { b.addEventListener("click", install); });
 })();
 </script>
-<script type="module" src="/aplikacja.js?v=16"></script>
+<script type="module" src="/aplikacja.js?v=17"></script>
 <script type="module" src="/straz.js?v=7"></script>
 <!-- ===== RABAT: KONIEC ===== -->
 
