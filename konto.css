@@ -654,3 +654,6 @@ body.dark .poll-opt{background:var(--dark-card)}
 #rabat-overlay .rb-perk.hi{border:2px solid var(--rb-gold);background:linear-gradient(135deg,rgba(212,175,55,.28),rgba(212,175,55,.08))}
 #rabat-overlay .rb-perk.hi .rb-perk-n{color:var(--rb-gold)}
 #rabat-overlay .rb-perk.hi .rb-perk-t{font-size:16px}
+#rabat-overlay .rb-ach-line{margin:6px 0 10px;font-size:13px;line-height:1.7;text-align:left;color:var(--rb-muted)}
+#rabat-overlay .rb-ach-line b{color:inherit}
+#rabat-overlay .rb-ach-line span{white-space:nowrap;color:var(--rb-text,inherit)}
