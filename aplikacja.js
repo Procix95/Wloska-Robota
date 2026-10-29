@@ -2770,6 +2770,14 @@ async function saveSitePhoto(slug, file) {
   if (!cfg || !isAdmin || photoBusy) return;
   photoBusy = true;
   const msg = $("rb-sp-msg");
+  if (/^video\//.test(file.type) || /\.(mp4|mov|m4v|webm|avi|mkv)$/i.test(file.name || "")) {
+    // film nie zmieści się w bazie (limit 1 MB na dokument), więc tu wgrywamy tylko zdjęcia
+    photoBusy = false;
+    const sel = $("rb-sp-vsel");
+    if (sel) { sel.value = "custom"; syncHeroVideoUi(); }
+    setMsg(msg, "To jest film, a tu można wgrać tylko zdjęcie. Film nie zmieści się w bazie. Wgraj go do folderu video na GitHubie (link poniżej; GitHub przyjmuje pliki do 25 MB, większy trzeba najpierw skompresować), wpisz jego nazwę w polu „Własny plik” i zapisz.", "err");
+    return;
+  }
   setMsg(msg, "Zapisuję zdjęcie…", "");
   try {
     if (!/^image\//.test(file.type) && !/\.(jpe?g|png|webp|heic|heif|gif|bmp)$/i.test(file.name || "")) throw new Error("type");

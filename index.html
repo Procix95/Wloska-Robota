@@ -1596,7 +1596,7 @@ fadeEls.forEach(el => observer.observe(el));
               <label for="rb-sp-vsel" style="margin-top:6px">Które wideo ma być w tle (gdy nie ma własnego zdjęcia)</label>
               <select id="rb-sp-vsel"><option value="">Nowe wideo (domyślne)</option><option value="old">Poprzednie wideo</option><option value="custom">Własny plik lub link…</option></select>
               <input id="rb-sp-vurl" type="text" maxlength="300" placeholder="video/moje.mp4 albo https://…/film.mp4" hidden>
-              <div class="rb-meta" id="rb-sp-vhint" hidden>Najprościej: wrzuć film do folderu <b>video</b> w repozytorium na GitHubie (Add file → Upload files) i wpisz tu <b>video/nazwa.mp4</b>. Lepiej bez dźwięku, 1080p, do ok. 10 MB. Gdy plik się nie wczyta, strona wróci do domyślnego wideo. Chcesz, żebym skompresował film? Wyślij mi go.</div>
+              <div class="rb-meta" id="rb-sp-vhint" hidden>Filmu nie da się wgrać tu przyciskiem (baza nie przyjmie tak dużego pliku). Najprościej: <a href="https://github.com/Procix95/Wloska-Robota/upload/main/video" target="_blank" rel="noopener">otwórz folder video na GitHubie</a>, przeciągnij film (limit GitHuba to 25 MB, większy trzeba skompresować) i kliknij „Commit changes”, potem wpisz tu <b>video/nazwa.mp4</b> i zapisz. Lepiej bez dźwięku, 1080p, do ok. 10 MB. Gdy plik się nie wczyta, strona wróci do domyślnego wideo. Chcesz, żebym skompresował film? Wyślij mi go.</div>
             </div>
           </div>
           <div class="rb-meta" id="rb-sp-msg" role="status" aria-live="polite"></div>
@@ -1845,7 +1845,7 @@ fadeEls.forEach(el => observer.observe(el));
   btns.forEach(function (b) { b.addEventListener("click", install); });
 })();
 </script>
-<script type="module" src="/aplikacja.js?v=11"></script>
+<script type="module" src="/aplikacja.js?v=12"></script>
 <script type="module" src="/straz.js?v=7"></script>
 <!-- ===== RABAT: KONIEC ===== -->
 
