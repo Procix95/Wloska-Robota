@@ -2277,7 +2277,7 @@ const BADGES = [["hit", "🔥 Hit"], ["ostra", "🌶 Ostra"], ["wege", "🌱 Weg
 const badgeIds = (v) => (Array.isArray(v) ? v : []).filter((b) => BADGES.some((x) => x[0] === b));
 const menuEls = () => [...document.querySelectorAll("#menuGrid .menu-item")];
 const itemKey = (el) => ((el.querySelector(".menu-item-title") || {}).textContent || "").replace(/^\s*\d+\.\s*/, "").trim().toLowerCase();
-const itemName = (el) => ((el.querySelector(".menu-item-title") || {}).textContent || "").trim();
+const itemName = (el) => ((el.querySelector(".menu-item-title") || {}).textContent || "").replace(/^\s*\d+\.\s*/, "").trim();
 menuEls().forEach((el) => {
   const pEl = el.querySelector(".menu-item-price");
   if (pEl && !el.dataset.origPrice) el.dataset.origPrice = pEl.textContent.replace(/\u00a0/g, " ").trim();
