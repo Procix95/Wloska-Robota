@@ -1098,7 +1098,7 @@ fadeEls.forEach(el => observer.observe(el));
      ===================================================================== -->
 
 <!-- ===== RABAT: STYLE ===== -->
-<link rel="stylesheet" href="/konto.css?v=7">
+<link rel="stylesheet" href="/konto.css?v=8">
 
 <!-- ===== RABAT: HTML ===== -->
 <div id="rabat-overlay" role="dialog" aria-modal="true" aria-labelledby="rb-title">
@@ -1576,14 +1576,8 @@ fadeEls.forEach(el => observer.observe(el));
           </select>
           <div class="rb-meta" id="rb-theme-now" style="margin-top:6px"></div>
 
-          <h4 class="rb-hsec"><span>Galeria zdjęć</span></h4>
-          <div class="rb-meta" style="margin:-4px 0 10px">Zmiany zapisują się od razu. Strzałki zmieniają kolejność (⤒ = na początek), 🗑 usuwa zdjęcie ze strony, a pole pod zdjęciem to opcjonalny podpis. Zdjęcia, które były w kodzie strony, też można usunąć i potem przywrócić.</div>
-          <button type="button" class="rb-btn" id="rb-gal-add">📷 Dodaj zdjęcia</button>
-          <div class="rb-meta" id="rb-gal-count" style="margin:10px 0 4px"></div>
-          <div id="rb-gal-list"></div>
-          <button type="button" class="rb-btn secondary small" id="rb-gal-reset" style="margin-top:8px">Przywróć usunięte i domyślną kolejność</button>
-
-          <h4 class="rb-hsec"><span>Zdjęcia strony</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
+          <h4 class="rb-hsec"><span>Zdjęcia i galeria</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
+          <div class="rb-subhead">Zdjęcia i wideo na górze strony</div>
           <div class="rb-meta" style="margin:-4px 0 10px">Zdjęcia zapisują się od razu po wybraniu pliku (przycisk „Przywróć" cofa je). Wybór wideo zapisz przyciskiem „💾 Zapisz". Zdjęcie jest automatycznie zmniejszane i kadrowane.</div>
           <div class="rb-sp">
             <div class="rb-sp-card">
@@ -1605,6 +1599,13 @@ fadeEls.forEach(el => observer.observe(el));
             </div>
           </div>
           <div class="rb-meta" id="rb-sp-msg" role="status" aria-live="polite"></div>
+
+          <div class="rb-subhead">Galeria zdjęć</div>
+          <div class="rb-meta" style="margin:-4px 0 10px">Zmiany zapisują się od razu. Strzałki zmieniają kolejność (⤒ = na początek), 🗑 usuwa zdjęcie ze strony, a pole pod zdjęciem to opcjonalny podpis. Zdjęcia, które były w kodzie strony, też można usunąć i potem przywrócić.</div>
+          <button type="button" class="rb-btn" id="rb-gal-add">📷 Dodaj zdjęcia</button>
+          <div class="rb-meta" id="rb-gal-count" style="margin:10px 0 4px"></div>
+          <div id="rb-gal-list"></div>
+          <button type="button" class="rb-btn secondary small" id="rb-gal-reset" style="margin-top:8px">Przywróć usunięte i domyślną kolejność</button>
 
           <h4 class="rb-hsec"><span>Lojalność i polecenia</span><button type="button" class="rb-btn small rb-sec-save">💾 Zapisz</button></h4>
           <div class="rb-meta" style="margin:-4px 0 8px">Klient widzi swoją rangę, postęp, osiągnięcia i przywilej, a obsługa widzi rangę przy skanowaniu, żeby przywilej zastosować. Na start oba mechanizmy są wyłączone — sprawdź teksty i włącz, kiedy będziesz gotowy.</div>
@@ -1850,7 +1851,7 @@ fadeEls.forEach(el => observer.observe(el));
   btns.forEach(function (b) { b.addEventListener("click", install); });
 })();
 </script>
-<script type="module" src="/aplikacja.js?v=13"></script>
+<script type="module" src="/aplikacja.js?v=14"></script>
 <script type="module" src="/straz.js?v=7"></script>
 <!-- ===== RABAT: KONIEC ===== -->
 
