@@ -4863,7 +4863,7 @@ $("rb-site-theme").addEventListener("change", showThemeNow);
   const pane = document.querySelector('#rb-admin .rb-pane[data-pane="site"]');
   if (!pane) return;
   const heads = [...pane.querySelectorAll(":scope > h4.rb-hsec")];
-  const LABELS = { "Komunikat na górze strony": "📢 Komunikat", "Akcje i specjalne dni": "🎯 Akcje", "Pizza dnia": "🍕 Pizza dnia", "Dowóz": "🚚 Dowóz", "Motyw sezonowy": "🎨 Motyw", "Galeria zdjęć": "🖼️ Galeria", "Zdjęcia strony": "🏞 Zdjęcia strony", "Lojalność i polecenia": "🏅 Lojalność", "Opinie w Google": "⭐ Opinie", "Godziny otwarcia": "🕐 Godziny", "Plakat QR": "🖨 Plakat QR", "Głosowanie klientów": "🗳 Głosowanie", "Kopia zapasowa": "💾 Kopia", "Opinie z Google na stronie": "💬 Opinie klientów", "Własne produkty": "➕ Produkty", "Ceny i dostępność pozycji ze strony": "💲 Ceny" };
+  const LABELS = { "Komunikat na górze strony": "📢 Komunikat", "Akcje i specjalne dni": "🎯 Akcje", "Pizza dnia": "🍕 Pizza dnia", "Dowóz": "🚚 Dowóz", "Motyw sezonowy": "🎨 Motyw", "Zdjęcia i galeria": "🖼️ Zdjęcia", "Lojalność i polecenia": "🏅 Lojalność", "Opinie w Google": "⭐ Opinie", "Godziny otwarcia": "🕐 Godziny", "Plakat QR": "🖨 Plakat QR", "Głosowanie klientów": "🗳 Głosowanie", "Kopia zapasowa": "💾 Kopia", "Opinie z Google na stronie": "💬 Opinie klientów", "Własne produkty": "➕ Produkty", "Ceny i dostępność pozycji ze strony": "💲 Ceny" };
   const groups = heads.map((h) => {
     const g = document.createElement("div"); g.className = "rb-sub"; g.hidden = true;
     const label = LABELS[(h.querySelector("span") || h).textContent.trim()] || h.textContent.trim();
