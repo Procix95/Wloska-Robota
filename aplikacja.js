@@ -2306,7 +2306,11 @@ function renderProducts() {
     el.innerHTML = '<div class="menu-item-content"><div class="menu-item-header"><h3 class="menu-item-title">' + esc(p.name) + '</h3><span class="menu-item-price">' + esc(p.price) + "</span></div>" +
       (p.desc ? '<p class="menu-item-desc">' + esc(p.desc) + "</p>" : "") +
       (tags.length ? '<div class="menu-item-sizes">' + tags.map((t) => '<span class="size-badge">' + esc(t) + "</span>").join("") + "</div>" : "") + "</div>";
-    grid.appendChild(el);
+    // wstawiamy za ostatnią pozycją tej samej grupy (pizze razem, sosy razem…), a nie na końcu całego menu
+    const grp = (c) => (/klasyczne|miesne|vege/.test(c || "") ? "pizza" : (c || "").split(/\s+/)[0]);
+    const mine = grp(el.dataset.category);
+    const same = [...grid.querySelectorAll(".menu-item")].filter((x) => x !== el && grp(x.dataset.category) === mine);
+    if (same.length) same[same.length - 1].after(el); else grid.appendChild(el);
   });
 }
 
