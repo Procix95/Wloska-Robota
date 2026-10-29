@@ -403,6 +403,9 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
 #rabat-overlay .rb-rev input,#rabat-overlay .rb-rev select,#rabat-overlay .rb-rev textarea{margin-bottom:8px}
 .hero-chips{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;margin:1.7rem auto 0;max-width:760px;animation:fadeInUp 1s ease .5s both}
 .hero-chips span{padding:.45rem .95rem;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);font-size:.9rem;font-weight:600;white-space:nowrap}
+.hero-sound{display:inline-flex;align-items:center;gap:.4rem;margin:.2rem 0 .9rem;border:1px solid rgba(255,255,255,.4);background:rgba(0,0,0,.4);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#fff;font-weight:600;font-size:.85rem;font-family:inherit;line-height:1;padding:.6rem 1.05rem;border-radius:99px;cursor:pointer;transition:background .2s}
+.hero-sound[hidden]{display:none}
+.hero-sound:hover{background:rgba(0,0,0,.62)}
 .hero-scroll{position:absolute;left:50%;bottom:20px;z-index:2;width:44px;height:44px;margin-left:-22px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;font-size:1.1rem;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);animation:wowBounce 2s ease-in-out infinite}
 @keyframes wowBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
 .menu-item{position:relative}
@@ -452,7 +455,7 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
     window.WR_HERO_SRC = function (s) {
       if (s === 'old') return 'video/C0024.mp4?v=2';
       if (s && (/^https:\/\/\S{4,290}$/.test(s) || /^video\/[\w.\-\/]{1,100}\.(mp4|webm)$/i.test(s))) return s;
-      return mob ? 'video/hero-m.mp4?v=3' : 'video/hero-d.mp4?v=3';
+      return mob ? 'video/hero-m.mp4?v=4' : 'video/hero-d.mp4?v=4';
     };
     if (v && (slabo || ruch)) { v.dataset.lite = '1'; v.removeAttribute('autoplay'); v.preload = 'none'; v.load(); }
     else if (v) { v.dataset.src = WR_HERO_SRC(''); v.innerHTML = '<source src="' + v.dataset.src + '">'; v.load(); }
@@ -468,6 +471,7 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
         <a href="#menu" class="btn btn-secondary"><i class="fas fa-utensils" aria-hidden="true"></i> Zobacz Menu</a>
         <a href="#dowoz" class="btn btn-secondary dowoz-link" hidden><i class="fas fa-truck" aria-hidden="true"></i> Czy dowozimy do mnie?</a>
       </div>
+      <button type="button" class="hero-sound" id="heroSound" hidden aria-pressed="false">🔇 Włącz dźwięk</button>
       <div class="hero-chips" aria-label="Dlaczego nasza pizza jest inna"><span>🔥 Piec 400°C</span><span>⏱️ 24h fermentacji</span><span>🧀 Mozzarella fior di latte</span><span>🍅 Pomidory San Marzano</span></div>
       <div class="opening-timer">
         <div class="timer-text" id="timerText">Sprawdzam godziny otwarcia...</div>
@@ -1595,6 +1599,7 @@ fadeEls.forEach(el => observer.observe(el));
               <div class="rb-sp-btns"><button type="button" class="rb-btn small" id="rb-sp-hero-add">📷 Wgraj zdjęcie jako tło</button><button type="button" class="rb-btn secondary small" id="rb-sp-hero-del" hidden>↩ Przywróć wideo</button></div>
               <label for="rb-sp-vsel" style="margin-top:6px">Które wideo ma być w tle (gdy nie ma własnego zdjęcia)</label>
               <select id="rb-sp-vsel"><option value="">Nowe wideo (domyślne)</option><option value="old">Poprzednie wideo</option><option value="custom">Własny plik lub link…</option></select>
+              <label class="rb-check"><input id="rb-sp-vsnd" type="checkbox" checked> Pokaż przycisk „Włącz dźwięk" na wideo (domyślnie wyciszone, klient włącza sam)</label>
               <input id="rb-sp-vurl" type="text" maxlength="300" placeholder="video/moje.mp4 albo https://…/film.mp4" hidden>
               <div class="rb-meta" id="rb-sp-vhint" hidden>Najprościej: wrzuć film do folderu <b>video</b> w repozytorium na GitHubie (Add file → Upload files) i wpisz tu <b>video/nazwa.mp4</b>. Lepiej bez dźwięku, 1080p, do ok. 10 MB. Gdy plik się nie wczyta, strona wróci do domyślnego wideo. Chcesz, żebym skompresował film? Wyślij mi go.</div>
             </div>
@@ -1845,7 +1850,7 @@ fadeEls.forEach(el => observer.observe(el));
   btns.forEach(function (b) { b.addEventListener("click", install); });
 })();
 </script>
-<script type="module" src="/aplikacja.js?v=11"></script>
+<script type="module" src="/aplikacja.js?v=12"></script>
 <script type="module" src="/straz.js?v=7"></script>
 <!-- ===== RABAT: KONIEC ===== -->
 
