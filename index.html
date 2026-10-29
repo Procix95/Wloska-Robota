@@ -406,6 +406,9 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
 .hero-sound{display:inline-flex;align-items:center;gap:.4rem;margin:.2rem 0 .9rem;border:1px solid rgba(255,255,255,.4);background:rgba(0,0,0,.4);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#fff;font-weight:600;font-size:.85rem;font-family:inherit;line-height:1;padding:.6rem 1.05rem;border-radius:99px;cursor:pointer;transition:background .2s}
 .hero-sound[hidden]{display:none}
 .hero-sound:hover{background:rgba(0,0,0,.62)}
+.hero-sound.hint{border-color:#fff;animation:heroSoundPulse 1.8s ease-in-out infinite}
+@keyframes heroSoundPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.5)}50%{box-shadow:0 0 0 9px rgba(255,255,255,0)}}
+@media (prefers-reduced-motion:reduce){.hero-sound.hint{animation:none}}
 .hero-scroll{position:absolute;left:50%;bottom:20px;z-index:2;width:44px;height:44px;margin-left:-22px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;font-size:1.1rem;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);animation:wowBounce 2s ease-in-out infinite}
 @keyframes wowBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
 .menu-item{position:relative}
@@ -1851,7 +1854,7 @@ fadeEls.forEach(el => observer.observe(el));
   btns.forEach(function (b) { b.addEventListener("click", install); });
 })();
 </script>
-<script type="module" src="/aplikacja.js?v=14"></script>
+<script type="module" src="/aplikacja.js?v=15"></script>
 <script type="module" src="/straz.js?v=7"></script>
 <!-- ===== RABAT: KONIEC ===== -->
 
