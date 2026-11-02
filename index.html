@@ -1660,6 +1660,7 @@ fadeEls.forEach(el => observer.observe(el));
           <div class="rb-actions" style="margin-top:8px">
             <button type="button" class="rb-btn secondary small" id="rb-poll-res">📊 Pokaż wyniki</button>
             <button type="button" class="rb-btn secondary small" id="rb-poll-close">🔒 Zamknij i opublikuj wyniki</button>
+            <button type="button" class="rb-btn secondary small" id="rb-poll-close-quiet">🚫 Zamknij bez publikowania</button>
             <button type="button" class="rb-btn secondary small" id="rb-poll-new">🆕 Nowe głosowanie</button>
           </div>
           <div id="rb-poll-out"></div>
@@ -1861,7 +1862,7 @@ fadeEls.forEach(el => observer.observe(el));
   btns.forEach(function (b) { b.addEventListener("click", install); });
 })();
 </script>
-<script type="module" src="/aplikacja.js?v=18"></script>
+<script type="module" src="/aplikacja.js?v=19"></script>
 <script type="module" src="/straz.js?v=7"></script>
 <!-- ===== RABAT: KONIEC ===== -->
 
