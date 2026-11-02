@@ -3877,6 +3877,20 @@ $("rb-poll-close").addEventListener("click", async () => {
   } catch (err) { $("rb-poll-out").innerHTML = '<div class="rb-msg err">' + esc(err.code ? errText(err) : err.message) + "</div>"; }
 });
 
+/* zamknięcie głosowania bez ogłaszania wyników: klienci przestają głosować, nic się nie pokazuje na stronie */
+$("rb-poll-close-quiet").addEventListener("click", async () => {
+  const p = siteCfg.poll;
+  if (!p) { $("rb-poll-out").innerHTML = '<div class="rb-msg err">Najpierw zapisz głosowanie.</div>'; return; }
+  if (!confirm("Zamknąć głosowanie BEZ publikowania wyników? Klienci przestaną głosować i nic nie zobaczą na stronie. Głosy zostają, wyniki dalej zobaczysz tylko Ty (Pokaż wyniki)." + (p.results ? " Uwaga: dotychczas opublikowane wyniki zostaną ukryte." : ""))) return;
+  try {
+    pollDraft.id = p.id;
+    pollDraft.results = null;
+    $("rb-poll-open").checked = false;
+    await saveSite();
+    fillPollForm();
+  } catch (err) { $("rb-poll-out").innerHTML = '<div class="rb-msg err">' + esc(err.code ? errText(err) : err.message) + "</div>"; }
+});
+
 /* ---------- panel admina: zakładka Raport (dziennik zdarzeń) ---------- */
 const rpMsg = $("rb-rp-msg");
 let reportEvents = [];
