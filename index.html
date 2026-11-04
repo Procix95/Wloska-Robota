@@ -1272,6 +1272,7 @@ fadeEls.forEach(el => observer.observe(el));
           <button type="button" class="rb-atab" data-pane="check" role="tab"><i>📷</i><span>Skanuj</span></button>
           <button type="button" class="rb-atab" data-pane="clients" role="tab"><i>👥</i><span>Klienci</span></button>
           <button type="button" class="rb-atab" data-pane="builder" role="tab"><i>🏷️</i><span>Rabaty</span></button>
+          <button type="button" class="rb-atab" data-pane="vouchers" role="tab"><i>🎫</i><span>Vouchery</span></button>
           <button type="button" class="rb-atab" data-pane="staff" role="tab"><i>🧑‍🍳</i><span>Obsługa</span></button>
           <button type="button" class="rb-atab" data-pane="site" role="tab"><i>🛠️</i><span>Strona</span></button>
           <button type="button" class="rb-atab" data-pane="report" role="tab"><i>📊</i><span>Raport</span></button>
@@ -1407,7 +1408,6 @@ fadeEls.forEach(el => observer.observe(el));
             <button type="button" data-sec="tpl" aria-pressed="false">★ Gotowe</button>
             <button type="button" data-sec="promo" aria-pressed="false">🌐 Kody promocyjne</button>
             <button type="button" data-sec="granted" aria-pressed="false">🎟 Przyznane</button>
-            <button type="button" data-sec="voucher" aria-pressed="false">🎫 Vouchery</button>
           </div>
 
           <div class="rb-nsec" data-sec="new">
@@ -1509,7 +1509,22 @@ fadeEls.forEach(el => observer.observe(el));
             <div id="rb-p-list"></div>
           </div>
 
-          <div class="rb-nsec" data-sec="voucher" hidden>
+          <div class="rb-nsec" data-sec="granted" hidden>
+            <h4>Wszystkie przyznane kody</h4>
+            <input id="rb-l-search" type="search" placeholder="Szukaj: kod lub e-mail klienta" autocomplete="off">
+            <select id="rb-l-filter" aria-label="Filtr kodów">
+              <option value="all">Wszystkie kody</option>
+              <option value="active">Aktywne</option>
+              <option value="soon">⏳ Wygasają w ciągu 7 dni</option>
+              <option value="used">Wykorzystane</option>
+              <option value="expired">Wygasłe</option>
+            </select>
+            <div class="rb-meta" id="rb-l-count" style="margin:-2px 0 8px"></div>
+            <div id="rb-a-list"></div>
+          </div>
+        </div>
+
+        <div class="rb-pane" data-pane="vouchers" hidden>
             <h4>Vouchery imprezowe (jednorazowe, z unikalnym QR)</h4>
             <div class="rb-meta" style="margin:-4px 0 10px">Każdy voucher dostaje własny, nie do odgadnięcia kod QR, który działa <b>tylko raz</b>: obsługa skanuje go w zakładce Skanuj, a po zrealizowaniu kod przestaje być ważny (wydruk, kopia ani zdjęcie nie zadziałają drugi raz). Panel dorysowuje kod QR pod grafiką voucheru. Opis i data poniżej trafiają do bazy; sama grafika ma tekst i datę z szablonu (31.12.2026), przy innej wybierz własną grafikę.</div>
             <label for="rb-v-batch">Nazwa partii (opcjonalnie)</label>
@@ -1534,21 +1549,6 @@ fadeEls.forEach(el => observer.observe(el));
             <h4 style="margin-top:18px">Wszystkie vouchery <button type="button" class="rb-btn secondary small" id="rb-v-refresh" style="margin-left:8px">↻ Odśwież</button></h4>
             <div id="rb-v-list"></div>
           </div>
-
-          <div class="rb-nsec" data-sec="granted" hidden>
-            <h4>Wszystkie przyznane kody</h4>
-            <input id="rb-l-search" type="search" placeholder="Szukaj: kod lub e-mail klienta" autocomplete="off">
-            <select id="rb-l-filter" aria-label="Filtr kodów">
-              <option value="all">Wszystkie kody</option>
-              <option value="active">Aktywne</option>
-              <option value="soon">⏳ Wygasają w ciągu 7 dni</option>
-              <option value="used">Wykorzystane</option>
-              <option value="expired">Wygasłe</option>
-            </select>
-            <div class="rb-meta" id="rb-l-count" style="margin:-2px 0 8px"></div>
-            <div id="rb-a-list"></div>
-          </div>
-        </div>
 
         <!-- Zakładka: konta obsługi (tylko skanowanie) -->
         <div class="rb-pane" data-pane="staff" hidden>
@@ -1889,7 +1889,7 @@ fadeEls.forEach(el => observer.observe(el));
   btns.forEach(function (b) { b.addEventListener("click", install); });
 })();
 </script>
-<script type="module" src="/aplikacja.js?v=20"></script>
+<script type="module" src="/aplikacja.js?v=21"></script>
 <script type="module" src="/straz.js?v=7"></script>
 <!-- ===== RABAT: KONIEC ===== -->
 

@@ -94,6 +94,7 @@ $("rb-close").addEventListener("click", closeRabat);
 overlay.addEventListener("mousedown", (e) => { if (e.target === overlay) closeRabat(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && overlay.classList.contains("open")) closeRabat(); });
 window.addEventListener("hashchange", () => { if (location.hash === "#konto") openRabat(); else if (location.hash === "#gry") openGames(); });
+const HASH0 = location.hash;   // adres z chwili wejścia (zanim panel zmieni hash)
 const QS = new URLSearchParams(location.search);
 let wantScan = QS.has("skan");
 if (location.hash === "#konto" || QS.has("konto") || wantScan) openRabat();
@@ -708,6 +709,7 @@ async function handleUser(user) {
   if (!isAdmin && isStaff) setAdminTab("check");
   else if (isAdmin) setAdminTab("today");
   if (wantScan && (isAdmin || isStaff)) { wantScan = false; setAdminTab("check"); if (PHONE_CAM) setTimeout(() => { startScanner(); }, 300); }
+  try { vchApplyImport(); } catch (_) {}
   $("rb-welcome").hidden = !gotWelcome;
   gateUser = user;
   setMsg($("rb-g-msg"), "");
@@ -1924,7 +1926,6 @@ document.querySelectorAll("#rb-n-mode button").forEach((b) => b.addEventListener
 function setNSec(sec) {
   document.querySelectorAll("#rb-n-sub button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.sec === sec ? "true" : "false"));
   document.querySelectorAll("#rabat-overlay .rb-nsec").forEach((x) => { x.hidden = x.dataset.sec !== sec; });
-  if (sec === "voucher") { try { vchLoadList(); } catch (_) {} }
 }
 document.querySelectorAll("#rb-n-sub button").forEach((b) => b.addEventListener("click", () => setNSec(b.dataset.sec)));
 setNMode("grant");
@@ -4237,6 +4238,21 @@ document.addEventListener("click", async (e) => {
 });
 $("rb-v-refresh").addEventListener("click", vchLoadList);
 
+/* link do wczytania gotowych kodów: /?konto#vimport=KOD1,KOD2,... (część po # nie trafia do serwera).
+   Po zalogowaniu admina otwiera zakładkę Vouchery i tylko WYPEŁNIA pole importu; rejestruje dopiero kliknięcie admina. */
+let vchImp = (/[#&]vimport=([A-Za-z0-9,-]{16,2000})/.exec(HASH0) || [])[1] || "";
+if (vchImp) { try { history.replaceState(null, "", location.pathname + location.search + (QS.has("konto") ? "#konto" : "")); } catch (_) {} }
+function vchApplyImport() {
+  if (!vchImp || !isAdmin) return;
+  const codes = vchImp.split(",").map(vchParse).filter(Boolean);
+  vchImp = "";
+  if (!codes.length) return;
+  setAdminTab("vouchers");
+  $("rb-v-import").value = codes.map(vchFmt).join("\n");
+  const d = $("rb-v-import").closest("details"); if (d) d.open = true;
+  setMsg(vchMsg, "Wczytano " + codes.length + " kodów z linku. Kliknij „Zarejestruj te kody”, tylko jeśli ten link pochodzi od Ciebie albo od Claude (kto zna kody, ten może ich użyć).", "ok");
+}
+
 /* start: link z kodu QR vouchera (?v=KOD) otwiera okienko ze statusem */
 if (QS.has("v")) {
   const c0 = vchParse(QS.get("v"));
@@ -5217,6 +5233,7 @@ function setAdminTab(name) {
   if (name === "today" || name === "clients") ensureData(false);
   if (name === "clients") renderClients();
   if (name === "builder" && nsec) setNSec(nsec);
+  if (name === "vouchers") vchLoadList();
 }
 document.querySelectorAll("#rb-admin .rb-atab").forEach((b) => b.addEventListener("click", () => setAdminTab(b.dataset.pane)));
 const szRef = $("rb-straz-refresh"); if (szRef) szRef.addEventListener("click", () => { if (window.WRStraz) window.WRStraz.open(); });
