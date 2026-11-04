@@ -654,3 +654,28 @@ body.dark .poll-opt{background:var(--dark-card)}
 #rabat-overlay .rb-perk.hi{border:2px solid var(--rb-gold);background:linear-gradient(135deg,rgba(212,175,55,.28),rgba(212,175,55,.08))}
 #rabat-overlay .rb-perk.hi .rb-perk-n{color:var(--rb-gold)}
 #rabat-overlay .rb-perk.hi .rb-perk-t{font-size:16px}
+
+/* vouchery imprezowe */
+#rabat-overlay .rb-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#rabat-overlay .rb-vch-row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 12px;margin-bottom:8px;border:1px solid var(--rb-border);border-radius:12px;background:var(--rb-card)}
+#rabat-overlay .rb-vch-row .rb-actions{margin:0}
+#rabat-overlay .rb-vch-code{font-family:ui-monospace,Consolas,monospace;letter-spacing:.04em;user-select:all}
+#rabat-overlay .rb-vch-st{display:inline-block;padding:1px 9px;border-radius:99px;font-size:12px;font-weight:800;border:1px solid currentColor}
+#rabat-overlay .rb-vch-st.ok{color:#2fbf71}
+#rabat-overlay .rb-vch-st.bad{color:#e5676d}
+#rabat-overlay .rb-vch-st.off{color:var(--rb-muted)}
+#rabat-overlay .rb-vch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:10px 0}
+#rabat-overlay .rb-vch-grid a{display:block;text-decoration:none;color:inherit;font-size:12px;text-align:center}
+#rabat-overlay .rb-vch-grid img{width:100%;height:auto;border-radius:8px;display:block;border:1px solid var(--rb-border)}
+.vch-bg{position:fixed;inset:0;z-index:100001;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:16px}
+.vch-bg[hidden]{display:none}
+.vch-box{position:relative;width:100%;max-width:420px;background:#14110f;color:#fff;border:2px solid #d4af37;border-radius:18px;padding:26px 20px 22px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.vch-x{position:absolute;top:6px;right:10px;background:none;border:0;color:#fff;font-size:30px;line-height:1;cursor:pointer;padding:4px 8px}
+.vch-ic{font-size:46px;line-height:1;margin-bottom:6px}
+.vch-t{font-size:22px;font-weight:800;margin-bottom:8px}
+.vch-t.ok{color:#e8c25a}
+.vch-t.bad{color:#ff8a8f}
+.vch-d{font-weight:800;color:#e8c25a;margin:6px 0}
+.vch-m{font-size:14px;color:rgba(255,255,255,.8);margin-top:6px}
+.vch-a{margin-top:14px}
+.vch-a .rb-btn{background:#009246;border:0;color:#fff;padding:12px 18px;border-radius:99px;font:inherit;font-weight:800;cursor:pointer}
