@@ -263,6 +263,7 @@ function cleanup() {
   unsubs = [];
   isAdmin = false; try { applyPhotos(); } catch (_) {} isStaff = false; allStaff = []; staffFound = []; myLoyal = null; custView = null; myCoupons = []; allUsers = []; allCoupons = []; allTemplates = []; lastCheck = ""; svVisit = 0; svRating = 0; svDoneFor = 0; myProfile = null; couponsReady = false; bdayTried = false;
   if ($("rb-bday-set")) delete $("rb-bday-set").dataset.filled;
+  try { vchRefresh(); } catch (_) {}
   allLoyal = []; allPromos = []; dataAt = 0; welcomeMigrated = false; reportEvents = []; feedbackItems = []; kShown = KPAGE;
   if ($("rb-k-card")) $("rb-k-card").innerHTML = "";
   scanHist = []; statsEvents = null; visitDocs = null; myPoints = null; ptsUser = null; if ($("rb-games")) $("rb-games").hidden = true; if ($("rb-s-hist")) $("rb-s-hist").innerHTML = "";
@@ -697,6 +698,7 @@ async function handleUser(user) {
   $("rb-avatar").textContent = (shownName.trim()[0] || "?").toUpperCase();
   $("rb-user").classList.toggle("adminview", isAdmin || isStaff); // admin i obsługa nie pokazują własnych kodów QR
   $("rb-delete").hidden = isAdmin || isStaff;
+  try { vchRefresh(); } catch (_) {}
   $("rb-admin").hidden = !(isAdmin || isStaff);
   if (!(isAdmin || isStaff)) delete overlay.dataset.atab;
   // panel obsługi/admina od razu pod nagłówkiem, bez przewijania przez własną kartę i kody
@@ -1576,6 +1578,8 @@ async function runCheck() {
     return;
   }
   if (custView && custView.target === $("rb-c-result")) custView = null;
+  const vcode = vchParse(raw);
+  if (vcode) { lastCheck = ""; await vchShow(vcode, $("rb-c-result"), false); return; }
   lastCheck = raw.toUpperCase();
   if (!isAdmin && lastCheck) {
     try { staffFound = await lookupCode(lastCheck); }
@@ -1920,6 +1924,7 @@ document.querySelectorAll("#rb-n-mode button").forEach((b) => b.addEventListener
 function setNSec(sec) {
   document.querySelectorAll("#rb-n-sub button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.sec === sec ? "true" : "false"));
   document.querySelectorAll("#rabat-overlay .rb-nsec").forEach((x) => { x.hidden = x.dataset.sec !== sec; });
+  if (sec === "voucher") { try { vchLoadList(); } catch (_) {} }
 }
 document.querySelectorAll("#rb-n-sub button").forEach((b) => b.addEventListener("click", () => setNSec(b.dataset.sec)));
 setNMode("grant");
@@ -3891,6 +3896,357 @@ $("rb-poll-close-quiet").addEventListener("click", async () => {
   } catch (err) { $("rb-poll-out").innerHTML = '<div class="rb-msg err">' + esc(err.code ? errText(err) : err.message) + "</div>"; }
 });
 
+/* ---------- vouchery imprezowe: jednorazowe, każdy z unikalnym kodem QR ----------
+   Dokument vouchers/{KOD16}: kod (16 znaków, ~80 bitów losowości) jest nazwą dokumentu, więc nie da się go odgadnąć ani wylistować.
+   Tworzy i kasuje tylko admin; wykorzystać (raz) może obsługa lub admin; status (ważny/wykorzystany) może sprawdzić każdy, kto zna kod. */
+const VCH_ALPHA = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const VCH_RE = /^[A-HJ-NP-Z2-9]{16}$/;
+const VCH_BASE = "https://wloskarobota.eu/?v=";
+const VCH_TPL = "images/voucher-szablon.jpg?v=1";
+const vchNew = () => { const b = new Uint8Array(16); crypto.getRandomValues(b); return Array.from(b, (x) => VCH_ALPHA[x & 31]).join(""); };
+const vchFmt = (c) => String(c).replace(/(.{4})(?=.)/g, "$1-");
+function vchParse(raw) {
+  const t = String(raw || "").trim();
+  const m = /[?&]v=([A-Za-z0-9-]{16,24})(?:[&#]|$)/.exec(t);
+  const c = (m ? m[1] : t).toUpperCase().replace(/-/g, "");
+  return VCH_RE.test(c) ? c : "";
+}
+function vchStatus(v) {
+  if (!v) return "none";
+  if (v.used === true) return "used";
+  const e = tsMs(v.exp);
+  return e && e < Date.now() ? "expired" : "ok";
+}
+async function vchGet(code) {
+  const s = await getDoc(doc(db, "vouchers", code));
+  return s.exists() ? s.data() : null;
+}
+async function vchRedeem(code) {
+  try {
+    await updateDoc(doc(db, "vouchers", code), { used: true, usedAt: serverTimestamp(), usedBy: auth.currentUser.uid });
+    return { ok: true };
+  } catch (err) {
+    console.error(err);
+    return { ok: false, reason: err.code === "permission-denied" ? "Nie udało się zrealizować: voucher jest już wykorzystany albo wygasł (lub to konto nie ma uprawnień obsługi)." : errText(err) };
+  }
+}
+const vchNr = (v) => (v && v.n ? "nr " + v.n + (v.total ? "/" + v.total : "") : "");
+
+/* wygląd karty: staff = w panelu (Skanuj / Sprawdź kod), pub = okienko po otwarciu linku z kodu QR */
+function vchHtml(code, v, o, note) {
+  const st = vchStatus(v), pub = !!o.pub;
+  const canUse = (isAdmin || isStaff) && st === "ok";
+  const wrap = (cls, title, body, extra) => pub
+    ? `<div class="vch-ic">${st === "ok" ? "🎫" : "⚠️"}</div><div class="vch-t ${cls}">${title}</div>${body}${extra || ""}`
+    : `<div class="rb-res big ${cls}"><div class="rb-big">${title}</div>${body}${extra || ""}</div>`;
+  const meta = (t) => `<div class="${pub ? "vch-m" : "rb-meta"}">${t}</div>`;
+  let cls, title, body = "";
+  if (st === "none") {
+    cls = "bad"; title = pub ? "Nie znaleziono vouchera" : "❌ Nie znaleziono vouchera";
+    body = meta(pub ? "Sprawdź, czy kod QR jest cały i nie jest kopią. Pytaj obsługę w lokalu." : "Kod: <b>" + esc(vchFmt(code)) + "</b> — to podróbka, kopia albo voucher usunięty przez właściciela.");
+  } else if (st === "used" && o.done) {
+    cls = "ok"; title = pub ? "Voucher zrealizowany" : "✅ ZREALIZOWANE";
+    body = meta((vchNr(v) ? esc(vchNr(v)) + " · " : "") + esc(v.desc || "") + " — zastosuj zniżkę przy rachunku");
+  } else if (st === "used") {
+    cls = "bad"; title = pub ? "Ten voucher został już wykorzystany" : "❌ Voucher już wykorzystany";
+    body = meta((vchNr(v) ? esc(vchNr(v)) + " · " : "") + (v.usedAt ? "wykorzystany " + esc(fmtDateTime(v.usedAt)) : ""));
+  } else if (st === "expired") {
+    cls = "bad"; title = pub ? "Ten voucher wygasł" : "❌ Voucher wygasł";
+    body = meta("Był ważny do " + esc(fmtDate(v.exp)) + ".");
+  } else {
+    cls = "ok"; title = pub ? "Voucher ważny" : "🎫 VOUCHER WAŻNY";
+    body = `<div class="${pub ? "vch-d" : "rb-desc"}" style="font-size:20px">${esc(v.desc || "")}</div>`
+      + meta((vchNr(v) ? esc(vchNr(v)) + (v.batch ? " · " + esc(v.batch) : "") + " · " : "") + "ważny do " + esc(fmtDate(v.exp)))
+      + (pub && !canUse ? meta("Pokaż ten kod obsłudze przy zamówieniu. Obsługa zeskanuje go, a voucher przestanie być ważny: każdy kod działa tylko raz.") : "");
+  }
+  const acts = [];
+  if (canUse) acts.push(`<button type="button" class="rb-btn small" data-vch="redeem">✅ Zrealizuj voucher (jednorazowo)</button>`);
+  if ((isAdmin) && st === "used") acts.push(`<button type="button" class="rb-btn secondary small" data-vch="undo">↩ Cofnij realizację (admin)</button>`);
+  if (!pub && o.withNext) acts.push(`<button type="button" class="rb-btn secondary small" data-act="next">Skanuj następny</button>`);
+  const extra = (note ? `<div class="${pub ? "vch-m" : "rb-meta"}" style="margin-top:6px"><b>${esc(note)}</b></div>` : "") + (acts.length ? `<div class="${pub ? "vch-a" : "rb-actions"}">${acts.join("")}</div>` : "");
+  return `<div data-vch-box data-code="${esc(code)}" data-pub="${pub ? 1 : 0}" data-next="${o.withNext ? 1 : 0}">${wrap(cls, title, body, extra)}</div>`;
+}
+async function vchShow(code, target, withNext) {
+  target.innerHTML = '<div class="rb-meta">Sprawdzam voucher…</div>';
+  let v = null;
+  try { v = await vchGet(code); }
+  catch (err) { console.error(err); target.innerHTML = '<div class="rb-res bad">❌ ' + esc(errText(err)) + "</div>"; buzz([120, 60, 120]); return; }
+  target.innerHTML = vchHtml(code, v, { withNext });
+  buzz(vchStatus(v) === "ok" ? 150 : [120, 60, 120]);
+}
+document.addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-vch]");
+  if (!b) return;
+  const box = b.closest("[data-vch-box]");
+  if (!box) return;
+  const code = box.dataset.code, o = { pub: box.dataset.pub === "1", withNext: box.dataset.next === "1" }, host = box.parentNode;
+  const repaint = (v, note, done) => { host.innerHTML = vchHtml(code, v, { ...o, done: !!done }, note); if (o.pub) vchPubData = v; };
+  b.disabled = true;
+  try {
+    if (b.dataset.vch === "redeem") {
+      const r = await vchRedeem(code);
+      const v = await vchGet(code).catch(() => null);
+      if (r.ok) { repaint(v, "Voucher jest już nieważny, nie da się go użyć ponownie.", true); buzz(200); scanHistPush("Voucher " + vchNr(v), "🎫 zrealizowany"); if (o.withNext) autoResume(); }
+      else { repaint(v, r.reason); buzz([120, 60, 120]); }
+    } else if (b.dataset.vch === "undo" && isAdmin) {
+      if (!confirm("Cofnąć realizację tego vouchera? Znów będzie ważny.")) { b.disabled = false; return; }
+      await updateDoc(doc(db, "vouchers", code), { used: false, usedAt: null, usedBy: null });
+      repaint(await vchGet(code), "↩ Cofnięto. Voucher znów jest ważny.");
+    }
+  } catch (err) { console.error(err); repaint(await vchGet(code).catch(() => null), errText(err)); }
+});
+
+/* okienko po zeskanowaniu QR zwykłym aparatem (link wloskarobota.eu/?v=KOD) */
+let vchPubCode = "", vchPubData = null;
+function vchPubBox() {
+  let m = $("vch-modal");
+  if (m) return m;
+  m = document.createElement("div");
+  m.id = "vch-modal"; m.className = "vch-bg"; m.hidden = true;
+  m.setAttribute("role", "dialog"); m.setAttribute("aria-modal", "true"); m.setAttribute("aria-label", "Voucher");
+  m.innerHTML = '<div class="vch-box"><button type="button" class="vch-x" aria-label="Zamknij">&times;</button><div id="vch-body"></div></div>';
+  document.body.appendChild(m);
+  const close = () => {
+    m.hidden = true; vchPubCode = "";
+    try { const u = new URL(location.href); u.searchParams.delete("v"); history.replaceState(null, "", u.pathname + (u.search || "") + u.hash); } catch (_) {}
+  };
+  m.querySelector(".vch-x").addEventListener("click", close);
+  m.addEventListener("click", (ev) => { if (ev.target === m) close(); });
+  document.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && !m.hidden) close(); });
+  return m;
+}
+async function vchPubOpen(code) {
+  vchPubCode = code; vchPubData = null;
+  const m = vchPubBox();
+  m.hidden = false;
+  $("vch-body").innerHTML = '<div class="vch-m">Sprawdzam voucher…</div>';
+  let v = null, fail = "";
+  try { v = await vchGet(code); } catch (err) { console.error(err); fail = errText(err); }
+  if (vchPubCode !== code) return;
+  if (fail) { $("vch-body").innerHTML = '<div class="vch-ic">⚠️</div><div class="vch-t bad">Nie udało się sprawdzić vouchera</div><div class="vch-m">' + esc(fail) + "</div>"; return; }
+  vchPubData = v;
+  $("vch-body").innerHTML = vchHtml(code, v, { pub: true });
+}
+/* po zmianie roli (zalogowanie / wylogowanie obsługi) pokaż lub schowaj przycisk „Zrealizuj” */
+function vchRefresh() {
+  const m = $("vch-modal");
+  if (!m || m.hidden || !vchPubCode || vchPubData === null) return;
+  $("vch-body").innerHTML = vchHtml(vchPubCode, vchPubData, { pub: true });
+}
+
+/* ----- panel admina: generator voucherów z unikalnym QR na grafice ----- */
+let vchTplCustom = "", vchLast = [];
+function vchLoadImg(src) {
+  return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error("Nie udało się wczytać grafiki voucheru.")); i.src = src; });
+}
+function vchWrap(g, text, maxW) {
+  const words = String(text).split(/\s+/), lines = []; let cur = "";
+  words.forEach((w) => { const t = cur ? cur + " " + w : w; if (g.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t; });
+  if (cur) lines.push(cur);
+  return lines;
+}
+/* grafika voucheru + pasek na dole z unikalnym kodem QR, numerem i kodem do przepisania */
+async function vchPng(img, code, n, total) {
+  if (!QRfn) QRfn = pickFn(await import("https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/+esm"));
+  if (!QRfn) throw new Error("Nie udało się wczytać generatora QR (sprawdź internet).");
+  try { await document.fonts.ready; } catch (_) {}
+  const W = img.naturalWidth, H0 = img.naturalHeight, S = Math.round(W * 0.215);
+  const cv = document.createElement("canvas");
+  cv.width = W; cv.height = H0 + S;
+  const g = cv.getContext("2d");
+  g.drawImage(img, 0, 0, W, H0);
+  g.fillStyle = "#0b0b0c"; g.fillRect(0, H0, W, S);
+  const gold = "#e8c25a";
+  g.fillStyle = gold; g.fillRect(0, H0, W, Math.max(3, Math.round(W * 0.003)));
+  const qr = QRfn(0, "M");
+  qr.addData(VCH_BASE + code); qr.make();
+  const nm = qr.getModuleCount(), qz = 4, ppm = Math.max(3, Math.floor(S * 0.9 / (nm + qz * 2)));
+  const plate = (nm + qz * 2) * ppm, px = W - Math.round(W * 0.045) - plate, py = H0 + Math.round((S - plate) / 2);
+  g.fillStyle = "#fff";
+  if (g.roundRect) { g.beginPath(); g.roundRect(px, py, plate, plate, 14); g.fill(); } else g.fillRect(px, py, plate, plate);
+  g.fillStyle = "#000";
+  for (let r = 0; r < nm; r++) for (let c = 0; c < nm; c++) if (qr.isDark(r, c)) g.fillRect(px + (c + qz) * ppm, py + (r + qz) * ppm, ppm, ppm);
+  const x = Math.round(W * 0.045), maxW = px - x - Math.round(W * 0.03), F = "Poppins, 'Segoe UI', Arial, sans-serif";
+  g.textBaseline = "alphabetic"; g.textAlign = "left";
+  g.fillStyle = gold; g.font = "800 " + Math.round(W * 0.0205) + "px " + F;
+  try { g.letterSpacing = "2px"; } catch (_) {}
+  g.fillText("VOUCHER JEDNORAZOWY · UNIKALNY KOD", x, H0 + S * 0.2);
+  try { g.letterSpacing = "0px"; } catch (_) {}
+  g.fillStyle = "#fff"; g.font = "800 " + Math.round(W * 0.04) + "px " + F;
+  g.fillText("Nr " + n + " / " + total, x, H0 + S * 0.46);
+  g.fillStyle = "rgba(255,255,255,.88)"; g.font = "500 " + Math.round(W * 0.0165) + "px " + F;
+  const lh = Math.round(W * 0.0235);
+  vchWrap(g, "Pokaż ten kod przy zamówieniu. Obsługa go zeskanuje i voucher przestanie być ważny: każdy kod działa tylko raz, kopie i zdjęcia nie zadziałają.", maxW)
+    .forEach((ln, i) => g.fillText(ln, x, H0 + S * 0.6 + i * lh));
+  g.fillStyle = gold; g.font = "700 " + Math.round(W * 0.0205) + "px 'Courier New', monospace";
+  g.fillText(vchFmt(code), x, H0 + S * 0.92);
+  return await new Promise((res) => cv.toBlob(res, "image/png"));
+}
+/* ZIP bez kompresji (PNG i tak jest skompresowany), żeby nie trzeba było ładować żadnej biblioteki */
+function zipStore(files) {
+  const tbl = zipStore.t || (zipStore.t = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })());
+  const crc = (u) => { let c = 0xFFFFFFFF; for (let i = 0; i < u.length; i++) c = tbl[(c ^ u[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+  const enc = new TextEncoder(), d = new Date();
+  const dt = ((d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1)) & 0xFFFF;
+  const dd = (((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()) & 0xFFFF;
+  const parts = [], cen = []; let off = 0;
+  files.forEach((f) => {
+    const nm = enc.encode(f.name), cr = crc(f.data), sz = f.data.length;
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, 0, true);
+    lh.setUint16(10, dt, true); lh.setUint16(12, dd, true); lh.setUint32(14, cr, true); lh.setUint32(18, sz, true); lh.setUint32(22, sz, true);
+    lh.setUint16(26, nm.length, true); lh.setUint16(28, 0, true);
+    parts.push(new Uint8Array(lh.buffer), nm, f.data);
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true); ch.setUint16(10, 0, true);
+    ch.setUint16(12, dt, true); ch.setUint16(14, dd, true); ch.setUint32(16, cr, true); ch.setUint32(20, sz, true); ch.setUint32(24, sz, true);
+    ch.setUint16(28, nm.length, true); ch.setUint32(42, off, true);
+    cen.push(new Uint8Array(ch.buffer), nm);
+    off += 30 + nm.length + sz;
+  });
+  const cenSize = cen.reduce((a, u) => a + u.length, 0);
+  const end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true); end.setUint32(12, cenSize, true); end.setUint32(16, off, true);
+  return new Blob([...parts, ...cen, new Uint8Array(end.buffer)], { type: "application/zip" });
+}
+function vchSave(blob, name) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+const vchName = (n, code) => "voucher-" + String(n).padStart(2, "0") + "-" + code.slice(0, 4) + ".png";
+const vchMsg = $("rb-v-msg");
+$("rb-v-file").addEventListener("change", (e) => {
+  const f = e.target.files && e.target.files[0];
+  if (vchTplCustom) { try { URL.revokeObjectURL(vchTplCustom); } catch (_) {} vchTplCustom = ""; }
+  if (!f) return;
+  if (!/^image\//.test(f.type)) { setMsg(vchMsg, "To nie jest obraz. Wybierz plik PNG lub JPG.", "err"); e.target.value = ""; return; }
+  vchTplCustom = URL.createObjectURL(f);
+  setMsg(vchMsg, "Użyję wybranej grafiki: " + f.name, "ok");
+});
+/* wspólna część: sprawdź formularz, zapisz kody w bazie, narysuj grafiki. codes = gotowe kody (import) albo null (losuj n nowych) */
+async function vchCreate(codes) {
+  if (!isAdmin) return;
+  const batch = $("rb-v-batch").value.trim().slice(0, 40), desc = $("rb-v-desc").value.trim().slice(0, 80), expv = $("rb-v-exp").value;
+  const n = codes ? codes.length : Number($("rb-v-n").value);
+  if (!desc) { setMsg(vchMsg, "Wpisz, co daje voucher (np. -50% na całe zamówienie).", "err"); return; }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(expv) || isNaN(new Date(expv + "T23:59:59").getTime())) { setMsg(vchMsg, "Ustaw datę ważności.", "err"); return; }
+  if (new Date(expv + "T23:59:59").getTime() < Date.now()) { setMsg(vchMsg, "Data ważności jest w przeszłości.", "err"); return; }
+  if (!Number.isInteger(n) || n < 1 || n > 50) { setMsg(vchMsg, "Liczba voucherów: od 1 do 50.", "err"); return; }
+  if (!confirm((codes ? "Zarejestrować " : "Utworzyć ") + n + " voucherów (każdy z innym kodem QR, ważnych do " + expv.split("-").reverse().join(".") + ")?")) return;
+  const btns = [$("rb-v-make"), $("rb-v-imp")];
+  btns.forEach((x) => { x.disabled = true; }); $("rb-v-new").innerHTML = "";
+  try {
+    setMsg(vchMsg, "Wczytuję grafikę…");
+    const img = await vchLoadImg(vchTplCustom || VCH_TPL);
+    if (!QRfn) QRfn = pickFn(await import("https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/+esm"));
+    if (!QRfn) throw new Error("Nie udało się wczytać generatora QR (sprawdź internet).");
+    setMsg(vchMsg, "Zapisuję kody w bazie…");
+    const exp = Timestamp.fromDate(new Date(expv + "T23:59:59"));
+    const list = codes || Array.from({ length: n }, vchNew);
+    const wb = writeBatch(db);
+    list.forEach((c, i) => wb.set(doc(db, "vouchers", c), { desc, exp, used: false, batch, n: i + 1, total: n, createdAt: serverTimestamp(), createdBy: auth.currentUser.uid }));
+    await wb.commit();
+    vchLast.forEach((x) => { try { URL.revokeObjectURL(x.url); } catch (_) {} });
+    vchLast = [];
+    for (let i = 0; i < list.length; i++) {
+      setMsg(vchMsg, "Rysuję grafiki " + (i + 1) + "/" + n + "…");
+      const blob = await vchPng(img, list[i], i + 1, n);
+      vchLast.push({ code: list[i], n: i + 1, blob, url: URL.createObjectURL(blob), name: vchName(i + 1, list[i]) });
+    }
+    $("rb-v-new").innerHTML = '<div class="rb-res ok"><b>Gotowe: ' + n + ' voucherów z unikalnymi kodami QR.</b><div class="rb-meta">Pobierz i wydrukuj. Kody są już w bazie; każdy da się zrealizować tylko raz. Grafiki możesz też pobrać później z listy poniżej.</div>'
+      + '<div class="rb-actions"><button type="button" class="rb-btn small" data-vchadm="zip">⬇ Pobierz wszystkie (ZIP)</button></div></div>'
+      + '<div class="rb-vch-grid">' + vchLast.map((x) => `<a href="${x.url}" download="${esc(x.name)}" title="Pobierz ${esc(x.name)}"><img src="${x.url}" alt="Voucher ${x.n}" loading="lazy"><span>Nr ${x.n}/${n}</span></a>`).join("") + "</div>";
+    setMsg(vchMsg, (codes ? "Zarejestrowano " : "Utworzono ") + n + " voucherów.", "ok");
+    vchLoadList();
+  } catch (err) {
+    console.error(err);
+    setMsg(vchMsg, err.code ? errText(err) + (err.code === "permission-denied" ? " Wklej najnowsze reguły Firestore (zawierają vouchery)." : "") : err.message, "err");
+  } finally { btns.forEach((x) => { x.disabled = false; }); }
+}
+$("rb-v-make").addEventListener("click", () => vchCreate(null));
+/* gotowe kody (np. z pliku od Claude): wklej listę, a panel zarejestruje je w bazie i narysuje grafiki */
+$("rb-v-impfile").addEventListener("change", async (e) => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  try { $("rb-v-import").value = await f.text(); } catch (_) { setMsg(vchMsg, "Nie udało się odczytać pliku.", "err"); }
+  e.target.value = "";
+});
+$("rb-v-imp").addEventListener("click", async () => {
+  const parts = $("rb-v-import").value.split(/[\s,;]+/).filter(Boolean), codes = [], bad = [];
+  parts.forEach((p) => { const c = vchParse(p); if (c) { if (!codes.includes(c)) codes.push(c); } else bad.push(p); });
+  if (!codes.length) { setMsg(vchMsg, "Wklej kody (jeden w linii).", "err"); return; }
+  if (bad.length) { setMsg(vchMsg, "Nie rozpoznaję kodu: " + bad[0].slice(0, 30) + ". Popraw lub usuń tę linię.", "err"); return; }
+  const taken = [];
+  try { for (const c of codes) { if (await vchGet(c).catch(() => null)) taken.push(c); } } catch (_) {}
+  if (taken.length) { setMsg(vchMsg, "Ten kod jest już w bazie: " + vchFmt(taken[0]) + ". Usuń go z listy.", "err"); return; }
+  vchCreate(codes);
+});
+let vchRows = [];
+async function vchLoadList() {
+  if (!isAdmin) return;
+  const box = $("rb-v-list");
+  box.innerHTML = '<div class="rb-meta">Wczytuję…</div>';
+  try {
+    const s = await getDocs(collection(db, "vouchers"));
+    vchRows = s.docs.map((d) => ({ code: d.id, ...d.data() })).sort((a, b) => tsMs(a.createdAt) - tsMs(b.createdAt) || (a.n || 0) - (b.n || 0));
+    vchPaintList();
+  } catch (err) { console.error(err); box.innerHTML = '<div class="rb-msg err">' + esc(err.code === "permission-denied" ? "Brak dostępu: wklej najnowsze reguły Firestore (zawierają vouchery)." : errText(err)) + "</div>"; }
+}
+function vchPaintList() {
+  const box = $("rb-v-list"), rows = vchRows;
+  if (!rows.length) { box.innerHTML = '<div class="rb-meta">Nie ma jeszcze żadnych voucherów.</div>'; return; }
+  const cnt = { ok: 0, used: 0, expired: 0 };
+  rows.forEach((r) => { cnt[vchStatus(r)]++; });
+  const lab = { ok: ["ważny", "ok"], used: ["wykorzystany", "bad"], expired: ["wygasł", "off"] };
+  box.innerHTML = `<div class="rb-meta" style="margin-bottom:8px">Razem ${rows.length} · ważne ${cnt.ok} · wykorzystane ${cnt.used} · wygasłe ${cnt.expired}</div>`
+    + rows.map((r) => { const st = vchStatus(r);
+      return `<div class="rb-vch-row" data-code="${esc(r.code)}"><div><b>${esc(vchNr(r))}</b>${r.batch ? " · " + esc(r.batch) : ""} <span class="rb-vch-st ${lab[st][1]}">${lab[st][0]}</span>
+        <div class="rb-meta">${esc(r.desc || "")} · do ${esc(fmtDate(r.exp))}${r.used && r.usedAt ? " · wykorzystany " + esc(fmtDateTime(r.usedAt)) : ""}</div>
+        <div class="rb-meta rb-vch-code">${esc(vchFmt(r.code))}</div></div>
+        <div class="rb-actions"><button type="button" class="rb-btn secondary small" data-vchadm="png">⬇ PNG</button>${st === "used" ? '<button type="button" class="rb-btn secondary small" data-vchadm="undo">↩ Cofnij</button>' : ""}<button type="button" class="rb-btn secondary small" data-vchadm="del">🗑 Usuń</button></div></div>`; }).join("");
+}
+document.addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-vchadm]");
+  if (!b || !isAdmin) return;
+  const act = b.dataset.vchadm, row = b.closest("[data-code]"), code = row && row.dataset.code;
+  try {
+    if (act === "zip") {
+      if (!vchLast.length) return;
+      b.disabled = true;
+      const files = await Promise.all(vchLast.map(async (x) => ({ name: x.name, data: new Uint8Array(await x.blob.arrayBuffer()) })));
+      vchSave(zipStore(files), "vouchery.zip");
+      b.disabled = false;
+    } else if (act === "png" && code) {
+      const r = vchRows.find((x) => x.code === code); if (!r) return;
+      b.disabled = true;
+      const blob = await vchPng(await vchLoadImg(vchTplCustom || VCH_TPL), code, r.n || 1, r.total || r.n || 1);
+      vchSave(blob, vchName(r.n || 1, code));
+      b.disabled = false;
+    } else if (act === "undo" && code) {
+      if (!confirm("Cofnąć realizację tego vouchera? Znów będzie ważny.")) return;
+      await updateDoc(doc(db, "vouchers", code), { used: false, usedAt: null, usedBy: null });
+      vchLoadList();
+    } else if (act === "del" && code) {
+      if (!confirm("Usunąć ten voucher? Jego kod QR przestanie działać (ta operacja jest nieodwracalna).")) return;
+      await deleteDoc(doc(db, "vouchers", code));
+      vchLoadList();
+    }
+  } catch (err) { console.error(err); b.disabled = false; setMsg(vchMsg, err.code ? errText(err) : err.message, "err"); }
+});
+$("rb-v-refresh").addEventListener("click", vchLoadList);
+
+/* start: link z kodu QR vouchera (?v=KOD) otwiera okienko ze statusem */
+if (QS.has("v")) {
+  const c0 = vchParse(QS.get("v"));
+  if (c0) vchPubOpen(c0);
+  else {
+    vchPubBox().hidden = false;
+    $("vch-body").innerHTML = '<div class="vch-ic">⚠️</div><div class="vch-t bad">Nieprawidłowy kod vouchera</div><div class="vch-m">Zeskanuj kod QR z vouchera jeszcze raz albo zapytaj obsługę.</div>';
+  }
+}
+
 /* ---------- panel admina: zakładka Raport (dziennik zdarzeń) ---------- */
 const rpMsg = $("rb-rp-msg");
 let reportEvents = [];
@@ -5249,6 +5605,8 @@ async function handleScan(raw) {
       buzz(120);
       return;
     }
+    const vc = vchParse(raw);
+    if (vc) { await vchShow(vc, out, true); return; }
     const code = parseCode(raw);
     if (!code) {
       out.innerHTML = scanCard("bad", "❌ To nie jest kod rabatowy", null, "Zeskanowano: " + esc(String(raw).slice(0, 40)));
