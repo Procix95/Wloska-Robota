@@ -4175,7 +4175,8 @@ $("rb-v-impfile").addEventListener("change", async (e) => {
   e.target.value = "";
 });
 $("rb-v-imp").addEventListener("click", async () => {
-  const parts = $("rb-v-import").value.split(/[\s,;]+/).filter(Boolean), codes = [], bad = [];
+  /* można wkleić też cały link ...#vimport=KOD1,KOD2 albo linki ?v=KOD: wycinamy początek linku z "vimport=" */
+  const parts = $("rb-v-import").value.replace(/https?:\/\/[^\s,;]*?vimport=/gi, " ").split(/[\s,;]+/).filter(Boolean), codes = [], bad = [];
   parts.forEach((p) => { const c = vchParse(p); if (c) { if (!codes.includes(c)) codes.push(c); } else bad.push(p); });
   if (!codes.length) { setMsg(vchMsg, "Wklej kody (jeden w linii).", "err"); return; }
   if (bad.length) { setMsg(vchMsg, "Nie rozpoznaję kodu: " + bad[0].slice(0, 30) + ". Popraw lub usuń tę linię.", "err"); return; }
