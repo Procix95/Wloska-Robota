@@ -3903,7 +3903,7 @@ $("rb-poll-close-quiet").addEventListener("click", async () => {
 const VCH_ALPHA = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const VCH_RE = /^[A-HJ-NP-Z2-9]{16}$/;
 const VCH_BASE = "https://wloskarobota.eu/?v=";
-const VCH_TPL = "images/voucher-szablon.jpg?v=1";
+const VCH_TPL = "images/voucher-szablon.jpg?v=2";
 const vchNew = () => { const b = new Uint8Array(16); crypto.getRandomValues(b); return Array.from(b, (x) => VCH_ALPHA[x & 31]).join(""); };
 const vchFmt = (c) => String(c).replace(/(.{4})(?=.)/g, "$1-");
 function vchParse(raw) {
