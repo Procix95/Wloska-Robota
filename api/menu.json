@@ -1,0 +1,205 @@
+{
+  "name": "Włoska Robota – menu",
+  "url": "https://wloskarobota.eu/#menu",
+  "currency": "PLN",
+  "note": "Stan bazowy ze strony. Ceny, dostępność i dodatkowe produkty ustawione w panelu admina są w api/wr-api.js (getMenu).",
+  "updated": "2026-11-06",
+  "categories": [
+    {
+      "id": "klasyczne",
+      "name": "Klasyczne"
+    },
+    {
+      "id": "miesne",
+      "name": "Mięsne"
+    },
+    {
+      "id": "vege",
+      "name": "Wege"
+    },
+    {
+      "id": "sosy",
+      "name": "Sosy"
+    },
+    {
+      "id": "makarony",
+      "name": "Makarony"
+    },
+    {
+      "id": "dodatki",
+      "name": "Dodatki"
+    }
+  ],
+  "items": [
+    {
+      "id": "margherita",
+      "name": "Margherita",
+      "key": "margherita",
+      "category": "klasyczne",
+      "categories": [
+        "klasyczne"
+      ],
+      "price": 28.0,
+      "priceText": "28 zł",
+      "description": "",
+      "tags": []
+    },
+    {
+      "id": "pepperoni",
+      "name": "Pepperoni",
+      "key": "pepperoni",
+      "category": "klasyczne",
+      "categories": [
+        "klasyczne",
+        "miesne"
+      ],
+      "price": 34.0,
+      "priceText": "34 zł",
+      "description": "",
+      "tags": []
+    },
+    {
+      "id": "prosciutto",
+      "name": "Prosciutto",
+      "key": "prosciutto",
+      "category": "miesne",
+      "categories": [
+        "miesne"
+      ],
+      "price": 38.0,
+      "priceText": "38 zł",
+      "description": "",
+      "tags": []
+    },
+    {
+      "id": "vegetariana",
+      "name": "Vegetariana",
+      "key": "vegetariana",
+      "category": "vege",
+      "categories": [
+        "vege"
+      ],
+      "price": 32.0,
+      "priceText": "32 zł",
+      "description": "",
+      "tags": []
+    },
+    {
+      "id": "diavola",
+      "name": "Diavola",
+      "key": "diavola",
+      "category": "miesne",
+      "categories": [
+        "miesne"
+      ],
+      "price": 35.0,
+      "priceText": "35 zł",
+      "description": "",
+      "tags": []
+    },
+    {
+      "id": "carbonara",
+      "name": "Carbonara",
+      "key": "carbonara",
+      "category": "miesne",
+      "categories": [
+        "miesne"
+      ],
+      "price": 36.0,
+      "priceText": "36 zł",
+      "description": "",
+      "tags": []
+    },
+    {
+      "id": "quattro-formaggi",
+      "name": "Quattro Formaggi",
+      "key": "quattro formaggi",
+      "category": "klasyczne",
+      "categories": [
+        "klasyczne"
+      ],
+      "price": 34.0,
+      "priceText": "34 zł",
+      "description": "",
+      "tags": []
+    },
+    {
+      "id": "cotto",
+      "name": "Cotto",
+      "key": "cotto",
+      "category": "miesne",
+      "categories": [
+        "miesne"
+      ],
+      "price": 36.0,
+      "priceText": "36 zł",
+      "description": "",
+      "tags": []
+    },
+    {
+      "id": "nduja",
+      "name": "Nduja",
+      "key": "nduja",
+      "category": "miesne",
+      "categories": [
+        "miesne"
+      ],
+      "price": 40.0,
+      "priceText": "40 zł",
+      "description": "",
+      "tags": []
+    },
+    {
+      "id": "sos-czosnkowy",
+      "name": "Sos Czosnkowy",
+      "key": "sos czosnkowy",
+      "category": "sosy",
+      "categories": [
+        "sosy"
+      ],
+      "price": 5.0,
+      "priceText": "5 zł",
+      "description": "",
+      "tags": []
+    },
+    {
+      "id": "sos-pomidorowy",
+      "name": "Sos Pomidorowy",
+      "key": "sos pomidorowy",
+      "category": "sosy",
+      "categories": [
+        "sosy"
+      ],
+      "price": 5.0,
+      "priceText": "5 zł",
+      "description": "",
+      "tags": []
+    },
+    {
+      "id": "spaghetti-bolognese",
+      "name": "Spaghetti Bolognese",
+      "key": "spaghetti bolognese",
+      "category": "makarony",
+      "categories": [
+        "makarony"
+      ],
+      "price": 25.0,
+      "priceText": "25 zł",
+      "description": "",
+      "tags": []
+    },
+    {
+      "id": "frytki",
+      "name": "Frytki",
+      "key": "frytki",
+      "category": "dodatki",
+      "categories": [
+        "dodatki"
+      ],
+      "price": 10.0,
+      "priceText": "10 zł",
+      "description": "",
+      "tags": []
+    }
+  ]
+}
