@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API Włoska Robota – menu, godziny, dowóz (JSON)</title>
+<meta name="description" content="Publiczne API pizzerii Włoska Robota z Głupoń: menu z cenami, godziny otwarcia, dowóz i dane kontaktowe w formacie JSON. Tylko odczyt, bez klucza.">
+<link rel="canonical" href="https://wloskarobota.eu/api/">
+<style>
+:root{--bg:#fff;--fg:#1d1d1f;--mut:#5f6368;--card:#f4f4f6;--line:#dcdce0;--acc:#c8102e;--code:#eceef2}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15151a;--fg:#ececf1;--mut:#a0a3ab;--card:#1f1f27;--line:#33343d;--acc:#ff5a6e;--code:#262630}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:820px;margin:0 auto;padding:24px 16px 56px}
+h1{font-size:1.7rem;margin:.2em 0}h2{font-size:1.2rem;margin:1.8em 0 .4em;border-bottom:1px solid var(--line);padding-bottom:.25em}
+a{color:var(--acc)}p{margin:.5em 0}.mut{color:var(--mut)}
+pre,code{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);padding:12px 14px;border-radius:10px;overflow:auto;margin:.6em 0}
+code{background:var(--code);padding:1px 5px;border-radius:5px}pre code{background:none;padding:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:.7em 0}
+.ep{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}.ep b{font-family:ui-monospace,Menlo,monospace;word-break:break-all}
+#demo{font-weight:600}.ok{color:#188038}.no{color:#c5221f}
+table{border-collapse:collapse;width:100%;font-size:.93rem}td,th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+</style>
+</head>
+<body>
+<main>
+<p><a href="/">← wloskarobota.eu</a></p>
+<h1>API Włoska Robota</h1>
+<p class="mut">Publiczne dane pizzerii z Głupoń koło Kuślina w formacie JSON. Tylko odczyt, bez klucza i bez logowania, można używać z dowolnej strony lub aplikacji (nagłówek CORS jest ustawiony).</p>
+<div class="card">Teraz: <span id="demo">sprawdzam…</span><div class="mut" id="demo2"></div></div>
+
+<h2>1. Pliki JSON (stan bazowy)</h2>
+<div class="card"><div class="ep"><b>GET https://wloskarobota.eu/api/menu.json</b></div><p class="mut">Menu: kategorie, pozycje (nazwa, cena liczbowa i tekstowa, opis, kategoria, plakietki).</p></div>
+<div class="card"><div class="ep"><b>GET https://wloskarobota.eu/api/info.json</b></div><p class="mut">Adres, telefon, e-mail, linki, miejscowości z dowozem i domyślne godziny otwarcia.</p></div>
+<pre><code>curl https://wloskarobota.eu/api/menu.json
+curl https://wloskarobota.eu/api/info.json</code></pre>
+<p>Te pliki pokazują stan ze strony, czyli to, co jest wpisane w kodzie. Zmiany, które właściciel robi w panelu admina (cena, „niedostępne dziś”, godziny), widać dopiero w pkt 2.</p>
+
+<h2>2. Dane na żywo (moduł JavaScript)</h2>
+<p>Moduł <code>wr-api.js</code> bierze dane bazowe i nakłada na nie aktualne ustawienia z panelu. Działa w przeglądarce i w Node 18+.</p>
+<pre><code>import { getMenu, getHours, isOpenNow, getNotice, getInfo }
+  from "https://wloskarobota.eu/api/wr-api.js";
+
+const menu = await getMenu();      // aktualne ceny, dostępność, własne produkty
+const open = await isOpenNow();    // { open: true, closesAt: "20:00" }
+const hours = await getHours();    // godziny + dni wolne (z świętami)
+const note = await getNotice();    // komunikat z góry strony albo null
+const info = await getInfo();      // adres, telefon, dowóz</code></pre>
+<table>
+<tr><th>Funkcja</th><th>Zwraca</th></tr>
+<tr><td><code>getMenu({includeHidden})</code></td><td><code>{ items[], categories[], live }</code>; pozycja ma <code>price</code>, <code>priceText</code>, <code>available</code>, <code>custom</code></td></tr>
+<tr><td><code>getHours()</code></td><td><code>{ days[] (0 = niedziela), closedDates[], holidayNames, live }</code></td></tr>
+<tr><td><code>isOpenNow(date?)</code></td><td><code>{ open, closesAt | opensAt | reason }</code>; czas liczony w strefie Europe/Warsaw</td></tr>
+<tr><td><code>getNotice()</code></td><td><code>{ text, type }</code> albo <code>null</code></td></tr>
+<tr><td><code>getInfo()</code></td><td>jak <code>info.json</code>, z aktualną listą miejscowości dowozu</td></tr>
+</table>
+<p>Pole <code>live: false</code> oznacza, że ustawień z panelu nie dało się pobrać i zwrócono dane bazowe. Wyniki są trzymane w pamięci przez 60 sekund.</p>
+
+<h2>Zasady</h2>
+<p>To nie jest system zamówień: pizzę zamawia się telefonicznie (+48 668 862 396). Prosimy o rozsądną liczbę zapytań (np. nie częściej niż raz na minutę). Dane mogą się zmieniać bez uprzedzenia. Pytania: <a href="mailto:radtom72@gmail.com">radtom72@gmail.com</a>.</p>
+</main>
+<script type="module">
+import { isOpenNow, getHours } from "./wr-api.js";
+const el = document.getElementById("demo"), el2 = document.getElementById("demo2");
+try {
+  const r = await isOpenNow();
+  el.textContent = r.open ? "Otwarte (do " + r.closesAt + ")" : "Zamknięte" + (r.opensAt ? " (otwieramy o " + r.opensAt + ")" : "");
+  el.className = r.open ? "ok" : "no";
+  el2.textContent = r.live ? "Dane na żywo z panelu." : "Godziny bazowe (ustawień z panelu nie udało się pobrać).";
+} catch (e) { el.textContent = "brak danych"; }
+</script>
+</body>
+</html>
