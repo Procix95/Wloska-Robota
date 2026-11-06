@@ -214,6 +214,103 @@
   "sameAs": ["https://www.facebook.com/profile.php?id=61591198263542", "https://g.page/r/CUq2_T6CQcy5EAE"]
 }
 </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://wloskarobota.eu/#faq",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Czy mogę zamówić pizzę przez stronę?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Nie, zamówienia przyjmujemy telefonicznie: 668 862 396. Strona i konto klienta nie służą do składania zamówień. W koncie znajdziesz kartę lojalnościową i kody rabatowe, które podajesz przy zamówieniu."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Kiedy jest otwarta pizzeria Włoska Robota?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Standardowo od środy do piątku w godzinach 12:00–20:00 oraz w sobotę i niedzielę 14:00–22:00. W poniedziałki i wtorki jest nieczynne. Aktualne godziny i zmiany (np. w święta) są w sekcji Kontakt oraz w komunikacie na górze strony."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Gdzie jest Włoska Robota?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Pizzeria mieści się w Głuponiach pod adresem Głuponie 103, 64-316 Kuślin (Wielkopolska). Pizzę możesz odebrać osobiście w lokalu albo zamówić z dowozem."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Czy dowozicie pizzę do mojej miejscowości?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Dowozimy do okolicznych miejscowości, m.in. Głupoń, Trzcianki, Tomaszewa, Michorzewa, Kuślina, Zygmuntowa, Chraplewa, Marszewa, Michorzewka, Wymysłowa, Dąbrowy, Łęczyc, Dąbrowy Nowej, Rudnik, Wąsowa i Jastrzębnik oraz Krystianowa. Aktualną listę znajdziesz w sekcji Dowóz na stronie głównej."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Ile kosztuje dowóz?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Koszt zależy od miejscowości. Wpisz swoją miejscowość w sekcji Dowóz na stronie głównej i od razu zobaczysz koszt. Koszt dowozu doliczamy do ceny pizzy i podajemy przed potwierdzeniem zamówienia."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Jak długo czeka się na pizzę?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Średnio liczymy około 5 minut na jedną pizzę, a przy dostawie dochodzi czas dojazdu. Czas zależy od liczby zamówień w danej chwili, dlatego przy każdym zamówieniu podajemy orientacyjny czas realizacji."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Jak mogę zapłacić za pizzę?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Płatność następuje przy odbiorze lub dostawie: gotówką albo kartą."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Jakiej wielkości są pizze i jakie jest ciasto?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Wszystkie pizze mają 30 cm. Ciasto wyrabiamy ręcznie i fermentujemy minimum 24 godziny, dzięki czemu jest lekkie i chrupiące. Pizzę pieczemy w piecu."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Czy macie pizzę wegetariańską?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tak. W menu jest m.in. Vegetariana (cebula, pieczarki, karczochy) oraz klasyczna Margherita. W menu znajdziesz też kategorię Wege."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Co z alergiami i nietolerancjami pokarmowymi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Jeśli masz alergię lub nietolerancję, zapytaj o skład wybranej pizzy przed złożeniem zamówienia. Chętnie podamy składniki."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Czy mogę zamówić na konkretną godzinę albo większe zamówienie?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tak. Zadzwoń i ustal godzinę. Przy większych zamówieniach prosimy o wcześniejszy telefon, abyśmy zdążyli się przygotować."
+      }
+    }
+  ]
+}
+</script>
 <link rel="icon" href="/favicon.ico?v=2" sizes="any">
 <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png?v=2">
 <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png?v=2">
@@ -392,6 +489,13 @@ body.dark footer {background: #0a0a0a;}
 .hero h1{text-shadow:0 6px 34px rgba(0,0,0,.55)}
 .hero p{text-shadow:0 2px 16px rgba(0,0,0,.6)}
 .theme-greet[hidden]{display:none}
+.faq{background:var(--light)}body.dark .faq{background:var(--dark-bg)}
+.faq-list{max-width:820px;margin:2rem auto 0;display:grid;gap:.7rem}
+.faq-item{background:white;border-radius:14px;box-shadow:0 3px 14px rgba(0,0,0,.07);padding:0 1.2rem}body.dark .faq-item{background:var(--dark-card);box-shadow:0 3px 14px rgba(0,0,0,.3)}
+.faq-item summary{cursor:pointer;font-weight:700;padding:1rem 1.6rem 1rem 0;list-style:none;position:relative;line-height:1.4}.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:"+";position:absolute;right:0;top:50%;transform:translateY(-50%);font-size:1.5rem;color:var(--red);font-weight:400;line-height:1}.faq-item[open] summary::after{content:"\2212"}
+.faq-item summary:focus-visible{outline:3px solid var(--gold);outline-offset:2px;border-radius:6px}
+.faq-item p{margin:0 0 1rem;line-height:1.6;color:var(--gray)}body.dark .faq-item p{color:#c9c9c9}
 .reviews{background:var(--light)}body.dark .reviews{background:var(--dark-bg)}
 .rev-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.2rem;margin-top:2rem}
 .rev-card{margin:0;background:white;border-radius:18px;padding:1.4rem 1.4rem 1.1rem;box-shadow:0 5px 20px rgba(0,0,0,.08);display:flex;flex-direction:column;gap:.7rem}
@@ -422,7 +526,7 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
 @media (max-width:600px){.hero-chips{gap:.45rem}.hero-chips span{font-size:.8rem;padding:.38rem .7rem}.hero-scroll{display:none}}
 @media (prefers-reduced-motion:reduce){.hero-scroll{animation:none}}
 </style>
-<link rel="stylesheet" href="/motyw.css?v=1">
+<link rel="stylesheet" href="/motyw.css?v=2">
 <script src="/motyw.js?v=1" defer></script>
 </head>
 <body class="dark">
@@ -440,6 +544,7 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
         <li><a href="#menu">Menu</a></li>
         <li class="dowoz-link" hidden><a href="#dowoz">Dowóz</a></li>
         <li><a href="#gallery">Galeria</a></li>
+        <li><a href="#faq">FAQ</a></li>
         <li><a href="#contact">Kontakt</a></li>
         <li><a href="#konto">Konto</a></li>
         <li data-pwa-show hidden><button type="button" class="pwa-nav-btn" data-pwa hidden aria-label="Zainstaluj aplikację Włoska Robota"><i class="fas fa-download" aria-hidden="true"></i> <span class="pwa-long">Zainstaluj aplikację</span><span class="pwa-short">Aplikacja</span></button></li>
@@ -799,6 +904,26 @@ body.dark .rev-card{background:var(--dark-card);box-shadow:0 5px 20px rgba(0,0,0
     <div class="rev-actions">
       <a class="rev-btn" id="rev-all" href="#" target="_blank" rel="noopener">Zobacz wszystkie opinie w Google</a>
       <a class="rev-btn alt" id="rev-add" href="#" target="_blank" rel="noopener" hidden>Dodaj swoją opinię</a>
+    </div>
+  </div>
+</section>
+
+<section class="faq" id="faq">
+  <div class="container">
+    <h2 class="section-title fade-in">Częste <span>Pytania</span></h2>
+    <p class="section-subtitle fade-in">Zamówienia, dowóz, godziny i płatność</p>
+    <div class="faq-list fade-in">
+      <details class="faq-item"><summary>Czy mogę zamówić pizzę przez stronę?</summary><p>Nie, zamówienia przyjmujemy telefonicznie: 668 862 396. Strona i konto klienta nie służą do składania zamówień. W koncie znajdziesz kartę lojalnościową i kody rabatowe, które podajesz przy zamówieniu.</p></details>
+      <details class="faq-item"><summary>Kiedy jest otwarta pizzeria Włoska Robota?</summary><p>Standardowo od środy do piątku w godzinach 12:00–20:00 oraz w sobotę i niedzielę 14:00–22:00. W poniedziałki i wtorki jest nieczynne. Aktualne godziny i zmiany (np. w święta) są w sekcji Kontakt oraz w komunikacie na górze strony.</p></details>
+      <details class="faq-item"><summary>Gdzie jest Włoska Robota?</summary><p>Pizzeria mieści się w Głuponiach pod adresem Głuponie 103, 64-316 Kuślin (Wielkopolska). Pizzę możesz odebrać osobiście w lokalu albo zamówić z dowozem.</p></details>
+      <details class="faq-item"><summary>Czy dowozicie pizzę do mojej miejscowości?</summary><p>Dowozimy do okolicznych miejscowości, m.in. Głupoń, Trzcianki, Tomaszewa, Michorzewa, Kuślina, Zygmuntowa, Chraplewa, Marszewa, Michorzewka, Wymysłowa, Dąbrowy, Łęczyc, Dąbrowy Nowej, Rudnik, Wąsowa i Jastrzębnik oraz Krystianowa. Aktualną listę znajdziesz w sekcji Dowóz na stronie głównej.</p></details>
+      <details class="faq-item"><summary>Ile kosztuje dowóz?</summary><p>Koszt zależy od miejscowości. Wpisz swoją miejscowość w sekcji Dowóz na stronie głównej i od razu zobaczysz koszt. Koszt dowozu doliczamy do ceny pizzy i podajemy przed potwierdzeniem zamówienia.</p></details>
+      <details class="faq-item"><summary>Jak długo czeka się na pizzę?</summary><p>Średnio liczymy około 5 minut na jedną pizzę, a przy dostawie dochodzi czas dojazdu. Czas zależy od liczby zamówień w danej chwili, dlatego przy każdym zamówieniu podajemy orientacyjny czas realizacji.</p></details>
+      <details class="faq-item"><summary>Jak mogę zapłacić za pizzę?</summary><p>Płatność następuje przy odbiorze lub dostawie: gotówką albo kartą.</p></details>
+      <details class="faq-item"><summary>Jakiej wielkości są pizze i jakie jest ciasto?</summary><p>Wszystkie pizze mają 30 cm. Ciasto wyrabiamy ręcznie i fermentujemy minimum 24 godziny, dzięki czemu jest lekkie i chrupiące. Pizzę pieczemy w piecu.</p></details>
+      <details class="faq-item"><summary>Czy macie pizzę wegetariańską?</summary><p>Tak. W menu jest m.in. Vegetariana (cebula, pieczarki, karczochy) oraz klasyczna Margherita. W menu znajdziesz też kategorię Wege.</p></details>
+      <details class="faq-item"><summary>Co z alergiami i nietolerancjami pokarmowymi?</summary><p>Jeśli masz alergię lub nietolerancję, zapytaj o skład wybranej pizzy przed złożeniem zamówienia. Chętnie podamy składniki.</p></details>
+      <details class="faq-item"><summary>Czy mogę zamówić na konkretną godzinę albo większe zamówienie?</summary><p>Tak. Zadzwoń i ustal godzinę. Przy większych zamówieniach prosimy o wcześniejszy telefon, abyśmy zdążyli się przygotować.</p></details>
     </div>
   </div>
 </section>
