@@ -11,4 +11,3 @@
 - Facebook: https://www.facebook.com/profile.php?id=61591198263542
 - Opinie Google: https://g.page/r/CUq2_T6CQcy5EAE
 - Firma: RadTom, Radosław Jaskuła
-- API (JSON, tylko odczyt): https://wloskarobota.eu/api/ (menu: /api/menu.json, dane firmy i godziny: /api/info.json)
