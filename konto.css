@@ -249,7 +249,7 @@ body.dark #pwaModal .box{background:#1e1e1e;color:#f3f3f3}
   #rabat-overlay .rb-head{padding-left:16px;padding-right:12px}
   #rabat-overlay .rb-codebox .rb-code{font-size:19px}
 }
-#rabat-overlay #rb-admin.staffonly .rb-tabs,#rabat-overlay #rb-admin.staffonly .rb-stats,#rabat-overlay #rb-admin.staffonly .rb-pane:not([data-pane="check"]){display:none!important}
+#rabat-overlay #rb-admin.staffonly .rb-tabs,#rabat-overlay #rb-admin.staffonly .rb-stats,#rabat-overlay #rb-admin.staffonly .rb-pane:not([data-pane="check"]):not([data-pane="dostawy"]){display:none!important}
 #rabat-overlay #rb-admin.staffonly{margin-top:8px}
 /* ===== panel admina: przyklejony pasek zakładek z ikonami ===== */
 @supports (overflow:clip){#rabat-overlay .rb-box{overflow:clip}}
@@ -679,3 +679,15 @@ body.dark .poll-opt{background:var(--dark-card)}
 .vch-m{font-size:14px;color:rgba(255,255,255,.8);margin-top:6px}
 .vch-a{margin-top:14px}
 .vch-a .rb-btn{background:#009246;border:0;color:#fff;padding:12px 18px;border-radius:99px;font:inherit;font-weight:800;cursor:pointer}
+
+/* status dostawy */
+.dlv-steps{list-style:none;display:flex;gap:4px;margin:16px 0 8px;padding:0;justify-content:space-between}
+.dlv-steps li{flex:1;text-align:center;opacity:.45;font-size:.78rem}
+.dlv-steps li span{display:block;font-size:1.6rem;filter:grayscale(1)}
+.dlv-steps li em{font-style:normal;font-weight:600}
+.dlv-steps li.past{opacity:.85}.dlv-steps li.past span{filter:none}
+.dlv-steps li.cur{opacity:1;font-weight:800}.dlv-steps li.cur span{filter:none;animation:dlvpulse 1.4s ease-in-out infinite}
+@keyframes dlvpulse{50%{transform:scale(1.18)}}
+@media (prefers-reduced-motion:reduce){.dlv-steps li.cur span{animation:none}}
+#rabat-overlay .rb-dlv .rb-actions{flex-wrap:wrap;gap:6px}
+#rabat-overlay .rb-dlv-eta{width:auto;margin:0;padding:6px 8px;font-size:14px}

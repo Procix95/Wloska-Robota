@@ -1110,7 +1110,7 @@ fadeEls.forEach(el => observer.observe(el));
      ===================================================================== -->
 
 <!-- ===== RABAT: STYLE ===== -->
-<link rel="stylesheet" href="/konto.css?v=10">
+<link rel="stylesheet" href="/konto.css?v=11">
 
 <!-- ===== RABAT: HTML ===== -->
 <div id="rabat-overlay" role="dialog" aria-modal="true" aria-labelledby="rb-title">
@@ -1274,6 +1274,7 @@ fadeEls.forEach(el => observer.observe(el));
         <div class="rb-tabs" role="tablist" aria-label="Panel administratora">
           <button type="button" class="rb-atab active" data-pane="today" role="tab"><i>🏠</i><span>Dziś</span></button>
           <button type="button" class="rb-atab" data-pane="check" role="tab"><i>📷</i><span>Skanuj</span></button>
+          <button type="button" class="rb-atab" data-pane="dostawy" role="tab"><i>🛵</i><span>Dostawy</span></button>
           <button type="button" class="rb-atab" data-pane="clients" role="tab"><i>👥</i><span>Klienci</span></button>
           <button type="button" class="rb-atab" data-pane="builder" role="tab"><i>🏷️</i><span>Rabaty</span></button>
           <button type="button" class="rb-atab" data-pane="vouchers" role="tab"><i>🎫</i><span>Vouchery</span></button>
@@ -1527,6 +1528,20 @@ fadeEls.forEach(el => observer.observe(el));
             <div id="rb-a-list"></div>
           </div>
         </div>
+
+        <div class="rb-pane" data-pane="dostawy" hidden>
+            <h4>🛵 Dostawy: link „gdzie jest moja pizza”</h4>
+            <div class="rb-meta" style="margin:-4px 0 10px">Utwórz link dla klienta i wyślij mu go SMS-em. Klient zobaczy pasek: przyjęte → w piecu → w drodze → dostarczone, a gdy klikniesz „W drodze”, także godzinę dojazdu. Link działa tylko w dniu zamówienia.</div>
+            <label for="rb-d-label">Opis dostawy (widzi go też klient; <b>bez adresu</b>), np. „Michorzewo, 2 pizze”</label>
+            <input id="rb-d-label" maxlength="40" autocomplete="off" placeholder="np. Michorzewo, 2 pizze">
+            <label for="rb-d-phone">Numer klienta (tylko do wysłania SMS, nie jest zapisywany)</label>
+            <input id="rb-d-phone" type="tel" inputmode="tel" autocomplete="off" placeholder="np. 600 100 200">
+            <button type="button" class="rb-btn" id="rb-d-make" style="margin-top:6px">➕ Utwórz link dla klienta</button>
+            <div class="rb-msg" id="rb-d-msg" role="status"></div>
+            <div id="rb-d-new"></div>
+            <h4 style="margin-top:18px">Dostawy z ostatniej doby <button type="button" class="rb-btn secondary small" id="rb-d-refresh" style="margin-left:8px">↻ Odśwież</button></h4>
+            <div id="rb-d-list"></div>
+          </div>
 
         <div class="rb-pane" data-pane="vouchers" hidden>
             <h4>Vouchery imprezowe (jednorazowe, z unikalnym QR)</h4>
@@ -1893,7 +1908,7 @@ fadeEls.forEach(el => observer.observe(el));
   btns.forEach(function (b) { b.addEventListener("click", install); });
 })();
 </script>
-<script type="module" src="/aplikacja.js?v=23"></script>
+<script type="module" src="/aplikacja.js?v=24"></script>
 <script type="module" src="/straz.js?v=7"></script>
 <!-- ===== RABAT: KONIEC ===== -->
 
