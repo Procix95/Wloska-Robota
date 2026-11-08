@@ -706,7 +706,7 @@ async function handleUser(user) {
   if (isAdmin || isStaff) { const top = document.querySelector("#rb-user .rb-top"); if (top) top.after($("rb-admin")); }
   $("rb-admin").classList.toggle("staffonly", !isAdmin && isStaff);
   $("rb-admin-title").textContent = isAdmin ? "🛠 Panel administratora" : "📷 Skanowanie rabatów";
-  if (!isAdmin && isStaff) setAdminTab("check");
+  if (!isAdmin && isStaff) { setAdminTab("check"); const dp = document.querySelector('#rb-admin .rb-pane[data-pane="dostawy"]'); if (dp) { dp.hidden = false; dlvLoad(); } }
   else if (isAdmin) setAdminTab("today");
   if (wantScan && (isAdmin || isStaff)) { wantScan = false; setAdminTab("check"); if (PHONE_CAM) setTimeout(() => { startScanner(); }, 300); }
   try { vchApplyImport(); } catch (_) {}
@@ -4254,6 +4254,124 @@ function vchApplyImport() {
   setMsg(vchMsg, "Wczytano " + codes.length + " kodów z linku. Kliknij „Zarejestruj te kody”, tylko jeśli ten link pochodzi od Ciebie albo od Claude (kto zna kody, ten może ich użyć).", "ok");
 }
 
+/* ---------- status dostawy: klient widzi, czy kierowca już jedzie (link ?dostawa=KOD) ---------- */
+const DLV_RE = /^[A-HJ-NP-Z2-9]{12}$/;
+const DLV_BASE = "https://wloskarobota.eu/?dostawa=";
+const DLV_STEPS = [["new", "Przyjęte", "📝"], ["oven", "W piecu", "🔥"], ["road", "W drodze", "🛵"], ["done", "Dostarczone", "✅"]];
+const DLV_TTL = 12 * 3600 * 1000, DLV_PHONE = '<div class="vch-a"><a class="rb-btn" href="tel:668862396" style="text-decoration:none;display:inline-block">📞 Zadzwoń: 668 862 396</a></div>';
+function dlvNew() { const b = new Uint8Array(12); crypto.getRandomValues(b); return Array.from(b, (x) => VCH_ALPHA[x % 32]).join(""); }
+function dlvEta(d) {
+  const t = d.eta && d.eta.toMillis ? d.eta.toMillis() : 0; if (!t) return "";
+  const left = Math.round((t - Date.now()) / 60000), hm = new Date(t).toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" });
+  return left > 1 ? "Będzie u Ciebie około <b>" + hm + "</b> (za ok. " + left + " min)" : "Kierowca powinien być już u Ciebie lub tuż-tuż.";
+}
+function dlvView(d) {
+  if (!d) return '<div class="vch-ic">🔎</div><div class="vch-t bad">Nie znaleziono dostawy</div><div class="vch-m">Sprawdź, czy link jest cały, albo zadzwoń do nas.</div>' + DLV_PHONE;
+  if (Date.now() - tsMs(d.createdAt) > DLV_TTL) return '<div class="vch-ic">⌛</div><div class="vch-t off">Ten link już wygasł</div><div class="vch-m">Linki do śledzenia działają tylko w dniu zamówienia.</div>' + DLV_PHONE;
+  const i = Math.max(0, DLV_STEPS.findIndex((s) => s[0] === d.st));
+  const head = { new: ["📝", "Zamówienie przyjęte", "Zaraz zabieramy się do pracy."], oven: ["🔥", "Twoja pizza jest w piecu", "Pieczemy ją specjalnie dla Ciebie."],
+    road: ["🛵", "Kierowca jedzie do Ciebie!", dlvEta(d) || "Pizza jest już w drodze."], done: ["✅", "Dostarczone. Smacznego!", "Dziękujemy za zamówienie."] }[DLV_STEPS[i][0]];
+  const steps = DLV_STEPS.map((s, n) => '<li class="' + (n < i ? "past" : n === i ? "cur" : "") + '"><span>' + s[2] + "</span><em>" + s[1] + "</em></li>").join("");
+  return '<div class="vch-ic">' + head[0] + '</div><div class="vch-t ok">' + head[1] + '</div><div class="vch-m">' + head[2] + "</div>"
+    + '<ol class="dlv-steps">' + steps + "</ol>" + (d.label ? '<div class="vch-m">Zamówienie: ' + esc(d.label) + "</div>" : "")
+    + (DLV_STEPS[i][0] === "done" ? '<div class="vch-a"><a class="rb-btn" href="https://g.page/r/CUq2_T6CQcy5EAE/review" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block">⭐ Oceń nas w Google</a></div>' : DLV_PHONE);
+}
+let dlvPubOff = null, dlvPubTimer = 0, dlvPubData = null;
+function dlvPubBox() {
+  let m = $("dlv-modal"); if (m) return m;
+  m = document.createElement("div"); m.id = "dlv-modal"; m.className = "vch-bg"; m.hidden = true;
+  m.setAttribute("role", "dialog"); m.setAttribute("aria-modal", "true"); m.setAttribute("aria-label", "Status dostawy");
+  m.innerHTML = '<div class="vch-box"><button type="button" class="vch-x" aria-label="Zamknij">&times;</button><div id="dlv-body" aria-live="polite"></div></div>';
+  document.body.appendChild(m);
+  const close = () => {
+    m.hidden = true; if (dlvPubOff) { dlvPubOff(); dlvPubOff = null; } clearInterval(dlvPubTimer);
+    try { const u = new URL(location.href); u.searchParams.delete("dostawa"); history.replaceState(null, "", u.pathname + (u.search || "") + u.hash); } catch (_) {}
+  };
+  m.querySelector(".vch-x").addEventListener("click", close);
+  m.addEventListener("click", (ev) => { if (ev.target === m) close(); });
+  document.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && !m.hidden) close(); });
+  return m;
+}
+function dlvPubOpen(code) {
+  const m = dlvPubBox(); m.hidden = false;
+  $("dlv-body").innerHTML = '<div class="vch-m">Sprawdzam status…</div>';
+  if (dlvPubOff) { dlvPubOff(); dlvPubOff = null; }
+  const paint = () => { $("dlv-body").innerHTML = dlvView(dlvPubData); };
+  dlvPubOff = onSnapshot(doc(db, "deliveries", code), (s) => { dlvPubData = s.exists() ? s.data() : null; paint(); },
+    (err) => { console.error(err); $("dlv-body").innerHTML = '<div class="vch-ic">⚠️</div><div class="vch-t bad">Nie udało się sprawdzić statusu</div><div class="vch-m">' + esc(errText(err)) + "</div>" + DLV_PHONE; });
+  clearInterval(dlvPubTimer); dlvPubTimer = setInterval(() => { if (dlvPubData) paint(); }, 30000);
+}
+
+/* panel: zakładka „Dostawy” (admin i obsługa) */
+let dlvRows = [], dlvTimer = 0;
+const dlvMsg = $("rb-d-msg");
+const dlvLink = (code) => DLV_BASE + code;
+async function dlvLoad() {
+  if (!(isAdmin || isStaff)) return;
+  const box = $("rb-d-list");
+  try {
+    const s = await getDocs(query(collection(db, "deliveries"), orderBy("createdAt", "desc"), limit(40)));
+    dlvRows = s.docs.map((d) => ({ code: d.id, ...d.data() }));
+    const old = dlvRows.filter((r) => r.createdAt && Date.now() - tsMs(r.createdAt) > 24 * 3600 * 1000);
+    old.forEach((r) => { deleteDoc(doc(db, "deliveries", r.code)).catch(() => {}); });
+    dlvRows = dlvRows.filter((r) => !old.includes(r));
+    dlvPaint();
+  } catch (err) { console.error(err); box.innerHTML = '<div class="rb-msg err">' + esc(err.code === "permission-denied" ? "Brak dostępu: wklej najnowsze reguły Firestore (zawierają dostawy)." : errText(err)) + "</div>"; }
+}
+function dlvPaint() {
+  const box = $("rb-d-list");
+  if (!dlvRows.length) { box.innerHTML = '<div class="rb-meta">Nie ma jeszcze żadnych dostaw. Utwórz link powyżej.</div>'; return; }
+  const lab = { new: "przyjęte", oven: "w piecu", road: "w drodze", done: "dostarczone" };
+  box.innerHTML = dlvRows.map((r) => {
+    const done = r.st === "done";
+    return `<div class="rb-vch-row rb-dlv" data-code="${esc(r.code)}"><div><b>${esc(r.label || "Dostawa")}</b> <span class="rb-vch-st ${done ? "off" : r.st === "road" ? "ok" : "bad"}">${esc(lab[r.st] || r.st)}</span>
+      <div class="rb-meta">${esc(fmtDateTime(r.upd || r.createdAt))}${r.st === "road" && r.eta ? " · będzie ok. " + esc(new Date(tsMs(r.eta)).toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" })) : ""}</div></div>
+      <div class="rb-actions">${done ? "" : `<button type="button" class="rb-btn secondary small" data-dlv="oven">🔥 W piecu</button>
+        <select class="rb-dlv-eta" aria-label="Za ile minut dojedzie"><option value="5">5 min</option><option value="10">10 min</option><option value="15" selected>15 min</option><option value="20">20 min</option><option value="30">30 min</option><option value="45">45 min</option></select>
+        <button type="button" class="rb-btn small" data-dlv="road">🛵 W drodze</button><button type="button" class="rb-btn secondary small" data-dlv="done">✅ Dostarczone</button>`}
+        <button type="button" class="rb-btn secondary small" data-dlv="copy">📋 Link</button><button type="button" class="rb-btn secondary small" data-dlv="del" aria-label="Usuń dostawę">🗑</button></div></div>`;
+  }).join("");
+}
+$("rb-d-make").addEventListener("click", async () => {
+  if (!(isAdmin || isStaff)) return;
+  const label = $("rb-d-label").value.trim().slice(0, 40), phone = $("rb-d-phone").value.replace(/[^\d+]/g, "");
+  const code = dlvNew(), b = $("rb-d-make"); b.disabled = true;
+  try {
+    await setDoc(doc(db, "deliveries", code), { st: "new", label, eta: null, createdAt: serverTimestamp(), upd: serverTimestamp(), createdBy: auth.currentUser.uid });
+    const link = dlvLink(code), sms = "sms:" + phone + "?&body=" + encodeURIComponent("Włoska Robota: śledź swoją pizzę na żywo: " + link);
+    $("rb-d-new").innerHTML = `<div class="rb-adm-box"><div class="rb-meta">Link dla klienta (działa do końca dnia):</div><input readonly id="rb-d-linkbox" value="${esc(link)}" onclick="this.select()">
+      <div class="rb-actions"><button type="button" class="rb-btn small" data-dlv="copynew" data-link="${esc(link)}">📋 Kopiuj link</button><a class="rb-btn small" style="text-decoration:none;text-align:center" href="${sms}">💬 Wyślij SMS-em</a></div></div>`;
+    $("rb-d-label").value = ""; setMsg(dlvMsg, "Dostawa utworzona. Wyślij klientowi link.", "ok"); await dlvLoad();
+  } catch (err) { console.error(err); setMsg(dlvMsg, err.code === "permission-denied" ? "Brak dostępu: wklej najnowsze reguły Firestore (zawierają dostawy)." : errText(err), "err"); }
+  b.disabled = false;
+});
+document.addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-dlv]"); if (!b || !(isAdmin || isStaff)) return;
+  const act = b.dataset.dlv, row = b.closest("[data-code]"), code = row && row.dataset.code;
+  const copy = async (t) => { try { await navigator.clipboard.writeText(t); setMsg(dlvMsg, "Link skopiowany.", "ok"); } catch (_) { window.prompt("Skopiuj link:", t); } };
+  try {
+    if (act === "copynew") return void copy(b.dataset.link);
+    if (!code) return;
+    if (act === "copy") return void copy(dlvLink(code));
+    if (act === "del") { if (!confirm("Usunąć tę dostawę? Link klienta przestanie działać.")) return; await deleteDoc(doc(db, "deliveries", code)); }
+    else {
+      const eta = act === "road" ? Timestamp.fromMillis(Date.now() + Number(row.querySelector(".rb-dlv-eta").value || 15) * 60000) : null;
+      await updateDoc(doc(db, "deliveries", code), { st: act, eta, upd: serverTimestamp() });
+    }
+    await dlvLoad();
+  } catch (err) { console.error(err); setMsg(dlvMsg, errText(err), "err"); }
+});
+$("rb-d-refresh").addEventListener("click", dlvLoad);
+function dlvPaneOpen() { const p = document.querySelector('#rb-admin .rb-pane[data-pane="dostawy"]'); return !!p && !p.hidden && !$("rb-admin").hidden; }
+clearInterval(dlvTimer); dlvTimer = setInterval(() => { if (!document.hidden && dlvPaneOpen()) dlvLoad(); }, 20000);
+
+/* start: link ze statusem dostawy (?dostawa=KOD) */
+if (QS.has("dostawa")) {
+  const c1 = String(QS.get("dostawa") || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (DLV_RE.test(c1)) dlvPubOpen(c1);
+  else { dlvPubBox().hidden = false; $("dlv-body").innerHTML = '<div class="vch-ic">⚠️</div><div class="vch-t bad">Nieprawidłowy link</div><div class="vch-m">Poproś o nowy link albo zadzwoń do nas.</div>' + DLV_PHONE; }
+}
+
 /* start: link z kodu QR vouchera (?v=KOD) otwiera okienko ze statusem */
 if (QS.has("v")) {
   const c0 = vchParse(QS.get("v"));
@@ -5229,6 +5347,7 @@ function setAdminTab(name) {
   if (act && act.scrollIntoView) act.scrollIntoView({ inline: "center", block: "nearest" });
   if (name !== "check") stopScanner();
   if (name === "site") loadSite().then(fillSiteForm);
+  if (name === "dostawy") dlvLoad();
   if (name === "report") { loadReport(); loadFeedback(); }
   if (name === "straz" && window.WRStraz) window.WRStraz.open();
   if (name === "today" || name === "clients") ensureData(false);
