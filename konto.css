@@ -679,3 +679,12 @@ body.dark .poll-opt{background:var(--dark-card)}
 .vch-m{font-size:14px;color:rgba(255,255,255,.8);margin-top:6px}
 .vch-a{margin-top:14px}
 .vch-a .rb-btn{background:#009246;border:0;color:#fff;padding:12px 18px;border-radius:99px;font:inherit;font-weight:800;cursor:pointer}
+
+/* generator postów */
+#rabat-overlay .rb-p-photos{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px;margin-bottom:6px;-webkit-overflow-scrolling:touch}
+#rabat-overlay .rb-p-ph{flex:none;width:64px;height:84px;border-radius:10px;border:3px solid transparent;padding:0;background:#222;cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;color:#fff;font:600 11px/1.2 inherit;text-align:center}
+#rabat-overlay .rb-p-ph img{width:100%;height:100%;object-fit:cover;display:block}
+#rabat-overlay .rb-p-ph.on{border-color:var(--rb-accent,#D4AF37)}
+#rabat-overlay .rb-p-ph:focus-visible{outline:3px solid #D4AF37;outline-offset:2px}
+#rabat-overlay .rb-p-prev{margin:12px 0;text-align:center}
+#rabat-overlay .rb-p-prev canvas{max-width:100%;max-height:70vh;width:auto;height:auto;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.35);background:#111}

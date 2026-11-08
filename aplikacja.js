@@ -5229,6 +5229,7 @@ function setAdminTab(name) {
   if (act && act.scrollIntoView) act.scrollIntoView({ inline: "center", block: "nearest" });
   if (name !== "check") stopScanner();
   if (name === "site") loadSite().then(fillSiteForm);
+  if (name === "post") import("./generator-postow.js?v=1").then((m) => m.open()).catch(() => { const x = $("rb-p-msg"); if (x) { x.className = "rb-msg err"; x.textContent = "Nie udało się wczytać generatora. Odśwież stronę."; } });
   if (name === "report") { loadReport(); loadFeedback(); }
   if (name === "straz" && window.WRStraz) window.WRStraz.open();
   if (name === "today" || name === "clients") ensureData(false);

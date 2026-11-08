@@ -1110,7 +1110,7 @@ fadeEls.forEach(el => observer.observe(el));
      ===================================================================== -->
 
 <!-- ===== RABAT: STYLE ===== -->
-<link rel="stylesheet" href="/konto.css?v=10">
+<link rel="stylesheet" href="/konto.css?v=11">
 
 <!-- ===== RABAT: HTML ===== -->
 <div id="rabat-overlay" role="dialog" aria-modal="true" aria-labelledby="rb-title">
@@ -1277,6 +1277,7 @@ fadeEls.forEach(el => observer.observe(el));
           <button type="button" class="rb-atab" data-pane="clients" role="tab"><i>👥</i><span>Klienci</span></button>
           <button type="button" class="rb-atab" data-pane="builder" role="tab"><i>🏷️</i><span>Rabaty</span></button>
           <button type="button" class="rb-atab" data-pane="vouchers" role="tab"><i>🎫</i><span>Vouchery</span></button>
+          <button type="button" class="rb-atab" data-pane="post" role="tab"><i>📣</i><span>Post</span></button>
           <button type="button" class="rb-atab" data-pane="staff" role="tab"><i>🧑‍🍳</i><span>Obsługa</span></button>
           <button type="button" class="rb-atab" data-pane="site" role="tab"><i>🛠️</i><span>Strona</span></button>
           <button type="button" class="rb-atab" data-pane="report" role="tab"><i>📊</i><span>Raport</span></button>
@@ -1552,6 +1553,44 @@ fadeEls.forEach(el => observer.observe(el));
             <div id="rb-v-new"></div>
             <h4 style="margin-top:18px">Wszystkie vouchery <button type="button" class="rb-btn secondary small" id="rb-v-refresh" style="margin-left:8px">↻ Odśwież</button></h4>
             <div id="rb-v-list"></div>
+          </div>
+
+        <div class="rb-pane" data-pane="post" hidden>
+            <h4>Generator postów (Facebook, Instagram, TikTok)</h4>
+            <div class="rb-meta" style="margin:-4px 0 10px">Wybierz, o czym ma być post, a panel zrobi gotową grafikę w Waszych kolorach i ułoży opis z hasztagami. Pobierz grafikę, skopiuj opis i wrzuć do Facebooka, Instagrama lub TikToka (albo zaplanuj w Meta Business Suite).</div>
+            <div class="rb-row2">
+              <div><label for="rb-p-type">Rodzaj posta</label>
+                <select id="rb-p-type"><option value="pizza">Pizza polecana</option><option value="promo">Promocja / zniżka</option><option value="info">Komunikat (np. dziś nieczynne)</option><option value="own">Własny tekst</option></select></div>
+              <div id="rb-p-pizzarow"><label for="rb-p-pizza">Która pizza</label><select id="rb-p-pizza"></select></div>
+            </div>
+            <label for="rb-p-title">Tytuł (duży napis)</label>
+            <input id="rb-p-title" maxlength="40" autocomplete="off">
+            <label for="rb-p-sub">Opis pod tytułem</label>
+            <input id="rb-p-sub" maxlength="120" autocomplete="off">
+            <div class="rb-row2">
+              <div><label for="rb-p-badge">Cena lub zniżka w kółku</label><input id="rb-p-badge" maxlength="16" placeholder="np. 34 zł albo -20%" autocomplete="off"></div>
+              <div><label for="rb-p-kicker">Etykieta nad tytułem</label><input id="rb-p-kicker" maxlength="16" placeholder="np. POLECAMY" autocomplete="off"></div>
+            </div>
+            <label for="rb-p-cta">Napis na zielonym przycisku</label>
+            <input id="rb-p-cta" maxlength="40" value="Zamów: 668 862 396" autocomplete="off">
+            <label>Zdjęcie</label>
+            <div id="rb-p-photos" class="rb-p-photos"></div>
+            <label for="rb-p-file">Albo własne zdjęcie z telefonu</label>
+            <input id="rb-p-file" type="file" accept="image/png,image/jpeg,image/webp">
+            <label for="rb-p-fmt">Format</label>
+            <select id="rb-p-fmt"><option value="post">Post 4:5 (Facebook, Instagram)</option><option value="story">Relacja / TikTok 9:16</option><option value="sq">Kwadrat 1:1</option></select>
+            <div class="rb-p-prev"><canvas id="rb-p-cv" width="1080" height="1350" aria-label="Podgląd grafiki"></canvas></div>
+            <div class="rb-row2">
+              <button type="button" class="rb-btn" id="rb-p-dl">⬇️ Pobierz grafikę</button>
+              <button type="button" class="rb-btn secondary" id="rb-p-all">⬇️ Pobierz wszystkie 3 formaty</button>
+            </div>
+            <label for="rb-p-cap" style="margin-top:12px">Opis do wklejenia (możesz go poprawić)</label>
+            <textarea id="rb-p-cap" rows="9" spellcheck="true"></textarea>
+            <div class="rb-row2">
+              <button type="button" class="rb-btn" id="rb-p-copy">📋 Kopiuj opis</button>
+              <button type="button" class="rb-btn secondary" id="rb-p-capreset">↺ Ułóż opis od nowa</button>
+            </div>
+            <div class="rb-msg" id="rb-p-msg" role="status"></div>
           </div>
 
         <!-- Zakładka: konta obsługi (tylko skanowanie) -->
@@ -1893,7 +1932,7 @@ fadeEls.forEach(el => observer.observe(el));
   btns.forEach(function (b) { b.addEventListener("click", install); });
 })();
 </script>
-<script type="module" src="/aplikacja.js?v=23"></script>
+<script type="module" src="/aplikacja.js?v=24"></script>
 <script type="module" src="/straz.js?v=7"></script>
 <!-- ===== RABAT: KONIEC ===== -->
 
